@@ -1,253 +1,276 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>SEP — White Tee</title>
-<meta name="description" content="SEP — clean, everyday white T-shirt. Hand-pressed in Copenhagen. 180 DKK. Free CPH delivery on drop days. Pay with MobilePay 51 34 31 33." />
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SEP | Your Choice</title>
+<meta name="description" content="Minimalist clothing made with intention. Hand-pressed in Copenhagen." />
+<link rel="icon" href="https://upload.wikimedia.org/wikipedia/commons/3/3f/Black_square.jpg">
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
 <style>
-  :root{--bg:#fff;--fg:#111;--muted:#6b7280;--line:#e5e7eb;--card:#fafafa;--btn:#000;--btnText:#fff}
-  html[data-theme="dark"]{--bg:#0f1115;--fg:#e5e7eb;--muted:#9aa5b1;--line:#1f2937;--card:#141821;--btn:#e5e7eb;--btnText:#0f1115}
-  *{box-sizing:border-box}
-  body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:var(--fg);background:var(--bg);line-height:1.55}
-  a{color:inherit;text-decoration:none}
-  img{max-width:100%;display:block;height:auto}
-  .wrap{max-width:1120px;margin:0 auto;padding:0 18px}
-  .muted{color:var(--muted)}
-  .btn{display:inline-block;padding:12px 16px;border-radius:10px;font-weight:600;background:var(--btn);color:var(--btnText);border:0}
-  .btn.secondary{background:transparent;color:var(--fg);border:1px solid var(--fg)}
-  .btn.block{display:block;width:100%;text-align:center}
-  .row{display:flex;gap:10px;flex-wrap:wrap}
-  .chip{border:1px solid var(--line);padding:8px 12px;border-radius:10px;user-select:none;cursor:pointer}
-  .chip.active{border-color:#000}
-  .card{border:1px solid var(--line);border-radius:14px;background:var(--card);overflow:hidden}
-  .card-body{padding:16px}
-  .grid{display:grid;gap:16px}
-  .grid.cols-2{grid-template-columns:1fr 1fr}
-  @media (max-width:760px){.grid.cols-2{grid-template-columns:1fr}}
-  header.site{position:sticky;top:0;z-index:40;border-bottom:1px solid var(--line);background:var(--bg)}
-  .nav{display:flex;align-items:center;gap:12px;padding:14px 0}
-  .brand{display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:.4px}
-  .nav-spacer{flex:1}
-  .nav a{padding:8px 10px;border-radius:8px}
-  .nav a.active{background:var(--card)}
-  .toggle{border:1px solid var(--line);padding:8px 10px;border-radius:10px;cursor:pointer}
-  .cart-pill{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);padding:8px 10px;border-radius:10px}
-  .hero{text-align:center;padding:42px 0 20px}
-  .hero h1{font-size:40px;line-height:1.05;margin:8px 0}
-  .price{font-size:22px;font-weight:700;margin:4px 0 10px}
-  table{width:100%;border-collapse:collapse}
-  th,td{padding:10px 8px;border-bottom:1px solid var(--line);text-align:left}
-  footer{border-top:1px solid var(--line);margin-top:36px}
-  .footer-inner{display:flex;gap:20px;padding:20px 0 40px;color:var(--muted);font-size:14px;flex-wrap:wrap;justify-content:space-between}
-  #toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:rgba(0,0,0,.9);color:#fff;padding:10px 14px;border-radius:10px;opacity:0;pointer-events:none;transition:opacity .4s;z-index:9999}
-  #toast.show{opacity:1}
+body {
+  font-family:'Inter',sans-serif;
+  background:linear-gradient(to bottom,#000,#fff);
+  color:#111;
+  transition:background .5s,color .5s;
+  scroll-behavior:smooth;
+}
+body.dark {
+  background:linear-gradient(to bottom,#fff,#000);
+  color:#f2f2f2;
+}
+h1,h2,h3,p,select,input,button,span {transition:color .5s;}
+.theme-text {color:#e6e6e6;transition:color .5s;}
+body.dark .theme-text {color:#333;}
+
+button,a{transition:all .25s ease;}
+button:hover,a:hover{transform:translateY(-2px);}
+#darkToggle{
+  position:fixed;bottom:20px;right:20px;z-index:50;
+  background:rgba(0,0,0,.5);border-radius:9999px;padding:12px;color:white;
+}
+#darkToggle svg{width:24px;height:24px;fill:white;}
+.popup{
+  position:fixed;top:20px;right:20px;
+  background:#16a34a;color:#fff;padding:10px 16px;border-radius:8px;
+  opacity:0;transition:opacity .3s;z-index:100;
+}
+.popup.show{opacity:1;}
+.fade-section{opacity:0;transform:translateY(30px);}
+#cartSidebar{color:#000;transition:background .5s,color .5s;}
+body.dark #cartSidebar{background:#111;color:#e6e6e6;}
 </style>
+
+<script>
+window.addEventListener('load',()=>{
+  gsap.registerPlugin(ScrollTrigger);
+  gsap.utils.toArray('.fade-section').forEach(sec=>{
+    gsap.to(sec,{opacity:1,y:0,duration:1,
+      scrollTrigger:{trigger:sec,start:'top 80%',once:true}});
+  });
+});
+</script>
 </head>
+
 <body>
-<header class="site">
-  <div class="wrap nav">
-    <a href="#home" class="brand">SEP</a>
-    <div class="nav-spacer"></div>
-    <a href="#home" class="active">Home</a>
-    <a href="#shop">Shop</a>
-    <a href="#cart" class="cart-pill">Cart <strong id="cartCount">0</strong></a>
-    <a target="_blank" href="https://instagram.com/se.proairesis" aria-label="Instagram">@se.proairesis</a>
-    <a target="_blank" href="https://www.tiktok.com/@se.proairesis" aria-label="TikTok">@se.proairesis</a>
-    <button id="themeToggle" class="toggle" type="button">Dark</button>
+
+<button id="darkToggle" title="Toggle dark mode">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9h-9V3z"/></svg>
+</button>
+
+<header class="py-20 text-center fade-section">
+  <h1 class="theme-text text-5xl font-bold mb-4">Minimalist clothing, made with intention.</h1>
+  <p class="theme-text text-lg mb-8">Soft, clean, and hand-pressed in Copenhagen.</p>
+  <div class="flex justify-center gap-4">
+    <a href="#products" class="bg-white text-black px-6 py-3 rounded-full font-medium">Shop Now</a>
+    <button id="viewCartBtn" class="border border-white text-white px-6 py-3 rounded-full font-medium relative">
+      View Cart
+      <span id="cartCounter" class="absolute -top-2 -right-2 bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hidden">0</span>
+    </button>
   </div>
 </header>
 
-<section id="home" class="wrap hero">
-  <h1>Clean white tee for everyday life</h1>
-  <p class="muted">Hand-pressed in Copenhagen • Free CPH delivery on drop days • MobilePay <strong>51 34 31 33</strong></p>
-  <div style="display:flex;gap:12px;justify-content:center;margin-top:16px">
-    <a class="btn" href="#shop">Shop now</a>
-    <a class="btn secondary" href="#cart">View cart</a>
+<section id="products" class="py-20 px-6 fade-section">
+  <div class="text-center mb-12">
+    <h2 class="theme-text text-4xl font-bold mb-4">Three products. One choice.</h2>
+    <p class="theme-text">Soft, durable, and timeless.</p>
   </div>
-</section>
 
-<!-- SHOP (single product: white tee, 180 DKK) -->
-<section id="shop" class="wrap" style="padding:24px 0">
-  <div class="grid cols-2">
-    <div class="card">
-      <!-- Your T-shirt image -->
-      <img id="pImg" src="https://i.postimg.cc/W3Qb6ygg/SEP-T-shirt-Portrait.png" alt="SEP White Tee on body">
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+    <div class="product-card bg-white/10 p-6 rounded-xl shadow-md text-center backdrop-blur">
+      <img src="http://static.photos/textures/1024x576/1" class="w-full h-64 object-cover rounded mb-4" alt="White T-shirt">
+      <h3 class="text-xl font-bold mb-2">SEP White T-shirt</h3>
+      <p class="mb-2">180 DKK</p>
+      <select class="theme-text border rounded px-3 py-2 mb-2 bg-transparent">
+        <option>XS</option><option>S</option><option>M</option><option>L</option><option>XL</option>
+      </select>
+      <div class="flex justify-center gap-2">
+        <input type="number" min="1" value="1" class="theme-text border rounded w-16 text-center bg-transparent quantity-selector">
+        <button class="add-to-cart bg-white text-black px-4 py-2 rounded">Add</button>
+      </div>
     </div>
-    <div>
-      <h2 style="margin:0 0 6px">SEP White Tee</h2>
-      <div class="price">180 DKK</div>
-      <p class="muted">Ultra-smooth cotton. Clean, regular fit. Small batch, hand-pressed in Copenhagen.</p>
 
-      <label>Colour</label>
-      <div class="row"><div class="chip active">White</div></div>
-
-      <label>Size</label>
-      <div id="pSizes" class="row">
-        <div class="chip" data-val="XS">XS</div>
-        <div class="chip active" data-val="S">S</div>
-        <div class="chip" data-val="M">M</div>
-        <div class="chip" data-val="L">L</div>
-        <div class="chip" data-val="XL">XL</div>
+    <div class="product-card bg-white/10 p-6 rounded-xl shadow-md text-center backdrop-blur">
+      <img src="http://static.photos/textures/1024x576/2" class="w-full h-64 object-cover rounded mb-4" alt="Black Hoodie">
+      <h3 class="text-xl font-bold mb-2">SEP Black Hoodie</h3>
+      <p class="mb-2">180 DKK</p>
+      <select class="theme-text border rounded px-3 py-2 mb-2 bg-transparent">
+        <option>XS</option><option>S</option><option>M</option><option>L</option><option>XL</option>
+      </select>
+      <div class="flex justify-center gap-2">
+        <input type="number" min="1" value="1" class="theme-text border rounded w-16 text-center bg-transparent quantity-selector">
+        <button class="add-to-cart bg-white text-black px-4 py-2 rounded">Add</button>
       </div>
-
-      <label>Qty</label>
-      <input id="pQty" type="number" min="1" value="1" style="max-width:120px">
-
-      <div class="row" style="margin-top:16px">
-        <button id="addBtn" class="btn" type="button">Add to cart</button>
-        <a class="btn secondary" href="#cart">Go to cart</a>
-      </div>
-
-      <p class="muted" style="margin-top:10px">
-        Pay with MobilePay to <strong>51 34 31 33</strong>. Free delivery in CPH on drop days.
-      </p>
     </div>
-  </div>
-</section>
 
-<!-- CART -->
-<section id="cart" class="wrap" style="padding:24px 0">
-  <h2 style="margin:0 0 8px">Your Cart</h2>
-  <div class="card">
-    <div class="card-body">
-      <div style="overflow:auto">
-        <table>
-          <thead><tr><th>Item</th><th>Price</th><th>Qty</th><th>Subtotal</th><th></th></tr></thead>
-          <tbody id="cartBody"></tbody>
-        </table>
-      </div>
-      <div class="row" style="justify-content:space-between;margin-top:10px">
-        <button class="btn secondary" onclick="clearCart()">Clear cart</button>
-        <div style="text-align:right">
-          <div class="muted">Total</div>
-          <div id="total" style="font-weight:700;font-size:22px">DKK 0,00</div>
-          <div class="row" style="justify-content:flex-end">
-            <!-- New MobilePay deep link button -->
-            <a id="mobilepayBtn" class="btn" href="#" rel="noopener">Open MobilePay</a>
-            <button id="copyOrder" class="btn secondary" type="button">Copy MobilePay message</button>
-          </div>
-          <p class="muted" style="font-size:13px;margin:6px 0 0">
-            If the button doesn’t open MobilePay, paste the copied note and pay to <strong>51 34 31 33</strong>, then DM <a target="_blank" href="https://instagram.com/se.proairesis">@se.proairesis</a> your name & address.
-          </p>
-        </div>
+    <div class="product-card bg-white/10 p-6 rounded-xl shadow-md text-center backdrop-blur">
+      <img src="http://static.photos/textures/1024x576/3" class="w-full h-64 object-cover rounded mb-4" alt="Black Trousers">
+      <h3 class="text-xl font-bold mb-2">SEP Black Trousers</h3>
+      <p class="mb-2">180 DKK</p>
+      <select class="theme-text border rounded px-3 py-2 mb-2 bg-transparent">
+        <option>XS</option><option>S</option><option>M</option><option>L</option><option>XL</option>
+      </select>
+      <div class="flex justify-center gap-2">
+        <input type="number" min="1" value="1" class="theme-text border rounded w-16 text-center bg-transparent quantity-selector">
+        <button class="add-to-cart bg-white text-black px-4 py-2 rounded">Add</button>
       </div>
     </div>
   </div>
 </section>
 
-<footer>
-  <div class="wrap footer-inner">
-    <div>©️ <span id="year"></span> SEP — Se Proairesis — “Your choice” • Copenhagen, DK</div>
-    <div class="row" style="gap:12px">
-      <a target="_blank" href="https://instagram.com/se.proairesis">Instagram @se.proairesis</a>
-      <span class="muted">•</span>
-      <a target="_blank" href="https://www.tiktok.com/@se.proairesis">TikTok @se.proairesis</a>
-      <span class="muted">• White Tee • 180 DKK • MobilePay 51 34 31 33</span>
+<div id="cartSidebar" class="fixed top-0 right-0 h-full w-80 bg-white shadow-xl translate-x-full transition-transform duration-300 z-50 overflow-y-auto">
+  <div class="p-6">
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="text-xl font-bold">Your Cart</h3>
+      <button id="closeCart">✕</button>
     </div>
+    <div id="cartItems" class="space-y-4 text-sm"></div>
+    <div class="border-t border-gray-300 pt-4 mt-4">
+      <div class="flex justify-between mb-1">
+        <span>Subtotal:</span><span id="cartSubtotal" class="font-bold">0 DKK</span>
+      </div>
+      <div class="flex justify-between mb-2 text-sm text-gray-600">
+        <span>Shipping:</span><span>+45 DKK</span>
+      </div>
+      <div class="flex justify-between font-semibold border-t border-gray-300 pt-2 mb-3">
+        <span>Total:</span><span id="cartTotal">45 DKK</span>
+      </div>
+      <button id="openMobilePay" class="w-full bg-green-500 text-white py-2 rounded mb-2">Open MobilePay</button>
+      <p class="text-xs text-gray-500 mb-2 text-center">Open MobilePay button is only a valid link on mobile.</p>
+      <button id="copyMobilePay" class="w-full bg-gray-200 py-2 rounded">Copy Order Message</button>
+    </div>
+  </div>
+</div>
+<div id="cartOverlay" class="fixed inset-0 bg-black/50 hidden z-40"></div>
+
+<section class="py-20 text-center fade-section">
+  <h2 class="text-3xl font-bold mb-10">How to Order</h2>
+  <div class="grid grid-cols-1 md:grid-cols-5 gap-6 max-w-6xl mx-auto text-sm md:text-base">
+    <div class="bg-white/10 rounded-xl p-6 backdrop-blur">
+      <h3 class="font-bold text-lg mb-2">1. Choose</h3>
+      <p>Select your favourite SEP piece — T-shirt, Hoodie, or Trousers — then pick your size and quantity.</p>
+    </div>
+    <div class="bg-white/10 rounded-xl p-6 backdrop-blur">
+      <h3 class="font-bold text-lg mb-2">2. Add to Cart</h3>
+      <p>Click “Add” to add your chosen items to your cart. When ready, click “View Cart” to review your order.</p>
+    </div>
+    <div class="bg-white/10 rounded-xl p-6 backdrop-blur">
+      <h3 class="font-bold text-lg mb-2">3. Copy Order Message</h3>
+      <p>Inside your cart, press “Copy Order Message”. This copies your full order, including shipping, automatically.</p>
+    </div>
+    <div class="bg-white/10 rounded-xl p-6 backdrop-blur">
+      <h3 class="font-bold text-lg mb-2">4. Pay with MobilePay</h3>
+      <p>Send the total amount (incl. +45 DKK shipping. Unless in Copenhagen.) to <b>5894BZ</b> using MobilePay.<br><span class="text-xs italic">“Open MobilePay” works only on mobile devices.</span></p>
+    </div>
+    <div class="bg-white/10 rounded-xl p-6 backdrop-blur">
+      <h3 class="font-bold text-lg mb-2">5. Send us your order</h3>
+      <p>DM your copied message to <b>@seproairesis</b> (Instagram) or <b>@se.proairesis</b> (TikTok).<br>We currently deliver within Denmark.</p>
+    </div>
+  </div>
+</section>
+
+<footer class="text-center py-10 fade-section">
+  <p>© 2025 SEP — Se Proairesis • MobilePay 5894BZ • +45 DKK Shipping (FREE in copenhagen) • Made in Copenhagen. Delivered across Denmark.</p>
+  <div class="flex justify-center gap-4 mt-4">
+    <a href="https://instagram.com/seproairesis" class="bg-gradient-to-br from-pink-500 to-purple-600 text-white p-3 rounded-full">IG</a>
+    <a href="https://tiktok.com/@se.proairesis" class="bg-black text-white p-3 rounded-full">TT</a>
   </div>
 </footer>
 
-<div id="toast"></div>
-
 <script>
-/* ===== Theme ===== */
-function applyTheme(t){document.documentElement.setAttribute('data-theme',t==='dark'?'dark':'light');localStorage.setItem('sep_theme',t)}
-function currentTheme(){return localStorage.getItem('sep_theme')||'light'}
-function toggleTheme(){applyTheme(currentTheme()==='dark'?'light':'dark');document.getElementById('themeToggle').textContent=currentTheme()==='dark'?'Light':'Dark'}
+const body=document.body;
+document.getElementById('darkToggle').onclick=()=>body.classList.toggle('dark');
 
-/* ===== Data (single product) ===== */
-const PRODUCT = { id:'sep-white-tee', title:'SEP White Tee', priceDKK:180, sizes:['XS','S','M','L','XL'], color:'White' };
+let cart=JSON.parse(localStorage.getItem('cart'))||[];
+const cartSidebar=document.getElementById('cartSidebar');
+const cartOverlay=document.getElementById('cartOverlay');
+const SHIPPING_COST=45;
 
-/* ===== Helpers ===== */
-const $$ = s=>document.querySelector(s);
-const fmt = n=>new Intl.NumberFormat('da-DK',{style:'currency',currency:'DKK'}).format(n);
-function toast(msg){const t=$$('#toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1200)}
-
-/* ===== Cart (localStorage) ===== */
-function getCart(){try{return JSON.parse(localStorage.getItem('sep_cart')||'[]')}catch(e){return[]}}
-function saveCart(items){localStorage.setItem('sep_cart',JSON.stringify(items));updateCartPill()}
-function updateCartPill(){$$('#cartCount').textContent=getCart().reduce((a,c)=>a+c.qty,0)}
-function addToCart(size,qty){const items=getCart();const i=items.findIndex(it=>it.size===size);if(i>=0){items[i].qty+=qty}else{items.push({id:PRODUCT.id,size,qty})}saveCart(items);toast('Added to cart')}
-function updateQty(size,qty){const items=getCart();const it=items.find(i=>i.size===size);if(it){it.qty=Math.max(1,Number(qty)||1);saveCart(items);renderCart()}}
-function removeItem(size){saveCart(getCart().filter(i=>i.size!==size));renderCart()}
-function clearCart(){saveCart([]);renderCart()}
-
-function renderCart(){
-  const items=getCart();const tbody=$$('#cartBody');const totalEl=$$('#total');
-  if(!items.length){tbody.innerHTML=`<tr><td colspan="5"><p class="muted">Your cart is empty.</p></td></tr>`;totalEl.textContent=fmt(0);updateMobilePayLink(0);return}
-  let total=0;
-  tbody.innerHTML=items.map(it=>{
-    const line=PRODUCT.priceDKK*it.qty;total+=line;
-    return `<tr>
-      <td>${PRODUCT.title}<br><span class="muted">${PRODUCT.color} • ${it.size}</span></td>
-      <td>${fmt(PRODUCT.priceDKK)}</td>
-      <td><input type="number" min="1" value="${it.qty}" style="width:70px" onchange="updateQty('${it.size}', this.value)"></td>
-      <td>${fmt(line)}</td>
-      <td><button class="btn secondary" onclick="removeItem('${it.size}')">Remove</button></td>
-    </tr>`;
-  }).join('');
-  totalEl.textContent=fmt(total);
-  updateMobilePayLink(total);
-}
-
-/* ===== Copy MobilePay message ===== */
-const MOBILEPAY = "51 34 31 33";
-function buildMobilePayNote(){
-  const items=getCart();if(!items.length) return "Order: (empty)";
-  const lines=items.map(it=>`• ${PRODUCT.title} — ${PRODUCT.color} / ${it.size} x${it.qty}`);
-  const total=items.reduce((a,it)=>a+(PRODUCT.priceDKK*it.qty),0);
-  return `Order for SEP:\n${lines.join('\n')}\nTotal: ${fmt(total)}\nMobilePay to: ${MOBILEPAY}\nName:\nAddress (CPH):`;
-}
-
-/* ===== MobilePay deep link (best-effort) =====
-   Tries to open the MobilePay app with number, amount and comment.
-   On desktop or unsupported browsers it may do nothing — user can use the copy button instead.
-*/
-function updateMobilePayLink(totalDKK){
-  const btn = $$('#mobilepayBtn');
-  if (!btn) return;
-  const comment = encodeURIComponent(buildMobilePayNote().replace(/\n/g,' ')).slice(0,180); // keep it short
-  const amount = Number(totalDKK||0).toFixed(2);
-  // Best-effort deep link format used by many apps:
-  const mpUrl = `mobilepay://send?phone=${MOBILEPAY.replace(/\s+/g,'')}&amount=${amount}&comment=${comment}`;
-  btn.setAttribute('href', mpUrl);
-}
-
-document.addEventListener('DOMContentLoaded',()=>{
-  // Theme
-  applyTheme(currentTheme());
-  $$('#themeToggle').textContent=currentTheme()==='dark'?'Light':'Dark';
-  $$('#themeToggle').addEventListener('click',toggleTheme);
-
-  // Year
-  const y = document.createElement('span'); y.id='year';
-  const footerYearTarget = document.querySelector('footer .footer-inner div');
-  if (footerYearTarget) {
-    footerYearTarget.innerHTML = `©️ ${new Date().getFullYear()} SEP — Se Proairesis — “Your choice” • Copenhagen, DK`;
+function updateCart(){
+  const items=document.getElementById('cartItems');
+  const subtotal=document.getElementById('cartSubtotal');
+  const total=document.getElementById('cartTotal');
+  items.innerHTML=''; let sum=0;
+  if(cart.length===0){
+    items.innerHTML='<p class="text-center text-gray-500 py-10">Cart is empty</p>';
+    subtotal.textContent='0 DKK';
+    total.textContent='45 DKK';
+  }else{
+    cart.forEach((it,i)=>{
+      const price=parseInt(it.price.replace(/\D/g,''))*it.qty; sum+=price;
+      items.innerHTML+=`
+        <div class="border-b pb-2">
+          <div class="flex justify-between"><span>${it.name}</span><span>${price} DKK</span></div>
+          <div class="text-gray-500">Size:${it.size} | Qty:${it.qty}</div>
+          <button onclick="removeFromCart(${i})" class="text-red-500 text-xs mt-1">Remove</button>
+        </div>`;
+    });
+    subtotal.textContent=sum+' DKK';
+    total.textContent=(sum+SHIPPING_COST)+' DKK';
   }
-
-  // Sizes UI
-  $$('#pSizes').addEventListener('click',e=>{
-    const c=e.target.closest('.chip');if(!c) return;
-    [...$$('#pSizes').children].forEach(x=>x.classList.remove('active'));c.classList.add('active');
-  });
-
-  // Add to cart
-  $$('#addBtn').addEventListener('click',()=>{
-    const size=$$('#pSizes .chip.active')?.dataset.val||'M';
-    const qty=Math.max(1,Number($$('#pQty').value)||1);
-    addToCart(size,qty);
-  });
-
-  // Cart + buttons
-  renderCart();
-
-  $$('#copyOrder').addEventListener('click',()=>{
-    const text=buildMobilePayNote();
-    navigator.clipboard.writeText(text).then(()=>toast('Copied MobilePay message'));
-  });
+  localStorage.setItem('cart',JSON.stringify(cart));
+  updateCounter();
+}
+function addToCart(n,p,s,q){
+  const f=cart.findIndex(i=>i.name===n&&i.size===s);
+  if(f>=0) cart[f].qty+=q; else cart.push({name:n,price:p,size:s,qty:q});
+  updateCart();
+  const popup=document.createElement('div'); popup.className='popup'; popup.textContent='Added to cart';
+  document.body.appendChild(popup);
+  setTimeout(()=>popup.classList.add('show'),10);
+  setTimeout(()=>{popup.classList.remove('show'); setTimeout(()=>popup.remove(),300);},2000);
+}
+function removeFromCart(i){cart.splice(i,1);updateCart();}
+function updateCounter(){
+  const c=document.getElementById('cartCounter');
+  const t=cart.reduce((s,i)=>s+i.qty,0);
+  if(t>0){c.textContent=t; c.classList.remove('hidden');}
+  else c.classList.add('hidden');
+}
+document.querySelectorAll('.add-to-cart').forEach(b=>{
+  b.onclick=()=>{
+    const card=b.closest('.product-card');
+    const name=card.querySelector('h3').textContent;
+    const price=card.querySelector('p').textContent;
+    const size=card.querySelector('select').value;
+    const qty=parseInt(card.querySelector('.quantity-selector').value);
+    addToCart(name,price,size,qty);
+  };
 });
+document.getElementById('viewCartBtn').onclick=()=>{
+  cartSidebar.classList.remove('translate-x-full');
+  cartOverlay.classList.remove('hidden');
+};
+document.getElementById('closeCart').onclick=closeCart;
+cartOverlay.onclick=closeCart;
+function closeCart(){
+  cartSidebar.classList.add('translate-x-full');
+  cartOverlay.classList.add('hidden');
+}
+updateCart();
+
+const mobilePayNum='5894BZ';
+document.getElementById('openMobilePay').onclick=()=>{
+  window.location.href='mobilepay://transfer?phone='+mobilePayNum.replace(/\D/g,'');
+  alert('Thanks for supporting SEP!');
+};
+document.getElementById('copyMobilePay').onclick=()=>{
+  const subtotal=document.getElementById('cartSubtotal').textContent;
+  const total=document.getElementById('cartTotal').textContent;
+  const msg=`Hi SEP, here’s my order:\n${cart.map(i=>`${i.qty}× ${i.name} (Size: ${i.size})`).join('\n')}\nSubtotal: ${subtotal}\nShipping: +45 DKK\nTotal: ${total}`;
+  navigator.clipboard.writeText(msg);
+  const popup=document.createElement('div');
+  popup.className='popup';
+  popup.textContent='Order message copied!';
+  document.body.appendChild(popup);
+  setTimeout(()=>popup.classList.add('show'),10);
+  setTimeout(()=>{popup.classList.remove('show');setTimeout(()=>popup.remove(),300);},2000);
+};
 </script>
 </body>
 </html>
