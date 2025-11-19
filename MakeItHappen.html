@@ -1,0 +1,1369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>MAKE IT HAPPEN – Hitachi Health Challenge</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg: #050814;
+      --bg-alt: #0d1020;
+      --accent: #ff0044;
+      --accent-soft: #ff4f7f;
+      --text: #f5f5f5;
+      --muted: #9ea3b5;
+      --card: #14182a;
+      --border: #262b3e;
+      --radius: 14px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #151a33, #050814);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ========== HEADER ========== */
+
+    header {
+      padding: 10px 16px;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      column-gap: 16px;
+      row-gap: 6px;
+      border-bottom: 1px solid #1e2235;
+      background: rgba(5, 8, 20, 0.9);
+      backdrop-filter: blur(10px);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      min-width: 0;
+    }
+
+    .logo {
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-size: 0.9rem;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      white-space: nowrap;
+    }
+
+    .logo span {
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-soft));
+      font-size: 0.65rem;
+    }
+
+    nav {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      padding: 2px 0;
+    }
+
+    nav::-webkit-scrollbar {
+      height: 4px;
+    }
+
+    nav::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 999px;
+    }
+
+    nav button {
+      border-radius: 999px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--muted);
+      padding: 6px 10px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: 0.15s ease;
+      white-space: nowrap;
+    }
+
+    nav button:hover {
+      color: var(--text);
+      border-color: var(--accent-soft);
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    nav button.active {
+      color: #fff;
+      background: linear-gradient(135deg, var(--accent), var(--accent-soft));
+      border-color: transparent;
+    }
+
+    .user-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.75rem;
+      color: var(--muted);
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      min-width: 0;
+    }
+
+    .user-name {
+      max-width: 150px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .btn-small {
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      padding: 4px 8px;
+      font-size: 0.7rem;
+      cursor: pointer;
+      transition: 0.15s ease;
+      white-space: nowrap;
+    }
+
+    .btn-small:hover {
+      color: var(--text);
+      border-color: var(--accent-soft);
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .btn-small.danger:hover {
+      border-color: var(--accent);
+      color: #ffd3e0;
+    }
+
+    @media (max-width: 720px) {
+      header {
+        grid-template-columns: 1fr;
+        align-items: flex-start;
+      }
+
+      .header-left {
+        justify-content: space-between;
+        width: 100%;
+      }
+
+      nav {
+        justify-content: flex-start;
+      }
+
+      .user-controls {
+        justify-content: flex-start;
+      }
+    }
+
+    /* ========== MAIN LAYOUT ========== */
+
+    main {
+      flex: 1;
+      max-width: 980px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 24px 16px 40px;
+    }
+
+    .scene {
+      display: none;
+      animation: fadeIn 0.25s ease;
+    }
+
+    .scene.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card {
+      background: radial-gradient(circle at top left, #1f2340, #111425);
+      border-radius: var(--radius);
+      padding: 24px 20px;
+      border: 1px solid var(--border);
+      box-shadow: 0 18px 45px rgba(0, 0, 0, 0.45);
+    }
+
+    .card + .card {
+      margin-top: 16px;
+    }
+
+    h1, h2, h3 {
+      margin: 0 0 8px;
+    }
+
+    h1 {
+      font-size: clamp(2rem, 4vw, 2.6rem);
+    }
+
+    h2 {
+      font-size: 1.3rem;
+    }
+
+    p {
+      margin: 4px 0 12px;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .tagline {
+      font-size: 0.95rem;
+      color: var(--muted);
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .btn {
+      border-radius: 999px;
+      border: none;
+      padding: 10px 18px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: 0.15s ease;
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent-soft));
+      color: #fff;
+      box-shadow: 0 0 24px rgba(255, 0, 68, 0.4);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 0 28px rgba(255, 0, 68, 0.6);
+    }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid var(--border);
+    }
+
+    .btn-outline:hover {
+      color: var(--text);
+      border-color: var(--accent-soft);
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin: 10px 0 0;
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    .pill {
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+      gap: 16px;
+      margin-top: 18px;
+    }
+
+    @media (max-width: 768px) {
+      .grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    form {
+      display: grid;
+      gap: 10px;
+    }
+
+    label {
+      font-size: 0.8rem;
+      color: var(--muted);
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    input {
+      width: 100%;
+      padding: 8px 9px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #080b18;
+      color: var(--text);
+      font-size: 0.85rem;
+      outline: none;
+      transition: 0.15s ease;
+    }
+
+    input:focus {
+      border-color: var(--accent-soft);
+      box-shadow: 0 0 0 1px rgba(255, 0, 68, 0.4);
+    }
+
+    .hint {
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    @media (max-width: 480px) {
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      font-size: 0.85rem;
+    }
+
+    th, td {
+      padding: 7px 8px;
+      text-align: left;
+      border-bottom: 1px solid #23263a;
+      vertical-align: middle;
+    }
+
+    th {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+    }
+
+    tbody tr:nth-child(even) {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    tbody tr:first-child td {
+      border-top: 1px solid #23263a;
+    }
+
+    .rank-medal {
+      font-size: 0.9rem;
+    }
+
+    .badge-league {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 3px 6px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: var(--muted);
+    }
+
+    .badge-league.amateurs { border-color: #73d1ff; color: #a6dfff; }
+    .badge-league.intermediates { border-color: #7bffb7; color: #b9ffda; }
+    .badge-league.pros { border-color: #ffd26f; color: #ffe29a; }
+    .badge-league.legends { border-color: #ff8ec9; color: #ffc0e1; }
+
+    .top-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+
+    .filter-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .filter-row select {
+      width: auto;
+      min-width: 130px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #080b18;
+      color: var(--text);
+      font-size: 0.8rem;
+    }
+
+    .small {
+      font-size: 0.8rem;
+    }
+
+    .empty-state {
+      margin-top: 8px;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    .actions-cell button {
+      padding: 3px 6px;
+      font-size: 0.7rem;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+    }
+
+    .actions-cell button:hover {
+      border-color: var(--accent);
+      color: #ffd3e0;
+      background: rgba(255, 0, 68, 0.1);
+    }
+
+    footer {
+      text-align: center;
+      font-size: 0.7rem;
+      color: var(--muted);
+      padding: 6px 12px 14px;
+      opacity: 0.75;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-left">
+      <div class="logo">
+        MAKE IT HAPPEN
+        <span>Hitachi Health</span>
+      </div>
+    </div>
+    <nav>
+      <button class="active" onclick="showScene('login')">Login</button>
+      <button onclick="requireLoginThenShow('welcome')">Welcome</button>
+      <button onclick="requireLoginThenShow('leaderboard')">Leaderboard</button>
+      <button onclick="requireLoginThenShow('stats')">Stats</button>
+      <button onclick="requireLoginThenShow('rules')">Rules &amp; Prizes</button>
+    </nav>
+    <div class="user-controls" id="user-controls">
+      <span id="user-status">Not logged in</span>
+    </div>
+  </header>
+
+  <main>
+    <!-- Scene 0: Login -->
+    <section id="scene-login" class="scene active">
+      <div class="card">
+        <h1>Log in to make it happen</h1>
+        <p class="tagline">
+          Create a simple account so the site knows who you are and only you can manage your activities.
+        </p>
+        <form id="login-form" style="margin-top: 12px;">
+          <div>
+            <label for="login-name">Name</label>
+            <input id="login-name" type="text" placeholder="e.g. Daniel" required />
+          </div>
+          <div>
+            <label for="login-password">Password</label>
+            <input id="login-password" type="password" placeholder="Choose something simple" required />
+          </div>
+          <button type="submit" class="btn btn-primary" style="margin-top: 6px;">
+            Log in / Create account
+          </button>
+          <div class="hint" style="margin-top: 6px;">
+            If this is your first time with this name, we will create a new account and place you into a league.
+            Leagues are kept roughly the same size.
+          </div>
+        </form>
+        <p class="small" style="margin-top: 14px;">
+          Your login is saved on this browser. Accounts that have been logged out for more than 30 days are
+          automatically deleted, together with their activities.
+        </p>
+      </div>
+    </section>
+
+    <!-- Scene 1: Welcome -->
+    <section id="scene-welcome" class="scene">
+      <div class="card">
+        <h1>Move more. Compete. Make it happen.</h1>
+        <p class="tagline">
+          A simple challenge for Hitachi teams: run, walk or cycle, log your distance, and climb the leaderboard.
+        </p>
+        <div class="hero-actions">
+          <button class="btn btn-primary" onclick="requireLoginThenShow('leaderboard')">
+            Start logging my distance →
+          </button>
+          <button class="btn btn-outline" onclick="requireLoginThenShow('rules')">
+            How it works
+          </button>
+        </div>
+        <div class="pill-row">
+          <span class="pill">4 leagues: Amateurs, Intermediates, Pros, Legends</span>
+          <span class="pill">New people are placed where the leagues are lightest</span>
+          <span class="pill">Promotions & relegations keep things moving</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Why MAKE IT HAPPEN?</h2>
+        <p>
+          Small actions add up. When hundreds of people move a bit more each week, it helps everyone feel better:
+          more energy, clearer head, happier teams.
+        </p>
+        <p>
+          This site keeps things fun. Log your activity, see where you rank, and move through the leagues as
+          promotions and relegations are applied.
+        </p>
+      </div>
+    </section>
+
+    <!-- Scene 2: Leaderboard -->
+    <section id="scene-leaderboard" class="scene">
+      <div class="card">
+        <div class="grid">
+          <div>
+            <h2>Add your latest activity</h2>
+            <p>
+              Log any run, walk or ride. Use kilometres and minutes so the leaderboard stays fair for everyone.
+            </p>
+            <form id="entry-form">
+              <div>
+                <label for="name">Your name</label>
+                <input id="name" type="text" disabled placeholder="Log in to set your name" />
+                <div class="hint">Name comes from your account. You cannot change it here.</div>
+              </div>
+
+              <div class="form-row">
+                <div>
+                  <label for="distance">Distance (km)</label>
+                  <input id="distance" type="number" step="0.1" min="0" placeholder="e.g. 5" required />
+                </div>
+                <div>
+                  <label for="time">Time (minutes)</label>
+                  <input id="time" type="number" step="0.1" min="0" placeholder="e.g. 28" required />
+                </div>
+              </div>
+
+              <button type="submit" class="btn btn-primary" style="margin-top: 4px;">
+                Save my activity
+              </button>
+              <div class="hint">
+                Leagues have unlimited spaces. New accounts are spread across leagues so the numbers stay balanced.
+              </div>
+            </form>
+          </div>
+
+          <div>
+            <h3>How ranking works</h3>
+            <p class="small">
+              The leaderboard uses:
+            </p>
+            <ul class="small" style="padding-left: 18px; margin: 4px 0 10px;">
+              <li><strong>Distance first</strong> – more total kilometres puts you higher.</li>
+              <li><strong>Time second</strong> – if distance is the same, lower total time wins.</li>
+            </ul>
+            <p class="small">
+              Promotions & relegations are applied from these rankings. With 5 people, 1 moves up and 1 moves down.
+              With more people, up to 3 can move each way.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="top-row">
+          <h2>Live leaderboard</h2>
+          <div class="filter-row">
+            <span>League:</span>
+            <select id="league-filter" onchange="renderLeaderboard()">
+              <option value="all">All leagues</option>
+              <option value="amateurs">Amateurs</option>
+              <option value="intermediates">Intermediates</option>
+              <option value="pros">Pros</option>
+              <option value="legends">Legends</option>
+            </select>
+          </div>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Participant</th>
+              <th>League</th>
+              <th>Total distance</th>
+              <th>Total time</th>
+            </tr>
+          </thead>
+          <tbody id="leaderboard-body">
+            <!-- Filled by JS -->
+          </tbody>
+        </table>
+        <div id="no-entries" class="empty-state">
+          No activities yet. Be the first to log a run and grab the number one spot.
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>My activities</h3>
+        <p class="small">
+          Only the activities from the account you are logged in with are shown here. You can delete them if you make a
+          mistake.
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Distance</th>
+              <th>Time</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="my-activities-body">
+            <!-- Filled by JS -->
+          </tbody>
+        </table>
+        <div id="no-my-activities" class="empty-state">
+          No activities yet for this account.
+        </div>
+      </div>
+    </section>
+
+    <!-- Scene 3: Stats -->
+    <section id="scene-stats" class="scene">
+      <div class="card">
+        <div class="top-row" style="margin-bottom: 8px;">
+          <h2>Player stats</h2>
+          <button class="btn-small" onclick="applyPromotions()">
+            Apply promotions now
+          </button>
+        </div>
+        <p>
+          Every line you log builds your personal stats. See who is most consistent and who has improved the most.
+          Promotions and relegations use these stats.
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Participant</th>
+              <th>League</th>
+              <th>Runs</th>
+              <th>Total distance</th>
+              <th>Average distance</th>
+              <th>Best distance</th>
+              <th>Improvement</th>
+            </tr>
+          </thead>
+          <tbody id="stats-body">
+            <!-- Filled by JS -->
+          </tbody>
+        </table>
+        <div id="no-stats" class="empty-state">
+          Stats will appear as soon as people start logging their activities.
+        </div>
+      </div>
+    </section>
+
+    <!-- Scene 4: Rules & Prizes -->
+    <section id="scene-rules" class="scene">
+      <div class="card">
+        <h2>Rules, leagues and prizes</h2>
+        <h3>Leagues & starting positions</h3>
+        <p class="small">
+          There are four leagues:
+        </p>
+        <ul class="small" style="padding-left: 18px;">
+          <li><strong>Amateurs</strong></li>
+          <li><strong>Intermediates</strong></li>
+          <li><strong>Pros</strong></li>
+          <li><strong>Legends</strong></li>
+        </ul>
+        <p class="small">
+          When a new account is created, we look at how many people are already in each league and place the new
+          person into one of the leagues with the fewest people, starting from the lowest league. That way, league
+          sizes stay very close together.
+        </p>
+
+        <h3>Promotions & relegations</h3>
+        <ul class="small" style="padding-left: 18px;">
+          <li>Leagues have no hard limits. Many people can be in each league.</li>
+          <li>When you press “Apply promotions” on the Stats page, people move between leagues.</li>
+          <li>The number of people moved each way depends on how many players there are:
+            <ul style="padding-left: 18px; margin-top: 4px;">
+              <li>5–9 players → 1 promotion + 1 relegation</li>
+              <li>10–14 players → 2 promotions + 2 relegations</li>
+              <li>15+ players → max 3 promotions + 3 relegations</li>
+            </ul>
+          </li>
+          <li>Promotions come from the top of the ranking. Relegations come from the bottom.</li>
+        </ul>
+
+        <h3>Prizes</h3>
+        <ul class="small" style="padding-left: 18px;">
+          <li><strong>Monthly:</strong> The person at the top of the table at month-end wins a small prize.<br />
+            Example: sports shop voucher, extra day of remote work, or team shout-out.</li>
+          <li><strong>Yearly:</strong> The person with the strongest overall year wins a bigger prize.<br />
+            Example: running shoes, smartwatch, or wellness experience.</li>
+        </ul>
+
+        <p class="small">
+          Exact prize details can be decided by the local Hitachi team; the site simply makes it easy to see who is
+          on top and who is improving fastest.
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    Prototype created for the Hitachi “Make It Happen” health challenge.
+  </footer>
+
+  <script>
+    // ========= CONSTANTS =========
+    const STORAGE_KEY_ENTRIES = "mih_entries_v4";
+    const STORAGE_KEY_USERS = "mih_users_v4";
+    const STORAGE_KEY_CURRENT_USER = "mih_current_user_v4";
+    const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
+    const LEAGUES = ["amateurs", "intermediates", "pros", "legends"];
+
+    // ========= STATE =========
+    let entries = [];
+    let users = [];
+    let currentUser = null;
+
+    // ========= UTILITIES =========
+    function generateId() {
+      return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+    }
+
+    function saveEntries() {
+      localStorage.setItem(STORAGE_KEY_ENTRIES, JSON.stringify(entries));
+    }
+
+    function saveUsers() {
+      localStorage.setItem(STORAGE_KEY_USERS, JSON.stringify(users));
+    }
+
+    function loadEntries() {
+      const saved = localStorage.getItem(STORAGE_KEY_ENTRIES);
+      if (saved) {
+        try {
+          entries = JSON.parse(saved) || [];
+        } catch (e) {
+          entries = [];
+        }
+      } else {
+        entries = [];
+      }
+    }
+
+    function loadUsers() {
+      const saved = localStorage.getItem(STORAGE_KEY_USERS);
+      if (saved) {
+        try {
+          users = JSON.parse(saved) || [];
+        } catch (e) {
+          users = [];
+        }
+      } else {
+        users = [];
+      }
+      users.forEach((u) => {
+        if (!u.league || !LEAGUES.includes(u.league)) {
+          u.league = "amateurs";
+        }
+      });
+      saveUsers();
+    }
+
+    function getUserById(id) {
+      return users.find((u) => u.id === id) || null;
+    }
+
+    function getUserByName(name) {
+      return users.find((u) => u.name.toLowerCase() === name.toLowerCase()) || null;
+    }
+
+    function formatImprovement(value) {
+      if (!isFinite(value) || value === 0) return "0%";
+      const rounded = Math.round(value);
+      return (rounded > 0 ? "+" : "") + rounded + "%";
+    }
+
+    function formatDate(ts) {
+      const d = new Date(ts);
+      if (isNaN(d.getTime())) return "";
+      return d.toLocaleDateString(undefined, {
+        year: "numeric",
+        month: "short",
+        day: "numeric"
+      });
+    }
+
+    function leagueIndex(league) {
+      return LEAGUES.indexOf(league);
+    }
+
+    function assignStartingLeague() {
+      const counts = {
+        amateurs: 0,
+        intermediates: 0,
+        pros: 0,
+        legends: 0
+      };
+      users.forEach((u) => {
+        if (u.league && counts.hasOwnProperty(u.league)) {
+          counts[u.league]++;
+        }
+      });
+
+      const values = Object.values(counts);
+      const minCount = Math.min(...values);
+      const candidateLeagues = LEAGUES.filter((l) => counts[l] === minCount);
+      return candidateLeagues[0] || "amateurs";
+    }
+
+    // ========= CLEANUP OLD ACCOUNTS =========
+    function cleanupOldAccounts() {
+      const now = Date.now();
+      const currentUserId = localStorage.getItem(STORAGE_KEY_CURRENT_USER);
+
+      const keptUsers = [];
+      const removedUserIds = new Set();
+
+      users.forEach((user) => {
+        const isCurrent = currentUserId && user.id === currentUserId;
+        if (!user.lastLogoutAt || isCurrent) {
+          keptUsers.push(user);
+          return;
+        }
+        const delta = now - user.lastLogoutAt;
+        if (delta > THIRTY_DAYS_MS) {
+          removedUserIds.add(user.id);
+        } else {
+          keptUsers.push(user);
+        }
+      });
+
+      users = keptUsers;
+
+      if (removedUserIds.size > 0) {
+        entries = entries.filter((e) => !removedUserIds.has(e.userId));
+      }
+
+      saveUsers();
+      saveEntries();
+    }
+
+    // ========= NAVIGATION =========
+    function showScene(name) {
+      const scenes = document.querySelectorAll(".scene");
+      scenes.forEach((scene) => scene.classList.remove("active"));
+
+      const target = document.getElementById("scene-" + name);
+      if (target) target.classList.add("active");
+
+      const navButtons = document.querySelectorAll("header nav button");
+      navButtons.forEach((btn) => btn.classList.remove("active"));
+      navButtons.forEach((btn) => {
+        if (
+          btn.getAttribute("onclick") === `showScene('${name}')` ||
+          btn.getAttribute("onclick") === `requireLoginThenShow('${name}')`
+        ) {
+          btn.classList.add("active");
+        }
+      });
+    }
+
+    function requireLoginThenShow(name) {
+      if (!currentUser) {
+        alert("Please log in first.");
+        showScene("login");
+        return;
+      }
+      showScene(name);
+    }
+
+    // ========= PLAYER STATS & LEAGUES =========
+    function getPlayerStats() {
+      const byUser = {};
+
+      entries.forEach((e) => {
+        const user = getUserById(e.userId);
+        if (!user) return;
+        const key = user.id;
+        if (!byUser[key]) {
+          byUser[key] = {
+            userId: user.id,
+            name: user.name,
+            league: user.league || "amateurs",
+            runs: 0,
+            totalDistance: 0,
+            totalTime: 0,
+            bestDistance: 0,
+            baselineDistance: null
+          };
+        }
+        const stats = byUser[key];
+        if (stats.baselineDistance === null) {
+          stats.baselineDistance = e.distanceKm;
+        }
+        stats.runs += 1;
+        stats.totalDistance += e.distanceKm;
+        stats.totalTime += e.timeMinutes;
+        if (e.distanceKm > stats.bestDistance) {
+          stats.bestDistance = e.distanceKm;
+        }
+      });
+
+      let players = Object.values(byUser);
+
+      players.sort((a, b) => {
+        if (b.totalDistance !== a.totalDistance) {
+          return b.totalDistance - a.totalDistance;
+        }
+        return a.totalTime - b.totalTime;
+      });
+
+      players = players.map((p, index) => {
+        const rank = index + 1;
+        const avgDistance = p.runs > 0 ? p.totalDistance / p.runs : 0;
+        let improvement = 0;
+        if (p.baselineDistance && p.baselineDistance > 0 && p.runs > 1) {
+          improvement = ((avgDistance - p.baselineDistance) / p.baselineDistance) * 100;
+        }
+
+        return {
+          ...p,
+          rank,
+          avgDistance,
+          improvement
+        };
+      });
+
+      return players;
+    }
+
+    // ========= PROMOTIONS & RELEGATIONS =========
+    function applyPromotions() {
+      const players = getPlayerStats();
+      const total = players.length;
+      if (total === 0) {
+        alert("No players yet.");
+        return;
+      }
+
+      let moves = Math.floor(total / 5);
+      if (moves < 1) moves = 1;
+      if (moves > 3) moves = 3;
+
+      let promoted = 0;
+      for (let i = 0; i < players.length && promoted < moves; i++) {
+        const p = players[i];
+        const idx = leagueIndex(p.league);
+        if (idx < 0 || idx >= LEAGUES.length - 1) continue;
+        const user = getUserById(p.userId);
+        if (!user) continue;
+        user.league = LEAGUES[idx + 1];
+        promoted++;
+      }
+
+      let relegated = 0;
+      for (let i = players.length - 1; i >= 0 && relegated < moves; i--) {
+        const p = players[i];
+        const idx = leagueIndex(p.league);
+        if (idx <= 0) continue;
+        const user = getUserById(p.userId);
+        if (!user) continue;
+        user.league = LEAGUES[idx - 1];
+        relegated++;
+      }
+
+      saveUsers();
+      renderHeaderUser();
+      renderLeaderboard();
+      renderStats();
+      alert(`Promotions and relegations applied: ${moves} up, ${moves} down.`);
+    }
+
+    // ========= RENDER UI =========
+    function renderHeaderUser() {
+      const el = document.getElementById("user-controls");
+      const nameInput = document.getElementById("name");
+
+      if (!el) return;
+
+      el.innerHTML = "";
+      if (!currentUser) {
+        const statusSpan = document.createElement("span");
+        statusSpan.id = "user-status";
+        statusSpan.textContent = "Not logged in";
+        el.appendChild(statusSpan);
+
+        const btn = document.createElement("button");
+        btn.className = "btn-small";
+        btn.textContent = "Log in";
+        btn.onclick = () => showScene("login");
+        el.appendChild(btn);
+
+        if (nameInput) {
+          nameInput.value = "";
+          nameInput.placeholder = "Log in to set your name";
+        }
+        return;
+      }
+
+      const statusSpan = document.createElement("span");
+      statusSpan.id = "user-status";
+      statusSpan.innerHTML = `Logged in as <span class="user-name">${currentUser.name}</span> · <span class="badge-league ${currentUser.league}">${currentUser.league.charAt(0).toUpperCase() + currentUser.league.slice(1)}</span>`;
+      el.appendChild(statusSpan);
+
+      const logoutBtn = document.createElement("button");
+      logoutBtn.className = "btn-small";
+      logoutBtn.textContent = "Log out";
+      logoutBtn.onclick = logout;
+      el.appendChild(logoutBtn);
+
+      const deleteBtn = document.createElement("button");
+      deleteBtn.className = "btn-small danger";
+      deleteBtn.textContent = "Delete account";
+      deleteBtn.onclick = deleteAccount;
+      el.appendChild(deleteBtn);
+
+      if (nameInput) {
+        nameInput.value = currentUser.name;
+        nameInput.placeholder = "";
+      }
+    }
+
+    function renderLeaderboard() {
+      const tbody = document.getElementById("leaderboard-body");
+      const empty = document.getElementById("no-entries");
+      if (!tbody) return;
+
+      tbody.innerHTML = "";
+      const players = getPlayerStats();
+      const filter = document.getElementById("league-filter")?.value || "all";
+
+      let filtered = players;
+      if (filter !== "all") {
+        filtered = players.filter((p) => p.league === filter);
+      }
+
+      if (!filtered.length) {
+        if (empty) empty.style.display = "block";
+        return;
+      }
+      if (empty) empty.style.display = "none";
+
+      filtered.forEach((player) => {
+        const tr = document.createElement("tr");
+
+        let rankSymbol = player.rank;
+        if (player.rank === 1) rankSymbol = "🥇";
+        else if (player.rank === 2) rankSymbol = "🥈";
+        else if (player.rank === 3) rankSymbol = "🥉";
+
+        tr.innerHTML = `
+          <td class="rank-medal">${rankSymbol}</td>
+          <td>${player.name}</td>
+          <td><span class="badge-league ${player.league}">${player.league.charAt(0).toUpperCase() + player.league.slice(1)}</span></td>
+          <td>${player.totalDistance.toFixed(2)} km</td>
+          <td>${player.totalTime.toFixed(1)} min</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderStats() {
+      const tbody = document.getElementById("stats-body");
+      const empty = document.getElementById("no-stats");
+      if (!tbody) return;
+
+      tbody.innerHTML = "";
+
+      if (!entries.length) {
+        if (empty) empty.style.display = "block";
+        return;
+      }
+      if (empty) empty.style.display = "none";
+
+      const players = getPlayerStats();
+
+      players.forEach((stats) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${stats.name}</td>
+          <td><span class="badge-league ${stats.league}">${stats.league.charAt(0).toUpperCase() + stats.league.slice(1)}</span></td>
+          <td>${stats.runs}</td>
+          <td>${stats.totalDistance.toFixed(2)} km</td>
+          <td>${stats.avgDistance.toFixed(2)} km</td>
+          <td>${stats.bestDistance.toFixed(2)} km</td>
+          <td>${formatImprovement(stats.improvement)}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderMyActivities() {
+      const tbody = document.getElementById("my-activities-body");
+      const empty = document.getElementById("no-my-activities");
+      if (!tbody) return;
+
+      tbody.innerHTML = "";
+
+      if (!currentUser) {
+        if (empty) {
+          empty.style.display = "block";
+          empty.textContent = "Log in to see and manage your activities.";
+        }
+        return;
+      }
+
+      const myEntries = entries.filter((e) => e.userId === currentUser.id);
+
+      if (!myEntries.length) {
+        if (empty) {
+          empty.style.display = "block";
+          empty.textContent = "No activities yet for this account.";
+        }
+        return;
+      }
+      if (empty) empty.style.display = "none";
+
+      myEntries
+        .slice()
+        .sort((a, b) => b.timestamp - a.timestamp)
+        .forEach((e) => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${formatDate(e.timestamp)}</td>
+            <td>${e.distanceKm.toFixed(2)} km</td>
+            <td>${e.timeMinutes.toFixed(1)} min</td>
+            <td class="actions-cell">
+              <button onclick="deleteActivity('${e.id}')">Delete</button>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+    }
+
+    // ========= ACTIVITY DELETION =========
+    function deleteActivity(id) {
+      if (!currentUser) {
+        alert("You need to be logged in to delete activities.");
+        return;
+      }
+      const entry = entries.find((e) => e.id === id);
+      if (!entry) return;
+      if (entry.userId !== currentUser.id) {
+        alert("You can only delete your own activities.");
+        return;
+      }
+      if (!confirm("Delete this activity?")) return;
+
+      entries = entries.filter((e) => e.id !== id);
+      saveEntries();
+      renderLeaderboard();
+      renderStats();
+      renderMyActivities();
+    }
+
+    // ========= AUTH: LOGIN / LOGOUT / DELETE ACCOUNT =========
+    function login(name, password) {
+      const trimmedName = name.trim();
+      if (!trimmedName || !password) {
+        alert("Please enter both name and password.");
+        return;
+      }
+
+      const existing = getUserByName(trimmedName);
+
+      if (!existing) {
+        const newLeague = assignStartingLeague();
+        const newUser = {
+          id: generateId(),
+          name: trimmedName,
+          password,
+          league: newLeague,
+          createdAt: Date.now(),
+          lastLoginAt: Date.now(),
+          lastLogoutAt: null
+        };
+        users.push(newUser);
+        currentUser = newUser;
+        saveUsers();
+        localStorage.setItem(STORAGE_KEY_CURRENT_USER, newUser.id);
+        renderHeaderUser();
+        showScene("welcome");
+        return;
+      }
+
+      if (existing.password !== password) {
+        alert("Wrong password for this name.");
+        return;
+      }
+
+      existing.lastLoginAt = Date.now();
+      if (!existing.league || !LEAGUES.includes(existing.league)) {
+        existing.league = "amateurs";
+      }
+      currentUser = existing;
+      saveUsers();
+      localStorage.setItem(STORAGE_KEY_CURRENT_USER, existing.id);
+      renderHeaderUser();
+      showScene("welcome");
+    }
+
+    function logout() {
+      if (!currentUser) return;
+      const user = getUserById(currentUser.id);
+      if (user) {
+        user.lastLogoutAt = Date.now();
+      }
+      saveUsers();
+      localStorage.removeItem(STORAGE_KEY_CURRENT_USER);
+      currentUser = null;
+      renderHeaderUser();
+      renderMyActivities();
+      showScene("login");
+    }
+
+    function deleteAccount() {
+      if (!currentUser) return;
+      const confirmText = "This will delete your account and all your activities. Are you sure?";
+      if (!confirm(confirmText)) return;
+
+      const userId = currentUser.id;
+      users = users.filter((u) => u.id !== userId);
+      entries = entries.filter((e) => e.userId !== userId);
+
+      saveUsers();
+      saveEntries();
+      localStorage.removeItem(STORAGE_KEY_CURRENT_USER);
+      currentUser = null;
+      renderHeaderUser();
+      renderLeaderboard();
+      renderStats();
+      renderMyActivities();
+      showScene("login");
+    }
+
+    // ========= FORM HANDLERS =========
+    const loginForm = document.getElementById("login-form");
+    if (loginForm) {
+      loginForm.addEventListener("submit", function (e) {
+        e.preventDefault();
+        const name = document.getElementById("login-name").value;
+        const password = document.getElementById("login-password").value;
+        login(name, password);
+        loginForm.reset();
+      });
+    }
+
+    const entryForm = document.getElementById("entry-form");
+    if (entryForm) {
+      entryForm.addEventListener("submit", function (e) {
+        e.preventDefault();
+        if (!currentUser) {
+          alert("Please log in before adding activities.");
+          showScene("login");
+          return;
+        }
+        const distance = parseFloat(document.getElementById("distance").value);
+        const time = parseFloat(document.getElementById("time").value);
+
+        if (isNaN(distance) || isNaN(time)) {
+          alert("Please fill in distance and time correctly.");
+          return;
+        }
+        if (distance <= 0 || time <= 0) {
+          alert("Distance and time must be bigger than zero.");
+          return;
+        }
+
+        entries.push({
+          id: generateId(),
+          userId: currentUser.id,
+          distanceKm: distance,
+          timeMinutes: time,
+          timestamp: Date.now()
+        });
+
+        saveEntries();
+        renderLeaderboard();
+        renderStats();
+        renderMyActivities();
+
+        entryForm.reset();
+        showScene("leaderboard");
+      });
+    }
+
+    // ========= INITIALISE =========
+    function init() {
+      loadEntries();
+      loadUsers();
+      cleanupOldAccounts();
+
+      const currentUserId = localStorage.getItem(STORAGE_KEY_CURRENT_USER);
+      if (currentUserId) {
+        const user = getUserById(currentUserId);
+        if (user) {
+          currentUser = user;
+        } else {
+          localStorage.removeItem(STORAGE_KEY_CURRENT_USER);
+          currentUser = null;
+        }
+      }
+
+      renderHeaderUser();
+      renderLeaderboard();
+      renderStats();
+      renderMyActivities();
+
+      if (currentUser) {
+        showScene("welcome");
+      } else {
+        showScene("login");
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>
