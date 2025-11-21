@@ -1,147 +1,146 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>SEP | Your Choice</title>
-<meta name="description" content="Minimalist clothing made with intention. Hand-pressed in Copenhagen." />
-<link rel="icon" href="https://upload.wikimedia.org/wikipedia/commons/3/3f/Black_square.jpg">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SEP | Your Choice</title>
+  <meta name="description" content="Minimalist clothing made with intention. Hand-pressed in Copenhagen." />
+  <link rel="icon" href="https://upload.wikimedia.org/wikipedia/commons/3/3f/Black_square.jpg">
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<script src="https://cdn.tailwindcss.com"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 
-<style>
-body {
-  font-family:'Inter',sans-serif;
-  background:linear-gradient(to bottom,#000,#fff);
-  color:#111;
-  transition:background .5s,color .5s;
-  scroll-behavior:smooth;
-}
-body.dark {
-  background:linear-gradient(to bottom,#fff,#000);
-  color:#f2f2f2;
-}
-h1,h2,h3,p,select,input,button,span {transition:color .5s;}
-.theme-text {color:#e6e6e6;transition:color .5s;}
-body.dark .theme-text {color:#333;}
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(to bottom, #000, #fff);
+      color: #111;
+      transition: background .5s, color .5s;
+      scroll-behavior: smooth;
+    }
+    body.dark {
+      background: linear-gradient(to bottom, #fff, #000);
+      color: #f2f2f2;
+    }
+    h1,h2,h3,p,select,input,button,span { transition: color .5s; }
+    .theme-text { color:#e6e6e6; transition:color .5s; }
+    body.dark .theme-text { color:#333; }
 
-button,a{transition:all .25s ease;}
-button:hover,a:hover{transform:translateY(-2px);}
-#darkToggle{
-  position:fixed;bottom:20px;right:20px;z-index:60;
-  background:rgba(0,0,0,.5);border-radius:9999px;padding:12px;color:white;
-}
-#darkToggle svg{width:24px;height:24px;fill:white;}
-.popup{
-  position:fixed;top:20px;right:20px;
-  background:#16a34a;color:#fff;padding:10px 16px;border-radius:8px;
-  opacity:0;transition:opacity .3s;z-index:100;
-}
-.popup.show{opacity:1;}
-.fade-section{opacity:0;transform:translateY(30px);}
-#cartSidebar{color:#000;transition:background .5s,color .5s;}
-body.dark #cartSidebar{background:#111;color:#e6e6e6;}
+    button,a { transition: all .25s ease; }
+    button:hover,a:hover { transform: translateY(-2px); }
 
-/* Scenes: only one visible */
-.scene{display:none;}
-.scene.active{display:block;}
+    #darkToggle {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 60;
+      background: rgba(0,0,0,.5);
+      border-radius: 9999px;
+      padding: 12px;
+      color: white;
+    }
+    #darkToggle svg {
+      width: 24px;
+      height: 24px;
+      fill: white;
+    }
 
-/* Fixed top-right global nav buttons */
-#btnSep,#btnSepAbout,#btnMih,#btnMihAbout{
-  position:fixed;
-  right:16px;
-  z-index:55;
-  background:rgba(0,0,0,.7);
-  color:#fff;
-  border-radius:9999px;
-  padding:6px 12px;
-  font-size:11px;
-  border:1px solid rgba(255,255,255,0.2);
-  opacity:1;
-  pointer-events:auto;
-}
-#btnSep{top:12px;}
-#btnSepAbout{top:44px;}
-#btnMih{top:76px;}
-#btnMihAbout{top:108px;}
+    .popup{
+      position:fixed;top:20px;right:20px;
+      background:#16a34a;color:#fff;padding:10px 16px;border-radius:8px;
+      opacity:0;transition:opacity .3s;z-index:100;
+    }
+    .popup.show{opacity:1;}
+    .fade-section{opacity:0;transform:translateY(30px);}
 
-/* Make it happen cards */
-.mih-card{
-  background:rgba(255,255,255,0.04);
-  border-radius:16px;
-  border:1px solid rgba(255,255,255,0.12);
-  box-shadow:0 18px 45px rgba(0,0,0,0.45);
-}
+    #cartSidebar{color:#000;transition:background .5s,color .5s;}
+    body.dark #cartSidebar{background:#111;color:#e6e6e6;}
 
-/* Light/dark for all MIH and About scenes */
-.mih-page .mih-inner{
-  min-height:100vh;
-  background:linear-gradient(to bottom,#000,#222);
-  color:#f5f5f5;
-}
-body.dark .mih-page .mih-inner{
-  background:linear-gradient(to bottom,#f9f9f9,#dddddd);
-  color:#111;
-}
-.mih-page .mih-inner h1,
-.mih-page .mih-inner h2,
-.mih-page .mih-inner h3,
-.mih-page .mih-inner h4,
-.mih-page .mih-inner p,
-.mih-page .mih-inner li,
-.mih-page .mih-inner span,
-.mih-page .mih-inner label{
-  color:inherit;
-}
-body.dark .mih-card{
-  background:rgba(0,0,0,0.03);
-  border-color:rgba(0,0,0,0.12);
-}
+    /* Scenes: only one visible at a time */
+    .scene{display:none;}
+    .scene.active{display:block;}
 
-/* Shipping buttons in cart */
-.ship-btn{
-  font-size:11px;
-  border-radius:9999px;
-  border:1px solid #9ca3af;
-  padding:4px 10px;
-}
-.ship-btn.active{
-  background:#111;
-  color:#fff;
-}
-body.dark .ship-btn.active{
-  background:#f5f5f5;
-  color:#000;
-}
-</style>
+    /* Global hamburger menu */
+    #globalMenu{
+      position:fixed;
+      top:8px;
+      right:8px;
+      z-index:55;
+    }
+    #menuToggle{
+      background:rgba(0,0,0,0.7);
+      color:#fff;
+      border-radius:9999px;
+      padding:8px;
+      border:1px solid rgba(255,255,255,0.2);
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:3px;
+    }
+    #menuToggle span{
+      display:block;
+      width:18px;
+      height:2px;
+      background:#fff;
+    }
+    #menuPanel{
+      margin-top:6px;
+      background:rgba(0,0,0,0.85);
+      color:#fff;
+      border-radius:12px;
+      padding:6px 8px;
+      font-size:11px;
+    }
 
-<script>
-window.addEventListener('load',()=>{
-  gsap.registerPlugin(ScrollTrigger);
-  gsap.utils.toArray('.fade-section').forEach(sec=>{
-    gsap.to(sec,{opacity:1,y:0,duration:1,
-      scrollTrigger:{trigger:sec,start:'top 80%',once:true}});
-  });
-});
-</script>
+    .mih-card{
+      background:rgba(255,255,255,0.04);
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,0.12);
+      box-shadow:0 18px 45px rgba(0,0,0,0.45);
+    }
+  </style>
+
+  <script>
+    window.addEventListener('load',()=>{
+      gsap.registerPlugin(ScrollTrigger);
+      gsap.utils.toArray('.fade-section').forEach(sec=>{
+        gsap.to(sec,{
+          opacity:1,y:0,duration:1,
+          scrollTrigger:{trigger:sec,start:'top 80%',once:true}
+        });
+      });
+    });
+  </script>
 </head>
 
 <body>
 
-<!-- GLOBAL NAV BUTTONS (switch scenes only) -->
-<button id="btnSep">SEP shop</button>
-<button id="btnSepAbout">About SEP</button>
-<button id="btnMih">Make It Happen</button>
-<button id="btnMihAbout">About “Make It Happen”</button>
+<!-- GLOBAL HAMBURGER MENU -->
+<div id="globalMenu">
+  <button id="menuToggle" aria-label="Menu">
+    <span></span>
+    <span></span>
+    <span></span>
+  </button>
+  <div id="menuPanel" class="hidden space-y-1">
+    <button class="block text-left w-full py-1 px-1" onclick="showScene('sep-shop'); hideMenuPanel();">SEP shop</button>
+    <button class="block text-left w-full py-1 px-1" onclick="showScene('mih-welcome'); hideMenuPanel();">Make it happen</button>
+    <button class="block text-left w-full py-1 px-1" onclick="showScene('sep-about'); hideMenuPanel();">About SEP</button>
+    <button class="block text-left w-full py-1 px-1" onclick="showScene('mih-about'); hideMenuPanel();">About Make it happen</button>
+  </div>
+</div>
 
 <button id="darkToggle" title="Toggle dark mode">
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9h-9V3z"/></svg>
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <path d="M12 3a9 9 0 1 0 9 9h-9V3z"/>
+  </svg>
 </button>
 
-<!-- ===================== SCENE: SEP SHOP (original products) ===================== -->
+<!-- ===================== SCENE: SEP SHOP ===================== -->
 <section id="scene-sep-shop" class="scene active">
   <header class="py-20 text-center fade-section">
     <h1 class="theme-text text-5xl font-bold mb-4">Minimalist clothing, made with intention.</h1>
@@ -165,7 +164,7 @@ window.addEventListener('load',()=>{
       <div class="product-card bg-white/10 p-6 rounded-xl shadow-md text-center backdrop-blur">
         <img src="http://static.photos/textures/1024x576/1" class="w-full h-64 object-cover rounded mb-4" alt="White T-shirt">
         <h3 class="text-xl font-bold mb-2">SEP White T-shirt</h3>
-        <p class="mb-2">180 DKK</p>
+        <p class="mb-2">180 kr.</p>
         <select class="theme-text border rounded px-3 py-2 mb-2 bg-transparent">
           <option>XS</option><option>S</option><option>M</option><option>L</option><option>XL</option>
         </select>
@@ -178,7 +177,7 @@ window.addEventListener('load',()=>{
       <div class="product-card bg-white/10 p-6 rounded-xl shadow-md text-center backdrop-blur">
         <img src="http://static.photos/textures/1024x576/2" class="w-full h-64 object-cover rounded mb-4" alt="Black Hoodie">
         <h3 class="text-xl font-bold mb-2">SEP Black Hoodie</h3>
-        <p class="mb-2">180 DKK</p>
+        <p class="mb-2">180 kr.</p>
         <select class="theme-text border rounded px-3 py-2 mb-2 bg-transparent">
           <option>XS</option><option>S</option><option>M</option><option>L</option><option>XL</option>
         </select>
@@ -191,7 +190,7 @@ window.addEventListener('load',()=>{
       <div class="product-card bg-white/10 p-6 rounded-xl shadow-md text-center backdrop-blur">
         <img src="http://static.photos/textures/1024x576/3" class="w-full h-64 object-cover rounded mb-4" alt="Black Trousers">
         <h3 class="text-xl font-bold mb-2">SEP Black Trousers</h3>
-        <p class="mb-2">180 DKK</p>
+        <p class="mb-2">180 kr.</p>
         <select class="theme-text border rounded px-3 py-2 mb-2 bg-transparent">
           <option>XS</option><option>S</option><option>M</option><option>L</option><option>XL</option>
         </select>
@@ -203,29 +202,36 @@ window.addEventListener('load',()=>{
     </div>
   </section>
 
+  <!-- CART SIDEBAR -->
   <div id="cartSidebar" class="fixed top-0 right-0 h-full w-80 bg-white shadow-xl translate-x-full transition-transform duration-300 z-50 overflow-y-auto">
     <div class="p-6">
       <div class="flex justify-between items-center mb-4">
         <h3 class="text-xl font-bold">Your Cart</h3>
         <button id="closeCart">✕</button>
       </div>
+
+      <!-- Shipping location toggle -->
+      <div class="mb-4 text-sm">
+        <p class="mb-1">Shipping location:</p>
+        <div class="flex gap-2">
+          <button id="shipCph" class="px-3 py-1 rounded-full border border-gray-400 text-xs">Copenhagen</button>
+          <button id="shipOther" class="px-3 py-1 rounded-full border border-gray-400 text-xs">Not Copenhagen</button>
+        </div>
+        <p class="mt-1 text-xs text-gray-500">
+          Copenhagen = free shipping. Other = +45 kr.
+        </p>
+      </div>
+
       <div id="cartItems" class="space-y-4 text-sm"></div>
-      <div class="border-t border-gray-300 pt-4 mt-4">
-        <div class="mb-3 text-xs text-gray-600">
-          <span class="block mb-1">Shipping location:</span>
-          <div class="flex gap-2">
-            <button type="button" id="shipCph" class="ship-btn">Copenhagen</button>
-            <button type="button" id="shipOther" class="ship-btn active">Other DK</button>
-          </div>
-        </div>
+      <div class="border-t border-gray-300 pt-4 mt-4 text-sm">
         <div class="flex justify-between mb-1">
-          <span>Subtotal:</span><span id="cartSubtotal" class="font-bold">0 DKK</span>
+          <span>Subtotal:</span><span id="cartSubtotal" class="font-bold">0 kr.</span>
         </div>
-        <div class="flex justify-between mb-2 text-sm text-gray-600">
-          <span>Shipping:</span><span id="shippingLabel">+45 DKK</span>
+        <div class="flex justify-between mb-2 text-xs text-gray-600">
+          <span>Shipping:</span><span id="cartShippingLabel">+45 kr.</span>
         </div>
         <div class="flex justify-between font-semibold border-t border-gray-300 pt-2 mb-3">
-          <span>Total:</span><span id="cartTotal">45 DKK</span>
+          <span>Total:</span><span id="cartTotal">45 kr.</span>
         </div>
         <button id="openMobilePay" class="w-full bg-green-500 text-white py-2 rounded mb-2">Open MobilePay</button>
         <p class="text-xs text-gray-500 mb-2 text-center">Open MobilePay button is only a valid link on mobile.</p>
@@ -240,7 +246,7 @@ window.addEventListener('load',()=>{
     <div class="grid grid-cols-1 md:grid-cols-5 gap-6 max-w-6xl mx-auto text-sm md:text-base">
       <div class="bg-white/10 rounded-xl p-6 backdrop-blur">
         <h3 class="font-bold text-lg mb-2">1. Choose</h3>
-        <p>Select your favourite SEP piece – T-shirt, Hoodie or Trousers – then pick your size and quantity.</p>
+        <p>Select your favourite SEP piece: T-shirt, Hoodie or Trousers. Then pick your size and quantity.</p>
       </div>
       <div class="bg-white/10 rounded-xl p-6 backdrop-blur">
         <h3 class="font-bold text-lg mb-2">2. Add to Cart</h3>
@@ -252,139 +258,78 @@ window.addEventListener('load',()=>{
       </div>
       <div class="bg-white/10 rounded-xl p-6 backdrop-blur">
         <h3 class="font-bold text-lg mb-2">4. Pay with MobilePay</h3>
-        <p>Send the total amount (incl. +45 DKK shipping, unless you pick Copenhagen) to <b>5894BZ</b> using MobilePay.<br><span class="text-xs italic">“Open MobilePay” works only on mobile devices.</span></p>
+        <p>Send the total amount to <b>5894BZ</b> using MobilePay.<br><span class="text-xs italic">“Open MobilePay” works only on mobile devices.</span></p>
       </div>
       <div class="bg-white/10 rounded-xl p-6 backdrop-blur">
         <h3 class="font-bold text-lg mb-2">5. Send us your order</h3>
-        <p>DM your copied message to <b>@seproairesis</b> (Instagram) or <b>@seproairesis</b> (TikTok).<br>We currently deliver within Denmark.</p>
+        <p>DM your copied message to <b>@seproairesis</b> on Instagram or TikTok.<br>We currently deliver within Denmark.</p>
       </div>
     </div>
   </section>
 
   <footer class="text-center py-10 fade-section">
-    <p>© 2025 SEP – Se Proairesis • MobilePay 5894BZ • +45 DKK Shipping (FREE in Copenhagen) • Made in Copenhagen. Delivered across Denmark.</p>
+    <p>© 2025 SEP – Se Proairesis • MobilePay 5894BZ • Shipping within Denmark • Made in Copenhagen. Delivered only across Denmark.</p>
     <div class="flex justify-center gap-4 mt-4">
       <a href="https://instagram.com/seproairesis" class="bg-gradient-to-br from-pink-500 to-purple-600 text-white p-3 rounded-full">IG</a>
       <a href="https://tiktok.com/@seproairesis" class="bg-black text-white p-3 rounded-full">TT</a>
     </div>
   </footer>
 </section>
-<!-- ================= END SCENE: SEP SHOP ================= -->
+<!-- ================= END SEP SHOP ================= -->
 
 <!-- ===================== SCENE: ABOUT SEP ===================== -->
-<section id="scene-sep-about" class="scene mih-page">
-  <div class="mih-inner flex items-center justify-center px-6 py-16">
+<section id="scene-sep-about" class="scene">
+  <div class="min-h-screen text-white flex items-center justify-center px-6 py-16">
     <div class="max-w-3xl mx-auto space-y-6">
       <h2 class="text-3xl font-bold tracking-wide">About SEP</h2>
-      <p class="text-sm md:text-base">
-        SEP stands for <span class="italic">Se Proairesis</span> – “Your Choice”. It is a minimalist clothing brand
-        built around simple, clean pieces that feel good to wear and last a long time.
+      <p class="text-sm md:text-base text-gray-200">
+        SEP stands for <span class="italic">Se Proairesis</span> – “Your Choice”. It is a word from ancient Greek, and a minimalist clothing brand
+        built around simple, clean pieces that feel good to wear and last.
       </p>
-      <p class="text-sm md:text-base">
+      <p class="text-sm md:text-base text-gray-300">
         Everything is hand-pressed in Copenhagen, in small batches. No hype drops, no giant collections. Just a white
         T-shirt, a black hoodie and black trousers that you can wear every day.
       </p>
-      <p class="text-sm md:text-base">
+      <p class="text-sm md:text-base text-gray-300">
         SEP is designed to be easy. You pick your size, your quantity, copy your order message and send it. That is the
-        entire process.
+        entire process. No accounts, no tracking, no data selling, no ads following you around.
       </p>
-      <p class="text-sm md:text-base opacity-80">
-        SEP, the idea, this website, the clothes, the designs and “Make It Happen” were all created by a 13-year-old.
+      <p class="text-sm md:text-base text-gray-300">
+        SEP, the idea, this website, the clothes, the designs and Make it happen – was created by a 13-year-old.
       </p>
       <div class="flex flex-wrap gap-3 text-xs md:text-sm mt-4">
         <button class="px-4 py-2 rounded-full border border-white/20" onclick="showScene('sep-shop')">
           Back to SEP shop
         </button>
-        <button class="px-4 py-2 rounded-full border border-white/20" onclick="showScene('mih-login')">
-          Go to Make It Happen
+        <button class="px-4 py-2 rounded-full border border-white/20" onclick="showScene('mih-welcome')">
+          Go to Make it happen
         </button>
       </div>
     </div>
   </div>
 </section>
-<!-- ================= END SCENE: ABOUT SEP ================= -->
-
-<!-- ===================== SCENE: MIH LOGIN ===================== -->
-<section id="scene-mih-login" class="scene mih-page">
-  <div class="mih-inner pt-16 pb-20 px-4 md:px-6">
-    <div class="max-w-5xl mx-auto mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-      <div>
-        <div class="text-[10px] tracking-[0.5em] uppercase mb-1 opacity-70">MAKE IT</div>
-        <div class="text-2xl md:text-3xl font-semibold tracking-[0.5em] uppercase">SEP</div>
-        <div class="text-[10px] tracking-[0.5em] uppercase mt-1 opacity-70">HAPPEN</div>
-      </div>
-      <div class="flex flex-wrap gap-2 text-xs md:text-sm">
-        <button class="px-3 py-1 rounded-full border border-white/20" onclick="showScene('mih-login')">Login</button>
-        <button class="px-3 py-1 rounded-full border border-white/20" onclick="showScene('mih-welcome')">Welcome</button>
-        <button class="px-3 py-1 rounded-full border border-white/20" onclick="showScene('mih-leaderboard')">Leaderboard</button>
-        <button class="px-3 py-1 rounded-full border border-white/20" onclick="showScene('mih-stats')">Stats</button>
-        <button class="px-3 py-1 rounded-full border border-white/20" onclick="showScene('mih-rules')">Rules</button>
-        <button class="px-3 py-1 rounded-full border border-white/20" onclick="showScene('mih-about')">About</button>
-      </div>
-      <div class="flex flex-col items-end gap-2 text-[11px] min-w-[180px]">
-        <div class="mih-user-controls flex flex-wrap gap-2 justify-end"></div>
-        <button type="button"
-                class="px-3 py-1 rounded-full border border-white/25 text-[11px]"
-                onclick="showScene('sep-shop')">
-          Back to SEP
-        </button>
-      </div>
-    </div>
-
-    <main class="max-w-5xl mx-auto">
-      <div class="mih-card p-6 md:p-8" id="mih-login-card">
-        <h1 class="text-2xl md:text-3xl font-semibold mb-2">Log in to Make It Happen</h1>
-        <p class="text-sm md:text-base mb-4">
-          Create a simple account so the site knows who you are and only you can manage your activities.
-        </p>
-        <form id="login-form" class="space-y-3 mt-2">
-          <div>
-            <label for="login-name" class="block text-xs mb-1 opacity-80">Name</label>
-            <input id="login-name" type="text" placeholder="e.g. Daniel"
-              class="w-full px-3 py-2 rounded-full bg-black/40 border border-white/15 text-sm" required />
-          </div>
-          <div>
-            <label for="login-password" class="block text-xs mb-1 opacity-80">Password</label>
-            <input id="login-password" type="password" placeholder="Choose something simple"
-              class="w-full px-3 py-2 rounded-full bg-black/40 border border-white/15 text-sm" required />
-          </div>
-          <button type="submit" class="px-5 py-2 rounded-full bg-white text-black text-xs md:text-sm mt-1">
-            Log in / Create account
-          </button>
-          <p class="text-[11px] opacity-70 mt-2">
-            If this is your first time with this name, we will create a new account and place you into a league.
-          </p>
-        </form>
-        <p class="text-[11px] opacity-60 mt-4">
-          Your login is saved on this browser. Accounts logged out for more than 30 days are deleted, together with their activities.
-        </p>
-      </div>
-    </main>
-  </div>
-</section>
-<!-- ================= END SCENE: MIH LOGIN ================= -->
+<!-- ================= END ABOUT SEP ================= -->
 
 <!-- ===================== SCENE: MIH WELCOME ===================== -->
-<section id="scene-mih-welcome" class="scene mih-page">
-  <div class="mih-inner pt-16 pb-20 px-4 md:px-6">
+<section id="scene-mih-welcome" class="scene">
+  <div class="min-h-screen text-white pt-16 pb-20 px-4 md:px-6">
     <div class="max-w-5xl mx-auto mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
       <div>
-        <div class="text-[10px] tracking-[0.5em] uppercase mb-1 opacity-70">MAKE IT</div>
+        <div class="text-[10px] tracking-[0.5em] uppercase text-gray-300 mb-1">MAKE IT</div>
         <div class="text-2xl md:text-3xl font-semibold tracking-[0.5em] uppercase">SEP</div>
-        <div class="text-[10px] tracking-[0.5em] uppercase mt-1 opacity-70">HAPPEN</div>
+        <div class="text-[10px] tracking-[0.5em] uppercase text-gray-300 mt-1">HAPPEN</div>
       </div>
       <div class="flex flex-wrap gap-2 text-xs md:text-sm">
-        <button class="px-3 py-1 rounded-full border border-white/20" onclick="showScene('mih-login')">Login</button>
-        <button class="px-3 py-1 rounded-full border border-white/20" onclick="showScene('mih-welcome')">Welcome</button>
-        <button class="px-3 py-1 rounded-full border border-white/20" onclick="showScene('mih-leaderboard')">Leaderboard</button>
-        <button class="px-3 py-1 rounded-full border border-white/20" onclick="showScene('mih-stats')">Stats</button>
-        <button class="px-3 py-1 rounded-full border border-white/20" onclick="showScene('mih-rules')">Rules</button>
-        <button class="px-3 py-1 rounded-full border border-white/20" onclick="showScene('mih-about')">About</button>
+        <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" onclick="showScene('mih-welcome')">Welcome</button>
+        <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" onclick="showScene('mih-leaderboard')">Leaderboard</button>
+        <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" onclick="showScene('mih-stats')">Stats</button>
+        <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" onclick="showScene('mih-rules')">Rules</button>
+        <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" onclick="showScene('mih-about')">About</button>
       </div>
-      <div class="flex flex-col items-end gap-2 text-[11px] min-w-[180px]">
-        <div class="mih-user-controls flex flex-wrap gap-2 justify-end"></div>
+      <div class="flex flex-col items-end gap-2 text-[11px] text-gray-300 min-w-[160px]">
+        <div id="user-controls" class="flex flex-wrap gap-2 justify-end text-xs"></div>
         <button type="button"
-                class="px-3 py-1 rounded-full border border-white/25 text-[11px]"
+                class="px-3 py-1 rounded-full border border-white/25 text-[11px] text-gray-200"
                 onclick="showScene('sep-shop')">
           Back to SEP
         </button>
@@ -394,53 +339,107 @@ window.addEventListener('load',()=>{
     <main class="max-w-5xl mx-auto">
       <div class="mih-card p-6 md:p-8 space-y-4">
         <div>
-          <h1 class="text-2xl md:text-3xl font-semibold mb-2">Move more. Compete. Make It Happen.</h1>
-          <p class="text-sm md:text-base opacity-90">
-            Run, walk or cycle, log your distance and climb the leaderboard.
+          <h1 class="text-2xl md:text-3xl font-semibold mb-2">Move more. Compete. Make it happen.</h1>
+          <p class="text-sm md:text-base text-gray-300">
+            Run, walk or cycle, log your distance, and climb the leaderboard.
           </p>
         </div>
         <div class="flex flex-wrap gap-3">
           <button class="px-5 py-2 rounded-full bg-white text-black text-xs md:text-sm"
                   onclick="showScene('mih-leaderboard')">
-            Go to leaderboard
-          </button>
-          <button class="px-5 py-2 rounded-full border border-white/20 text-xs md:text-sm"
-                  onclick="showScene('mih-rules')">
-            How it works
+            Go to leaderboard →
           </button>
         </div>
-        <div class="flex flex-wrap gap-2 text-[11px] opacity-90">
+        <div class="flex flex-wrap gap-2 text-[11px] text-gray-300">
           <span class="px-3 py-1 rounded-full border border-white/10 bg-white/5">4 leagues: Amateurs, Intermediates, Pros, Legends</span>
-          <span class="px-3 py-1 rounded-full border border-white/10 bg-white/5">New people are placed where leagues are lightest</span>
-          <span class="px-3 py-1 rounded-full border border-white/10 bg-white/5">Automatic promotions and relegations keep things moving</span>
+          <span class="px-3 py-1 rounded-full border border-white/10 bg-white/5">New people placed where leagues are lightest</span>
+          <span class="px-3 py-1 rounded-full border border-white/10 bg-white/5">Promotions and relegations keep things moving</span>
         </div>
       </div>
     </main>
   </div>
 </section>
-<!-- ================= END SCENE: MIH WELCOME ================= -->
+<!-- ================= END MIH WELCOME ================= -->
 
-<!-- ===================== SCENE: MIH LEADERBOARD ===================== -->
-<section id="scene-mih-leaderboard" class="scene mih-page">
-  <div class="mih-inner pt-16 pb-20 px-4 md:px-6">
+<!-- ===================== SCENE: MIH LOGIN ===================== -->
+<section id="scene-mih-login" class="scene">
+  <div class="min-h-screen text-white pt-16 pb-20 px-4 md:px-6">
     <div class="max-w-5xl mx-auto mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
       <div>
-        <div class="text-[10px] tracking-[0.5em] uppercase mb-1 opacity-70">MAKE IT</div>
+        <div class="text-[10px] tracking-[0.5em] uppercase text-gray-300 mb-1">MAKE IT</div>
         <div class="text-2xl md:text-3xl font-semibold tracking-[0.5em] uppercase">SEP</div>
-        <div class="text-[10px] tracking-[0.5em] uppercase mt-1 opacity-70">HAPPEN</div>
+        <div class="text-[10px] tracking-[0.5em] uppercase text-gray-300 mt-1">HAPPEN</div>
       </div>
       <div class="flex flex-wrap gap-2 text-xs md:text-sm">
-        <button class="px-3 py-1 rounded-full border border-white/20" onclick="showScene('mih-login')">Login</button>
-        <button class="px-3 py-1 rounded-full border border-white/20" onclick="showScene('mih-welcome')">Welcome</button>
-        <button class="px-3 py-1 rounded-full border border-white/20" onclick="showScene('mih-leaderboard')">Leaderboard</button>
-        <button class="px-3 py-1 rounded-full border border-white/20" onclick="showScene('mih-stats')">Stats</button>
-        <button class="px-3 py-1 rounded-full border border-white/20" onclick="showScene('mih-rules')">Rules</button>
-        <button class="px-3 py-1 rounded-full border border-white/20" onclick="showScene('mih-about')">About</button>
+        <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" onclick="showScene('mih-welcome')">Welcome</button>
+        <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" onclick="showScene('mih-leaderboard')">Leaderboard</button>
+        <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" onclick="showScene('mih-stats')">Stats</button>
+        <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" onclick="showScene('mih-rules')">Rules</button>
+        <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" onclick="showScene('mih-about')">About</button>
       </div>
-      <div class="flex flex-col items-end gap-2 text-[11px] min-w-[180px]">
-        <div class="mih-user-controls flex flex-wrap gap-2 justify-end"></div>
+      <div class="flex flex-col items-end gap-2 text-[11px] text-gray-300 min-w-[160px]">
+        <div class="text-xs">Create or log into your Make it happen account.</div>
         <button type="button"
-                class="px-3 py-1 rounded-full border border-white/25 text-[11px]"
+                class="px-3 py-1 rounded-full border border-white/25 text-[11px] text-gray-200"
+                onclick="showScene('sep-shop')">
+          Back to SEP
+        </button>
+      </div>
+    </div>
+
+    <main class="max-w-5xl mx-auto">
+      <div class="mih-card p-6 md:p-8">
+        <h1 class="text-2xl md:text-3xl font-semibold mb-2">Log in to make it happen</h1>
+        <p class="text-sm md:text-base text-gray-300 mb-4">
+          Create a simple account so the site knows who you are and only you can manage your activities.
+        </p>
+        <form id="login-form" class="space-y-3 mt-2">
+          <div>
+            <label for="login-name" class="block text-xs text-gray-400 mb-1">Name</label>
+            <input id="login-name" type="text" placeholder="e.g. Daniel"
+                   class="w-full px-3 py-2 rounded-full bg-black/40 border border-white/15 text-sm" required />
+          </div>
+          <div>
+            <label for="login-password" class="block text-xs text-gray-400 mb-1">Password</label>
+            <input id="login-password" type="password" placeholder="Choose something simple"
+                   class="w-full px-3 py-2 rounded-full bg-black/40 border border-white/15 text-sm" required />
+          </div>
+          <button type="submit" class="px-5 py-2 rounded-full bg-white text-black text-xs md:text-sm mt-1">
+            Log in / Create account
+          </button>
+          <p class="text-[11px] text-gray-400 mt-2">
+            If this is your first time with this name, we’ll create a new account and place you into a league.
+          </p>
+        </form>
+        <p class="text-[11px] text-gray-500 mt-4">
+          Your login is saved on this browser. Accounts logged out for more than 30 days are deleted, together with their activities.
+        </p>
+      </div>
+    </main>
+  </div>
+</section>
+<!-- ================= END MIH LOGIN ================= -->
+
+<!-- ===================== SCENE: MIH LEADERBOARD ===================== -->
+<section id="scene-mih-leaderboard" class="scene">
+  <div class="min-h-screen text-white pt-16 pb-20 px-4 md:px-6">
+    <div class="max-w-5xl mx-auto mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div>
+        <div class="text-[10px] tracking-[0.5em] uppercase text-gray-300 mb-1">MAKE IT</div>
+        <div class="text-2xl md:text-3xl font-semibold tracking-[0.5em] uppercase">SEP</div>
+        <div class="text-[10px] tracking-[0.5em] uppercase text-gray-300 mt-1">HAPPEN</div>
+      </div>
+      <div class="flex flex-wrap gap-2 text-xs md:text-sm">
+        <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" onclick="showScene('mih-welcome')">Welcome</button>
+        <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" onclick="showScene('mih-leaderboard')">Leaderboard</button>
+        <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" onclick="showScene('mih-stats')">Stats</button>
+        <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" onclick="showScene('mih-rules')">Rules</button>
+        <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" onclick="showScene('mih-about')">About</button>
+      </div>
+      <div class="flex flex-col items-end gap-2 text-[11px] text-gray-300 min-w-[160px]">
+        <div id="user-controls-leader" class="text-xs"></div>
+        <button type="button"
+                class="px-3 py-1 rounded-full border border-white/25 text-[11px] text-gray-200"
                 onclick="showScene('sep-shop')">
           Back to SEP
         </button>
@@ -452,48 +451,45 @@ window.addEventListener('load',()=>{
         <div class="grid md:grid-cols-2 gap-6">
           <div>
             <h2 class="text-xl font-semibold mb-2">Add your latest activity</h2>
-            <p class="text-sm opacity-90 mb-3">
+            <p class="text-sm text-gray-300 mb-3">
               Log any run, walk or ride. Use kilometres and minutes so the leaderboard stays fair for everyone.
             </p>
             <form id="entry-form" class="space-y-3">
               <div>
-                <label for="name" class="block text-xs mb-1 opacity-80">Your name</label>
+                <label for="name" class="block text-xs text-gray-400 mb-1">Your name</label>
                 <input id="name" type="text" disabled placeholder="Log in to set your name"
-                  class="w-full px-3 py-2 rounded-full bg-black/40 border border-white/15 text-sm" />
-                <p class="text-[11px] opacity-70 mt-1">
+                       class="w-full px-3 py-2 rounded-full bg-black/40 border border-white/15 text-sm" />
+                <p class="text-[11px] text-gray-500 mt-1">
                   Name comes from your account. You cannot change it here.
                 </p>
               </div>
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label for="distance" class="block text-xs mb-1 opacity-80">Distance (km)</label>
+                  <label for="distance" class="block text-xs text-gray-400 mb-1">Distance (km)</label>
                   <input id="distance" type="number" step="0.1" min="0" placeholder="e.g. 5"
-                    class="w-full px-3 py-2 rounded-full bg-black/40 border border-white/15 text-sm" required />
+                         class="w-full px-3 py-2 rounded-full bg-black/40 border border-white/15 text-sm" required />
                 </div>
                 <div>
-                  <label for="time" class="block text-xs mb-1 opacity-80">Time (minutes)</label>
+                  <label for="time" class="block text-xs text-gray-400 mb-1">Time (minutes)</label>
                   <input id="time" type="number" step="0.1" min="0" placeholder="e.g. 28"
-                    class="w-full px-3 py-2 rounded-full bg-black/40 border border-white/15 text-sm" required />
+                         class="w-full px-3 py-2 rounded-full bg-black/40 border border-white/15 text-sm" required />
                 </div>
               </div>
               <button type="submit" class="px-5 py-2 rounded-full bg-white text-black text-xs md:text-sm">
                 Save my activity
               </button>
-              <p class="text-[11px] opacity-70 mt-2">
-                Leagues have unlimited spaces. New accounts are spread across leagues so the numbers stay balanced.
-              </p>
             </form>
           </div>
 
           <div>
             <h3 class="text-lg font-semibold mb-2">How ranking works</h3>
-            <p class="text-sm opacity-90">
-              The leaderboard sorts people using three things:
+            <p class="text-sm text-gray-300">
+              The leaderboard sorts people using:
             </p>
-            <ul class="text-sm opacity-90 list-disc list-inside mt-2 space-y-1">
+            <ul class="text-sm text-gray-300 list-disc list-inside mt-2 space-y-1">
               <li><strong>Total distance</strong> – more kilometres puts you higher.</li>
-              <li><strong>Speed</strong> – average km per minute, faster is better.</li>
-              <li><strong>Time spent</strong> – if distance and speed are the same, less total time wins.</li>
+              <li><strong>Total time</strong> – more time moving also counts, so dedication matters.</li>
+              <li><strong>Speed</strong> – if distance and time are close, faster average pace helps.</li>
             </ul>
           </div>
         </div>
@@ -502,7 +498,7 @@ window.addEventListener('load',()=>{
       <div class="mih-card p-6 md:p-8">
         <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
           <h2 class="text-xl font-semibold">Live leaderboard</h2>
-          <div class="flex items-center gap-2 text-xs opacity-90">
+          <div class="flex items-center gap-2 text-xs text-gray-300">
             <span>League:</span>
             <select id="league-filter"
                     class="px-3 py-1 rounded-full bg-black/40 border border-white/20 text-xs"
@@ -517,7 +513,7 @@ window.addEventListener('load',()=>{
         </div>
         <div class="overflow-x-auto text-xs md:text-sm">
           <table class="w-full border-collapse min-w-full">
-            <thead class="text-[11px] uppercase tracking-wide border-b border-white/10 opacity-70">
+            <thead class="text-gray-400 text-[11px] uppercase tracking-wide border-b border-white/10">
               <tr>
                 <th class="py-2 pr-2 text-left">#</th>
                 <th class="py-2 px-2 text-left">Participant</th>
@@ -529,19 +525,19 @@ window.addEventListener('load',()=>{
             <tbody id="leaderboard-body"></tbody>
           </table>
         </div>
-        <div id="no-entries" class="text-xs opacity-70 mt-3">
+        <div id="no-entries" class="text-xs text-gray-400 mt-3">
           No activities yet. Be the first to log a run and grab the number one spot.
         </div>
       </div>
 
       <div class="mih-card p-6 md:p-8">
         <h3 class="text-lg font-semibold mb-2">My activities</h3>
-        <p class="text-xs opacity-70 mb-3">
+        <p class="text-xs text-gray-400 mb-3">
           Only the activities from the account you are logged in with are shown here. You can delete them if you make a mistake.
         </p>
         <div class="overflow-x-auto text-xs md:text-sm">
           <table class="w-full border-collapse min-w-full">
-            <thead class="text-[11px] uppercase tracking-wide border-b border-white/10 opacity-70">
+            <thead class="text-gray-400 text-[11px] uppercase tracking-wide border-b border-white/10">
               <tr>
                 <th class="py-2 pr-2 text-left">Date</th>
                 <th class="py-2 px-2 text-left">Distance</th>
@@ -552,36 +548,34 @@ window.addEventListener('load',()=>{
             <tbody id="my-activities-body"></tbody>
           </table>
         </div>
-        <div id="no-my-activities" class="text-xs opacity-70 mt-3">
+        <div id="no-my-activities" class="text-xs text-gray-400 mt-3">
           No activities yet for this account.
         </div>
       </div>
     </main>
   </div>
 </section>
-<!-- ================= END SCENE: MIH LEADERBOARD ================= -->
+<!-- ================= END MIH LEADERBOARD ================= -->
 
 <!-- ===================== SCENE: MIH STATS ===================== -->
-<section id="scene-mih-stats" class="scene mih-page">
-  <div class="mih-inner pt-16 pb-20 px-4 md:px-6">
+<section id="scene-mih-stats" class="scene">
+  <div class="min-h-screen text-white pt-16 pb-20 px-4 md:px-6">
     <div class="max-w-5xl mx-auto mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
       <div>
-        <div class="text-[10px] tracking-[0.5em] uppercase mb-1 opacity-70">MAKE IT</div>
+        <div class="text-[10px] tracking-[0.5em] uppercase text-gray-300 mb-1">MAKE IT</div>
         <div class="text-2xl md:text-3xl font-semibold tracking-[0.5em] uppercase">SEP</div>
-        <div class="text-[10px] tracking-[0.5em] uppercase mt-1 opacity-70">HAPPEN</div>
+        <div class="text-[10px] tracking-[0.5em] uppercase text-gray-300 mt-1">HAPPEN</div>
       </div>
       <div class="flex flex-wrap gap-2 text-xs md:text-sm">
-        <button class="px-3 py-1 rounded-full border border-white/20" onclick="showScene('mih-login')">Login</button>
-        <button class="px-3 py-1 rounded-full border border-white/20" onclick="showScene('mih-welcome')">Welcome</button>
-        <button class="px-3 py-1 rounded-full border border-white/20" onclick="showScene('mih-leaderboard')">Leaderboard</button>
-        <button class="px-3 py-1 rounded-full border border-white/20" onclick="showScene('mih-stats')">Stats</button>
-        <button class="px-3 py-1 rounded-full border border-white/20" onclick="showScene('mih-rules')">Rules</button>
-        <button class="px-3 py-1 rounded-full border border-white/20" onclick="showScene('mih-about')">About</button>
+        <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" onclick="showScene('mih-welcome')">Welcome</button>
+        <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" onclick="showScene('mih-leaderboard')">Leaderboard</button>
+        <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" onclick="showScene('mih-stats')">Stats</button>
+        <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" onclick="showScene('mih-rules')">Rules</button>
+        <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" onclick="showScene('mih-about')">About</button>
       </div>
-      <div class="flex flex-col items-end gap-2 text-[11px] min-w-[180px]">
-        <div class="mih-user-controls flex flex-wrap gap-2 justify-end"></div>
+      <div class="flex flex-col items-end gap-2 text-[11px] text-gray-300 min-w-[160px]">
         <button type="button"
-                class="px-3 py-1 rounded-full border border-white/25 text-[11px]"
+                class="px-3 py-1 rounded-full border border-white/25 text-[11px] text-gray-200"
                 onclick="showScene('sep-shop')">
           Back to SEP
         </button>
@@ -590,15 +584,13 @@ window.addEventListener('load',()=>{
 
     <main class="max-w-5xl mx-auto">
       <div class="mih-card p-6 md:p-8">
-        <div class="flex justify-between items-center mb-3">
-          <h2 class="text-xl font-semibold">Player stats</h2>
-        </div>
-        <p class="text-sm opacity-90 mb-3">
-          Every activity builds your personal stats. Promotions and relegations use these stats and are applied automatically each month.
+        <h2 class="text-xl font-semibold mb-2">Player stats</h2>
+        <p class="text-sm text-gray-300 mb-3">
+          Every activity builds your personal stats. Improvements look at both how far you go and how fast you are getting.
         </p>
         <div class="overflow-x-auto text-xs md:text-sm">
           <table class="w-full border-collapse min-w-full">
-            <thead class="text-[11px] uppercase tracking-wide border-b border-white/10 opacity-70">
+            <thead class="text-gray-400 text-[11px] uppercase tracking-wide border-b border-white/10">
               <tr>
                 <th class="py-2 px-2 text-left">Participant</th>
                 <th class="py-2 px-2 text-left">League</th>
@@ -612,36 +604,34 @@ window.addEventListener('load',()=>{
             <tbody id="stats-body"></tbody>
           </table>
         </div>
-        <div id="no-stats" class="text-xs opacity-70 mt-3">
+        <div id="no-stats" class="text-xs text-gray-400 mt-3">
           Stats will appear as soon as people start logging their activities.
         </div>
       </div>
     </main>
   </div>
 </section>
-<!-- ================= END SCENE: MIH STATS ================= -->
+<!-- ================= END MIH STATS ================= -->
 
 <!-- ===================== SCENE: MIH RULES ===================== -->
-<section id="scene-mih-rules" class="scene mih-page">
-  <div class="mih-inner pt-16 pb-20 px-4 md:px-6">
+<section id="scene-mih-rules" class="scene">
+  <div class="min-h-screen text-white pt-16 pb-20 px-4 md:px-6">
     <div class="max-w-5xl mx-auto mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
       <div>
-        <div class="text-[10px] tracking-[0.5em] uppercase mb-1 opacity-70">MAKE IT</div>
+        <div class="text-[10px] tracking-[0.5em] uppercase text-gray-300 mb-1">MAKE IT</div>
         <div class="text-2xl md:text-3xl font-semibold tracking-[0.5em] uppercase">SEP</div>
-        <div class="text-[10px] tracking-[0.5em] uppercase mt-1 opacity-70">HAPPEN</div>
+        <div class="text-[10px] tracking-[0.5em] uppercase text-gray-300 mt-1">HAPPEN</div>
       </div>
       <div class="flex flex-wrap gap-2 text-xs md:text-sm">
-        <button class="px-3 py-1 rounded-full border border-white/20" onclick="showScene('mih-login')">Login</button>
-        <button class="px-3 py-1 rounded-full border border-white/20" onclick="showScene('mih-welcome')">Welcome</button>
-        <button class="px-3 py-1 rounded-full border border-white/20" onclick="showScene('mih-leaderboard')">Leaderboard</button>
-        <button class="px-3 py-1 rounded-full border border-white/20" onclick="showScene('mih-stats')">Stats</button>
-        <button class="px-3 py-1 rounded-full border border-white/20" onclick="showScene('mih-rules')">Rules</button>
-        <button class="px-3 py-1 rounded-full border border-white/20" onclick="showScene('mih-about')">About</button>
+        <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" onclick="showScene('mih-welcome')">Welcome</button>
+        <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" onclick="showScene('mih-leaderboard')">Leaderboard</button>
+        <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" onclick="showScene('mih-stats')">Stats</button>
+        <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" onclick="showScene('mih-rules')">Rules</button>
+        <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" onclick="showScene('mih-about')">About</button>
       </div>
-      <div class="flex flex-col items-end gap-2 text-[11px] min-w-[180px]">
-        <div class="mih-user-controls flex flex-wrap gap-2 justify-end"></div>
+      <div class="flex flex-col items-end gap-2 text-[11px] text-gray-300 min-w-[160px]">
         <button type="button"
-                class="px-3 py-1 rounded-full border border-white/25 text-[11px]"
+                class="px-3 py-1 rounded-full border border-white/25 text-[11px] text-gray-200"
                 onclick="showScene('sep-shop')">
           Back to SEP
         </button>
@@ -649,41 +639,40 @@ window.addEventListener('load',()=>{
     </div>
 
     <main class="max-w-5xl mx-auto">
-      <div class="mih-card p-6 md:p-8 space-y-4 text-sm">
-        <h2 class="text-xl font-semibold mb-2">Rules and leagues</h2>
+      <div class="mih-card p-6 md:p-8 space-y-4 text-sm text-gray-200">
+        <h2 class="text-xl font-semibold">Rules and leagues</h2>
 
         <div>
-          <h3 class="font-semibold mb-1">Leagues and starting positions</h3>
-          <p class="text-xs mb-1 opacity-90">There are four leagues:</p>
-          <ul class="list-disc list-inside text-xs opacity-90 space-y-1">
+          <h3 class="font-semibold mb-1">Leagues & starting positions</h3>
+          <p class="text-xs text-gray-300 mb-1">There are four leagues:</p>
+          <ul class="list-disc list-inside text-xs text-gray-300 space-y-1">
             <li><strong>Amateurs</strong></li>
             <li><strong>Intermediates</strong></li>
             <li><strong>Pros</strong></li>
             <li><strong>Legends</strong></li>
           </ul>
-          <p class="text-xs opacity-90 mt-2">
-            New accounts are placed where the leagues have the fewest people, starting from the lowest league. That keeps league sizes balanced.
+          <p class="text-xs text-gray-300 mt-2">
+            New accounts are placed where the leagues have the fewest people, starting from the lowest league. That keeps sizes balanced.
           </p>
         </div>
 
         <div>
-          <h3 class="font-semibold mb-1">Promotions and relegations</h3>
-          <ul class="list-disc list-inside text-xs opacity-90 space-y-1">
+          <h3 class="font-semibold mb-1">Promotions & relegations</h3>
+          <ul class="list-disc list-inside text-xs text-gray-300 space-y-1">
             <li>Leagues have no hard limits. Many people can be in each league.</li>
-            <li>Promotions and relegations are applied automatically at the beginning of each month.</li>
-            <li>The number of people moved each way depends on total number of players:
+            <li>The number of people moved each way depends on total players:
               <ul class="list-disc list-inside pl-4 mt-1 space-y-1">
-                <li><strong>8+ players</strong> – 1 promotion and 1 relegation</li>
-                <li><strong>16+ players</strong> – 2 promotions and 2 relegations</li>
-                <li><strong>32+ players</strong> – 3 promotions and 3 relegations</li>
+                <li><strong>8+ players</strong> → 1 promotion + 1 relegation</li>
+                <li><strong>16+ players</strong> → 2 promotions + 2 relegations</li>
+                <li><strong>32+ players</strong> → 3 promotions + 3 relegations</li>
               </ul>
             </li>
             <li>Promotions come from the top of the ranking. Relegations come from the bottom.</li>
             <li>Ranking is based on:
               <ul class="list-disc list-inside pl-4 mt-1 space-y-1">
                 <li>Total distance</li>
+                <li>Total time</li>
                 <li>Average speed (km per minute)</li>
-                <li>Total time (less is better if distance and speed are the same)</li>
               </ul>
             </li>
           </ul>
@@ -692,29 +681,27 @@ window.addEventListener('load',()=>{
     </main>
   </div>
 </section>
-<!-- ================= END SCENE: MIH RULES ================= -->
+<!-- ================= END MIH RULES ================= -->
 
 <!-- ===================== SCENE: MIH ABOUT ===================== -->
-<section id="scene-mih-about" class="scene mih-page">
-  <div class="mih-inner pt-16 pb-20 px-4 md:px-6">
+<section id="scene-mih-about" class="scene">
+  <div class="min-h-screen text-white pt-16 pb-20 px-4 md:px-6">
     <div class="max-w-5xl mx-auto mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
       <div>
-        <div class="text-[10px] tracking-[0.5em] uppercase mb-1 opacity-70">MAKE IT</div>
+        <div class="text-[10px] tracking-[0.5em] uppercase text-gray-300 mb-1">MAKE IT</div>
         <div class="text-2xl md:text-3xl font-semibold tracking-[0.5em] uppercase">SEP</div>
-        <div class="text-[10px] tracking-[0.5em] uppercase mt-1 opacity-70">HAPPEN</div>
+        <div class="text-[10px] tracking-[0.5em] uppercase text-gray-300 mt-1">HAPPEN</div>
       </div>
       <div class="flex flex-wrap gap-2 text-xs md:text-sm">
-        <button class="px-3 py-1 rounded-full border border-white/20" onclick="showScene('mih-login')">Login</button>
-        <button class="px-3 py-1 rounded-full border border-white/20" onclick="showScene('mih-welcome')">Welcome</button>
-        <button class="px-3 py-1 rounded-full border border-white/20" onclick="showScene('mih-leaderboard')">Leaderboard</button>
-        <button class="px-3 py-1 rounded-full border border-white/20" onclick="showScene('mih-stats')">Stats</button>
-        <button class="px-3 py-1 rounded-full border border-white/20" onclick="showScene('mih-rules')">Rules</button>
-        <button class="px-3 py-1 rounded-full border border-white/20" onclick="showScene('mih-about')">About</button>
+        <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" onclick="showScene('mih-welcome')">Welcome</button>
+        <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" onclick="showScene('mih-leaderboard')">Leaderboard</button>
+        <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" onclick="showScene('mih-stats')">Stats</button>
+        <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" onclick="showScene('mih-rules')">Rules</button>
+        <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" onclick="showScene('mih-about')">About</button>
       </div>
-      <div class="flex flex-col items-end gap-2 text-[11px] min-w-[180px]">
-        <!-- no logout/delete here as requested -->
+      <div class="flex flex-col items-end gap-2 text-[11px] text-gray-300 min-w-[160px]">
         <button type="button"
-                class="px-3 py-1 rounded-full border border-white/25 text-[11px]"
+                class="px-3 py-1 rounded-full border border-white/25 text-[11px] text-gray-200"
                 onclick="showScene('sep-shop')">
           Back to SEP
         </button>
@@ -722,30 +709,21 @@ window.addEventListener('load',()=>{
     </div>
 
     <main class="max-w-5xl mx-auto">
-      <div class="mih-card p-6 md:p-8 space-y-4 text-sm">
-        <h2 class="text-xl font-semibold mb-2">About “Make It Happen”</h2>
+      <div class="mih-card p-6 md:p-8 space-y-4 text-sm text-gray-200">
+        <h2 class="text-xl font-semibold mb-2">About Make it happen</h2>
         <p>
-          “Make It Happen” is a simple health challenge for anyone who wants to move a bit more, without paying for
-          apps, subscriptions or fancy gear. You log what you do and watch yourself climb the table.
+          Make it happen is a simple health challenge for anyone who wants to move a bit more, without paying for apps, subscriptions or fancy gear.
+          You log what you do and watch yourself climb the table.
         </p>
         <p>
           The idea is not to turn people into athletes. It is to make movement feel normal, fun and slightly addictive
-          in a good way. Run, walk or cycle, add your distance and see where you sit in your league.
+          in a good way. Run, walk or cycle, add your distance, and see where you sit in your league.
         </p>
         <p>
-          It is built to be:
+          It is built to be healthy, free and fun. No paywalls, no data selling, no ads following you around.
         </p>
-        <ul class="list-disc list-inside space-y-1">
-          <li><strong>For fun</strong> – no pressure, no judgement, just friendly competition.</li>
-          <li><strong>For health</strong> – small sessions add up to better sleep, more energy and a clearer head.</li>
-          <li><strong>For free</strong> – no paywalls, no data selling, no ads following you around.</li>
-        </ul>
-        <p>
-          Automatic promotions and relegations keep things exciting. Each month, people can move up or down based on how much
-          they have done, how fast they moved and how consistent they were.
-        </p>
-        <p class="opacity-80">
-          SEP, the idea, this website, the clothes, the designs and “Make It Happen” were all created by a 13-year-old.
+        <p class="text-gray-300">
+          SEP, the idea, this website, the clothes, the designs and Make it happen – was created by a 13-year-old.
         </p>
         <div class="flex flex-wrap gap-3 text-xs md:text-sm mt-2">
           <button class="px-4 py-2 rounded-full border border-white/20" onclick="showScene('mih-leaderboard')">
@@ -759,741 +737,922 @@ window.addEventListener('load',()=>{
     </main>
   </div>
 </section>
-<!-- ================= END SCENE: MIH ABOUT ================= -->
+<!-- ================= END MIH ABOUT ================= -->
 
+<!-- ===================== SCENE: MIH PROFILE ===================== -->
+<section id="scene-mih-profile" class="scene">
+  <div class="min-h-screen text-white pt-16 pb-20 px-4 md:px-6">
+    <div class="max-w-5xl mx-auto mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div>
+        <div class="text-[10px] tracking-[0.5em] uppercase text-gray-300 mb-1">MAKE IT</div>
+        <div class="text-2xl md:text-3xl font-semibold tracking-[0.5em] uppercase">SEP</div>
+        <div class="text-[10px] tracking-[0.5em] uppercase text-gray-300 mt-1">HAPPEN</div>
+      </div>
+      <div class="flex flex-wrap gap-2 text-xs md:text-sm">
+        <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" onclick="showScene('mih-leaderboard')">← Back to leaderboard</button>
+      </div>
+      <div class="flex flex-col items-end gap-2 text-[11px] text-gray-300 min-w-[160px]">
+        <button type="button"
+                class="px-3 py-1 rounded-full border border-white/25 text-[11px] text-gray-200"
+                onclick="showScene('sep-shop')">
+          Back to SEP
+        </button>
+      </div>
+    </div>
+
+    <main class="max-w-5xl mx-auto">
+      <div id="profile-content" class="mih-card p-6 md:p-8 space-y-4 text-sm text-gray-200">
+        <p>Loading profile…</p>
+      </div>
+    </main>
+  </div>
+</section>
+<!-- ================= END MIH PROFILE ================= -->
 
 <!-- ========== SEP CART + MOBILEPAY JS ========== -->
 <script>
-const body=document.body;
-document.getElementById('darkToggle').onclick=()=>body.classList.toggle('dark');
-
-let cart=JSON.parse(localStorage.getItem('cart'))||[];
-const cartSidebar=document.getElementById('cartSidebar');
-const cartOverlay=document.getElementById('cartOverlay');
-const BASE_SHIPPING_COST=45;
-let isCph=false; // false = other DK, true = Copenhagen
-
-function getShippingCost(){
-  return isCph ? 0 : BASE_SHIPPING_COST;
-}
-
-function updateCart(){
-  const items=document.getElementById('cartItems');
-  const subtotal=document.getElementById('cartSubtotal');
-  const total=document.getElementById('cartTotal');
-  const shippingLabel=document.getElementById('shippingLabel');
-  items.innerHTML=''; let sum=0;
-  if(cart.length===0){
-    items.innerHTML='<p class="text-center text-gray-500 py-10">Cart is empty</p>';
-    subtotal.textContent='0 DKK';
-    const ship=getShippingCost();
-    shippingLabel.textContent=ship===0?'0 DKK (Copenhagen)':'+'+ship+' DKK';
-    total.textContent=ship+' DKK';
-  }else{
-    cart.forEach((it,i)=>{
-      const price=parseInt(it.price.replace(/\D/g,''))*it.qty; sum+=price;
-      items.innerHTML+=`
-        <div class="border-b pb-2">
-          <div class="flex justify-between"><span>${it.name}</span><span>${price} DKK</span></div>
-          <div class="text-gray-500">Size: ${it.size} | Qty: ${it.qty}</div>
-          <button onclick="removeFromCart(${i})" class="text-red-500 text-xs mt-1">Remove</button>
-        </div>`;
-    });
-    subtotal.textContent=sum+' DKK';
-    const ship=getShippingCost();
-    shippingLabel.textContent=ship===0?'0 DKK (Copenhagen)':'+'+ship+' DKK';
-    total.textContent=(sum+ship)+' DKK';
-  }
-  localStorage.setItem('cart',JSON.stringify(cart));
-  updateCounter();
-}
-
-function addToCart(n,p,s,q){
-  const f=cart.findIndex(i=>i.name===n&&i.size===s);
-  if(f>=0) cart[f].qty+=q; else cart.push({name:n,price:p,size:s,qty:q});
-  updateCart();
-  const popup=document.createElement('div'); popup.className='popup'; popup.textContent='Added to cart';
-  document.body.appendChild(popup);
-  setTimeout(()=>popup.classList.add('show'),10);
-  setTimeout(()=>{popup.classList.remove('show'); setTimeout(()=>popup.remove(),300);},2000);
-}
-function removeFromCart(i){cart.splice(i,1);updateCart();}
-function updateCounter(){
-  const c=document.getElementById('cartCounter');
-  const t=cart.reduce((s,i)=>s+i.qty,0);
-  if(t>0){c.textContent=t; c.classList.remove('hidden');}
-  else c.classList.add('hidden');
-}
-
-document.querySelectorAll('.add-to-cart').forEach(b=>{
-  b.onclick=()=>{
-    const card=b.closest('.product-card');
-    const name=card.querySelector('h3').textContent;
-    const price=card.querySelector('p').textContent;
-    const size=card.querySelector('select').value;
-    const qty=parseInt(card.querySelector('.quantity-selector').value);
-    addToCart(name,price,size,qty);
+  const body = document.body;
+  document.getElementById('darkToggle').onclick = () => {
+    body.classList.toggle('dark');
   };
-});
 
-function hideTopButtons(hide){
-  const ids=['btnSep','btnSepAbout','btnMih','btnMihAbout'];
-  ids.forEach(id=>{
-    const el=document.getElementById(id);
-    if(!el) return;
-    el.style.opacity=hide?'0':'1';
-    el.style.pointerEvents=hide?'none':'auto';
-  });
-}
-
-document.getElementById('viewCartBtn').onclick=()=>{
-  cartSidebar.classList.remove('translate-x-full');
-  cartOverlay.classList.remove('hidden');
-  hideTopButtons(true);
-};
-document.getElementById('closeCart').onclick=closeCart;
-cartOverlay.onclick=closeCart;
-function closeCart(){
-  cartSidebar.classList.add('translate-x-full');
-  cartOverlay.classList.add('hidden');
-  hideTopButtons(false);
-}
-updateCart();
-
-// Shipping buttons
-const shipCphBtn=document.getElementById('shipCph');
-const shipOtherBtn=document.getElementById('shipOther');
-function updateShippingButtons(){
-  if(isCph){
-    shipCphBtn.classList.add('active');
-    shipOtherBtn.classList.remove('active');
-  }else{
-    shipCphBtn.classList.remove('active');
-    shipOtherBtn.classList.add('active');
+  // Hamburger menu behaviour
+  const menuToggle = document.getElementById('menuToggle');
+  const menuPanel = document.getElementById('menuPanel');
+  function hideMenuPanel(){
+    menuPanel.classList.add('hidden');
   }
-  updateCart();
-}
-shipCphBtn.onclick=()=>{isCph=true;updateShippingButtons();};
-shipOtherBtn.onclick=()=>{isCph=false;updateShippingButtons();};
+  menuToggle.addEventListener('click',()=>{
+    menuPanel.classList.toggle('hidden');
+  });
 
-const mobilePayNum='5894BZ';
-document.getElementById('openMobilePay').onclick=()=>{
-  window.location.href='mobilepay://transfer?phone='+mobilePayNum.replace(/\D/g,'');
-  alert('Thanks for supporting SEP!');
-};
-document.getElementById('copyMobilePay').onclick=()=>{
-  const subtotal=document.getElementById('cartSubtotal').textContent;
-  const total=document.getElementById('cartTotal').textContent;
-  const ship=getShippingCost();
-  const shippingText=ship===0?'0 DKK (Copenhagen)':'+'+ship+' DKK';
-  const msg=`Hi SEP, here’s my order:
-${cart.map(i=>`${i.qty}× ${i.name} (Size: ${i.size})`).join('\n')}
-Subtotal: ${subtotal}
-Shipping: ${shippingText}
-Total: ${total}`;
-  navigator.clipboard.writeText(msg);
-  const popup=document.createElement('div');
-  popup.className='popup';
-  popup.textContent='Order message copied!';
-  document.body.appendChild(popup);
-  setTimeout(()=>popup.classList.add('show'),10);
-  setTimeout(()=>{popup.classList.remove('show');setTimeout(()=>popup.remove(),300);},2000);
-};
-updateShippingButtons();
+  let cart = JSON.parse(localStorage.getItem('cart')) || [];
+  const cartSidebar = document.getElementById('cartSidebar');
+  const cartOverlay = document.getElementById('cartOverlay');
+
+  let shippingIsCph = false;
+  const BASE_SHIPPING = 45;
+
+  function currentShippingCost(){
+    return shippingIsCph ? 0 : BASE_SHIPPING;
+  }
+
+  function updateCart(){
+    const items = document.getElementById('cartItems');
+    const subtotal = document.getElementById('cartSubtotal');
+    const total = document.getElementById('cartTotal');
+    const shipLabel = document.getElementById('cartShippingLabel');
+
+    items.innerHTML = '';
+    let sum = 0;
+    if(cart.length === 0){
+      items.innerHTML = '<p class="text-center text-gray-500 py-10">Cart is empty</p>';
+      subtotal.textContent = '0 kr.';
+      shipLabel.textContent = shippingIsCph ? '+0 kr.' : '+45 kr.';
+      total.textContent = currentShippingCost() + ' kr.';
+    } else {
+      cart.forEach((it,i)=>{
+        const price = parseInt(it.price.replace(/\D/g,'')) * it.qty;
+        sum += price;
+        items.innerHTML += `
+          <div class="border-b pb-2">
+            <div class="flex justify-between"><span>${it.name}</span><span>${price} kr.</span></div>
+            <div class="text-gray-500">Size:${it.size} | Qty:${it.qty}</div>
+            <button onclick="removeFromCart(${i})" class="text-red-500 text-xs mt-1">Remove</button>
+          </div>`;
+      });
+      subtotal.textContent = sum + ' kr.';
+      shipLabel.textContent = shippingIsCph ? '+0 kr.' : '+45 kr.';
+      total.textContent = (sum + currentShippingCost()) + ' kr.';
+    }
+    localStorage.setItem('cart', JSON.stringify(cart));
+    updateCounter();
+  }
+
+  function addToCart(n,p,s,q){
+    const f = cart.findIndex(i=>i.name===n && i.size===s);
+    if(f>=0) cart[f].qty += q;
+    else cart.push({name:n,price:p,size:s,qty:q});
+    updateCart();
+    const popup=document.createElement('div');
+    popup.className='popup'; popup.textContent='Added to cart';
+    document.body.appendChild(popup);
+    setTimeout(()=>popup.classList.add('show'),10);
+    setTimeout(()=>{popup.classList.remove('show'); setTimeout(()=>popup.remove(),300);},2000);
+  }
+
+  function removeFromCart(i){ cart.splice(i,1); updateCart(); }
+
+  function updateCounter(){
+    const c = document.getElementById('cartCounter');
+    const t = cart.reduce((s,i)=>s+i.qty,0);
+    if(t>0){c.textContent=t; c.classList.remove('hidden');}
+    else c.classList.add('hidden');
+  }
+
+  document.querySelectorAll('.add-to-cart').forEach(b=>{
+    b.onclick=()=>{
+      const card=b.closest('.product-card');
+      const name=card.querySelector('h3').textContent;
+      const price=card.querySelector('p').textContent;
+      const size=card.querySelector('select').value;
+      const qty=parseInt(card.querySelector('.quantity-selector').value);
+      addToCart(name,price,size,qty);
+    };
+  });
+
+  function hideTopButtons(hide){
+    const gm = document.getElementById('globalMenu');
+    if(!gm) return;
+    gm.style.display = hide ? 'none' : 'block';
+    if(!hide) hideMenuPanel();
+  }
+
+  document.getElementById('viewCartBtn').onclick = ()=>{
+    cartSidebar.classList.remove('translate-x-full');
+    cartOverlay.classList.remove('hidden');
+    hideTopButtons(true);
+  };
+
+  function closeCart(){
+    cartSidebar.classList.add('translate-x-full');
+    cartOverlay.classList.add('hidden');
+    hideTopButtons(false);
+  }
+
+  document.getElementById('closeCart').onclick = closeCart;
+  cartOverlay.onclick = closeCart;
+
+  // Shipping buttons
+  document.getElementById('shipCph').onclick = ()=>{
+    shippingIsCph = true;
+    updateCart();
+  };
+  document.getElementById('shipOther').onclick = ()=>{
+    shippingIsCph = false;
+    updateCart();
+  };
+
+  updateCart();
+
+  const mobilePayNum='5894BZ';
+  document.getElementById('openMobilePay').onclick=()=>{
+    window.location.href='mobilepay://transfer?phone='+mobilePayNum.replace(/\D/g,'');
+    alert('Thanks for supporting SEP!');
+  };
+  document.getElementById('copyMobilePay').onclick=()=>{
+    const subtotal=document.getElementById('cartSubtotal').textContent;
+    const total=document.getElementById('cartTotal').textContent;
+    const msg=`Hi SEP, here’s my order:\n${cart.map(i=>`${i.qty}× ${i.name} (Size: ${i.size})`).join('\n')}\nSubtotal: ${subtotal}\nShipping: ${shippingIsCph ? '0 kr. (Copenhagen)' : '+45 kr.'}\nTotal: ${total}`;
+    navigator.clipboard.writeText(msg);
+    const popup=document.createElement('div');
+    popup.className='popup';
+    popup.textContent='Order message copied!';
+    document.body.appendChild(popup);
+    setTimeout(()=>popup.classList.add('show'),10);
+    setTimeout(()=>{popup.classList.remove('show');setTimeout(()=>popup.remove(),300);},2000);
+  };
 </script>
 
 <!-- ========== GLOBAL SCENE + MIH LOGIC ========== -->
 <script>
-// GLOBAL SCENE HANDLER
-function showScene(name){
-  // If already logged in, do not show login; send to welcome
-  if(name==='mih-login' && currentUser){
-    name='mih-welcome';
-  }
-  document.querySelectorAll('.scene').forEach(s=>s.classList.remove('active'));
-  const target=document.getElementById('scene-'+name);
-  if(target) target.classList.add('active');
-  window.scrollTo({top:0,left:0,behavior:'instant'});
-}
-
-// Top-right buttons
-document.getElementById('btnSep').onclick=()=>showScene('sep-shop');
-document.getElementById('btnSepAbout').onclick=()=>showScene('sep-about');
-document.getElementById('btnMih').onclick=()=>showScene('mih-login');
-document.getElementById('btnMihAbout').onclick=()=>showScene('mih-about');
-
-// MAKE IT HAPPEN DATA / LOGIC
-const STORAGE_KEY_ENTRIES = "mih_entries_v4";
-const STORAGE_KEY_USERS = "mih_users_v4";
-const STORAGE_KEY_CURRENT_USER = "mih_current_user_v4";
-const STORAGE_KEY_LAST_PROMO_MONTH = "mih_last_promo_month";
-const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
-const LEAGUES = ["amateurs", "intermediates", "pros", "legends"];
-
-let entries = [];
-let users = [];
-let currentUser = null;
-
-function generateId() {
-  return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
-}
-function saveEntries() {
-  localStorage.setItem(STORAGE_KEY_ENTRIES, JSON.stringify(entries));
-}
-function saveUsers() {
-  localStorage.setItem(STORAGE_KEY_USERS, JSON.stringify(users));
-}
-function loadEntries() {
-  const saved = localStorage.getItem(STORAGE_KEY_ENTRIES);
-  if (saved) {
-    try { entries = JSON.parse(saved) || []; }
-    catch (e) { entries = []; }
-  } else { entries = []; }
-}
-function loadUsers() {
-  const saved = localStorage.getItem(STORAGE_KEY_USERS);
-  if (saved) {
-    try { users = JSON.parse(saved) || []; }
-    catch (e) { users = []; }
-  } else { users = []; }
-  users.forEach((u) => {
-    if (!u.league || !LEAGUES.includes(u.league)) {
-      u.league = "amateurs";
-    }
-  });
-  saveUsers();
-}
-function getUserById(id) {
-  return users.find((u) => u.id === id) || null;
-}
-function getUserByName(name) {
-  return users.find((u) => u.name.toLowerCase() === name.toLowerCase()) || null;
-}
-function formatImprovement(value) {
-  if (!isFinite(value) || value === 0) return "0%";
-  const rounded = Math.round(value);
-  return (rounded > 0 ? "+" : "") + rounded + "%";
-}
-function formatDate(ts) {
-  const d = new Date(ts);
-  if (isNaN(d.getTime())) return "";
-  return d.toLocaleDateString(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric"
-  });
-}
-function leagueIndex(league) {
-  return LEAGUES.indexOf(league);
-}
-function assignStartingLeague() {
-  const counts = {
-    amateurs: 0,
-    intermediates: 0,
-    pros: 0,
-    legends: 0
-  };
-  users.forEach((u) => {
-    if (u.league && counts.hasOwnProperty(u.league)) {
-      counts[u.league]++;
-    }
-  });
-  const values = Object.values(counts);
-  const minCount = Math.min(...values);
-  const candidateLeagues = LEAGUES.filter((l) => counts[l] === minCount);
-  return candidateLeagues[0] || "amateurs";
-}
-function cleanupOldAccounts() {
-  const now = Date.now();
-  const currentUserId = localStorage.getItem(STORAGE_KEY_CURRENT_USER);
-
-  const keptUsers = [];
-  const removedUserIds = new Set();
-
-  users.forEach((user) => {
-    const isCurrent = currentUserId && user.id === currentUserId;
-    if (!user.lastLogoutAt || isCurrent) {
-      keptUsers.push(user);
-      return;
-    }
-    const delta = now - user.lastLogoutAt;
-    if (delta > THIRTY_DAYS_MS) {
-      removedUserIds.add(user.id);
-    } else {
-      keptUsers.push(user);
-    }
-  });
-
-  users = keptUsers;
-
-  if (removedUserIds.size > 0) {
-    entries = entries.filter((e) => !removedUserIds.has(e.userId));
+  function showScene(name){
+    document.querySelectorAll('.scene').forEach(s=>s.classList.remove('active'));
+    const target = document.getElementById('scene-'+name);
+    if(target) target.classList.add('active');
+    window.scrollTo({top:0,left:0,behavior:'instant'});
   }
 
-  saveUsers();
-  saveEntries();
-}
+  const STORAGE_KEY_ENTRIES = "mih_entries_v6";
+  const STORAGE_KEY_USERS = "mih_users_v6";
+  const STORAGE_KEY_CURRENT_USER = "mih_current_user_v6";
+  const STORAGE_KEY_PROMO_MONTH = "mih_last_promo_month_v1";
 
-function getPlayerStats() {
-  const byUser = {};
+  const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
+  const LEAGUES = ["amateurs", "intermediates", "pros", "legends"];
 
-  // Start with all users so even people with zero runs appear
-  users.forEach((user) => {
-    const key = user.id;
-    byUser[key] = {
-      userId: user.id,
-      name: user.name,
-      league: user.league || "amateurs",
-      runs: 0,
-      totalDistance: 0,
-      totalTime: 0,
-      bestDistance: 0,
-      baselineDistance: null
+  let entries = [];
+  let users = [];
+  let currentUser = null;
+  let currentProfileUserId = null;
+
+  function generateId() {
+    return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+  }
+  function saveEntries() {
+    localStorage.setItem(STORAGE_KEY_ENTRIES, JSON.stringify(entries));
+  }
+  function saveUsers() {
+    localStorage.setItem(STORAGE_KEY_USERS, JSON.stringify(users));
+  }
+  function loadEntries() {
+    const saved = localStorage.getItem(STORAGE_KEY_ENTRIES);
+    if (saved) {
+      try { entries = JSON.parse(saved) || []; }
+      catch (e) { entries = []; }
+    } else { entries = []; }
+  }
+  function loadUsers() {
+    const saved = localStorage.getItem(STORAGE_KEY_USERS);
+    if (saved) {
+      try { users = JSON.parse(saved) || []; }
+      catch (e) { users = []; }
+    } else { users = []; }
+    users.forEach((u) => {
+      if (!u.league || !LEAGUES.includes(u.league)) {
+        u.league = "amateurs";
+      }
+    });
+    saveUsers();
+  }
+  function getUserById(id) {
+    return users.find((u) => u.id === id) || null;
+  }
+  function getUserByName(name) {
+    return users.find((u) => u.name.toLowerCase() === name.toLowerCase()) || null;
+  }
+  function formatImprovement(value) {
+    if (!isFinite(value) || value === 0) return "0%";
+    const rounded = Math.round(value);
+    return (rounded > 0 ? "+" : "") + rounded + "%";
+  }
+  function formatDate(ts) {
+    const d = new Date(ts);
+    if (isNaN(d.getTime())) return "";
+    return d.toLocaleDateString(undefined, {
+      year: "numeric",
+      month: "short",
+      day: "numeric"
+    });
+  }
+  function leagueIndex(league) {
+    return LEAGUES.indexOf(league);
+  }
+  function assignStartingLeague() {
+    const counts = {
+      amateurs: 0,
+      intermediates: 0,
+      pros: 0,
+      legends: 0
     };
-  });
+    users.forEach((u) => {
+      if (u.league && counts.hasOwnProperty(u.league)) {
+        counts[u.league]++;
+      }
+    });
+    const values = Object.values(counts);
+    const minCount = Math.min(...values);
+    const candidateLeagues = LEAGUES.filter((l) => counts[l] === minCount);
+    return candidateLeagues[0] || "amateurs";
+  }
+  function cleanupOldAccounts() {
+    const now = Date.now();
+    const currentUserId = localStorage.getItem(STORAGE_KEY_CURRENT_USER);
 
-  entries.forEach((e) => {
-    const user = getUserById(e.userId);
-    if (!user) return;
-    const key = user.id;
-    const stats = byUser[key];
-    if (stats.baselineDistance === null) {
-      stats.baselineDistance = e.distanceKm;
+    const keptUsers = [];
+    const removedUserIds = new Set();
+
+    users.forEach((user) => {
+      const isCurrent = currentUserId && user.id === currentUserId;
+      if (!user.lastLogoutAt || isCurrent) {
+        keptUsers.push(user);
+        return;
+      }
+      const delta = now - user.lastLogoutAt;
+      if (delta > THIRTY_DAYS_MS) {
+        removedUserIds.add(user.id);
+      } else {
+        keptUsers.push(user);
+      }
+    });
+
+    users = keptUsers;
+
+    if (removedUserIds.size > 0) {
+      entries = entries.filter((e) => !removedUserIds.has(e.userId));
     }
-    stats.runs += 1;
-    stats.totalDistance += e.distanceKm;
-    stats.totalTime += e.timeMinutes;
-    if (e.distanceKm > stats.bestDistance) {
-      stats.bestDistance = e.distanceKm;
-    }
-  });
 
-  let players = Object.values(byUser);
-
-  players.forEach((p) => {
-    p.avgDistance = p.runs > 0 ? p.totalDistance / p.runs : 0;
-    p.speed = p.totalTime > 0 ? p.totalDistance / p.totalTime : 0;
-    let improvement = 0;
-    if (p.baselineDistance && p.baselineDistance > 0 && p.runs > 1) {
-      improvement = ((p.avgDistance - p.baselineDistance) / p.baselineDistance) * 100;
-    }
-    p.improvement = improvement;
-  });
-
-  players.sort((a, b) => {
-    if (b.totalDistance !== a.totalDistance) {
-      return b.totalDistance - a.totalDistance;
-    }
-    if (b.speed !== a.speed) {
-      return b.speed - a.speed;
-    }
-    return a.totalTime - b.totalTime;
-  });
-
-  players = players.map((p, index) => ({
-    ...p,
-    rank: index + 1
-  }));
-
-  return players;
-}
-
-// Automatic promotions once per month (based on first visit that month)
-function runMonthlyPromotionsIfNeeded() {
-  const now = new Date();
-  const currentMonth = now.getFullYear() + "-" + String(now.getMonth() + 1).padStart(2,"0");
-  const last = localStorage.getItem(STORAGE_KEY_LAST_PROMO_MONTH);
-
-  if (last === currentMonth) return;
-
-  const players = getPlayerStats();
-  const total = players.length;
-  let moves = 0;
-  if (total >= 32) moves = 3;
-  else if (total >= 16) moves = 2;
-  else if (total >= 8) moves = 1;
-  else moves = 0;
-
-  if (moves === 0) {
-    localStorage.setItem(STORAGE_KEY_LAST_PROMO_MONTH, currentMonth);
-    return;
+    saveUsers();
+    saveEntries();
   }
 
-  // Promote from top
-  let promoted = 0;
-  for (let i = 0; i < players.length && promoted < moves; i++) {
-    const p = players[i];
-    const idx = leagueIndex(p.league);
-    if (idx < 0 || idx >= LEAGUES.length - 1) continue;
-    const user = getUserById(p.userId);
-    if (!user) continue;
-    user.league = LEAGUES[idx + 1];
-    promoted++;
+  function getPlayerStats() {
+    const byUser = {};
+
+    users.forEach((user) => {
+      const key = user.id;
+      byUser[key] = {
+        userId: user.id,
+        name: user.name,
+        league: user.league || "amateurs",
+        runs: 0,
+        totalDistance: 0,
+        totalTime: 0,
+        bestDistance: 0,
+        baselineDistance: null,
+        baselineTime: null,
+        baselineSpeed: null
+      };
+    });
+
+    entries.forEach((e) => {
+      const user = getUserById(e.userId);
+      if (!user) return;
+      const key = user.id;
+      const stats = byUser[key];
+      if (stats.baselineDistance === null) {
+        stats.baselineDistance = e.distanceKm;
+        stats.baselineTime = e.timeMinutes;
+        stats.baselineSpeed = e.timeMinutes > 0 ? (e.distanceKm / e.timeMinutes) : null;
+      }
+      stats.runs += 1;
+      stats.totalDistance += e.distanceKm;
+      stats.totalTime += e.timeMinutes;
+      if (e.distanceKm > stats.bestDistance) {
+        stats.bestDistance = e.distanceKm;
+      }
+    });
+
+    let players = Object.values(byUser);
+
+    players.forEach((p) => {
+      p.avgDistance = p.runs > 0 ? p.totalDistance / p.runs : 0;
+      p.speed = p.totalTime > 0 ? p.totalDistance / p.totalTime : 0;
+      let improvement = 0;
+      if (p.baselineDistance && p.baselineDistance > 0 && p.runs > 1) {
+        const distanceChange = ((p.avgDistance - p.baselineDistance) / p.baselineDistance) * 100;
+        let speedChange = 0;
+        if (p.baselineSpeed && p.baselineSpeed > 0) {
+          speedChange = ((p.speed - p.baselineSpeed) / p.baselineSpeed) * 100;
+        }
+        improvement = (distanceChange + speedChange) / 2;
+      }
+      p.improvement = improvement;
+    });
+
+    players.sort((a, b) => {
+      if (b.totalDistance !== a.totalDistance) {
+        return b.totalDistance - a.totalDistance;
+      }
+      if (b.totalTime !== a.totalTime) {
+        return b.totalTime - a.totalTime; // more time = more dedication
+      }
+      return b.speed - a.speed; // then speed
+    });
+
+    players = players.map((p, index) => ({
+      ...p,
+      rank: index + 1
+    }));
+
+    return players;
   }
 
-  // Relegate from bottom
-  let relegated = 0;
-  for (let i = players.length - 1; i >= 0 && relegated < moves; i--) {
-    const p = players[i];
-    const idx = leagueIndex(p.league);
-    if (idx <= 0) continue;
-    const user = getUserById(p.userId);
-    if (!user) continue;
-    user.league = LEAGUES[idx - 1];
-    relegated++;
+  // Automatic promotions once per month
+  function autoPromotionsIfNeeded(){
+    const players = getPlayerStats();
+    if(players.length === 0) return;
+
+    const now = new Date();
+    const currentMonthKey = now.getFullYear() + "-" + (now.getMonth()+1);
+    const last = localStorage.getItem(STORAGE_KEY_PROMO_MONTH);
+    if(last === currentMonthKey) return; // already done this month
+
+    applyPromotionsInternal();
+    localStorage.setItem(STORAGE_KEY_PROMO_MONTH, currentMonthKey);
   }
 
-  saveUsers();
-  localStorage.setItem(STORAGE_KEY_LAST_PROMO_MONTH, currentMonth);
-}
+  function applyPromotionsInternal() {
+    const players = getPlayerStats();
+    const total = players.length;
+    if (total === 0) return;
 
-function renderHeaderUser() {
-  const controlsList = document.querySelectorAll(".mih-user-controls");
-  const nameInput = document.getElementById("name");
+    let moves = 0;
+    if (total >= 32) moves = 3;
+    else if (total >= 16) moves = 2;
+    else if (total >= 8) moves = 1;
+    else moves = 0;
+    if (moves === 0) return;
 
-  controlsList.forEach((el) => {
+    let promoted = 0;
+    for (let i = 0; i < players.length && promoted < moves; i++) {
+      const p = players[i];
+      const idx = leagueIndex(p.league);
+      if (idx < 0 || idx >= LEAGUES.length - 1) continue;
+      const user = getUserById(p.userId);
+      if (!user) continue;
+      user.league = LEAGUES[idx + 1];
+      promoted++;
+    }
+
+    let relegated = 0;
+    for (let i = players.length - 1; i >= 0 && relegated < moves; i--) {
+      const p = players[i];
+      const idx = leagueIndex(p.league);
+      if (idx <= 0) continue;
+      const user = getUserById(p.userId);
+      if (!user) continue;
+      user.league = LEAGUES[idx - 1];
+      relegated++;
+    }
+
+    saveUsers();
+  }
+
+  function renderHeaderUser() {
+    const el = document.getElementById("user-controls");
+    const el2 = document.getElementById("user-controls-leader");
+    const nameInput = document.getElementById("name");
+    if (!el || !el2) return;
+
     el.innerHTML = "";
-    if (!currentUser) {
-      const statusSpan = document.createElement("span");
-      statusSpan.className = "text-[11px] opacity-80";
-      statusSpan.textContent = "Not logged in";
-      el.appendChild(statusSpan);
+    el2.innerHTML = "";
 
-      const btn = document.createElement("button");
-      btn.className = "px-3 py-1 rounded-full border border-white/20 text-[11px]";
-      btn.textContent = "Log in";
-      btn.onclick = () => showScene("mih-login");
-      el.appendChild(btn);
+    function fill(container){
+      if (!currentUser) {
+        container.textContent = "Not logged in • ";
+        const btn = document.createElement("button");
+        btn.className = "px-3 py-1 rounded-full border border-white/20 text-[11px] text-gray-300 ml-1";
+        btn.textContent = "Log in";
+        btn.onclick = () => showScene("mih-login");
+        container.appendChild(btn);
+        return;
+      }
+      const statusSpan = document.createElement("span");
+      statusSpan.innerHTML =
+        `Logged in as <span class="font-semibold">${currentUser.name}</span> · ` +
+        `<span class="px-2 py-0.5 rounded-full border border-white/25 text-[10px] uppercase tracking-wide">` +
+        `${currentUser.league.charAt(0).toUpperCase() + currentUser.league.slice(1)}</span>`;
+      container.appendChild(statusSpan);
+
+      const logoutBtn = document.createElement("button");
+      logoutBtn.className = "px-3 py-1 rounded-full border border-white/20 text-[11px] text-gray-300 ml-2";
+      logoutBtn.textContent = "Log out";
+      logoutBtn.onclick = logout;
+      container.appendChild(logoutBtn);
+
+      const deleteBtn = document.createElement("button");
+      deleteBtn.className = "px-3 py-1 rounded-full border border-red-400/60 text-[11px] text-red-200 ml-1";
+      deleteBtn.textContent = "Delete account";
+      deleteBtn.onclick = deleteAccount;
+      container.appendChild(deleteBtn);
+    }
+
+    fill(el);
+    fill(el2);
+
+    if (!currentUser) {
+      if (nameInput) {
+        nameInput.value = "";
+        nameInput.placeholder = "Log in to set your name";
+      }
+    } else {
+      if (nameInput) {
+        nameInput.value = currentUser.name;
+        nameInput.placeholder = "";
+      }
+    }
+  }
+
+  function renderLeaderboard() {
+    const tbody = document.getElementById("leaderboard-body");
+    const empty = document.getElementById("no-entries");
+    if (!tbody) return;
+
+    tbody.innerHTML = "";
+    const players = getPlayerStats();
+    const filterEl = document.getElementById("league-filter");
+    const filter = filterEl ? filterEl.value : "all";
+
+    let filtered = players;
+    if (filter !== "all") {
+      filtered = players.filter((p) => p.league === filter);
+    }
+
+    if (!filtered.length) {
+      if (empty) empty.style.display = "block";
       return;
     }
+    if (empty) empty.style.display = "none";
 
-    const statusSpan = document.createElement("span");
-    statusSpan.className = "text-[11px] opacity-90";
-    statusSpan.innerHTML =
-      `Logged in as <span class="font-semibold">${currentUser.name}</span> · ` +
-      `<span class="px-2 py-0.5 rounded-full border border-white/25 text-[10px] uppercase tracking-wide">` +
-      `${currentUser.league.charAt(0).toUpperCase() + currentUser.league.slice(1)}</span>`;
-    el.appendChild(statusSpan);
-
-    const logoutBtn = document.createElement("button");
-    logoutBtn.className = "px-3 py-1 rounded-full border border-white/20 text-[11px]";
-    logoutBtn.textContent = "Log out";
-    logoutBtn.onclick = logout;
-    el.appendChild(logoutBtn);
-
-    const deleteBtn = document.createElement("button");
-    deleteBtn.className = "px-3 py-1 rounded-full border border-red-400/60 text-[11px] text-red-200";
-    deleteBtn.textContent = "Delete account";
-    deleteBtn.onclick = deleteAccount;
-    el.appendChild(deleteBtn);
-  });
-
-  if (!nameInput) return;
-  if (!currentUser) {
-    nameInput.value = "";
-    nameInput.placeholder = "Log in to set your name";
-  } else {
-    nameInput.value = currentUser.name;
-    nameInput.placeholder = "";
-  }
-}
-
-function renderLeaderboard() {
-  const tbody = document.getElementById("leaderboard-body");
-  const empty = document.getElementById("no-entries");
-  if (!tbody) return;
-
-  tbody.innerHTML = "";
-  const players = getPlayerStats();
-  const filterEl = document.getElementById("league-filter");
-  const filter = filterEl ? filterEl.value : "all";
-
-  let filtered = players;
-  if (filter !== "all") {
-    filtered = players.filter((p) => p.league === filter);
-  }
-
-  if (!filtered.length) {
-    if (empty) empty.style.display = "block";
-    return;
-  }
-  if (empty) empty.style.display = "none";
-
-  filtered.forEach((player) => {
-    const tr = document.createElement("tr");
-    tr.className = "border-b border-white/10";
-
-    let rankSymbol = player.rank;
-    if (player.rank === 1) rankSymbol = "🥇";
-    else if (player.rank === 2) rankSymbol = "🥈";
-    else if (player.rank === 3) rankSymbol = "🥉";
-
-    tr.innerHTML = `
-      <td class="py-2 pr-2">${rankSymbol}</td>
-      <td class="py-2 px-2">${player.name}</td>
-      <td class="py-2 px-2">
-        <span class="px-2 py-0.5 rounded-full border border-white/25 text-[10px] uppercase tracking-wide">
-          ${player.league.charAt(0).toUpperCase() + player.league.slice(1)}
-        </span>
-      </td>
-      <td class="py-2 px-2">${player.totalDistance.toFixed(2)} km</td>
-      <td class="py-2 px-2">${player.totalTime.toFixed(1)} min</td>
-    `;
-    tbody.appendChild(tr);
-  });
-}
-
-function renderStats() {
-  const tbody = document.getElementById("stats-body");
-  const empty = document.getElementById("no-stats");
-  if (!tbody) return;
-
-  tbody.innerHTML = "";
-
-  if (!users.length) {
-    if (empty) empty.style.display = "block";
-    return;
-  }
-  if (empty) empty.style.display = "none";
-
-  const players = getPlayerStats();
-
-  players.forEach((stats) => {
-    const tr = document.createElement("tr");
-    tr.className = "border-b border-white/10";
-    tr.innerHTML = `
-      <td class="py-2 px-2">${stats.name}</td>
-      <td class="py-2 px-2">
-        <span class="px-2 py-0.5 rounded-full border border-white/25 text-[10px] uppercase tracking-wide">
-          ${stats.league.charAt(0).toUpperCase() + stats.league.slice(1)}</span></td>
-      <td class="py-2 px-2">${stats.runs}</td>
-      <td class="py-2 px-2">${stats.totalDistance.toFixed(2)} km</td>
-      <td class="py-2 px-2">${stats.avgDistance.toFixed(2)} km</td>
-      <td class="py-2 px-2">${stats.bestDistance.toFixed(2)} km</td>
-      <td class="py-2 px-2">${formatImprovement(stats.improvement)}</td>
-    `;
-    tbody.appendChild(tr);
-  });
-}
-
-function renderMyActivities() {
-  const tbody = document.getElementById("my-activities-body");
-  const empty = document.getElementById("no-my-activities");
-  if (!tbody) return;
-
-  tbody.innerHTML = "";
-
-  if (!currentUser) {
-    if (empty) {
-      empty.style.display = "block";
-      empty.textContent = "Log in to see and manage your activities.";
-    }
-    return;
-  }
-
-  const myEntries = entries.filter((e) => e.userId === currentUser.id);
-
-  if (!myEntries.length) {
-    if (empty) {
-      empty.style.display = "block";
-      empty.textContent = "No activities yet for this account.";
-    }
-    return;
-  }
-  if (empty) empty.style.display = "none";
-
-  myEntries
-    .slice()
-    .sort((a, b) => b.timestamp - a.timestamp)
-    .forEach((e) => {
+    filtered.forEach((player) => {
       const tr = document.createElement("tr");
       tr.className = "border-b border-white/10";
+
+      let rankSymbol = player.rank;
+      if (player.rank === 1) rankSymbol = "🥇";
+      else if (player.rank === 2) rankSymbol = "🥈";
+      else if (player.rank === 3) rankSymbol = "🥉";
+
       tr.innerHTML = `
-        <td class="py-2 px-2">${formatDate(e.timestamp)}</td>
-        <td class="py-2 px-2">${e.distanceKm.toFixed(2)} km</td>
-        <td class="py-2 px-2">${e.timeMinutes.toFixed(1)} min</td>
-        <td class="py-2 px-2 text-right">
-          <button class="text-[11px] text-red-300 underline" onclick="deleteActivity('${e.id}')">Delete</button>
+        <td class="py-2 pr-2">${rankSymbol}</td>
+        <td class="py-2 px-2">
+          <button
+            class="underline underline-offset-2 hover:no-underline hover:text-white transition text-left"
+            onclick="openProfile('${player.userId}')">
+            ${player.name}
+          </button>
         </td>
+        <td class="py-2 px-2">
+          <span class="px-2 py-0.5 rounded-full border border-white/25 text-[10px] uppercase tracking-wide">
+            ${player.league.charAt(0).toUpperCase() + player.league.slice(1)}
+          </span>
+        </td>
+        <td class="py-2 px-2">${player.totalDistance.toFixed(2)} km</td>
+        <td class="py-2 px-2">${player.totalTime.toFixed(1)} min</td>
       `;
       tbody.appendChild(tr);
     });
-}
-
-function deleteActivity(id) {
-  if (!currentUser) {
-    alert("You need to be logged in to delete activities.");
-    return;
-  }
-  const entry = entries.find((e) => e.id === id);
-  if (!entry) return;
-  if (entry.userId !== currentUser.id) {
-    alert("You can only delete your own activities.");
-    return;
-  }
-  if (!confirm("Delete this activity?")) return;
-
-  entries = entries.filter((e) => e.id !== id);
-  saveEntries();
-  renderLeaderboard();
-  renderStats();
-  renderMyActivities();
-}
-
-function login(name, password) {
-  const trimmedName = name.trim();
-  if (!trimmedName || !password) {
-    alert("Please enter both name and password.");
-    return;
   }
 
-  const existing = getUserByName(trimmedName);
+  function renderStats() {
+    const tbody = document.getElementById("stats-body");
+    const empty = document.getElementById("no-stats");
+    if (!tbody) return;
 
-  if (!existing) {
-    const newLeague = assignStartingLeague();
-    const newUser = {
-      id: generateId(),
-      name: trimmedName,
-      password,
-      league: newLeague,
-      createdAt: Date.now(),
-      lastLoginAt: Date.now(),
-      lastLogoutAt: null
-    };
-    users.push(newUser);
-    currentUser = newUser;
-    saveUsers();
-    localStorage.setItem(STORAGE_KEY_CURRENT_USER, newUser.id);
-    renderHeaderUser();
-    showScene("mih-welcome");
-    return;
-  }
+    tbody.innerHTML = "";
 
-  if (existing.password !== password) {
-    alert("Wrong password for this name.");
-    return;
-  }
-
-  existing.lastLoginAt = Date.now();
-  if (!existing.league || !LEAGUES.includes(existing.league)) {
-    existing.league = "amateurs";
-  }
-  currentUser = existing;
-  saveUsers();
-  localStorage.setItem(STORAGE_KEY_CURRENT_USER, existing.id);
-  renderHeaderUser();
-  showScene("mih-welcome");
-}
-
-function logout() {
-  if (!currentUser) return;
-  const user = getUserById(currentUser.id);
-  if (user) {
-    user.lastLogoutAt = Date.now();
-  }
-  saveUsers();
-  localStorage.removeItem(STORAGE_KEY_CURRENT_USER);
-  currentUser = null;
-  renderHeaderUser();
-  renderMyActivities();
-  showScene("mih-login");
-}
-
-function deleteAccount() {
-  if (!currentUser) return;
-  const confirmText = "This will delete your account and all your activities. Are you sure?";
-  if (!confirm(confirmText)) return;
-
-  const userId = currentUser.id;
-  users = users.filter((u) => u.id !== userId);
-  entries = entries.filter((e) => e.userId !== userId);
-
-  saveUsers();
-  saveEntries();
-  localStorage.removeItem(STORAGE_KEY_CURRENT_USER);
-  currentUser = null;
-  renderHeaderUser();
-  renderLeaderboard();
-  renderStats();
-  renderMyActivities();
-  showScene("mih-login");
-}
-
-// FORM HANDLERS
-const loginForm = document.getElementById("login-form");
-if (loginForm) {
-  loginForm.addEventListener("submit", function (e) {
-    e.preventDefault();
-    const name = document.getElementById("login-name").value;
-    const password = document.getElementById("login-password").value;
-    login(name, password);
-    loginForm.reset();
-  });
-}
-
-const entryForm = document.getElementById("entry-form");
-if (entryForm) {
-  entryForm.addEventListener("submit", function (e) {
-    e.preventDefault();
-    if (!currentUser) {
-      alert("Please log in before adding activities.");
-      showScene("mih-login");
+    if (!users.length) {
+      if (empty) empty.style.display = "block";
       return;
     }
-    const distance = parseFloat(document.getElementById("distance").value);
-    const time = parseFloat(document.getElementById("time").value);
+    if (empty) empty.style.display = "none";
 
-    if (isNaN(distance) || isNaN(time)) {
-      alert("Please fill in distance and time correctly.");
-      return;
-    }
-    if (distance <= 0 || time <= 0) {
-      alert("Distance and time must be bigger than zero.");
-      return;
-    }
+    const players = getPlayerStats();
 
-    entries.push({
-      id: generateId(),
-      userId: currentUser.id,
-      distanceKm: distance,
-      timeMinutes: time,
-      timestamp: Date.now()
+    players.forEach((stats) => {
+      const tr = document.createElement("tr");
+      tr.className = "border-b border-white/10";
+      tr.innerHTML = `
+        <td class="py-2 px-2">${stats.name}</td>
+        <td class="py-2 px-2">
+          <span class="px-2 py-0.5 rounded-full border border-white/25 text-[10px] uppercase tracking-wide">
+            ${stats.league.charAt(0).toUpperCase() + stats.league.slice(1)}</span></td>
+        <td class="py-2 px-2">${stats.runs}</td>
+        <td class="py-2 px-2">${stats.totalDistance.toFixed(2)} km</td>
+        <td class="py-2 px-2">${stats.avgDistance.toFixed(2)} km</td>
+        <td class="py-2 px-2">${stats.bestDistance.toFixed(2)} km</td>
+        <td class="py-2 px-2">${formatImprovement(stats.improvement)}</td>
+      `;
+      tbody.appendChild(tr);
     });
+  }
 
+  function renderMyActivities() {
+    const tbody = document.getElementById("my-activities-body");
+    const empty = document.getElementById("no-my-activities");
+    if (!tbody) return;
+
+    tbody.innerHTML = "";
+
+    if (!currentUser) {
+      if (empty) {
+        empty.style.display = "block";
+        empty.textContent = "Log in to see and manage your activities.";
+      }
+      return;
+    }
+
+    const myEntries = entries.filter((e) => e.userId === currentUser.id);
+
+    if (!myEntries.length) {
+      if (empty) {
+        empty.style.display = "block";
+        empty.textContent = "No activities yet for this account.";
+      }
+      return;
+    }
+    if (empty) empty.style.display = "none";
+
+    myEntries
+      .slice()
+      .sort((a, b) => b.timestamp - a.timestamp)
+      .forEach((e) => {
+        const tr = document.createElement("tr");
+        tr.className = "border-b border-white/10";
+        tr.innerHTML = `
+          <td class="py-2 px-2">${formatDate(e.timestamp)}</td>
+          <td class="py-2 px-2">${e.distanceKm.toFixed(2)} km</td>
+          <td class="py-2 px-2">${e.timeMinutes.toFixed(1)} min</td>
+          <td class="py-2 px-2 text-right">
+            <button class="text-[11px] text-red-300 underline" onclick="deleteActivity('${e.id}')">Delete</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+  }
+
+  function deleteActivity(id) {
+    if (!currentUser) {
+      alert("You need to be logged in to delete activities.");
+      return;
+    }
+    const entry = entries.find((e) => e.id === id);
+    if (!entry) return;
+    if (entry.userId !== currentUser.id) {
+      alert("You can only delete your own activities.");
+      return;
+    }
+    if (!confirm("Delete this activity?")) return;
+
+    entries = entries.filter((e) => e.id !== id);
     saveEntries();
     renderLeaderboard();
     renderStats();
     renderMyActivities();
-
-    entryForm.reset();
-    showScene("mih-leaderboard");
-  });
-}
-
-// INIT
-function initMIH() {
-  loadEntries();
-  loadUsers();
-  cleanupOldAccounts();
-
-  const currentUserId = localStorage.getItem(STORAGE_KEY_CURRENT_USER);
-  if (currentUserId) {
-    const user = getUserById(currentUserId);
-    if (user) {
-      currentUser = user;
-    } else {
-      localStorage.removeItem(STORAGE_KEY_CURRENT_USER);
-      currentUser = null;
-    }
   }
 
-  runMonthlyPromotionsIfNeeded();
-  renderHeaderUser();
-  renderLeaderboard();
-  renderStats();
-  renderMyActivities();
-}
-initMIH();
+  function login(name, password) {
+    const trimmedName = name.trim();
+    if (!trimmedName || !password) {
+      alert("Please enter both name and password.");
+      return;
+    }
+
+    const existing = getUserByName(trimmedName);
+
+    if (!existing) {
+      const newLeague = assignStartingLeague();
+      const newUser = {
+        id: generateId(),
+        name: trimmedName,
+        password,
+        league: newLeague,
+        createdAt: Date.now(),
+        lastLoginAt: Date.now(),
+        lastLogoutAt: null
+      };
+      users.push(newUser);
+      currentUser = newUser;
+      saveUsers();
+      localStorage.setItem(STORAGE_KEY_CURRENT_USER, newUser.id);
+      renderHeaderUser();
+      showScene("mih-welcome");
+      return;
+    }
+
+    if (existing.password !== password) {
+      alert("Wrong password for this name.");
+      return;
+    }
+
+    existing.lastLoginAt = Date.now();
+    if (!existing.league || !LEAGUES.includes(existing.league)) {
+      existing.league = "amateurs";
+    }
+    currentUser = existing;
+    saveUsers();
+    localStorage.setItem(STORAGE_KEY_CURRENT_USER, existing.id);
+    renderHeaderUser();
+    showScene("mih-welcome");
+  }
+
+  function logout() {
+    if (!currentUser) return;
+    const user = getUserById(currentUser.id);
+    if (user) {
+      user.lastLogoutAt = Date.now();
+    }
+    saveUsers();
+    localStorage.removeItem(STORAGE_KEY_CURRENT_USER);
+    currentUser = null;
+    renderHeaderUser();
+    renderMyActivities();
+    showScene("mih-login");
+  }
+
+  function deleteAccount() {
+    if (!currentUser) return;
+    const confirmText = "This will delete your account and all your activities. Are you sure?";
+    if (!confirm(confirmText)) return;
+
+    const userId = currentUser.id;
+    users = users.filter((u) => u.id !== userId);
+    entries = entries.filter((e) => e.userId !== userId);
+
+    saveUsers();
+    saveEntries();
+    localStorage.removeItem(STORAGE_KEY_CURRENT_USER);
+    currentUser = null;
+    renderHeaderUser();
+    renderLeaderboard();
+    renderStats();
+    renderMyActivities();
+    showScene("mih-login");
+  }
+
+  // Login form
+  const loginForm = document.getElementById("login-form");
+  if (loginForm) {
+    loginForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+      const name = document.getElementById("login-name").value;
+      const password = document.getElementById("login-password").value;
+      login(name, password);
+      loginForm.reset();
+    });
+  }
+
+  // Entry form
+  const entryForm = document.getElementById("entry-form");
+  if (entryForm) {
+    entryForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+      if (!currentUser) {
+        alert("Please log in before adding activities.");
+        showScene("mih-login");
+        return;
+      }
+      const distance = parseFloat(document.getElementById("distance").value);
+      const time = parseFloat(document.getElementById("time").value);
+
+      if (isNaN(distance) || isNaN(time)) {
+        alert("Please fill in distance and time correctly.");
+        return;
+      }
+      if (distance <= 0 || time <= 0) {
+        alert("Distance and time must be bigger than zero.");
+        return;
+      }
+
+      entries.push({
+        id: generateId(),
+        userId: currentUser.id,
+        distanceKm: distance,
+        timeMinutes: time,
+        timestamp: Date.now()
+      });
+
+      saveEntries();
+      renderLeaderboard();
+      renderStats();
+      renderMyActivities();
+
+      entryForm.reset();
+      showScene("mih-leaderboard");
+    });
+  }
+
+  // PROFILE VIEW
+  function calculateEstimatedRaceTimes(activities) {
+    if (!activities.length) return null;
+
+    let bestPace = null; // minutes per km
+
+    activities.forEach(e => {
+      if (e.distanceKm > 0 && e.timeMinutes > 0) {
+        const pace = e.timeMinutes / e.distanceKm;
+        if (bestPace === null || pace < bestPace) {
+          bestPace = pace;
+        }
+      }
+    });
+
+    if (bestPace === null) return null;
+
+    return {
+      "100m": bestPace * 0.1,
+      "1k":   bestPace * 1,
+      "5k":   bestPace * 5,
+      "10k":  bestPace * 10
+    };
+  }
+
+  function formatRaceTime(mins){
+    if(!isFinite(mins) || mins <= 0) return "-";
+    const totalSeconds = Math.round(mins * 60);
+    const m = Math.floor(totalSeconds / 60);
+    const s = totalSeconds % 60;
+    if(m === 0) return s + "s";
+    return m + "m " + s + "s";
+  }
+
+  function openProfile(userId){
+    currentProfileUserId = userId;
+    renderProfile(userId);
+    showScene("mih-profile");
+  }
+
+  function renderProfile(userId){
+    const user = getUserById(userId);
+    const box = document.getElementById("profile-content");
+    if(!box) return;
+    if(!user){
+      box.innerHTML = "<p class='text-sm text-red-300'>Player not found.</p>";
+      return;
+    }
+
+    const playerEntries = entries.filter(e=>e.userId === user.id)
+                                 .sort((a,b)=>b.timestamp - a.timestamp);
+    const statsBase = {
+      runs: 0,
+      totalDistance: 0,
+      totalTime: 0,
+      bestDistance: 0
+    };
+    playerEntries.forEach(e=>{
+      statsBase.runs += 1;
+      statsBase.totalDistance += e.distanceKm;
+      statsBase.totalTime += e.timeMinutes;
+      if(e.distanceKm > statsBase.bestDistance){
+        statsBase.bestDistance = e.distanceKm;
+      }
+    });
+    const avgDist = statsBase.runs>0 ? statsBase.totalDistance / statsBase.runs : 0;
+    const raceTimes = calculateEstimatedRaceTimes(playerEntries);
+
+    box.innerHTML = `
+      <h2 class="text-2xl font-semibold mb-2">${user.name}</h2>
+      <p class="text-xs text-gray-400 mb-4">
+        League:
+        <span class="px-2 py-0.5 rounded-full border border-white/25 text-[10px] uppercase tracking-wide">
+          ${user.league.charAt(0).toUpperCase() + user.league.slice(1)}
+        </span>
+      </p>
+
+      <div class="grid md:grid-cols-2 gap-6 mb-6">
+        <div>
+          <h3 class="font-semibold mb-2 text-sm uppercase tracking-wide text-gray-300">Overview</h3>
+          <ul class="space-y-1 text-sm text-gray-200">
+            <li><strong>Total sessions:</strong> ${statsBase.runs}</li>
+            <li><strong>Total distance:</strong> ${statsBase.totalDistance.toFixed(2)} km</li>
+            <li><strong>Total time:</strong> ${statsBase.totalTime.toFixed(1)} min</li>
+            <li><strong>Average distance:</strong> ${avgDist.toFixed(2)} km</li>
+            <li><strong>Best single distance:</strong> ${statsBase.bestDistance.toFixed(2)} km</li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="font-semibold mb-2 text-sm uppercase tracking-wide text-gray-300">Estimated best times</h3>
+          ${
+            !raceTimes
+              ? `<p class="text-xs text-gray-400">No activities yet for this player.</p>`
+              : `
+                <ul class="space-y-1 text-sm text-gray-200">
+                  <li><strong>100 m:</strong> ${formatRaceTime(raceTimes["100m"])}</li>
+                  <li><strong>1 km:</strong> ${formatRaceTime(raceTimes["1k"])}</li>
+                  <li><strong>5 km:</strong> ${formatRaceTime(raceTimes["5k"])}</li>
+                  <li><strong>10 km:</strong> ${formatRaceTime(raceTimes["10k"])}</li>
+                </ul>
+              `
+          }
+        </div>
+      </div>
+
+      <div>
+        <h3 class="font-semibold mb-2 text-sm uppercase tracking-wide text-gray-300">Recent activities</h3>
+        ${
+          !playerEntries.length
+            ? `<p class="text-xs text-gray-400">No activities logged yet.</p>`
+            : `
+              <div class="overflow-x-auto text-xs md:text-sm">
+                <table class="w-full border-collapse min-w-full">
+                  <thead class="text-gray-400 text-[11px] uppercase tracking-wide border-b border-white/10">
+                    <tr>
+                      <th class="py-2 px-2 text-left">Date</th>
+                      <th class="py-2 px-2 text-left">Distance</th>
+                      <th class="py-2 px-2 text-left">Time</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${playerEntries.slice(0,20).map(e=>`
+                      <tr class="border-b border-white/10">
+                        <td class="py-2 px-2">${formatDate(e.timestamp)}</td>
+                        <td class="py-2 px-2">${e.distanceKm.toFixed(2)} km</td>
+                        <td class="py-2 px-2">${e.timeMinutes.toFixed(1)} min</td>
+                      </tr>
+                    `).join('')}
+                  </tbody>
+                </table>
+              </div>
+            `
+        }
+      </div>
+    `;
+  }
+
+  function initMIH() {
+    loadEntries();
+    loadUsers();
+    cleanupOldAccounts();
+    autoPromotionsIfNeeded();
+
+    const currentUserId = localStorage.getItem(STORAGE_KEY_CURRENT_USER);
+    if (currentUserId) {
+      const user = getUserById(currentUserId);
+      if (user) {
+        currentUser = user;
+      } else {
+        localStorage.removeItem(STORAGE_KEY_CURRENT_USER);
+        currentUser = null;
+      }
+    }
+
+    renderHeaderUser();
+    renderLeaderboard();
+    renderStats();
+    renderMyActivities();
+  }
+  initMIH();
 </script>
 
 </body>
