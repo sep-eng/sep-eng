@@ -1,4 +1,4 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
@@ -31,7 +31,7 @@ body.dark .theme-text {color:#333;}
 button,a{transition:all .25s ease;}
 button:hover,a:hover{transform:translateY(-2px);}
 #darkToggle{
-  position:fixed;bottom:20px;right:20px;z-index:50;
+  position:fixed;bottom:20px;right:20px;z-index:60;
   background:rgba(0,0,0,.5);border-radius:9999px;padding:12px;color:white;
 }
 #darkToggle svg{width:24px;height:24px;fill:white;}
@@ -50,7 +50,7 @@ body.dark #cartSidebar{background:#111;color:#e6e6e6;}
 .scene.active{display:block;}
 
 /* Fixed top-right global nav buttons */
-#btnSep,#btnSepAbout,#btnMihLogin,#btnMihAbout{
+#btnSep,#btnSepAbout,#btnMih,#btnMihAbout{
   position:fixed;
   right:16px;
   z-index:55;
@@ -60,10 +60,12 @@ body.dark #cartSidebar{background:#111;color:#e6e6e6;}
   padding:6px 12px;
   font-size:11px;
   border:1px solid rgba(255,255,255,0.2);
+  opacity:1;
+  pointer-events:auto;
 }
 #btnSep{top:12px;}
 #btnSepAbout{top:44px;}
-#btnMihLogin{top:76px;}
+#btnMih{top:76px;}
 #btnMihAbout{top:108px;}
 
 /* Make it happen cards */
@@ -72,6 +74,47 @@ body.dark #cartSidebar{background:#111;color:#e6e6e6;}
   border-radius:16px;
   border:1px solid rgba(255,255,255,0.12);
   box-shadow:0 18px 45px rgba(0,0,0,0.45);
+}
+
+/* Light/dark for all MIH and About scenes */
+.mih-page .mih-inner{
+  min-height:100vh;
+  background:linear-gradient(to bottom,#000,#222);
+  color:#f5f5f5;
+}
+body.dark .mih-page .mih-inner{
+  background:linear-gradient(to bottom,#f9f9f9,#dddddd);
+  color:#111;
+}
+.mih-page .mih-inner h1,
+.mih-page .mih-inner h2,
+.mih-page .mih-inner h3,
+.mih-page .mih-inner h4,
+.mih-page .mih-inner p,
+.mih-page .mih-inner li,
+.mih-page .mih-inner span,
+.mih-page .mih-inner label{
+  color:inherit;
+}
+body.dark .mih-card{
+  background:rgba(0,0,0,0.03);
+  border-color:rgba(0,0,0,0.12);
+}
+
+/* Shipping buttons in cart */
+.ship-btn{
+  font-size:11px;
+  border-radius:9999px;
+  border:1px solid #9ca3af;
+  padding:4px 10px;
+}
+.ship-btn.active{
+  background:#111;
+  color:#fff;
+}
+body.dark .ship-btn.active{
+  background:#f5f5f5;
+  color:#000;
 }
 </style>
 
@@ -91,19 +134,19 @@ window.addEventListener('load',()=>{
 <!-- GLOBAL NAV BUTTONS (switch scenes only) -->
 <button id="btnSep">SEP shop</button>
 <button id="btnSepAbout">About SEP</button>
-<button id="btnMihLogin">Make it happen</button>
-<button id="btnMihAbout">About "Make It Happen"</button>
+<button id="btnMih">Make It Happen</button>
+<button id="btnMihAbout">About “Make It Happen”</button>
 
 <button id="darkToggle" title="Toggle dark mode">
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9h-9V3z"/></svg>
 </button>
 
-<!-- ===================== SCENE: SEP SHOP ===================== -->
+<!-- ===================== SCENE: SEP SHOP (original products) ===================== -->
 <section id="scene-sep-shop" class="scene active">
   <header class="py-20 text-center fade-section">
     <h1 class="theme-text text-5xl font-bold mb-4">Minimalist clothing, made with intention.</h1>
     <p class="theme-text text-lg mb-8">Soft, clean, and hand-pressed in Copenhagen.</p>
-    <div id="heroActions" class="flex justify-center gap-4">
+    <div class="flex justify-center gap-4">
       <a href="#products" class="bg-white text-black px-6 py-3 rounded-full font-medium">Shop Now</a>
       <button id="viewCartBtn" class="border border-white text-white px-6 py-3 rounded-full font-medium relative">
         View Cart
@@ -168,18 +211,18 @@ window.addEventListener('load',()=>{
       </div>
       <div id="cartItems" class="space-y-4 text-sm"></div>
       <div class="border-t border-gray-300 pt-4 mt-4">
-        <!-- Shipping location toggle -->
-        <div class="mb-3 text-sm">
-          <span class="mr-2">Location:</span>
-          <button id="shipCph" class="px-3 py-1 rounded-full border text-xs mr-1 bg-transparent">Copenhagen</button>
-          <button id="shipOther" class="px-3 py-1 rounded-full border text-xs bg-black text-white">Rest of Denmark</button>
+        <div class="mb-3 text-xs text-gray-600">
+          <span class="block mb-1">Shipping location:</span>
+          <div class="flex gap-2">
+            <button type="button" id="shipCph" class="ship-btn">Copenhagen</button>
+            <button type="button" id="shipOther" class="ship-btn active">Other DK</button>
+          </div>
         </div>
-
         <div class="flex justify-between mb-1">
           <span>Subtotal:</span><span id="cartSubtotal" class="font-bold">0 DKK</span>
         </div>
         <div class="flex justify-between mb-2 text-sm text-gray-600">
-          <span>Shipping:</span><span id="cartShipping">+45 DKK</span>
+          <span>Shipping:</span><span id="shippingLabel">+45 DKK</span>
         </div>
         <div class="flex justify-between font-semibold border-t border-gray-300 pt-2 mb-3">
           <span>Total:</span><span id="cartTotal">45 DKK</span>
@@ -197,7 +240,7 @@ window.addEventListener('load',()=>{
     <div class="grid grid-cols-1 md:grid-cols-5 gap-6 max-w-6xl mx-auto text-sm md:text-base">
       <div class="bg-white/10 rounded-xl p-6 backdrop-blur">
         <h3 class="font-bold text-lg mb-2">1. Choose</h3>
-        <p>Select your favourite SEP piece – T-shirt, Hoodie, or Trousers – then pick your size and quantity.</p>
+        <p>Select your favourite SEP piece – T-shirt, Hoodie or Trousers – then pick your size and quantity.</p>
       </div>
       <div class="bg-white/10 rounded-xl p-6 backdrop-blur">
         <h3 class="font-bold text-lg mb-2">2. Add to Cart</h3>
@@ -209,11 +252,11 @@ window.addEventListener('load',()=>{
       </div>
       <div class="bg-white/10 rounded-xl p-6 backdrop-blur">
         <h3 class="font-bold text-lg mb-2">4. Pay with MobilePay</h3>
-        <p>Send the total amount (incl. shipping) to <b>5894BZ</b> using MobilePay.<br><span class="text-xs italic">“Open MobilePay” works only on mobile devices.</span></p>
+        <p>Send the total amount (incl. +45 DKK shipping, unless you pick Copenhagen) to <b>5894BZ</b> using MobilePay.<br><span class="text-xs italic">“Open MobilePay” works only on mobile devices.</span></p>
       </div>
       <div class="bg-white/10 rounded-xl p-6 backdrop-blur">
         <h3 class="font-bold text-lg mb-2">5. Send us your order</h3>
-        <p>DM your copied message to <b>@seproairesis</b> on Instagram or TikTok.<br>We currently deliver within Denmark.</p>
+        <p>DM your copied message to <b>@seproairesis</b> (Instagram) or <b>@seproairesis</b> (TikTok).<br>We currently deliver within Denmark.</p>
       </div>
     </div>
   </section>
@@ -229,31 +272,31 @@ window.addEventListener('load',()=>{
 <!-- ================= END SCENE: SEP SHOP ================= -->
 
 <!-- ===================== SCENE: ABOUT SEP ===================== -->
-<section id="scene-sep-about" class="scene">
-  <div class="min-h-screen bg-black text-white flex items-center justify-center px-6 py-16">
+<section id="scene-sep-about" class="scene mih-page">
+  <div class="mih-inner flex items-center justify-center px-6 py-16">
     <div class="max-w-3xl mx-auto space-y-6">
       <h2 class="text-3xl font-bold tracking-wide">About SEP</h2>
-      <p class="text-sm md:text-base text-gray-200">
+      <p class="text-sm md:text-base">
         SEP stands for <span class="italic">Se Proairesis</span> – “Your Choice”. It is a minimalist clothing brand
         built around simple, clean pieces that feel good to wear and last a long time.
       </p>
-      <p class="text-sm md:text-base text-gray-300">
+      <p class="text-sm md:text-base">
         Everything is hand-pressed in Copenhagen, in small batches. No hype drops, no giant collections. Just a white
         T-shirt, a black hoodie and black trousers that you can wear every day.
       </p>
-      <p class="text-sm md:text-base text-gray-300">
+      <p class="text-sm md:text-base">
         SEP is designed to be easy. You pick your size, your quantity, copy your order message and send it. That is the
         entire process.
       </p>
-      <p class="text-sm md:text-base text-gray-400">
-        SEP, the idea, this website, the clothes, the designs and “Make It Happen” – was created by a 13-year-old.
+      <p class="text-sm md:text-base opacity-80">
+        SEP, the idea, this website, the clothes, the designs and “Make It Happen” were all created by a 13-year-old.
       </p>
       <div class="flex flex-wrap gap-3 text-xs md:text-sm mt-4">
         <button class="px-4 py-2 rounded-full border border-white/20" onclick="showScene('sep-shop')">
           Back to SEP shop
         </button>
         <button class="px-4 py-2 rounded-full border border-white/20" onclick="showScene('mih-login')">
-          Go to Make it happen
+          Go to Make It Happen
         </button>
       </div>
     </div>
@@ -262,28 +305,26 @@ window.addEventListener('load',()=>{
 <!-- ================= END SCENE: ABOUT SEP ================= -->
 
 <!-- ===================== SCENE: MIH LOGIN ===================== -->
-<section id="scene-mih-login" class="scene">
-  <div class="min-h-screen bg-black text-white pt-16 pb-20 px-4 md:px-6">
+<section id="scene-mih-login" class="scene mih-page">
+  <div class="mih-inner pt-16 pb-20 px-4 md:px-6">
     <div class="max-w-5xl mx-auto mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
       <div>
-        <div class="text-[10px] tracking-[0.5em] uppercase text-gray-400 mb-1">MAKE IT</div>
+        <div class="text-[10px] tracking-[0.5em] uppercase mb-1 opacity-70">MAKE IT</div>
         <div class="text-2xl md:text-3xl font-semibold tracking-[0.5em] uppercase">SEP</div>
-        <div class="text-[10px] tracking-[0.5em] uppercase text-gray-400 mt-1">HAPPEN</div>
+        <div class="text-[10px] tracking-[0.5em] uppercase mt-1 opacity-70">HAPPEN</div>
       </div>
       <div class="flex flex-wrap gap-2 text-xs md:text-sm">
-        <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" onclick="showScene('mih-login')">Login</button>
-        <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" onclick="showScene('mih-welcome')">Welcome</button>
-        <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" onclick="showScene('mih-leaderboard')">Leaderboard</button>
-        <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" onclick="showScene('mih-stats')">Stats</button>
-        <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" onclick="showScene('mih-rules')">Rules</button>
-        <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" onclick="showScene('mih-about')">About</button>
+        <button class="px-3 py-1 rounded-full border border-white/20" onclick="showScene('mih-login')">Login</button>
+        <button class="px-3 py-1 rounded-full border border-white/20" onclick="showScene('mih-welcome')">Welcome</button>
+        <button class="px-3 py-1 rounded-full border border-white/20" onclick="showScene('mih-leaderboard')">Leaderboard</button>
+        <button class="px-3 py-1 rounded-full border border-white/20" onclick="showScene('mih-stats')">Stats</button>
+        <button class="px-3 py-1 rounded-full border border-white/20" onclick="showScene('mih-rules')">Rules</button>
+        <button class="px-3 py-1 rounded-full border border-white/20" onclick="showScene('mih-about')">About</button>
       </div>
-      <div class="flex flex-col items-end gap-2 text-[11px] text-gray-400 min-w-[160px]">
-        <div class="mih-user-controls flex flex-wrap gap-2 justify-end">
-          <span id="user-status">Not logged in</span>
-        </div>
+      <div class="flex flex-col items-end gap-2 text-[11px] min-w-[180px]">
+        <div class="mih-user-controls flex flex-wrap gap-2 justify-end"></div>
         <button type="button"
-                class="px-3 py-1 rounded-full border border-white/25 text-[11px] text-gray-200"
+                class="px-3 py-1 rounded-full border border-white/25 text-[11px]"
                 onclick="showScene('sep-shop')">
           Back to SEP
         </button>
@@ -291,30 +332,30 @@ window.addEventListener('load',()=>{
     </div>
 
     <main class="max-w-5xl mx-auto">
-      <div class="mih-card p-6 md:p-8">
-        <h1 class="text-2xl md:text-3xl font-semibold mb-2">Log in to make it happen</h1>
-        <p class="text-sm md:text-base text-gray-300 mb-4">
+      <div class="mih-card p-6 md:p-8" id="mih-login-card">
+        <h1 class="text-2xl md:text-3xl font-semibold mb-2">Log in to Make It Happen</h1>
+        <p class="text-sm md:text-base mb-4">
           Create a simple account so the site knows who you are and only you can manage your activities.
         </p>
         <form id="login-form" class="space-y-3 mt-2">
           <div>
-            <label for="login-name" class="block text-xs text-gray-400 mb-1">Name</label>
+            <label for="login-name" class="block text-xs mb-1 opacity-80">Name</label>
             <input id="login-name" type="text" placeholder="e.g. Daniel"
               class="w-full px-3 py-2 rounded-full bg-black/40 border border-white/15 text-sm" required />
           </div>
           <div>
-            <label for="login-password" class="block text-xs text-gray-400 mb-1">Password</label>
+            <label for="login-password" class="block text-xs mb-1 opacity-80">Password</label>
             <input id="login-password" type="password" placeholder="Choose something simple"
               class="w-full px-3 py-2 rounded-full bg-black/40 border border-white/15 text-sm" required />
           </div>
           <button type="submit" class="px-5 py-2 rounded-full bg-white text-black text-xs md:text-sm mt-1">
             Log in / Create account
           </button>
-          <p class="text-[11px] text-gray-400 mt-2">
-            If this is your first time with this name, we’ll create a new account and place you into a league.
+          <p class="text-[11px] opacity-70 mt-2">
+            If this is your first time with this name, we will create a new account and place you into a league.
           </p>
         </form>
-        <p class="text-[11px] text-gray-500 mt-4">
+        <p class="text-[11px] opacity-60 mt-4">
           Your login is saved on this browser. Accounts logged out for more than 30 days are deleted, together with their activities.
         </p>
       </div>
@@ -324,26 +365,26 @@ window.addEventListener('load',()=>{
 <!-- ================= END SCENE: MIH LOGIN ================= -->
 
 <!-- ===================== SCENE: MIH WELCOME ===================== -->
-<section id="scene-mih-welcome" class="scene">
-  <div class="min-h-screen bg-black text-white pt-16 pb-20 px-4 md:px-6">
+<section id="scene-mih-welcome" class="scene mih-page">
+  <div class="mih-inner pt-16 pb-20 px-4 md:px-6">
     <div class="max-w-5xl mx-auto mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
       <div>
-        <div class="text-[10px] tracking-[0.5em] uppercase text-gray-400 mb-1">MAKE IT</div>
+        <div class="text-[10px] tracking-[0.5em] uppercase mb-1 opacity-70">MAKE IT</div>
         <div class="text-2xl md:text-3xl font-semibold tracking-[0.5em] uppercase">SEP</div>
-        <div class="text-[10px] tracking-[0.5em] uppercase text-gray-400 mt-1">HAPPEN</div>
+        <div class="text-[10px] tracking-[0.5em] uppercase mt-1 opacity-70">HAPPEN</div>
       </div>
       <div class="flex flex-wrap gap-2 text-xs md:text-sm">
-        <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" onclick="showScene('mih-login')">Login</button>
-        <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" onclick="showScene('mih-welcome')">Welcome</button>
-        <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" onclick="showScene('mih-leaderboard')">Leaderboard</button>
-        <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" onclick="showScene('mih-stats')">Stats</button>
-        <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" onclick="showScene('mih-rules')">Rules</button>
-        <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" onclick="showScene('mih-about')">About</button>
+        <button class="px-3 py-1 rounded-full border border-white/20" onclick="showScene('mih-login')">Login</button>
+        <button class="px-3 py-1 rounded-full border border-white/20" onclick="showScene('mih-welcome')">Welcome</button>
+        <button class="px-3 py-1 rounded-full border border-white/20" onclick="showScene('mih-leaderboard')">Leaderboard</button>
+        <button class="px-3 py-1 rounded-full border border-white/20" onclick="showScene('mih-stats')">Stats</button>
+        <button class="px-3 py-1 rounded-full border border-white/20" onclick="showScene('mih-rules')">Rules</button>
+        <button class="px-3 py-1 rounded-full border border-white/20" onclick="showScene('mih-about')">About</button>
       </div>
-      <div class="flex flex-col items-end gap-2 text-[11px] text-gray-400 min-w-[160px]">
+      <div class="flex flex-col items-end gap-2 text-[11px] min-w-[180px]">
         <div class="mih-user-controls flex flex-wrap gap-2 justify-end"></div>
         <button type="button"
-                class="px-3 py-1 rounded-full border border-white/25 text-[11px] text-gray-200"
+                class="px-3 py-1 rounded-full border border-white/25 text-[11px]"
                 onclick="showScene('sep-shop')">
           Back to SEP
         </button>
@@ -353,25 +394,25 @@ window.addEventListener('load',()=>{
     <main class="max-w-5xl mx-auto">
       <div class="mih-card p-6 md:p-8 space-y-4">
         <div>
-          <h1 class="text-2xl md:text-3xl font-semibold mb-2">Move more. Compete. Make it happen.</h1>
-          <p class="text-sm md:text-base text-gray-300">
-            Run, walk or cycle, log your distance, and climb the leaderboard.
+          <h1 class="text-2xl md:text-3xl font-semibold mb-2">Move more. Compete. Make It Happen.</h1>
+          <p class="text-sm md:text-base opacity-90">
+            Run, walk or cycle, log your distance and climb the leaderboard.
           </p>
         </div>
         <div class="flex flex-wrap gap-3">
           <button class="px-5 py-2 rounded-full bg-white text-black text-xs md:text-sm"
-                  onclick="requireLoginThenShow('mih-leaderboard')">
-            Start logging my distance →
+                  onclick="showScene('mih-leaderboard')">
+            Go to leaderboard
           </button>
-          <button class="px-5 py-2 rounded-full border border-white/20 text-xs md:text-sm text-gray-200"
+          <button class="px-5 py-2 rounded-full border border-white/20 text-xs md:text-sm"
                   onclick="showScene('mih-rules')">
             How it works
           </button>
         </div>
-        <div class="flex flex-wrap gap-2 text-[11px] text-gray-300">
+        <div class="flex flex-wrap gap-2 text-[11px] opacity-90">
           <span class="px-3 py-1 rounded-full border border-white/10 bg-white/5">4 leagues: Amateurs, Intermediates, Pros, Legends</span>
           <span class="px-3 py-1 rounded-full border border-white/10 bg-white/5">New people are placed where leagues are lightest</span>
-          <span class="px-3 py-1 rounded-full border border-white/10 bg-white/5">Promotions & relegations keep things moving</span>
+          <span class="px-3 py-1 rounded-full border border-white/10 bg-white/5">Automatic promotions and relegations keep things moving</span>
         </div>
       </div>
     </main>
@@ -380,26 +421,26 @@ window.addEventListener('load',()=>{
 <!-- ================= END SCENE: MIH WELCOME ================= -->
 
 <!-- ===================== SCENE: MIH LEADERBOARD ===================== -->
-<section id="scene-mih-leaderboard" class="scene">
-  <div class="min-h-screen bg-black text-white pt-16 pb-20 px-4 md:px-6">
+<section id="scene-mih-leaderboard" class="scene mih-page">
+  <div class="mih-inner pt-16 pb-20 px-4 md:px-6">
     <div class="max-w-5xl mx-auto mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
       <div>
-        <div class="text-[10px] tracking-[0.5em] uppercase text-gray-400 mb-1">MAKE IT</div>
+        <div class="text-[10px] tracking-[0.5em] uppercase mb-1 opacity-70">MAKE IT</div>
         <div class="text-2xl md:text-3xl font-semibold tracking-[0.5em] uppercase">SEP</div>
-        <div class="text-[10px] tracking-[0.5em] uppercase text-gray-400 mt-1">HAPPEN</div>
+        <div class="text-[10px] tracking-[0.5em] uppercase mt-1 opacity-70">HAPPEN</div>
       </div>
       <div class="flex flex-wrap gap-2 text-xs md:text-sm">
-        <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" onclick="showScene('mih-login')">Login</button>
-        <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" onclick="showScene('mih-welcome')">Welcome</button>
-        <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" onclick="showScene('mih-leaderboard')">Leaderboard</button>
-        <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" onclick="showScene('mih-stats')">Stats</button>
-        <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" onclick="showScene('mih-rules')">Rules</button>
-        <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" onclick="showScene('mih-about')">About</button>
+        <button class="px-3 py-1 rounded-full border border-white/20" onclick="showScene('mih-login')">Login</button>
+        <button class="px-3 py-1 rounded-full border border-white/20" onclick="showScene('mih-welcome')">Welcome</button>
+        <button class="px-3 py-1 rounded-full border border-white/20" onclick="showScene('mih-leaderboard')">Leaderboard</button>
+        <button class="px-3 py-1 rounded-full border border-white/20" onclick="showScene('mih-stats')">Stats</button>
+        <button class="px-3 py-1 rounded-full border border-white/20" onclick="showScene('mih-rules')">Rules</button>
+        <button class="px-3 py-1 rounded-full border border-white/20" onclick="showScene('mih-about')">About</button>
       </div>
-      <div class="flex flex-col items-end gap-2 text-[11px] text-gray-400 min-w-[160px]">
+      <div class="flex flex-col items-end gap-2 text-[11px] min-w-[180px]">
         <div class="mih-user-controls flex flex-wrap gap-2 justify-end"></div>
         <button type="button"
-                class="px-3 py-1 rounded-full border border-white/25 text-[11px] text-gray-200"
+                class="px-3 py-1 rounded-full border border-white/25 text-[11px]"
                 onclick="showScene('sep-shop')">
           Back to SEP
         </button>
@@ -411,26 +452,26 @@ window.addEventListener('load',()=>{
         <div class="grid md:grid-cols-2 gap-6">
           <div>
             <h2 class="text-xl font-semibold mb-2">Add your latest activity</h2>
-            <p class="text-sm text-gray-300 mb-3">
+            <p class="text-sm opacity-90 mb-3">
               Log any run, walk or ride. Use kilometres and minutes so the leaderboard stays fair for everyone.
             </p>
             <form id="entry-form" class="space-y-3">
               <div>
-                <label for="name" class="block text-xs text-gray-400 mb-1">Your name</label>
+                <label for="name" class="block text-xs mb-1 opacity-80">Your name</label>
                 <input id="name" type="text" disabled placeholder="Log in to set your name"
                   class="w-full px-3 py-2 rounded-full bg-black/40 border border-white/15 text-sm" />
-                <p class="text-[11px] text-gray-500 mt-1">
+                <p class="text-[11px] opacity-70 mt-1">
                   Name comes from your account. You cannot change it here.
                 </p>
               </div>
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label for="distance" class="block text-xs text-gray-400 mb-1">Distance (km)</label>
+                  <label for="distance" class="block text-xs mb-1 opacity-80">Distance (km)</label>
                   <input id="distance" type="number" step="0.1" min="0" placeholder="e.g. 5"
                     class="w-full px-3 py-2 rounded-full bg-black/40 border border-white/15 text-sm" required />
                 </div>
                 <div>
-                  <label for="time" class="block text-xs text-gray-400 mb-1">Time (minutes)</label>
+                  <label for="time" class="block text-xs mb-1 opacity-80">Time (minutes)</label>
                   <input id="time" type="number" step="0.1" min="0" placeholder="e.g. 28"
                     class="w-full px-3 py-2 rounded-full bg-black/40 border border-white/15 text-sm" required />
                 </div>
@@ -438,25 +479,22 @@ window.addEventListener('load',()=>{
               <button type="submit" class="px-5 py-2 rounded-full bg-white text-black text-xs md:text-sm">
                 Save my activity
               </button>
-              <p class="text-[11px] text-gray-400 mt-2">
-                Anyone can view the leaderboard and stats. You need an account to add or delete activities.
+              <p class="text-[11px] opacity-70 mt-2">
+                Leagues have unlimited spaces. New accounts are spread across leagues so the numbers stay balanced.
               </p>
             </form>
           </div>
 
           <div>
             <h3 class="text-lg font-semibold mb-2">How ranking works</h3>
-            <p class="text-sm text-gray-300">
+            <p class="text-sm opacity-90">
               The leaderboard sorts people using three things:
             </p>
-            <ul class="text-sm text-gray-300 list-disc list-inside mt-2 space-y-1">
+            <ul class="text-sm opacity-90 list-disc list-inside mt-2 space-y-1">
               <li><strong>Total distance</strong> – more kilometres puts you higher.</li>
               <li><strong>Speed</strong> – average km per minute, faster is better.</li>
               <li><strong>Time spent</strong> – if distance and speed are the same, less total time wins.</li>
             </ul>
-            <p class="text-xs text-gray-400 mt-3">
-              Promotions & relegations are applied automatically once per month.
-            </p>
           </div>
         </div>
       </div>
@@ -464,7 +502,7 @@ window.addEventListener('load',()=>{
       <div class="mih-card p-6 md:p-8">
         <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
           <h2 class="text-xl font-semibold">Live leaderboard</h2>
-          <div class="flex items-center gap-2 text-xs text-gray-300">
+          <div class="flex items-center gap-2 text-xs opacity-90">
             <span>League:</span>
             <select id="league-filter"
                     class="px-3 py-1 rounded-full bg-black/40 border border-white/20 text-xs"
@@ -479,7 +517,7 @@ window.addEventListener('load',()=>{
         </div>
         <div class="overflow-x-auto text-xs md:text-sm">
           <table class="w-full border-collapse min-w-full">
-            <thead class="text-gray-400 text-[11px] uppercase tracking-wide border-b border-white/10">
+            <thead class="text-[11px] uppercase tracking-wide border-b border-white/10 opacity-70">
               <tr>
                 <th class="py-2 pr-2 text-left">#</th>
                 <th class="py-2 px-2 text-left">Participant</th>
@@ -491,19 +529,19 @@ window.addEventListener('load',()=>{
             <tbody id="leaderboard-body"></tbody>
           </table>
         </div>
-        <div id="no-entries" class="text-xs text-gray-400 mt-3">
-          No players yet. As soon as someone creates an account, they’ll appear here (even with 0 km).
+        <div id="no-entries" class="text-xs opacity-70 mt-3">
+          No activities yet. Be the first to log a run and grab the number one spot.
         </div>
       </div>
 
       <div class="mih-card p-6 md:p-8">
         <h3 class="text-lg font-semibold mb-2">My activities</h3>
-        <p class="text-xs text-gray-400 mb-3">
+        <p class="text-xs opacity-70 mb-3">
           Only the activities from the account you are logged in with are shown here. You can delete them if you make a mistake.
         </p>
         <div class="overflow-x-auto text-xs md:text-sm">
           <table class="w-full border-collapse min-w-full">
-            <thead class="text-gray-400 text-[11px] uppercase tracking-wide border-b border-white/10">
+            <thead class="text-[11px] uppercase tracking-wide border-b border-white/10 opacity-70">
               <tr>
                 <th class="py-2 pr-2 text-left">Date</th>
                 <th class="py-2 px-2 text-left">Distance</th>
@@ -514,8 +552,8 @@ window.addEventListener('load',()=>{
             <tbody id="my-activities-body"></tbody>
           </table>
         </div>
-        <div id="no-my-activities" class="text-xs text-gray-400 mt-3">
-          Log in and add an activity to see it here.
+        <div id="no-my-activities" class="text-xs opacity-70 mt-3">
+          No activities yet for this account.
         </div>
       </div>
     </main>
@@ -524,26 +562,26 @@ window.addEventListener('load',()=>{
 <!-- ================= END SCENE: MIH LEADERBOARD ================= -->
 
 <!-- ===================== SCENE: MIH STATS ===================== -->
-<section id="scene-mih-stats" class="scene">
-  <div class="min-h-screen bg-black text-white pt-16 pb-20 px-4 md:px-6">
+<section id="scene-mih-stats" class="scene mih-page">
+  <div class="mih-inner pt-16 pb-20 px-4 md:px-6">
     <div class="max-w-5xl mx-auto mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
       <div>
-        <div class="text-[10px] tracking-[0.5em] uppercase text-gray-400 mb-1">MAKE IT</div>
+        <div class="text-[10px] tracking-[0.5em] uppercase mb-1 opacity-70">MAKE IT</div>
         <div class="text-2xl md:text-3xl font-semibold tracking-[0.5em] uppercase">SEP</div>
-        <div class="text-[10px] tracking-[0.5em] uppercase text-gray-400 mt-1">HAPPEN</div>
+        <div class="text-[10px] tracking-[0.5em] uppercase mt-1 opacity-70">HAPPEN</div>
       </div>
       <div class="flex flex-wrap gap-2 text-xs md:text-sm">
-        <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" onclick="showScene('mih-login')">Login</button>
-        <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" onclick="showScene('mih-welcome')">Welcome</button>
-        <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" onclick="showScene('mih-leaderboard')">Leaderboard</button>
-        <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" onclick="showScene('mih-stats')">Stats</button>
-        <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" onclick="showScene('mih-rules')">Rules</button>
-        <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" onclick="showScene('mih-about')">About</button>
+        <button class="px-3 py-1 rounded-full border border-white/20" onclick="showScene('mih-login')">Login</button>
+        <button class="px-3 py-1 rounded-full border border-white/20" onclick="showScene('mih-welcome')">Welcome</button>
+        <button class="px-3 py-1 rounded-full border border-white/20" onclick="showScene('mih-leaderboard')">Leaderboard</button>
+        <button class="px-3 py-1 rounded-full border border-white/20" onclick="showScene('mih-stats')">Stats</button>
+        <button class="px-3 py-1 rounded-full border border-white/20" onclick="showScene('mih-rules')">Rules</button>
+        <button class="px-3 py-1 rounded-full border border-white/20" onclick="showScene('mih-about')">About</button>
       </div>
-      <div class="flex flex-col items-end gap-2 text-[11px] text-gray-400 min-w-[160px]">
+      <div class="flex flex-col items-end gap-2 text-[11px] min-w-[180px]">
         <div class="mih-user-controls flex flex-wrap gap-2 justify-end"></div>
         <button type="button"
-                class="px-3 py-1 rounded-full border border-white/25 text-[11px] text-gray-200"
+                class="px-3 py-1 rounded-full border border-white/25 text-[11px]"
                 onclick="showScene('sep-shop')">
           Back to SEP
         </button>
@@ -552,13 +590,15 @@ window.addEventListener('load',()=>{
 
     <main class="max-w-5xl mx-auto">
       <div class="mih-card p-6 md:p-8">
-        <h2 class="text-xl font-semibold mb-3">Player stats</h2>
-        <p class="text-sm text-gray-300 mb-3">
-          Every activity builds your personal stats. Promotions and relegations use these stats and are applied automatically once per month.
+        <div class="flex justify-between items-center mb-3">
+          <h2 class="text-xl font-semibold">Player stats</h2>
+        </div>
+        <p class="text-sm opacity-90 mb-3">
+          Every activity builds your personal stats. Promotions and relegations use these stats and are applied automatically each month.
         </p>
         <div class="overflow-x-auto text-xs md:text-sm">
           <table class="w-full border-collapse min-w-full">
-            <thead class="text-gray-400 text-[11px] uppercase tracking-wide border-b border-white/10">
+            <thead class="text-[11px] uppercase tracking-wide border-b border-white/10 opacity-70">
               <tr>
                 <th class="py-2 px-2 text-left">Participant</th>
                 <th class="py-2 px-2 text-left">League</th>
@@ -572,7 +612,7 @@ window.addEventListener('load',()=>{
             <tbody id="stats-body"></tbody>
           </table>
         </div>
-        <div id="no-stats" class="text-xs text-gray-400 mt-3">
+        <div id="no-stats" class="text-xs opacity-70 mt-3">
           Stats will appear as soon as people start logging their activities.
         </div>
       </div>
@@ -582,26 +622,26 @@ window.addEventListener('load',()=>{
 <!-- ================= END SCENE: MIH STATS ================= -->
 
 <!-- ===================== SCENE: MIH RULES ===================== -->
-<section id="scene-mih-rules" class="scene">
-  <div class="min-h-screen bg-black text-white pt-16 pb-20 px-4 md:px-6">
+<section id="scene-mih-rules" class="scene mih-page">
+  <div class="mih-inner pt-16 pb-20 px-4 md:px-6">
     <div class="max-w-5xl mx-auto mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
       <div>
-        <div class="text-[10px] tracking-[0.5em] uppercase text-gray-400 mb-1">MAKE IT</div>
+        <div class="text-[10px] tracking-[0.5em] uppercase mb-1 opacity-70">MAKE IT</div>
         <div class="text-2xl md:text-3xl font-semibold tracking-[0.5em] uppercase">SEP</div>
-        <div class="text-[10px] tracking-[0.5em] uppercase text-gray-400 mt-1">HAPPEN</div>
+        <div class="text-[10px] tracking-[0.5em] uppercase mt-1 opacity-70">HAPPEN</div>
       </div>
       <div class="flex flex-wrap gap-2 text-xs md:text-sm">
-        <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" onclick="showScene('mih-login')">Login</button>
-        <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" onclick="showScene('mih-welcome')">Welcome</button>
-        <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" onclick="showScene('mih-leaderboard')">Leaderboard</button>
-        <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" onclick="showScene('mih-stats')">Stats</button>
-        <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" onclick="showScene('mih-rules')">Rules</button>
-        <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" onclick="showScene('mih-about')">About</button>
+        <button class="px-3 py-1 rounded-full border border-white/20" onclick="showScene('mih-login')">Login</button>
+        <button class="px-3 py-1 rounded-full border border-white/20" onclick="showScene('mih-welcome')">Welcome</button>
+        <button class="px-3 py-1 rounded-full border border-white/20" onclick="showScene('mih-leaderboard')">Leaderboard</button>
+        <button class="px-3 py-1 rounded-full border border-white/20" onclick="showScene('mih-stats')">Stats</button>
+        <button class="px-3 py-1 rounded-full border border-white/20" onclick="showScene('mih-rules')">Rules</button>
+        <button class="px-3 py-1 rounded-full border border-white/20" onclick="showScene('mih-about')">About</button>
       </div>
-      <div class="flex flex-col items-end gap-2 text-[11px] text-gray-400 min-w-[160px]">
+      <div class="flex flex-col items-end gap-2 text-[11px] min-w-[180px]">
         <div class="mih-user-controls flex flex-wrap gap-2 justify-end"></div>
         <button type="button"
-                class="px-3 py-1 rounded-full border border-white/25 text-[11px] text-gray-200"
+                class="px-3 py-1 rounded-full border border-white/25 text-[11px]"
                 onclick="showScene('sep-shop')">
           Back to SEP
         </button>
@@ -609,33 +649,33 @@ window.addEventListener('load',()=>{
     </div>
 
     <main class="max-w-5xl mx-auto">
-      <div class="mih-card p-6 md:p-8 space-y-4 text-sm text-gray-200">
-        <h2 class="text-xl font-semibold">Rules, leagues and movement</h2>
+      <div class="mih-card p-6 md:p-8 space-y-4 text-sm">
+        <h2 class="text-xl font-semibold mb-2">Rules and leagues</h2>
 
         <div>
-          <h3 class="font-semibold mb-1">Leagues & starting positions</h3>
-          <p class="text-xs text-gray-300 mb-1">There are four leagues:</p>
-          <ul class="list-disc list-inside text-xs text-gray-300 space-y-1">
+          <h3 class="font-semibold mb-1">Leagues and starting positions</h3>
+          <p class="text-xs mb-1 opacity-90">There are four leagues:</p>
+          <ul class="list-disc list-inside text-xs opacity-90 space-y-1">
             <li><strong>Amateurs</strong></li>
             <li><strong>Intermediates</strong></li>
             <li><strong>Pros</strong></li>
             <li><strong>Legends</strong></li>
           </ul>
-          <p class="text-xs text-gray-300 mt-2">
+          <p class="text-xs opacity-90 mt-2">
             New accounts are placed where the leagues have the fewest people, starting from the lowest league. That keeps league sizes balanced.
           </p>
         </div>
 
         <div>
-          <h3 class="font-semibold mb-1">Promotions & relegations</h3>
-          <ul class="list-disc list-inside text-xs text-gray-300 space-y-1">
+          <h3 class="font-semibold mb-1">Promotions and relegations</h3>
+          <ul class="list-disc list-inside text-xs opacity-90 space-y-1">
             <li>Leagues have no hard limits. Many people can be in each league.</li>
-            <li>Promotions and relegations are applied automatically at the start of each new month.</li>
+            <li>Promotions and relegations are applied automatically at the beginning of each month.</li>
             <li>The number of people moved each way depends on total number of players:
               <ul class="list-disc list-inside pl-4 mt-1 space-y-1">
-                <li><strong>8+ players</strong> → 1 promotion + 1 relegation</li>
-                <li><strong>16+ players</strong> → 2 promotions + 2 relegations</li>
-                <li><strong>32+ players</strong> → 3 promotions + 3 relegations</li>
+                <li><strong>8+ players</strong> – 1 promotion and 1 relegation</li>
+                <li><strong>16+ players</strong> – 2 promotions and 2 relegations</li>
+                <li><strong>32+ players</strong> – 3 promotions and 3 relegations</li>
               </ul>
             </li>
             <li>Promotions come from the top of the ranking. Relegations come from the bottom.</li>
@@ -643,7 +683,7 @@ window.addEventListener('load',()=>{
               <ul class="list-disc list-inside pl-4 mt-1 space-y-1">
                 <li>Total distance</li>
                 <li>Average speed (km per minute)</li>
-                <li>Total time (less is better if distance & speed are the same)</li>
+                <li>Total time (less is better if distance and speed are the same)</li>
               </ul>
             </li>
           </ul>
@@ -655,25 +695,26 @@ window.addEventListener('load',()=>{
 <!-- ================= END SCENE: MIH RULES ================= -->
 
 <!-- ===================== SCENE: MIH ABOUT ===================== -->
-<section id="scene-mih-about" class="scene">
-  <div class="min-h-screen bg-black text-white pt-16 pb-20 px-4 md:px-6">
+<section id="scene-mih-about" class="scene mih-page">
+  <div class="mih-inner pt-16 pb-20 px-4 md:px-6">
     <div class="max-w-5xl mx-auto mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
       <div>
-        <div class="text-[10px] tracking-[0.5em] uppercase text-gray-400 mb-1">MAKE IT</div>
+        <div class="text-[10px] tracking-[0.5em] uppercase mb-1 opacity-70">MAKE IT</div>
         <div class="text-2xl md:text-3xl font-semibold tracking-[0.5em] uppercase">SEP</div>
-        <div class="text-[10px] tracking-[0.5em] uppercase text-gray-400 mt-1">HAPPEN</div>
+        <div class="text-[10px] tracking-[0.5em] uppercase mt-1 opacity-70">HAPPEN</div>
       </div>
       <div class="flex flex-wrap gap-2 text-xs md:text-sm">
-        <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" onclick="showScene('mih-login')">Login</button>
-        <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" onclick="showScene('mih-welcome')">Welcome</button>
-        <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" onclick="showScene('mih-leaderboard')">Leaderboard</button>
-        <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" onclick="showScene('mih-stats')">Stats</button>
-        <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" onclick="showScene('mih-rules')">Rules</button>
-        <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" onclick="showScene('mih-about')">About</button>
+        <button class="px-3 py-1 rounded-full border border-white/20" onclick="showScene('mih-login')">Login</button>
+        <button class="px-3 py-1 rounded-full border border-white/20" onclick="showScene('mih-welcome')">Welcome</button>
+        <button class="px-3 py-1 rounded-full border border-white/20" onclick="showScene('mih-leaderboard')">Leaderboard</button>
+        <button class="px-3 py-1 rounded-full border border-white/20" onclick="showScene('mih-stats')">Stats</button>
+        <button class="px-3 py-1 rounded-full border border-white/20" onclick="showScene('mih-rules')">Rules</button>
+        <button class="px-3 py-1 rounded-full border border-white/20" onclick="showScene('mih-about')">About</button>
       </div>
-      <div class="flex flex-col items-end gap-2 text-[11px] text-gray-400 min-w-[160px]">
+      <div class="flex flex-col items-end gap-2 text-[11px] min-w-[180px]">
+        <!-- no logout/delete here as requested -->
         <button type="button"
-                class="px-3 py-1 rounded-full border border-white/25 text-[11px] text-gray-200"
+                class="px-3 py-1 rounded-full border border-white/25 text-[11px]"
                 onclick="showScene('sep-shop')">
           Back to SEP
         </button>
@@ -681,30 +722,30 @@ window.addEventListener('load',()=>{
     </div>
 
     <main class="max-w-5xl mx-auto">
-      <div class="mih-card p-6 md:p-8 space-y-4 text-sm text-gray-200">
-        <h2 class="text-xl font-semibold mb-2">About “Make it happen”</h2>
+      <div class="mih-card p-6 md:p-8 space-y-4 text-sm">
+        <h2 class="text-xl font-semibold mb-2">About “Make It Happen”</h2>
         <p>
-          “Make it happen” is a simple health challenge for anyone who wants to move a bit more, without paying for
-          apps, subscriptions or fancy gear. You just log what you do and watch yourself climb the table.
+          “Make It Happen” is a simple health challenge for anyone who wants to move a bit more, without paying for
+          apps, subscriptions or fancy gear. You log what you do and watch yourself climb the table.
         </p>
         <p>
           The idea is not to turn people into athletes. It is to make movement feel normal, fun and slightly addictive
-          in a good way. Run, walk or cycle, add your distance, and see where you sit in your league.
+          in a good way. Run, walk or cycle, add your distance and see where you sit in your league.
         </p>
         <p>
           It is built to be:
         </p>
-        <ul class="list-disc list-inside space-y-1 text-gray-200">
+        <ul class="list-disc list-inside space-y-1">
           <li><strong>For fun</strong> – no pressure, no judgement, just friendly competition.</li>
           <li><strong>For health</strong> – small sessions add up to better sleep, more energy and a clearer head.</li>
           <li><strong>For free</strong> – no paywalls, no data selling, no ads following you around.</li>
         </ul>
         <p>
-          Promotions and relegations keep things exciting. Each month, people can move up or down based on how much
+          Automatic promotions and relegations keep things exciting. Each month, people can move up or down based on how much
           they have done, how fast they moved and how consistent they were.
         </p>
-        <p class="text-gray-400">
-          SEP, the idea, this website, the clothes, the designs and “Make It Happen” – was created by a 13-year-old.
+        <p class="opacity-80">
+          SEP, the idea, this website, the clothes, the designs and “Make It Happen” were all created by a 13-year-old.
         </p>
         <div class="flex flex-wrap gap-3 text-xs md:text-sm mt-2">
           <button class="px-4 py-2 rounded-full border border-white/20" onclick="showScene('mih-leaderboard')">
@@ -729,49 +770,44 @@ document.getElementById('darkToggle').onclick=()=>body.classList.toggle('dark');
 let cart=JSON.parse(localStorage.getItem('cart'))||[];
 const cartSidebar=document.getElementById('cartSidebar');
 const cartOverlay=document.getElementById('cartOverlay');
-const SHIPPING_COST=45;
-let isCopenhagen=false;
-let shippingCost=SHIPPING_COST;
+const BASE_SHIPPING_COST=45;
+let isCph=false; // false = other DK, true = Copenhagen
 
-function navButtons(setHidden){
-  ['btnSep','btnSepAbout','btnMihLogin','btnMihAbout'].forEach(id=>{
-    const el=document.getElementById(id);
-    if(!el) return;
-    if(setHidden) el.classList.add('hidden');
-    else el.classList.remove('hidden');
-  });
+function getShippingCost(){
+  return isCph ? 0 : BASE_SHIPPING_COST;
 }
 
 function updateCart(){
   const items=document.getElementById('cartItems');
   const subtotal=document.getElementById('cartSubtotal');
   const total=document.getElementById('cartTotal');
-  const shippingEl=document.getElementById('cartShipping');
+  const shippingLabel=document.getElementById('shippingLabel');
   items.innerHTML=''; let sum=0;
   if(cart.length===0){
     items.innerHTML='<p class="text-center text-gray-500 py-10">Cart is empty</p>';
     subtotal.textContent='0 DKK';
-    shippingCost=isCopenhagen ? 0 : SHIPPING_COST;
-    shippingEl.textContent=shippingCost===0 ? '0 DKK (Copenhagen)' : `+${shippingCost} DKK`;
-    total.textContent=shippingCost + ' DKK';
+    const ship=getShippingCost();
+    shippingLabel.textContent=ship===0?'0 DKK (Copenhagen)':'+'+ship+' DKK';
+    total.textContent=ship+' DKK';
   }else{
     cart.forEach((it,i)=>{
       const price=parseInt(it.price.replace(/\D/g,''))*it.qty; sum+=price;
       items.innerHTML+=`
         <div class="border-b pb-2">
           <div class="flex justify-between"><span>${it.name}</span><span>${price} DKK</span></div>
-          <div class="text-gray-500">Size:${it.size} | Qty:${it.qty}</div>
+          <div class="text-gray-500">Size: ${it.size} | Qty: ${it.qty}</div>
           <button onclick="removeFromCart(${i})" class="text-red-500 text-xs mt-1">Remove</button>
         </div>`;
     });
     subtotal.textContent=sum+' DKK';
-    shippingCost=isCopenhagen ? 0 : SHIPPING_COST;
-    shippingEl.textContent=shippingCost===0 ? '0 DKK (Copenhagen)' : `+${shippingCost} DKK`;
-    total.textContent=(sum+shippingCost)+' DKK';
+    const ship=getShippingCost();
+    shippingLabel.textContent=ship===0?'0 DKK (Copenhagen)':'+'+ship+' DKK';
+    total.textContent=(sum+ship)+' DKK';
   }
   localStorage.setItem('cart',JSON.stringify(cart));
   updateCounter();
 }
+
 function addToCart(n,p,s,q){
   const f=cart.findIndex(i=>i.name===n&&i.size===s);
   if(f>=0) cart[f].qty+=q; else cart.push({name:n,price:p,size:s,qty:q});
@@ -788,6 +824,7 @@ function updateCounter(){
   if(t>0){c.textContent=t; c.classList.remove('hidden');}
   else c.classList.add('hidden');
 }
+
 document.querySelectorAll('.add-to-cart').forEach(b=>{
   b.onclick=()=>{
     const card=b.closest('.product-card');
@@ -798,45 +835,46 @@ document.querySelectorAll('.add-to-cart').forEach(b=>{
     addToCart(name,price,size,qty);
   };
 });
+
+function hideTopButtons(hide){
+  const ids=['btnSep','btnSepAbout','btnMih','btnMihAbout'];
+  ids.forEach(id=>{
+    const el=document.getElementById(id);
+    if(!el) return;
+    el.style.opacity=hide?'0':'1';
+    el.style.pointerEvents=hide?'none':'auto';
+  });
+}
+
 document.getElementById('viewCartBtn').onclick=()=>{
   cartSidebar.classList.remove('translate-x-full');
   cartOverlay.classList.remove('hidden');
-  const hero=document.getElementById('heroActions');
-  if(hero) hero.classList.add('hidden');
-  navButtons(true);
+  hideTopButtons(true);
 };
 document.getElementById('closeCart').onclick=closeCart;
 cartOverlay.onclick=closeCart;
 function closeCart(){
   cartSidebar.classList.add('translate-x-full');
   cartOverlay.classList.add('hidden');
-  const hero=document.getElementById('heroActions');
-  if(hero) hero.classList.remove('hidden');
-  navButtons(false);
+  hideTopButtons(false);
 }
 updateCart();
 
-// Shipping location buttons
+// Shipping buttons
 const shipCphBtn=document.getElementById('shipCph');
 const shipOtherBtn=document.getElementById('shipOther');
-function setShippingLocation(cph){
-  isCopenhagen=cph;
-  if(cph){
-    shipCphBtn.classList.add('bg-black','text-white');
-    shipCphBtn.classList.remove('bg-transparent');
-    shipOtherBtn.classList.remove('bg-black','text-white');
-    shipOtherBtn.classList.add('bg-transparent');
+function updateShippingButtons(){
+  if(isCph){
+    shipCphBtn.classList.add('active');
+    shipOtherBtn.classList.remove('active');
   }else{
-    shipOtherBtn.classList.add('bg-black','text-white');
-    shipOtherBtn.classList.remove('bg-transparent');
-    shipCphBtn.classList.remove('bg-black','text-white');
-    shipCphBtn.classList.add('bg-transparent');
+    shipCphBtn.classList.remove('active');
+    shipOtherBtn.classList.add('active');
   }
   updateCart();
 }
-shipCphBtn.onclick=()=>setShippingLocation(true);
-shipOtherBtn.onclick=()=>setShippingLocation(false);
-setShippingLocation(false); // default rest of Denmark
+shipCphBtn.onclick=()=>{isCph=true;updateShippingButtons();};
+shipOtherBtn.onclick=()=>{isCph=false;updateShippingButtons();};
 
 const mobilePayNum='5894BZ';
 document.getElementById('openMobilePay').onclick=()=>{
@@ -846,10 +884,13 @@ document.getElementById('openMobilePay').onclick=()=>{
 document.getElementById('copyMobilePay').onclick=()=>{
   const subtotal=document.getElementById('cartSubtotal').textContent;
   const total=document.getElementById('cartTotal').textContent;
-  const shippingLine=shippingCost===0
-    ? 'Shipping: 0 DKK (Copenhagen)'
-    : `Shipping: +${shippingCost} DKK`;
-  const msg=`Hi SEP, here’s my order:\n${cart.map(i=>`${i.qty}× ${i.name} (Size: ${i.size})`).join('\n')}\nSubtotal: ${subtotal}\n${shippingLine}\nTotal: ${total}`;
+  const ship=getShippingCost();
+  const shippingText=ship===0?'0 DKK (Copenhagen)':'+'+ship+' DKK';
+  const msg=`Hi SEP, here’s my order:
+${cart.map(i=>`${i.qty}× ${i.name} (Size: ${i.size})`).join('\n')}
+Subtotal: ${subtotal}
+Shipping: ${shippingText}
+Total: ${total}`;
   navigator.clipboard.writeText(msg);
   const popup=document.createElement('div');
   popup.className='popup';
@@ -858,13 +899,14 @@ document.getElementById('copyMobilePay').onclick=()=>{
   setTimeout(()=>popup.classList.add('show'),10);
   setTimeout(()=>{popup.classList.remove('show');setTimeout(()=>popup.remove(),300);},2000);
 };
+updateShippingButtons();
 </script>
 
 <!-- ========== GLOBAL SCENE + MIH LOGIC ========== -->
 <script>
 // GLOBAL SCENE HANDLER
 function showScene(name){
-  // If already logged in, do not show MIH login again; go to welcome
+  // If already logged in, do not show login; send to welcome
   if(name==='mih-login' && currentUser){
     name='mih-welcome';
   }
@@ -877,14 +919,14 @@ function showScene(name){
 // Top-right buttons
 document.getElementById('btnSep').onclick=()=>showScene('sep-shop');
 document.getElementById('btnSepAbout').onclick=()=>showScene('sep-about');
-document.getElementById('btnMihLogin').onclick=()=>showScene('mih-login');
+document.getElementById('btnMih').onclick=()=>showScene('mih-login');
 document.getElementById('btnMihAbout').onclick=()=>showScene('mih-about');
 
 // MAKE IT HAPPEN DATA / LOGIC
-const STORAGE_KEY_ENTRIES = "mih_entries_v6";
-const STORAGE_KEY_USERS = "mih_users_v6";
-const STORAGE_KEY_CURRENT_USER = "mih_current_user_v6";
-const STORAGE_KEY_LAST_PROMO = "mih_last_promo_v6";
+const STORAGE_KEY_ENTRIES = "mih_entries_v4";
+const STORAGE_KEY_USERS = "mih_users_v4";
+const STORAGE_KEY_CURRENT_USER = "mih_current_user_v4";
+const STORAGE_KEY_LAST_PROMO_MONTH = "mih_last_promo_month";
 const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
 const LEAGUES = ["amateurs", "intermediates", "pros", "legends"];
 
@@ -995,6 +1037,7 @@ function cleanupOldAccounts() {
 function getPlayerStats() {
   const byUser = {};
 
+  // Start with all users so even people with zero runs appear
   users.forEach((user) => {
     const key = user.id;
     byUser[key] = {
@@ -1038,8 +1081,12 @@ function getPlayerStats() {
   });
 
   players.sort((a, b) => {
-    if (b.totalDistance !== a.totalDistance) return b.totalDistance - a.totalDistance;
-    if (b.speed !== a.speed) return b.speed - a.speed;
+    if (b.totalDistance !== a.totalDistance) {
+      return b.totalDistance - a.totalDistance;
+    }
+    if (b.speed !== a.speed) {
+      return b.speed - a.speed;
+    }
     return a.totalTime - b.totalTime;
   });
 
@@ -1051,15 +1098,16 @@ function getPlayerStats() {
   return players;
 }
 
-// Promotions with optional silent mode
-function applyPromotions(silent=false) {
+// Automatic promotions once per month (based on first visit that month)
+function runMonthlyPromotionsIfNeeded() {
+  const now = new Date();
+  const currentMonth = now.getFullYear() + "-" + String(now.getMonth() + 1).padStart(2,"0");
+  const last = localStorage.getItem(STORAGE_KEY_LAST_PROMO_MONTH);
+
+  if (last === currentMonth) return;
+
   const players = getPlayerStats();
   const total = players.length;
-  if (total === 0) {
-    if(!silent) alert("No players yet.");
-    return;
-  }
-
   let moves = 0;
   if (total >= 32) moves = 3;
   else if (total >= 16) moves = 2;
@@ -1067,10 +1115,11 @@ function applyPromotions(silent=false) {
   else moves = 0;
 
   if (moves === 0) {
-    if(!silent) alert("Not enough players yet. You need at least 8 players for promotions and relegations.");
+    localStorage.setItem(STORAGE_KEY_LAST_PROMO_MONTH, currentMonth);
     return;
   }
 
+  // Promote from top
   let promoted = 0;
   for (let i = 0; i < players.length && promoted < moves; i++) {
     const p = players[i];
@@ -1082,6 +1131,7 @@ function applyPromotions(silent=false) {
     promoted++;
   }
 
+  // Relegate from bottom
   let relegated = 0;
   for (let i = players.length - 1; i >= 0 && relegated < moves; i--) {
     const p = players[i];
@@ -1094,74 +1144,57 @@ function applyPromotions(silent=false) {
   }
 
   saveUsers();
-  renderHeaderUser();
-  renderLeaderboard();
-  renderStats();
-  if(!silent){
-    alert(`Promotions and relegations applied: ${moves} up, ${moves} down.`);
-  }
+  localStorage.setItem(STORAGE_KEY_LAST_PROMO_MONTH, currentMonth);
 }
 
-function maybeApplyMonthlyPromotions(){
-  const players = getPlayerStats();
-  if(!players.length) return;
-  const now = new Date();
-  const monthKey = `${now.getFullYear()}-${now.getMonth()}`;
-  const last = localStorage.getItem(STORAGE_KEY_LAST_PROMO);
-  if(last === monthKey) return;
-  applyPromotions(true);
-  localStorage.setItem(STORAGE_KEY_LAST_PROMO, monthKey);
-}
-
-// Render user controls into all MIH headers
 function renderHeaderUser() {
-  const containers = document.querySelectorAll(".mih-user-controls");
+  const controlsList = document.querySelectorAll(".mih-user-controls");
   const nameInput = document.getElementById("name");
 
-  containers.forEach(el => {
+  controlsList.forEach((el) => {
     el.innerHTML = "";
     if (!currentUser) {
       const statusSpan = document.createElement("span");
-      statusSpan.id = "user-status";
+      statusSpan.className = "text-[11px] opacity-80";
       statusSpan.textContent = "Not logged in";
       el.appendChild(statusSpan);
 
       const btn = document.createElement("button");
-      btn.className = "px-3 py-1 rounded-full border border-white/20 text-[11px] text-gray-300";
+      btn.className = "px-3 py-1 rounded-full border border-white/20 text-[11px]";
       btn.textContent = "Log in";
       btn.onclick = () => showScene("mih-login");
       el.appendChild(btn);
-    } else {
-      const statusSpan = document.createElement("span");
-      statusSpan.id = "user-status";
-      statusSpan.innerHTML =
-        `Logged in as <span class="user-name font-semibold">${currentUser.name}</span> · ` +
-        `<span class="px-2 py-0.5 rounded-full border border-white/25 text-[10px] uppercase tracking-wide">` +
-        `${currentUser.league.charAt(0).toUpperCase() + currentUser.league.slice(1)}</span>`;
-      el.appendChild(statusSpan);
-
-      const logoutBtn = document.createElement("button");
-      logoutBtn.className = "px-3 py-1 rounded-full border border-white/20 text-[11px] text-gray-300";
-      logoutBtn.textContent = "Log out";
-      logoutBtn.onclick = logout;
-      el.appendChild(logoutBtn);
-
-      const deleteBtn = document.createElement("button");
-      deleteBtn.className = "px-3 py-1 rounded-full border border-red-400/60 text-[11px] text-red-200";
-      deleteBtn.textContent = "Delete account";
-      deleteBtn.onclick = deleteAccount;
-      el.appendChild(deleteBtn);
+      return;
     }
+
+    const statusSpan = document.createElement("span");
+    statusSpan.className = "text-[11px] opacity-90";
+    statusSpan.innerHTML =
+      `Logged in as <span class="font-semibold">${currentUser.name}</span> · ` +
+      `<span class="px-2 py-0.5 rounded-full border border-white/25 text-[10px] uppercase tracking-wide">` +
+      `${currentUser.league.charAt(0).toUpperCase() + currentUser.league.slice(1)}</span>`;
+    el.appendChild(statusSpan);
+
+    const logoutBtn = document.createElement("button");
+    logoutBtn.className = "px-3 py-1 rounded-full border border-white/20 text-[11px]";
+    logoutBtn.textContent = "Log out";
+    logoutBtn.onclick = logout;
+    el.appendChild(logoutBtn);
+
+    const deleteBtn = document.createElement("button");
+    deleteBtn.className = "px-3 py-1 rounded-full border border-red-400/60 text-[11px] text-red-200";
+    deleteBtn.textContent = "Delete account";
+    deleteBtn.onclick = deleteAccount;
+    el.appendChild(deleteBtn);
   });
 
-  if (nameInput) {
-    if (currentUser) {
-      nameInput.value = currentUser.name;
-      nameInput.placeholder = "";
-    } else {
-      nameInput.value = "";
-      nameInput.placeholder = "Log in to set your name";
-    }
+  if (!nameInput) return;
+  if (!currentUser) {
+    nameInput.value = "";
+    nameInput.placeholder = "Log in to set your name";
+  } else {
+    nameInput.value = currentUser.name;
+    nameInput.placeholder = "";
   }
 }
 
@@ -1437,15 +1470,6 @@ if (entryForm) {
   });
 }
 
-function requireLoginThenShow(name) {
-  if (!currentUser) {
-    alert("Please log in first.");
-    showScene("mih-login");
-    return;
-  }
-  showScene(name);
-}
-
 // INIT
 function initMIH() {
   loadEntries();
@@ -1463,22 +1487,11 @@ function initMIH() {
     }
   }
 
+  runMonthlyPromotionsIfNeeded();
   renderHeaderUser();
   renderLeaderboard();
   renderStats();
   renderMyActivities();
-
-  // auto promotions once per month
-  maybeApplyMonthlyPromotions();
-  renderHeaderUser();
-  renderLeaderboard();
-  renderStats();
-
-  if(currentUser){
-    showScene("mih-welcome");
-  }else{
-    showScene("sep-shop");
-  }
 }
 initMIH();
 </script>
