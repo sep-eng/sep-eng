@@ -1830,598 +1830,827 @@
     ============================
   -->
   <script>
-    /*  
-    ============================================
-      TRANSLATION SYSTEM - SEP ONLY
-    ============================================
-    */
+  // ============================================
+  // TRANSLATION SYSTEM - SEP ONLY
+  // ============================================
 
-    const translations = {
-      en: {
-        nav_shop: "SEP shop",
-        nav_about_sep: "About SEP",
-        nav_mih: "Make it happen",
-        nav_about_mih: "About Make it happen",
-        nav_language: "Language",
+  const translations = {
+    en: {
+      nav_shop: "SEP shop",
+      nav_about_sep: "About SEP",
+      nav_mih: "Make it happen",
+      nav_about_mih: "About Make it happen",
+      nav_language: "Language",
 
-        hero_title: "Minimalist clothing made with intention",
-        hero_subtitle: "Soft, clean and hand pressed in Copenhagen",
+      hero_title: "Minimalist clothing made with intention",
+      hero_subtitle: "Soft, clean and hand pressed in Copenhagen",
 
-        shop_now: "Shop now",
-        view_cart: "View cart",
+      shop_now: "Shop now",
+      view_cart: "View cart",
 
-        cart_title: "Your cart",
-        cart_shipping_cph: "Copenhagen (free)",
-        cart_shipping_rest: "Rest of Denmark +45 kr",
-        cart_subtotal: "Subtotal",
-        cart_shipping: "Shipping",
-        cart_total: "Total",
-        open_mobilepay: "Open MobilePay",
-        copy_order: "Copy order message",
+      cart_title: "Your cart",
+      cart_shipping_cph: "Copenhagen (free)",
+      cart_shipping_rest: "Rest of Denmark +45 kr",
+      cart_subtotal: "Subtotal",
+      cart_shipping: "Shipping",
+      cart_total: "Total",
+      open_mobilepay: "Open MobilePay",
+      copy_order: "Copy order message",
 
-        added_to_cart: "Added to cart",
-        copied: "Order message copied",
+      added_to_cart: "Added to cart",
+      copied: "Order message copied",
 
-        hto_title: "How to order",
-        hto_step1: "Choose product and size",
-        hto_step2: "Add to cart",
-        hto_step3: "Copy order message",
-        hto_step4: "Pay with MobilePay",
-        hto_step5: "Send order via DM",
+      hto_title: "How to order",
+      hto_step1: "Choose product and size",
+      hto_step2: "Add to cart",
+      hto_step3: "Copy order message",
+      hto_step4: "Pay with MobilePay",
+      hto_step5: "Send order via DM",
 
-        footer_title: "SEP - Se Proairesis",
-        footer_shipping: "45 kr shipping. Free in Copenhagen.",
-        footer_denmark: "Delivery only in Denmark.",
-        footer_privacy: "No tracking. No data selling. No dark patterns.",
-      },
+      footer_title: "SEP - Se Proairesis",
+      footer_shipping: "45 kr shipping. Free in Copenhagen.",
+      footer_denmark: "Delivery only in Denmark.",
+      footer_privacy: "No tracking. No data selling. No dark patterns."
+    },
+    da: {
+      nav_shop: "SEP butik",
+      nav_about_sep: "Om SEP",
+      nav_mih: "Make it happen",
+      nav_about_mih: "Om Make it happen",
+      nav_language: "Sprog",
 
-      da: {
-        nav_shop: "SEP butik",
-        nav_about_sep: "Om SEP",
-        nav_mih: "Make it happen",
-        nav_about_mih: "Om Make it happen",
-        nav_language: "Sprog",
+      hero_title: "Minimalistisk tøj lavet med omtanke",
+      hero_subtitle: "Blødt, rent og håndpresset i København",
 
-        hero_title: "Minimalistisk tøj lavet med omtanke",
-        hero_subtitle: "Blødt, rent og håndpresset i København",
+      shop_now: "Køb nu",
+      view_cart: "Se kurv",
 
-        shop_now: "Køb nu",
-        view_cart: "Se kurv",
+      cart_title: "Din kurv",
+      cart_shipping_cph: "København (gratis)",
+      cart_shipping_rest: "Resten af Danmark +45 kr",
+      cart_subtotal: "Subtotal",
+      cart_shipping: "Fragt",
+      cart_total: "Total",
+      open_mobilepay: "Åbn MobilePay",
+      copy_order: "Kopiér ordrebesked",
 
-        cart_title: "Din kurv",
-        cart_shipping_cph: "København (gratis)",
-        cart_shipping_rest: "Resten af Danmark +45 kr",
-        cart_subtotal: "Subtotal",
-        cart_shipping: "Fragt",
-        cart_total: "Total",
-        open_mobilepay: "Åbn MobilePay",
-        copy_order: "Kopiér ordrebesked",
+      added_to_cart: "Tilføjet til kurv",
+      copied: "Ordrebesked kopieret",
 
-        added_to_cart: "Tilføjet til kurv",
-        copied: "Ordrebesked kopieret",
+      hto_title: "Sådan bestiller du",
+      hto_step1: "Vælg produkt og størrelse",
+      hto_step2: "Læg i kurv",
+      hto_step3: "Kopiér ordrebesked",
+      hto_step4: "Betal med MobilePay",
+      hto_step5: "Send ordren via DM",
 
-        hto_title: "Sådan bestiller du",
-        hto_step1: "Vælg produkt og størrelse",
-        hto_step2: "Læg i kurv",
-        hto_step3: "Kopiér ordrebesked",
-        hto_step4: "Betal med MobilePay",
-        hto_step5: "Send ordren via DM",
+      footer_title: "SEP - Se Proairesis",
+      footer_shipping: "45 kr fragt. Gratis i København.",
+      footer_denmark: "Levering kun i Danmark.",
+      footer_privacy: "Ingen tracking. Ingen datasalg. Ingen dark patterns."
+    },
+    cs: {
+      nav_shop: "SEP obchod",
+      nav_about_sep: "O SEP",
+      nav_mih: "Make it happen",
+      nav_about_mih: "O Make it happen",
+      nav_language: "Jazyk",
 
-        footer_title: "SEP - Se Proairesis",
-        footer_shipping: "45 kr fragt. Gratis i København.",
-        footer_denmark: "Levering kun i Danmark.",
-        footer_privacy: "Ingen tracking. Ingen datasalg. Ingen dark patterns.",
-      },
+      hero_title: "Minimalistické oblečení vyrobené s úmyslem",
+      hero_subtitle: "Měkké, čisté a ručně lisované v Kodani",
 
-      cs: {
-        nav_shop: "SEP obchod",
-        nav_about_sep: "O SEP",
-        nav_mih: "Make it happen",
-        nav_about_mih: "O Make it happen",
-        nav_language: "Jazyk",
+      shop_now: "Nakoupit",
+      view_cart: "Zobrazit košík",
 
-        hero_title: "Minimalistické oblečení vyrobené s úmyslem",
-        hero_subtitle: "Měkké, čisté a ručně lisované v Kodani",
+      cart_title: "Váš košík",
+      cart_shipping_cph: "Kodaň (zdarma)",
+      cart_shipping_rest: "Zbytek Dánska +45 kr",
+      cart_subtotal: "Mezisoučet",
+      cart_shipping: "Doprava",
+      cart_total: "Celkem",
+      open_mobilepay: "Otevřít MobilePay",
+      copy_order: "Kopírovat objednávku",
 
-        shop_now: "Nakoupit",
-        view_cart: "Zobrazit košík",
+      added_to_cart: "Přidáno do košíku",
+      copied: "Objednávka zkopírována",
 
-        cart_title: "Váš košík",
-        cart_shipping_cph: "Kodaň (zdarma)",
-        cart_shipping_rest: "Zbytek Dánska +45 kr",
-        cart_subtotal: "Mezisoučet",
-        cart_shipping: "Doprava",
-        cart_total: "Celkem",
-        open_mobilepay: "Otevřít MobilePay",
-        copy_order: "Kopírovat objednávku",
+      hto_title: "Jak objednat",
+      hto_step1: "Vyberte produkt a velikost",
+      hto_step2: "Přidejte do košíku",
+      hto_step3: "Zkopírujte objednávku",
+      hto_step4: "Zaplaťte MobilePay",
+      hto_step5: "Pošlete objednávku přes DM",
 
-        added_to_cart: "Přidáno do košíku",
-        copied: "Objednávka zkopírována",
+      footer_title: "SEP - Se Proairesis",
+      footer_shipping: "45 kr doprava. Zdarma v Kodani.",
+      footer_denmark: "Doručení pouze v Dánsku.",
+      footer_privacy: "Žádné sledování. Žádný prodej dat. Žádné dark patterns."
+    }
+  };
 
-        hto_title: "Jak objednat",
-        hto_step1: "Vyberte produkt a velikost",
-        hto_step2: "Přidejte do košíku",
-        hto_step3: "Zkopírujte objednávku",
-        hto_step4: "Zaplaťte MobilePay",
-        hto_step5: "Pošlete objednávku přes DM",
+  let currentLang = "en";
 
-        footer_title: "SEP - Se Proairesis",
-        footer_shipping: "45 kr doprava. Zdarma v Kodani.",
-        footer_denmark: "Doručení pouze v Dánsku.",
-        footer_privacy: "Žádné sledování. Žádný prodej dat. Žádné dark patterns.",
+  function t(key) {
+    return translations[currentLang][key] || translations.en[key] || key;
+  }
+
+  function applyTranslations() {
+    document.querySelectorAll("[data-i18n]").forEach(el => {
+      const key = el.getAttribute("data-i18n");
+      el.innerHTML = t(key);
+    });
+  }
+
+  function updateLanguageButtons() {
+    document.querySelectorAll(".lang-btn").forEach(btn => {
+      if (btn.dataset.lang === currentLang) {
+        btn.classList.add("bg-white", "text-black");
+      } else {
+        btn.classList.remove("bg-white", "text-black");
       }
-    };
+    });
+  }
 
-    let currentLang = "en";
+  function detectLanguage() {
+    const saved = localStorage.getItem("sep_lang");
+    if (saved && translations[saved]) return saved;
+    const browser = navigator.language.slice(0, 2);
+    if (browser === "da") return "da";
+    if (browser === "cs") return "cs";
+    return "en";
+  }
 
-    function setLanguage(lang) {
-      currentLang = lang;
-      localStorage.setItem("sep_lang", lang);
-      applyTranslations();
-      updateLanguageButtons();
-    }
+  function setLanguage(lang) {
+    currentLang = lang;
+    localStorage.setItem("sep_lang", lang);
+    applyTranslations();
+    updateLanguageButtons();
+  }
 
-    function t(key) {
-      return translations[currentLang][key] || translations.en[key] || key;
-    }
+  // ============================================
+  // SCENE SWITCHING
+  // ============================================
 
-    function applyTranslations() {
-      document.querySelectorAll("[data-i18n]").forEach(el => {
-        const key = el.getAttribute("data-i18n");
-        el.innerHTML = t(key);
+  function showScene(name) {
+    document.querySelectorAll(".scene").forEach(sec => {
+      sec.classList.remove("active");
+    });
+    const target = document.getElementById("scene-" + name);
+    if (target) target.classList.add("active");
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+  }
+
+  // ============================================
+  // GLOBAL NAV (HAMBURGER)
+  // ============================================
+
+  function initGlobalNav() {
+    const navToggle = document.getElementById("mainNavToggle");
+    const navMenu = document.getElementById("navMenu");
+
+    if (!navToggle || !navMenu) return;
+
+    navToggle.addEventListener("click", () => {
+      navMenu.classList.toggle("hidden");
+    });
+
+    // Language buttons
+    document.querySelectorAll(".lang-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const lang = btn.dataset.lang;
+        if (lang) setLanguage(lang);
       });
+    });
+  }
+
+  // ============================================
+  // SEP CART SYSTEM
+  // ============================================
+
+  let cart = JSON.parse(localStorage.getItem("sep_cart") || "[]");
+  let shippingType = "cph"; // cph = free, rest = +45
+  const SHIPPING_COST_REST = 45;
+
+  function saveCart() {
+    localStorage.setItem("sep_cart", JSON.stringify(cart));
+  }
+
+  function getCartCounts() {
+    const totalItems = cart.reduce((sum, item) => sum + item.qty, 0);
+    const subtotal = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
+    const shipping = shippingType === "cph" ? 0 : SHIPPING_COST_REST;
+    const total = subtotal + shipping;
+    return { totalItems, subtotal, shipping, total };
+  }
+
+  function updateCartBadge() {
+    const badge = document.getElementById("cartCounter");
+    if (!badge) return;
+    const { totalItems } = getCartCounts();
+    if (totalItems > 0) {
+      badge.classList.remove("hidden");
+      badge.textContent = totalItems;
+    } else {
+      badge.classList.add("hidden");
     }
+  }
 
-    function updateLanguageButtons() {
-      document.querySelectorAll(".lang-btn").forEach(btn => {
-        if (btn.dataset.lang === currentLang) {
-          btn.classList.add("bg-white", "text-black");
-        } else {
-          btn.classList.remove("bg-white", "text-black");
-        }
-      });
-    }
+  function renderCart() {
+    const itemsContainer = document.getElementById("cartItems");
+    const subtotalEl = document.getElementById("cartSubtotal");
+    const shippingLabelEl = document.getElementById("cartShippingLabel");
+    const totalEl = document.getElementById("cartTotal");
 
-    function detectLanguage() {
-      const saved = localStorage.getItem("sep_lang");
-      if (saved && translations[saved]) return saved;
-      const browser = navigator.language.slice(0, 2);
-      if (browser === "da") return "da";
-      if (browser === "cs") return "cs";
-      return "en";
-    }
+    if (!itemsContainer || !subtotalEl || !shippingLabelEl || !totalEl) return;
 
-    /*  
-    ============================================
-      GLOBAL SCENE SWITCHING
-    ============================================
-    */
+    itemsContainer.innerHTML = "";
 
-    function showScene(name) {
-      document.querySelectorAll(".scene").forEach(sec => {
-        sec.classList.remove("active");
-      });
-      document.querySelector(`#scene-${name}`).classList.add("active");
-      window.scrollTo({ top: 0, behavior: "instant" });
-    }
-
-    /*  
-    ============================================
-      SEP CART SYSTEM
-    ============================================
-    */
-
-    let cart = JSON.parse(localStorage.getItem("sep_cart") || "[]");
-    let shippingType = "cph"; // cph = free, rest = +45
-
-    function saveCart() {
-      localStorage.setItem("sep_cart", JSON.stringify(cart));
-    }
-
-    function addToCart(product) {
-      cart.push(product);
-      saveCart();
-      renderCart();
-    }
-
-    function removeFromCart(i) {
-      cart.splice(i, 1);
-      saveCart();
-      renderCart();
-    }
-
-    function setShipping(type) {
-      shippingType = type;
-      renderCartTotals();
-    }
-
-    function renderCart() {
-      const container = document.getElementById("cart-items");
-      if (!container) return;
-
-      container.innerHTML = "";
-
-      cart.forEach((item, i) => {
+    if (cart.length === 0) {
+      const empty = document.createElement("p");
+      empty.className = "text-sm text-gray-500 py-8 text-center";
+      empty.textContent = "Your cart is empty.";
+      itemsContainer.appendChild(empty);
+    } else {
+      cart.forEach((item, index) => {
         const row = document.createElement("div");
-        row.className = "flex justify-between items-center py-2 border-b border-white/10 text-sm";
+        row.className = "border-b border-gray-200 pb-2 mb-2 text-sm";
 
         row.innerHTML = `
-          <div>
-            <div class="font-semibold">${item.name}</div>
-            <div class="text-gray-400 text-xs">Size: ${item.size}</div>
-            <div class="text-gray-400 text-xs">Qty: ${item.qty}</div>
+          <div class="flex justify-between">
+            <span class="font-medium">${item.name}</span>
+            <span>${item.price * item.qty} kr.</span>
           </div>
-          <div class="flex items-center gap-3">
-            <div>${item.price * item.qty} kr</div>
-            <button class="text-red-400 text-xs" onclick="removeFromCart(${i})">Remove</button>
+          <div class="text-xs text-gray-500">
+            Size: ${item.size} · Qty: ${item.qty}
           </div>
+          <button class="mt-1 text-xs text-red-500 underline remove-item-btn" data-index="${index}">
+            Remove
+          </button>
         `;
-        container.appendChild(row);
-      });
 
-      renderCartTotals();
-    }
-
-    function renderCartTotals() {
-      const subtotal = cart.reduce((a, b) => a + (b.price * b.qty), 0);
-      const shipping = shippingType === "cph" ? 0 : 45;
-      const total = subtotal + shipping;
-
-      document.getElementById("cart-subtotal").innerText = `${subtotal} kr`;
-      document.getElementById("cart-shipping").innerText = shippingType === "cph" ? t("cart_shipping_cph") : t("cart_shipping_rest");
-      document.getElementById("cart-total").innerText = `${total} kr`;
-    }
-
-    /*  
-    ============================================
-      MOBILEPAY + ORDER MESSAGE
-    ============================================
-    */
-
-    function openMobilePay() {
-      window.location.href = "mobilepay://send";
-      alert("Thanks for supporting SEP.");
-    }
-
-    function copyOrderMessage() {
-      const subtotal = cart.reduce((a, b) => a + (b.price * b.qty), 0);
-      const shipping = shippingType === "cph" ? 0 : 45;
-      const total = subtotal + shipping;
-
-      let msg = "Hi. I'd like to order:\n\n";
-      cart.forEach(item => {
-        msg += `${item.qty} × ${item.name} (Size ${item.size})\n`;
-      });
-      msg += `\nSubtotal: ${subtotal} kr\nShipping: ${shipping} kr\nTotal: ${total} kr\n`;
-
-      navigator.clipboard.writeText(msg).then(() => {
-        alert(t("copied"));
+        itemsContainer.appendChild(row);
       });
     }
 
-    /*  
-    ============================================
-      MIH DATA MODEL
-    ============================================
-    */
+    const { subtotal, shipping, total } = getCartCounts();
 
-    let users = JSON.parse(localStorage.getItem("mih_users") || "[]");
-    let entries = JSON.parse(localStorage.getItem("mih_entries") || "[]");
-    let currentUserId = JSON.parse(localStorage.getItem("mih_current_user") || "null");
-
-    function saveUsers() {
-      localStorage.setItem("mih_users", JSON.stringify(users));
+    subtotalEl.textContent = `${subtotal} kr.`;
+    if (shippingType === "cph") {
+      shippingLabelEl.textContent = "0 kr. (FREE in Copenhagen)";
+    } else {
+      shippingLabelEl.textContent = `+${shipping} kr.`;
     }
+    totalEl.textContent = `${total} kr.`;
 
-    function saveEntries() {
-      localStorage.setItem("mih_entries", JSON.stringify(entries));
-    }
+    updateCartBadge();
 
-    function saveCurrentUser() {
-      localStorage.setItem("mih_current_user", JSON.stringify(currentUserId));
-    }
-
-    function findUserByName(name) {
-      return users.find(u => u.name.toLowerCase() === name.toLowerCase());
-    }
-
-    function assignLeague() {
-      const counts = {
-        amateurs: users.filter(u => u.league === "amateurs").length,
-        intermediates: users.filter(u => u.league === "intermediates").length,
-        pros: users.filter(u => u.league === "pros").length,
-        legends: users.filter(u => u.league === "legends").length
-      };
-      return Object.entries(counts).sort((a, b) => a[1] - b[1])[0][0];
-    }
-
-    function login(name, pass) {
-      const existing = findUserByName(name);
-
-      if (existing) {
-        if (existing.pass !== pass) {
-          alert("Wrong password.");
-          return false;
+    // Wire remove buttons
+    itemsContainer.querySelectorAll(".remove-item-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const idx = parseInt(btn.dataset.index, 10);
+        if (!isNaN(idx)) {
+          cart.splice(idx, 1);
+          saveCart();
+          renderCart();
         }
-        currentUserId = existing.id;
-        saveCurrentUser();
-        renderUserControls();
-        return true;
-      }
-
-      const id = Date.now();
-      const league = assignLeague();
-
-      users.push({
-        id,
-        name,
-        pass,
-        league,
-        created: Date.now()
       });
+    });
+  }
 
-      saveUsers();
-      currentUserId = id;
-      saveCurrentUser();
-      renderUserControls();
+  function addToCartFromCard(card) {
+    const name = card.querySelector("h3")?.textContent.trim();
+    const priceText = card.querySelector(".product-price")?.textContent || "180";
+    const size = card.querySelector(".size-select")?.value || "M";
+    const qtyInput = card.querySelector(".qty-input");
+    const qty = qtyInput ? parseInt(qtyInput.value, 10) || 1 : 1;
+
+    const price = parseInt(priceText.replace(/\D/g, ""), 10) || 180;
+
+    const existing = cart.find(
+      item => item.name === name && item.size === size
+    );
+
+    if (existing) {
+      existing.qty += qty;
+    } else {
+      cart.push({ name, price, size, qty });
+    }
+
+    saveCart();
+    renderCart();
+    showGreenPopup(t("added_to_cart"));
+  }
+
+  function showGreenPopup(text) {
+    const existing = document.querySelector(".popup");
+    if (existing) existing.remove();
+
+    const popup = document.createElement("div");
+    popup.className = "popup";
+    popup.textContent = text;
+    document.body.appendChild(popup);
+
+    requestAnimationFrame(() => {
+      popup.classList.add("show");
+    });
+
+    setTimeout(() => {
+      popup.classList.remove("show");
+      setTimeout(() => popup.remove(), 300);
+    }, 2000);
+  }
+
+  function openCartSidebar() {
+    const sidebar = document.getElementById("cartSidebar");
+    const overlay = document.getElementById("cartOverlay");
+    if (!sidebar || !overlay) return;
+    sidebar.classList.remove("translate-x-full");
+    overlay.classList.remove("hidden");
+    document.getElementById("globalNavButtons")?.classList.add("opacity-40");
+    document.getElementById("sepHeroButtons")?.classList.add("opacity-40");
+  }
+
+  function closeCartSidebar() {
+    const sidebar = document.getElementById("cartSidebar");
+    const overlay = document.getElementById("cartOverlay");
+    if (!sidebar || !overlay) return;
+    sidebar.classList.add("translate-x-full");
+    overlay.classList.add("hidden");
+    document.getElementById("globalNavButtons")?.classList.remove("opacity-40");
+    document.getElementById("sepHeroButtons")?.classList.remove("opacity-40");
+  }
+
+  function setShipping(type) {
+    shippingType = type;
+    renderCart();
+  }
+
+  function initCart() {
+    // View cart
+    document.getElementById("viewCartBtn")?.addEventListener("click", openCartSidebar);
+    document.getElementById("cartOverlay")?.addEventListener("click", closeCartSidebar);
+    document.getElementById("closeCart")?.addEventListener("click", closeCartSidebar);
+
+    // Shipping buttons
+    document.getElementById("shippingCph")?.addEventListener("click", () => setShipping("cph"));
+    document.getElementById("shippingNonCph")?.addEventListener("click", () => setShipping("rest"));
+
+    // Add to cart buttons
+    document.querySelectorAll(".product-card .add-to-cart").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const card = btn.closest(".product-card");
+        if (card) addToCartFromCard(card);
+      });
+    });
+
+    // Initial render
+    renderCart();
+  }
+
+  // ============================================
+  // MOBILEPAY + ORDER MESSAGE
+  // ============================================
+
+  const MOBILEPAY_NUMBER = "5894BZ";
+
+  function openMobilePay() {
+    window.location.href = "mobilepay://transfer?phone=" + MOBILEPAY_NUMBER.replace(/\D/g, "");
+    alert("Thanks for supporting SEP.");
+  }
+
+  function copyOrderMessage() {
+    const { subtotal, shipping, total } = getCartCounts();
+    const shippingLabel = shippingType === "cph"
+      ? "0 kr. (FREE in Copenhagen)"
+      : `+${shipping} kr.`;
+
+    let lines = [];
+    lines.push("Hi SEP, here is my order:");
+    lines.push("");
+    cart.forEach(item => {
+      lines.push(`${item.qty} × ${item.name} (Size: ${item.size})`);
+    });
+    lines.push("");
+    lines.push(`Subtotal: ${subtotal} kr.`);
+    lines.push(`Shipping: ${shippingLabel}`);
+    lines.push(`Total: ${total} kr.`);
+    lines.push("");
+    lines.push("Paid with MobilePay: " + MOBILEPAY_NUMBER);
+
+    const text = lines.join("\n");
+
+    navigator.clipboard.writeText(text).then(() => {
+      showGreenPopup(t("copied"));
+    }).catch(() => {
+      alert("Could not copy. Please copy manually.");
+    });
+  }
+
+  function initMobilePayButtons() {
+    document.getElementById("openMobilePay")?.addEventListener("click", openMobilePay);
+    document.getElementById("copyMobilePay")?.addEventListener("click", copyOrderMessage);
+  }
+
+  // ============================================
+  // MIH DATA MODEL
+  // ============================================
+
+  const STORAGE_USERS = "mih_users_v1";
+  const STORAGE_ENTRIES = "mih_entries_v1";
+  const STORAGE_CURRENT_USER = "mih_current_user_v1";
+
+  let mihUsers = JSON.parse(localStorage.getItem(STORAGE_USERS) || "[]");
+  let mihEntries = JSON.parse(localStorage.getItem(STORAGE_ENTRIES) || "[]");
+  let mihCurrentUserId = JSON.parse(localStorage.getItem(STORAGE_CURRENT_USER) || "null");
+
+  const MIH_LEAGUES = ["amateurs", "intermediates", "pros", "legends"];
+
+  function saveMihUsers() {
+    localStorage.setItem(STORAGE_USERS, JSON.stringify(mihUsers));
+  }
+
+  function saveMihEntries() {
+    localStorage.setItem(STORAGE_ENTRIES, JSON.stringify(mihEntries));
+  }
+
+  function saveMihCurrentUser() {
+    localStorage.setItem(STORAGE_CURRENT_USER, JSON.stringify(mihCurrentUserId));
+  }
+
+  function findMihUserByName(name) {
+    return mihUsers.find(u => u.name.toLowerCase() === name.toLowerCase()) || null;
+  }
+
+  function assignMihLeague() {
+    const counts = {
+      amateurs: mihUsers.filter(u => u.league === "amateurs").length,
+      intermediates: mihUsers.filter(u => u.league === "intermediates").length,
+      pros: mihUsers.filter(u => u.league === "pros").length,
+      legends: mihUsers.filter(u => u.league === "legends").length
+    };
+    return Object.entries(counts).sort((a, b) => a[1] - b[1])[0][0];
+  }
+
+  function mihLogin(name, password) {
+    const trimmed = name.trim();
+    if (!trimmed || !password) {
+      alert("Please enter both name and password.");
+      return false;
+    }
+
+    const existing = findMihUserByName(trimmed);
+    if (existing) {
+      if (existing.password !== password) {
+        alert("Wrong password for this name.");
+        return false;
+      }
+      mihCurrentUserId = existing.id;
+      saveMihCurrentUser();
+      renderMihUserControls();
+      renderMihMyActivities();
       return true;
     }
 
-    /*  
-    ============================================
-      MIH ENTRY LOGGING
-    ============================================
-    */
+    const league = assignMihLeague();
+    const newUser = {
+      id: Date.now().toString(36) + Math.random().toString(36).slice(2),
+      name: trimmed,
+      password,
+      league,
+      createdAt: Date.now()
+    };
 
-    function addEntry(distance, time) {
-      if (!currentUserId) return;
+    mihUsers.push(newUser);
+    saveMihUsers();
+    mihCurrentUserId = newUser.id;
+    saveMihCurrentUser();
+    renderMihUserControls();
+    renderMihMyActivities();
+    return true;
+  }
 
-      entries.push({
-        id: Date.now(),
-        userId: currentUserId,
-        distance: parseFloat(distance),
-        time: parseFloat(time),
-        ts: Date.now()
-      });
+  function mihLogout() {
+    mihCurrentUserId = null;
+    saveMihCurrentUser();
+    renderMihUserControls();
+    renderMihMyActivities();
+    renderMihLeaderboard();
+  }
 
-      saveEntries();
-      renderLeaderboard();
-      renderMyActivities();
-      renderStats();
+  function mihAddEntry(distance, time) {
+    if (!mihCurrentUserId) {
+      alert("Please log in first.");
+      showScene("mih-login");
+      return;
     }
 
-    /*  
-    ============================================
-      RENDER FUNCTIONS
-    ============================================
-    */
+    const d = parseFloat(distance);
+    const t = parseFloat(time);
 
-    function renderUserControls() {
-      const box = document.getElementById("user-controls");
-      if (!box) return;
+    if (!isFinite(d) || d <= 0 || !isFinite(t) || t <= 0) {
+      alert("Please enter distance and time bigger than zero.");
+      return;
+    }
 
-      box.innerHTML = "";
+    mihEntries.push({
+      id: Date.now().toString(36) + Math.random().toString(36).slice(2),
+      userId: mihCurrentUserId,
+      distanceKm: d,
+      timeMinutes: t,
+      timestamp: Date.now()
+    });
 
-      if (!currentUserId) {
-        box.innerHTML = `<span class="text-[11px] text-gray-400">Not logged in</span>`;
-        return;
-      }
+    saveMihEntries();
+    renderMihLeaderboard();
+    renderMihMyActivities();
+    renderMihStats();
+  }
 
-      const user = users.find(u => u.id === currentUserId);
-      box.innerHTML = `
-        <span class="text-[11px] text-gray-300">Logged in as ${user.name}</span>
-        <button 
-          onclick="logout()" 
-          class="px-3 py-1 rounded-full border border-white/20 text-[11px]"
-        >
-          Log out
-        </button>
+  // ============================================
+  // MIH RENDERING
+  // ============================================
+
+  function getMihAggregatedUsers() {
+    return mihUsers.map(user => {
+      const runs = mihEntries.filter(e => e.userId === user.id);
+      const totalDistance = runs.reduce((sum, e) => sum + e.distanceKm, 0);
+      const totalTime = runs.reduce((sum, e) => sum + e.timeMinutes, 0);
+      const avgDistance = runs.length ? totalDistance / runs.length : 0;
+      const bestDistance = runs.length ? Math.max(...runs.map(e => e.distanceKm)) : 0;
+
+      return {
+        user,
+        runs,
+        totalDistance,
+        totalTime,
+        avgDistance,
+        bestDistance
+      };
+    });
+  }
+
+  function renderMihUserControls() {
+    const box = document.getElementById("user-controls");
+    if (!box) return;
+
+    box.innerHTML = "";
+
+    if (!mihCurrentUserId) {
+      const span = document.createElement("span");
+      span.className = "text-[11px] text-gray-400";
+      span.textContent = "Not logged in";
+      box.appendChild(span);
+
+      const btn = document.createElement("button");
+      btn.className = "px-3 py-1 rounded-full border border-white/20 text-[11px] text-gray-300";
+      btn.textContent = "Log in";
+      btn.addEventListener("click", () => showScene("mih-login"));
+      box.appendChild(btn);
+      return;
+    }
+
+    const user = mihUsers.find(u => u.id === mihCurrentUserId);
+    if (!user) return;
+
+    const span = document.createElement("span");
+    span.className = "text-[11px] text-gray-300";
+    span.textContent = `Logged in as ${user.name}`;
+    box.appendChild(span);
+
+    const logoutBtn = document.createElement("button");
+    logoutBtn.className = "px-3 py-1 rounded-full border border-white/20 text-[11px] text-gray-300";
+    logoutBtn.textContent = "Log out";
+    logoutBtn.addEventListener("click", mihLogout);
+    box.appendChild(logoutBtn);
+  }
+
+  function renderMihLeaderboard() {
+    const tbody = document.getElementById("leaderboard-body");
+    const empty = document.getElementById("no-entries");
+    if (!tbody) return;
+
+    const leagueFilter = document.getElementById("league-filter");
+    const filterValue = leagueFilter ? leagueFilter.value : "all";
+
+    const aggregated = getMihAggregatedUsers()
+      .filter(row => filterValue === "all" || row.user.league === filterValue)
+      .sort((a, b) => b.totalDistance - a.totalDistance);
+
+    tbody.innerHTML = "";
+
+    if (!aggregated.length) {
+      if (empty) empty.style.display = "block";
+      return;
+    }
+    if (empty) empty.style.display = "none";
+
+    aggregated.forEach((row, index) => {
+      const tr = document.createElement("tr");
+      tr.className = "border-b border-white/10 text-xs";
+
+      tr.innerHTML = `
+        <td class="py-2 px-2">${index + 1}</td>
+        <td class="py-2 px-2">
+          <button class="underline" onclick="openMihProfile('${row.user.id}')">
+            ${row.user.name}
+          </button>
+        </td>
+        <td class="py-2 px-2">${row.user.league}</td>
+        <td class="py-2 px-2">${row.totalDistance.toFixed(1)} km</td>
+        <td class="py-2 px-2">${row.totalTime.toFixed(1)} min</td>
       `;
-    }
 
-    function logout() {
-      currentUserId = null;
-      saveCurrentUser();
-      renderUserControls();
-      renderMyActivities();
-      renderLeaderboard();
-    }
+      tbody.appendChild(tr);
+    });
+  }
 
-    function renderLeaderboard() {
-      const body = document.getElementById("leaderboard-body");
-      const noEntries = document.getElementById("no-entries");
-      if (!body) return;
+  function renderMihMyActivities() {
+    const tbody = document.getElementById("my-activities-body");
+    const empty = document.getElementById("no-my-activities");
+    if (!tbody) return;
 
-      const selectedLeague = document.getElementById("league-filter").value;
+    tbody.innerHTML = "";
 
-      let list = users.map(u => {
-        const runs = entries.filter(e => e.userId === u.id);
-        const dist = runs.reduce((a, b) => a + b.distance, 0);
-        const time = runs.reduce((a, b) => a + b.time, 0);
-        return {
-          ...u,
-          dist,
-          time
-        };
-      });
-
-      if (selectedLeague !== "all") {
-        list = list.filter(u => u.league === selectedLeague);
-      }
-
-      list.sort((a, b) => b.dist - a.dist);
-
-      body.innerHTML = "";
-
-      if (list.length === 0) {
-        noEntries.style.display = "block";
-        return;
-      }
-
-      noEntries.style.display = "none";
-
-      list.forEach((u, i) => {
-        const row = document.createElement("tr");
-        row.className = "border-b border-white/10";
-
-        row.innerHTML = `
-          <td class="py-2 px-2 text-xs">${i + 1}</td>
-          <td class="py-2 px-2 text-xs cursor-pointer underline" onclick="openProfile(${u.id})">${u.name}</td>
-          <td class="py-2 px-2 text-xs">${u.league}</td>
-          <td class="py-2 px-2 text-xs">${u.dist.toFixed(1)} km</td>
-          <td class="py-2 px-2 text-xs">${u.time.toFixed(1)} min</td>
-        `;
-
-        body.appendChild(row);
-      });
-    }
-
-    function renderMyActivities() {
-      const body = document.getElementById("my-activities-body");
-      const empty = document.getElementById("no-my-activities");
-      if (!body) return;
-
-      body.innerHTML = "";
-
-      if (!currentUserId) {
+    if (!mihCurrentUserId) {
+      if (empty) {
+        empty.textContent = "Log in to see and manage your activities.";
         empty.style.display = "block";
-        return;
       }
+      return;
+    }
 
-      const list = entries.filter(e => e.userId === currentUserId);
+    const runs = mihEntries
+      .filter(e => e.userId === mihCurrentUserId)
+      .sort((a, b) => b.timestamp - a.timestamp);
 
-      if (list.length === 0) {
+    if (!runs.length) {
+      if (empty) {
+        empty.textContent = "No activities yet for this account.";
         empty.style.display = "block";
-        return;
       }
+      return;
+    }
+    if (empty) empty.style.display = "none";
 
-      empty.style.display = "none";
+    runs.forEach(entry => {
+      const tr = document.createElement("tr");
+      tr.className = "border-b border-white/10 text-xs";
 
-      list.forEach(e => {
-        const row = document.createElement("tr");
-        row.className = "border-b border-white/10";
+      const date = new Date(entry.timestamp).toLocaleDateString();
 
-        const date = new Date(e.ts).toLocaleDateString();
+      tr.innerHTML = `
+        <td class="py-2 px-2">${date}</td>
+        <td class="py-2 px-2">${entry.distanceKm.toFixed(1)} km</td>
+        <td class="py-2 px-2">${entry.timeMinutes.toFixed(1)} min</td>
+        <td class="py-2 px-2 text-right">
+          <button class="text-red-300 underline" onclick="deleteMihEntry('${entry.id}')">
+            Delete
+          </button>
+        </td>
+      `;
 
-        row.innerHTML = `
-          <td class="py-2 px-2 text-xs">${date}</td>
-          <td class="py-2 px-2 text-xs">${e.distance} km</td>
-          <td class="py-2 px-2 text-xs">${e.time} min</td>
-          <td class="py-2 px-2 text-xs text-red-400 cursor-pointer" onclick="deleteEntry(${e.id})">Delete</td>
-        `;
+      tbody.appendChild(tr);
+    });
+  }
 
-        body.appendChild(row);
+  function deleteMihEntry(id) {
+    mihEntries = mihEntries.filter(e => e.id !== id);
+    saveMihEntries();
+    renderMihMyActivities();
+    renderMihLeaderboard();
+    renderMihStats();
+  }
+
+  function openMihProfile(userId) {
+    const user = mihUsers.find(u => u.id === userId);
+    if (!user) return;
+
+    const runs = mihEntries.filter(e => e.userId === userId);
+    const totalDistance = runs.reduce((sum, e) => sum + e.distanceKm, 0);
+    const totalTime = runs.reduce((sum, e) => sum + e.timeMinutes, 0);
+    const runsCount = runs.length;
+    const avgDistance = runsCount ? totalDistance / runsCount : 0;
+    const pace = totalDistance > 0 ? totalTime / totalDistance : 0;
+
+    function formatMinutes(mins) {
+      if (!mins || !isFinite(mins)) return "–";
+      const m = Math.floor(mins);
+      const s = Math.round((mins - m) * 60);
+      return `${m}:${s.toString().padStart(2, "0")} min`;
+    }
+
+    document.getElementById("profileName").textContent = user.name;
+    document.getElementById("profileLeague").textContent = user.league;
+    document.getElementById("profileTotalDistance").textContent = totalDistance.toFixed(1) + " km";
+    document.getElementById("profileTotalTime").textContent = totalTime.toFixed(1) + " min";
+    document.getElementById("profileRuns").textContent = runsCount.toString();
+    document.getElementById("profileAvgDistance").textContent = avgDistance.toFixed(1) + " km";
+
+    document.getElementById("profileBest5k").textContent = pace ? formatMinutes(pace * 5) : "–";
+    document.getElementById("profileBest10k").textContent = pace ? formatMinutes(pace * 10) : "–";
+    document.getElementById("profileBest100m").textContent = pace ? formatMinutes(pace * 0.1) : "–";
+
+    showScene("mih-profile");
+  }
+
+  function renderMihStats() {
+    const tbody = document.getElementById("stats-body");
+    const empty = document.getElementById("no-stats");
+    if (!tbody) return;
+
+    const aggregated = getMihAggregatedUsers().filter(a => a.runs.length > 0);
+
+    tbody.innerHTML = "";
+
+    if (!aggregated.length) {
+      if (empty) empty.style.display = "block";
+      return;
+    }
+    if (empty) empty.style.display = "none";
+
+    aggregated.forEach(row => {
+      const tr = document.createElement("tr");
+      tr.className = "border-b border-white/10 text-xs";
+
+      tr.innerHTML = `
+        <td class="py-2 px-2">${row.user.name}</td>
+        <td class="py-2 px-2">${row.user.league}</td>
+        <td class="py-2 px-2">${row.runs.length}</td>
+        <td class="py-2 px-2">${row.totalDistance.toFixed(1)} km</td>
+        <td class="py-2 px-2">${row.totalTime.toFixed(1)} min</td>
+        <td class="py-2 px-2">${row.avgDistance.toFixed(1)} km</td>
+        <td class="py-2 px-2">${row.bestDistance.toFixed(1)} km</td>
+        <td class="py-2 px-2">${(row.avgDistance || 0).toFixed(1)}</td>
+      `;
+
+      tbody.appendChild(tr);
+    });
+  }
+
+  // ============================================
+  // FORM LISTENERS
+  // ============================================
+
+  function initForms() {
+    const loginForm = document.getElementById("login-form");
+    if (loginForm) {
+      loginForm.addEventListener("submit", e => {
+        e.preventDefault();
+        const name = document.getElementById("login-name")?.value || "";
+        const pw = document.getElementById("login-password")?.value || "";
+        if (mihLogin(name, pw)) {
+          loginForm.reset();
+          showScene("mih-welcome");
+        }
       });
     }
 
-    function deleteEntry(id) {
-      entries = entries.filter(e => e.id !== id);
-      saveEntries();
-      renderMyActivities();
-      renderLeaderboard();
-      renderStats();
-    }
-
-    function openProfile(id) {
-      const user = users.find(u => u.id === id);
-      if (!user) return;
-
-      const list = entries.filter(e => e.userId === id);
-      const dist = list.reduce((a, b) => a + b.distance, 0);
-      const time = list.reduce((a, b) => a + b.time, 0);
-      const avg = list.length ? dist / list.length : 0;
-
-      document.getElementById("profileName").innerText = user.name;
-      document.getElementById("profileLeague").innerText = user.league;
-      document.getElementById("profileTotalDistance").innerText = dist.toFixed(1) + " km";
-      document.getElementById("profileTotalTime").innerText = time.toFixed(1) + " min";
-      document.getElementById("profileRuns").innerText = list.length;
-      document.getElementById("profileAvgDistance").innerText = avg.toFixed(1) + " km";
-
-      const pace = time && dist ? time / dist : 0;
-
-      function project(d) {
-        return (pace * d).toFixed(1) + " min";
-      }
-
-      document.getElementById("profileBest5k").innerText = project(5);
-      document.getElementById("profileBest10k").innerText = project(10);
-      document.getElementById("profileBest100m").innerText = project(0.1);
-
-      showScene("mih-profile");
-    }
-
-    function renderStats() {
-      const body = document.getElementById("stats-body");
-      const empty = document.getElementById("no-stats");
-      if (!body) return;
-
-      const list = users.map(u => {
-        const runs = entries.filter(e => e.userId === u.id);
-        const dist = runs.reduce((a, b) => a + b.distance, 0);
-        const time = runs.reduce((a, b) => a + b.time, 0);
-        const avg = runs.length ? dist / runs.length : 0;
-        const best = runs.length ? Math.max(...runs.map(r => r.distance)) : 0;
-        return {
-          ...u,
-          runs: runs.length,
-          dist,
-          time,
-          avg,
-          best
-        };
-      }).filter(x => x.runs > 0);
-
-      body.innerHTML = "";
-
-      if (list.length === 0) {
-        empty.style.display = "block";
-        return;
-      }
-
-      empty.style.display = "none";
-
-      list.forEach(u => {
-        const row = document.createElement("tr");
-        row.className = "border-b border-white/10";
-
-        row.innerHTML = `
-          <td class="py-2 px-2 text-xs">${u.name}</td>
-          <td class="py-2 px-2 text-xs">${u.league}</td>
-          <td class="py-2 px-2 text-xs">${u.runs}</td>
-          <td class="py-2 px-2 text-xs">${u.dist.toFixed(1)} km</td>
-          <td class="py-2 px-2 text-xs">${u.time.toFixed(1)} min</td>
-          <td class="py-2 px-2 text-xs">${u.avg.toFixed(1)} km</td>
-          <td class="py-2 px-2 text-xs">${u.best.toFixed(1)} km</td>
-          <td class="py-2 px-2 text-xs">${(u.avg - 0).toFixed(1)}</td>
-        `;
-
-        body.appendChild(row);
+    const entryForm = document.getElementById("entry-form");
+    if (entryForm) {
+      entryForm.addEventListener("submit", e => {
+        e.preventDefault();
+        const distance = document.getElementById("distance")?.value || "";
+        const time = document.getElementById("time")?.value || "";
+        mihAddEntry(distance, time);
+        entryForm.reset();
       });
     }
 
-    /*  
-    ============================================
-      INIT
-    ============================================
-    */
-
-    function initAll() {
-      currentLang = detectLanguage();
-      applyTranslations();
-      updateLanguageButtons();
-
-      renderUserControls();
-      renderLeaderboard();
-      renderMyActivities();
-      renderStats();
-
-      showScene("sep-shop");
+    const leagueFilter = document.getElementById("league-filter");
+    if (leagueFilter) {
+      leagueFilter.addEventListener("change", renderMihLeaderboard);
     }
+  }
 
-    initAll();
+  // ============================================
+  // INIT ALL
+  // ============================================
 
-  </script>
+  function initAll() {
+    // Lang
+    currentLang = detectLanguage();
+    applyTranslations();
+    updateLanguageButtons();
 
+    // Nav
+    initGlobalNav();
+
+    // Cart + MobilePay
+    initCart();
+    initMobilePayButtons();
+
+    // MIH
+    renderMihUserControls();
+    renderMihLeaderboard();
+    renderMihMyActivities();
+    renderMihStats();
+    initForms();
+
+    // Default scene
+    showScene("sep-shop");
+  }
+
+  document.addEventListener("DOMContentLoaded", initAll);
+</script>
 </body>
 </html>
