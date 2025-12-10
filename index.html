@@ -1039,14 +1039,14 @@
     autoRunning = true;
     try {
       const today = new Date();
-      const monthKey = currentMonthKey(today);
-      const day = today.getDate();
+const monthKey = currentMonthKey(today);
+const day = today.getDate();
 
-      // Only run on or after the 3rd of the month
-      if (day < 3) {
-        autoRunning = false;
-        return;
-      }
+// Only run on the 1st of the month
+if (day !== 1) {
+  autoRunning = false;
+  return;
+}
 
       const metaRef = db.collection("meta").doc("global_state");
       const snap = await metaRef.get();
