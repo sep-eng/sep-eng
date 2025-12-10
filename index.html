@@ -1042,8 +1042,8 @@
 const monthKey = currentMonthKey(today);
 const day = today.getDate();
 
-// Only run on the 1st of the month
-if (day !== 1) {
+// Only run on the 12th of the month
+if (day !== 12) {
   autoRunning = false;
   return;
 }
