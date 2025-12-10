@@ -107,7 +107,7 @@
   const WORKDAY_EMPLOYEE_END   = { hour: 17, minute: 0 };
   const WORKDAY_OWNER_START    = { hour: 10, minute: 0 };
 
-  // 1 real second = 1 in-game minute
+  // 1 real second = 1 in-game minute (you can change this if you want slower time)
   const MS_PER_GAME_MINUTE = 1000;
 
   function cloneTime(t) {
@@ -403,8 +403,152 @@
   }
 
   // ===========================
-  // PART 6/10 – SALES CALL UI & LOGIC
+  // PART 6/10 – SALES CALL UI, GIBBERISH & NPC REPLIES
   // ===========================
+
+  // --- Helper: detect gibberish / nonsense ---
+  function isGibberish(text) {
+    const lettersOnly = text.replace(/[^a-z]/g, '');
+    if (lettersOnly.length < 3) return true;
+
+    const commonWords = /(hello|hi|price|discount|quality|best|refund|guarantee|today|buy|business|offer|deal|cost|meeting|call|email|contract|support|help|sorry)/;
+    if (commonWords.test(text)) return false;
+
+    const vowels = lettersOnly.match(/[aeiou]/g) || [];
+    const vowelRatio = vowels.length / lettersOnly.length;
+    if (vowelRatio < 0.2) return true;
+
+    return false;
+  }
+
+  // Big NPC reply pools – combined randomly
+  const NPC_REPLIES = {
+    gibberishIntro: [
+      "What are you even talking about?",
+      "I'm not sure if this is a real call.",
+      "Is this some kind of prank?",
+      "This makes no sense.",
+      "Are you okay?",
+      "This is… incomprehensible.",
+      "Did you dial the wrong number?",
+      "I'm not following any of this.",
+      "This sounds like static.",
+      "I have no idea what you just said.",
+      "This feels like random noise.",
+      "None of that was actual words to me.",
+      "You lost me completely.",
+      "I can't understand a single thing you said.",
+      "This is wasting my time."
+    ],
+    gibberishCloser: [
+      "I'm hanging up.",
+      "Don't call here again.",
+      "Please stop wasting my time.",
+      "Goodbye.",
+      "I'm blocking this number.",
+      "Let's end this conversation.",
+      "I have work to do, bye.",
+      "This is the last time I listen to this.",
+      "Take care… somewhere else.",
+      "Click."
+    ],
+    price: [
+      "Price is a big factor for us.",
+      "We're trying to keep costs down.",
+      "If the price is right, we can talk.",
+      "We already have a tight budget.",
+      "Any discount would help.",
+      "We compare offers mainly on price.",
+      "We can't overspend this quarter.",
+      "Our finance team will look at the numbers first.",
+      "We need a very clear cost breakdown.",
+      "We don't pay premium unless it's worth it."
+    ],
+    quality: [
+      "Quality matters more than price for us.",
+      "We just want something reliable.",
+      "We've been burned by cheap solutions before.",
+      "Long-term durability is important.",
+      "We don't mind paying more if it's truly better.",
+      "We care a lot about uptime and stability.",
+      "We want professional-grade, not consumer-level.",
+      "Good support and quality go hand in hand.",
+      "We look at reviews and track record.",
+      "We're aiming for long-term partners, not quick fixes."
+    ],
+    guarantee: [
+      "A guarantee is reassuring.",
+      "Warranty terms are a big deal.",
+      "What happens if something breaks?",
+      "Support and refund options matter.",
+      "We need to know we're covered if things go wrong.",
+      "Service-level agreements are important.",
+      "We want a clear guarantee on performance.",
+      "Do you offer replacements or refunds?",
+      "We like vendors that stand behind their product.",
+      "Having a strong guarantee builds trust."
+    ],
+    pushy: [
+      "Slow down, this feels rushed.",
+      "We're not going to decide today.",
+      "I don't like being pressured.",
+      "If this is a hard sell, I'm out.",
+      "We move at our own pace.",
+      "I'm getting a pushy vibe here.",
+      "Please stop trying to force a decision.",
+      "We need time to think, not pressure.",
+      "Urgency doesn't work on us.",
+      "Being pushy makes me want to say no."
+    ],
+    neutralFollowups: [
+      "Okay, I see.",
+      "Go on.",
+      "I'm listening.",
+      "Alright, interesting.",
+      "Could you clarify that?",
+      "Tell me more.",
+      "I'm not convinced yet.",
+      "Hmm, explain that part again.",
+      "Alright, what else?",
+      "I need a bit more detail."
+    ],
+    smallTalk: [
+      "How many clients do you work with?",
+      "How long has your company been around?",
+      "What makes you different from others?",
+      "Who else uses this?",
+      "Do you have any references?",
+      "Is this more for small or big businesses?",
+      "Where are you based?",
+      "Do you work internationally?",
+      "How fast can you deliver?",
+      "What kind of training do you provide?"
+    ],
+    annoyed: [
+      "This is going nowhere.",
+      "I think we're wasting time.",
+      "I'm not getting anything useful out of this.",
+      "This doesn't sound like a good fit.",
+      "I'm losing interest.",
+      "I'm not sure you understand what we need.",
+      "This pitch is all over the place.",
+      "I'm not impressed so far.",
+      "Your answers are a bit vague.",
+      "You haven't convinced me yet."
+    ],
+    positive: [
+      "Alright, this actually sounds useful.",
+      "I'm starting to like this.",
+      "This could be what we're looking for.",
+      "You're making a good case.",
+      "I can see the value here.",
+      "This might fit our needs.",
+      "You're answering my questions well.",
+      "This sounds promising.",
+      "Okay, I'm interested.",
+      "I could see us using this."
+    ]
+  };
 
   function startCallSelection() {
     game.state = GAME_STATE.CALL;
@@ -513,36 +657,97 @@
     }
   }
 
+  // Upgraded handlePlayerMessage with gibberish + many random replies
   function handlePlayerMessage(text) {
     if (!game.isInCall || !game.callProduct) return;
-    if (!text.trim()) return;
-    game.callLog.push({ from: 'player', text });
+    const trimmed = text.trim();
+    if (!trimmed) return;
 
-    const lower = text.toLowerCase();
-    let response = '';
+    game.callLog.push({ from: 'player', text: trimmed });
 
-    if (lower.includes('discount') || lower.includes('price')) {
-      response = 'The price matters a lot to us. What can you offer?';
-      game.callNPCMood += 0;
-    } else if (lower.includes('quality') || lower.includes('best')) {
-      response = 'We do care about quality. Tell me more.';
-      game.callNPCMood += 1;
-    } else if (lower.includes('refund') || lower.includes('guarantee')) {
-      response = 'A guarantee sounds reassuring.';
-      game.callNPCMood += 1;
-    } else if (lower.includes('buy now') || lower.includes('today')) {
-      response = 'You are a bit pushy, but I\'m listening.';
-      game.callNPCMood -= 1;
-    } else {
-      response = randChoice([
-        'Hmm, I see.',
-        'Could you explain that a bit more?',
-        'I\'m not sure yet.',
-        'That sounds interesting.'
-      ]);
+    const lower = trimmed.toLowerCase();
+
+    // 1) Gibberish handling
+    if (isGibberish(lower)) {
+      const intro = randChoice(NPC_REPLIES.gibberishIntro);
+      const closer = randChoice(NPC_REPLIES.gibberishCloser);
+
+      game.callLog.push({ from: 'npc', text: intro });
+      game.callLog.push({ from: 'npc', text: closer });
+
+      applySaleFailure(game.callProduct);
+
+      game.isInCall = false;
+      hideInput();
+      game.callProduct = null;
+
+      setTimeout(() => {
+        game.state = (game.phase === PHASE.EMPLOYEE)
+          ? GAME_STATE.EMPLOYEE_DAY
+          : GAME_STATE.OWNER_DAY;
+      }, 800);
+
+      return;
     }
 
-    game.callLog.push({ from: 'npc', text: response });
+    // 2) Keyword-based mood + randomized replies
+    let bucketList = [];
+    let moodDelta = 0;
+
+    // price / money
+    if (lower.includes('price') || lower.includes('discount') || lower.includes('cheap') || lower.includes('cost')) {
+      bucketList.push(NPC_REPLIES.price);
+    }
+
+    // quality / reliability
+    if (lower.includes('quality') || lower.includes('reliable') || lower.includes('best') || lower.includes('premium')) {
+      bucketList.push(NPC_REPLIES.quality);
+      moodDelta += 1;
+    }
+
+    // guarantee / warranty
+    if (lower.includes('warranty') || lower.includes('refund') || lower.includes('guarantee') || lower.includes('support') || lower.includes('service')) {
+      bucketList.push(NPC_REPLIES.guarantee);
+      moodDelta += 1;
+    }
+
+    // pushy
+    if (lower.includes('buy now') || lower.includes('right now') || lower.includes('today only') || lower.includes('limited time')) {
+      bucketList.push(NPC_REPLIES.pushy);
+      moodDelta -= 1;
+    }
+
+    // generic business small-talk
+    if (lower.includes('company') || lower.includes('business') || lower.includes('team') || lower.includes('clients')) {
+      bucketList.push(NPC_REPLIES.smallTalk);
+    }
+
+    // if no keywords at all → neutral or annoyed
+    if (bucketList.length === 0) {
+      if (Math.random() < 0.6) {
+        bucketList.push(NPC_REPLIES.neutralFollowups);
+      } else {
+        bucketList.push(NPC_REPLIES.annoyed);
+        moodDelta -= 1;
+      }
+    }
+
+    // choose replies
+    let replyLines = [];
+    const mainBucket = randChoice(bucketList);
+    replyLines.push(randChoice(mainBucket));
+
+    // 50% chance for a neutral followup
+    if (Math.random() < 0.5) {
+      replyLines.push(randChoice(NPC_REPLIES.neutralFollowups));
+    }
+
+    game.callNPCMood += moodDelta;
+
+    for (const line of replyLines) {
+      game.callLog.push({ from: 'npc', text: line });
+    }
+
     game.callStep++;
 
     if (game.callStep >= 3) {
@@ -579,11 +784,11 @@
     }
 
     if (success) {
-      game.callLog.push({ from: 'npc', text: 'Okay, we will take it.' });
+      game.callLog.push({ from: 'npc', text: 'You know what? Let’s go ahead with this.' });
       applySaleSuccess(game.callProduct);
     } else {
       if (!forcedHangup) {
-        game.callLog.push({ from: 'npc', text: 'Sorry, not interested.' });
+        game.callLog.push({ from: 'npc', text: 'I think we’re going to pass.' });
       } else {
         game.callLog.push({ from: 'npc', text: 'Click.' });
       }
@@ -682,6 +887,7 @@
       game.money -= 20; // rent
       game.money -= 20; // food
       game.money -= 5;  // utilities
+      if (game.money < 0) game.money = 0;
     }
 
     if (game.phase === PHASE.OWNER) {
@@ -794,12 +1000,12 @@
 
     drawButton(40, 160, 180, 30, 'Restock');
     addClickRegion(40, 160, 180, 30, () => {
-      drawRestockScreen(true);
+      drawRestockScreen();
     });
 
     drawButton(40, 200, 180, 30, 'Hire employee');
     addClickRegion(40, 200, 180, 30, () => {
-      drawHireEmployeeScreen(true);
+      drawHireEmployeeScreen();
     });
 
     drawButton(40, canvas.height - 60, 140, 30, 'Back');
