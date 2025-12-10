@@ -1172,57 +1172,65 @@
   // ==========================
 
   async function applyPromotions(auto = false) {
-    if (!db) return;
+  if (!db) return;
 
-    const players = getPlayerStats();
-    const total = players.length;
-    if (total === 0) {
-      if (!auto) alert(t("alert.noPlayers"));
-      return;
-    }
+  // All players with stats
+  const allPlayers = getPlayerStats();
 
-    let moves = 0;
-    if (total >= 32) moves = 3;
-    else if (total >= 16) moves = 2;
-    else if (total >= 8) moves = 1;
-    else moves = 0;
+  // Only players who are already in a real league
+  const leaguePlayers = allPlayers.filter(p => LEAGUES.includes(p.league));
 
-    if (moves === 0) {
-      if (!auto) alert(t("alert.notEnoughPlayers"));
-      return;
-    }
-
-    const batch = db.batch();
-
-    let promoted = 0;
-    for (let i = 0; i < players.length && promoted < moves; i++) {
-      const p = players[i];
-      if (!LEAGUES.includes(p.league)) continue;
-      const idx = leagueIndex(p.league);
-      if (idx < 0 || idx >= LEAGUES.length - 1) continue;
-      const userRef = db.collection("users").doc(p.userId);
-      batch.update(userRef, { league: LEAGUES[idx + 1] });
-      promoted++;
-    }
-
-    let relegated = 0;
-    for (let i = players.length - 1; i >= 0 && relegated < moves; i--) {
-      const p = players[i];
-      if (!LEAGUES.includes(p.league)) continue;
-      const idx = leagueIndex(p.league);
-      if (idx <= 0) continue;
-      const userRef = db.collection("users").doc(p.userId);
-      batch.update(userRef, { league: LEAGUES[idx - 1] });
-      relegated++;
-    }
-
-    await batch.commit();
-    await loadAllData();
-    restoreCurrentUser();
-    if (!auto) {
-      alert(t("alert.promotionsDone", { up: moves, down: moves }));
-    }
+  const total = leaguePlayers.length;
+  if (total === 0) {
+    if (!auto) alert(t("alert.noPlayers"));
+    return;
   }
+
+  let moves = 0;
+  if (total >= 32) moves = 3;
+  else if (total >= 16) moves = 2;
+  else if (total >= 8) moves = 1;
+  else moves = 0;
+
+  if (moves === 0) {
+    if (!auto) alert(t("alert.notEnoughPlayers"));
+    return;
+  }
+
+  const batch = db.batch();
+
+  // PROMOTIONS: from the *top* of the table
+  let promoted = 0;
+  for (let i = 0; i < leaguePlayers.length && promoted < moves; i++) {
+    const p = leaguePlayers[i];
+    const idx = leagueIndex(p.league);
+    if (idx < 0 || idx >= LEAGUES.length - 1) continue; // already in top league
+
+    const userRef = db.collection("users").doc(p.userId);
+    batch.update(userRef, { league: LEAGUES[idx + 1] });
+    promoted++;
+  }
+
+  // RELEGATIONS: from the *bottom* of the table
+  let relegated = 0;
+  for (let i = leaguePlayers.length - 1; i >= 0 && relegated < moves; i--) {
+    const p = leaguePlayers[i];
+    const idx = leagueIndex(p.league);
+    if (idx <= 0) continue; // already in bottom league
+
+    const userRef = db.collection("users").doc(p.userId);
+    batch.update(userRef, { league: LEAGUES[idx - 1] });
+    relegated++;
+  }
+
+  await batch.commit();
+  await loadAllData();
+  restoreCurrentUser();
+
+  if (!auto) {
+    alert(t("alert.promotionsDone", { up: promoted, down: relegated }));
+  }
+}
 
   // ==========================
   //  PROFILE VIEW
