@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Make It Happen – Hitachi Vantara</title>
+  <title>Make It Happen – SEP</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <!-- Icons -->
-  <link rel="apple-touch-icon" href="hitachi-logo.jpg">
-  <link rel="icon" type="image/jpeg" sizes="192x192" href="hitachi-logo.jpg">
+  <link rel="apple-touch-icon" href="sep-logo.jpg">
+  <link rel="icon" type="image/jpeg" sizes="192x192" href="sep-logo.jpg">
 
   <!-- Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -42,7 +42,7 @@
 
     header nav button.active {
       font-weight: bold;
-      color: #ff0026; /* Hitachi red */
+      color: #f5f5f5; /* SEP accent */
     }
 
     .scene {
@@ -56,12 +56,12 @@
     }
 
     h1, h2 {
-      color: #ff0026; /* Hitachi red */
+      color: #f5f5f5; /* SEP accent instead of Hitachi red */
     }
 
     .btn {
-      background: #ff0026;
-      color: white;
+      background: #f5f5f5;       /* SEP light accent */
+      color: #000000;            /* Dark text for contrast */
       border: none;
       padding: 10px 16px;
       border-radius: 6px;
@@ -76,7 +76,8 @@
     }
 
     .danger {
-      background: #ff0026;
+      background: #f5f5f5;       /* Same accent, different context */
+      color: #000000;
     }
 
     .input {
@@ -111,9 +112,9 @@
       color: white;
     }
     .amateurs { background: #6c757d; }
-    .intermediates { background: #007bff; }
-    .pros { background: #28a745; }
-    .legends { background: #ff0026; }
+    .intermediates { background: #4b5563; } /* muted grey-blue */
+    .pros { background: #10b981; }          /* calm green */
+    .legends { background: #f5f5f5; color:#000000; } /* SEP accent */
     .pending { background: #888888; }
   </style>
 </head>
@@ -491,7 +492,7 @@
       "alert.notEnoughPlayers": "You need at least 8 players for promotions and relegations.",
       "alert.promotionsDone": "Promotions and relegations applied: {up} up, {down} down.",
       "alert.noActivitiesToPlace": "No activities yet, nothing to place.",
-      "alert.noPending": "No pending joiners ready to place. New sign-ups will join at the start of the next month.",
+      "alert.noPending": "No pending joiners right now.",
       "alert.placeSummary": "Placed {placed} new joiner(s) into leagues. {skipped}",
       "alert.placeSkipped": "{count} left pending (not enough data yet or for balance).",
       "alert.deleteActivityConfirm": "Delete this activity?",
@@ -1425,7 +1426,7 @@
       tr.innerHTML = `
         <td>${rankSymbol}</td>
         <td>
-          <button type="button" class="link-name" data-user-id="${player.userId}" style="background:none;border:none;color:#007bff;cursor:pointer;text-decoration:underline;">
+          <button type="button" class="link-name" data-user-id="${player.userId}" style="background:none;border:none;color:#f5f5f5;cursor:pointer;text-decoration:underline;">
             ${player.name}
           </button>
         </td>
@@ -1464,7 +1465,7 @@
       const tr = document.createElement("tr");
       tr.innerHTML = `
         <td>
-          <button type="button" class="link-name" data-user-id="${stats.userId}" style="background:none;border:none;color:#007bff;cursor:pointer;text-decoration:underline;">
+          <button type="button" class="link-name" data-user-id="${stats.userId}" style="background:none;border:none;color:#f5f5f5;cursor:pointer;text-decoration:underline;">
             ${stats.name}
           </button>
         </td>
