@@ -1,2027 +1,1798 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>SEP & Make It Happen</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <title>Make It Happen – Hitachi Vantara</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <!-- Inter font -->
-  <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
-    rel="stylesheet"
-  />
+  <!-- Icons -->
+  <link rel="apple-touch-icon" href="hitachi-logo.jpg">
+  <link rel="icon" type="image/jpeg" sizes="192x192" href="hitachi-logo.jpg">
 
-  <!-- Tailwind CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- GSAP -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-
-  <!-- Firebase module: sets window.mihFirebaseApi that the main script uses -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-    import {
-      getFirestore,
-      collection,
-      getDocs,
-      addDoc,
-      query,
-      where,
-      orderBy,
-      serverTimestamp,
-    } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
-
-    // Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyAkbH3mJkeheF3L7EaqN1kMgbFd_LJCIXo",
-  authDomain: "hitachi-vantara-make-it-happen.firebaseapp.com",
-  projectId: "hitachi-vantara-make-it-happen",
-  storageBucket: "hitachi-vantara-make-it-happen.firebasestorage.app",
-  messagingSenderId: "749690169824",
-  appId: "1:749690169824:web:21d6b8d2a5862847e4e385",
-  measurementId: "G-7WZ03E68MF"
-};
-
-    function createApi() {
-      const app = initializeApp(firebaseConfig);
-      const db = getFirestore(app);
-
-      const usersCol = collection(db, "mih_users");
-      const entriesCol = collection(db, "mih_entries");
-
-      // Helper to fetch all users
-      async function fetchAllUsers() {
-        const snap = await getDocs(usersCol);
-        const users = [];
-        snap.forEach((doc) => {
-          users.push({ id: doc.id, ...doc.data() });
-        });
-        return users;
-      }
-
-      // Helper to fetch all entries
-      async function fetchAllEntries() {
-        const snap = await getDocs(entriesCol);
-        const entries = [];
-        snap.forEach((doc) => {
-          entries.push({ id: doc.id, ...doc.data() });
-        });
-        return entries;
-      }
-
-      // Determine league with lowest user count
-      async function decideLeague() {
-        const users = await fetchAllUsers();
-        const counts = {
-          amateurs: 0,
-          intermediates: 0,
-          pros: 0,
-          legends: 0,
-        };
-        users.forEach((u) => {
-          if (counts[u.league] !== undefined) {
-            counts[u.league]++;
-          }
-        });
-        const leagues = Object.keys(counts);
-        let best = "amateurs";
-        let bestCount = counts[best];
-        leagues.forEach((l) => {
-          if (counts[l] < bestCount) {
-            best = l;
-            bestCount = counts[l];
-          }
-        });
-        return best;
-      }
-
-      // Login or create user
-      async function loginOrCreateUser(name, password) {
-        const trimmed = name.trim();
-        if (!trimmed) {
-          throw new Error("Name is required");
-        }
-
-        const qUser = query(usersCol, where("nameLower", "==", trimmed.toLowerCase()));
-        const qSnap = await getDocs(qUser);
-        if (!qSnap.empty) {
-          // Existing user
-          const docSnap = qSnap.docs[0];
-          const data = docSnap.data();
-          if (data.password !== password) {
-            throw new Error("wrong-password");
-          }
-          return { id: docSnap.id, ...data };
-        } else {
-          // New user
-          const league = await decideLeague();
-          const docRef = await addDoc(usersCol, {
-            name: trimmed,
-            nameLower: trimmed.toLowerCase(),
-            password,
-            league,
-            createdAt: serverTimestamp(),
-          });
-          return {
-            id: docRef.id,
-            name: trimmed,
-            nameLower: trimmed.toLowerCase(),
-            password,
-            league,
-          };
-        }
-      }
-
-      // Add activity
-      async function addActivity(userId, distanceKm, timeMinutes) {
-        return addDoc(entriesCol, {
-          userId,
-          distanceKm,
-          timeMinutes,
-          createdAt: serverTimestamp(),
-        });
-      }
-
-      // Fetch entries for a single user
-      async function fetchEntriesForUser(userId) {
-        const qEntries = query(entriesCol, where("userId", "==", userId), orderBy("createdAt", "desc"));
-        const snap = await getDocs(qEntries);
-        const entries = [];
-        snap.forEach((doc) => {
-          entries.push({ id: doc.id, ...doc.data() });
-        });
-        return entries;
-      }
-
-      // Build leaderboard data
-      async function buildLeaderboard() {
-        const [users, entries] = await Promise.all([fetchAllUsers(), fetchAllEntries()]);
-        const userMap = {};
-        users.forEach((u) => {
-          userMap[u.id] = u;
-        });
-
-        const totals = {};
-        entries.forEach((e) => {
-          if (!totals[e.userId]) {
-            totals[e.userId] = {
-              userId: e.userId,
-              totalDistance: 0,
-              totalTime: 0,
-              runs: 0,
-            };
-          }
-          totals[e.userId].totalDistance += Number(e.distanceKm) || 0;
-          totals[e.userId].totalTime += Number(e.timeMinutes) || 0;
-          totals[e.userId].runs += 1;
-        });
-
-        const rows = Object.values(totals).map((row) => {
-          const user = userMap[row.userId] || {};
-          return {
-            ...row,
-            name: user.name || "Unknown",
-            league: user.league || "amateurs",
-          };
-        });
-
-        rows.sort((a, b) => b.totalDistance - a.totalDistance);
-        return rows;
-      }
-
-      // Stats table
-      async function buildStats() {
-        const leaderboardRows = await buildLeaderboard();
-        // For now stats are same as leaderboard but with improvement placeholder
-        return leaderboardRows.map((row) => ({
-          ...row,
-          avgDistance: row.runs > 0 ? row.totalDistance / row.runs : 0,
-          bestDistance: 0,
-          improvement: 0,
-        }));
-      }
-
-      // Profile data for a single user
-      async function buildProfile(userId) {
-        const [users, entries] = await Promise.all([
-          fetchAllUsers(),
-          fetchEntriesForUser(userId),
-        ]);
-        const user = users.find((u) => u.id === userId);
-        if (!user) {
-          throw new Error("user-not-found");
-        }
-        let totalDistance = 0;
-        let totalTime = 0;
-        entries.forEach((e) => {
-          totalDistance += Number(e.distanceKm) || 0;
-          totalTime += Number(e.timeMinutes) || 0;
-        });
-        const runs = entries.length;
-        const avgDistance = runs > 0 ? totalDistance / runs : 0;
-        const avgPace = totalDistance > 0 ? totalTime / totalDistance : 0; // minutes per km
-
-        function formatMinutes(m) {
-          if (!isFinite(m) || m <= 0) return "–";
-          const mins = Math.floor(m);
-          const secs = Math.round((m - mins) * 60);
-          return `${mins}m ${secs}s`;
-        }
-
-        return {
-          user,
-          runs,
-          totalDistance,
-          totalTime,
-          avgDistance,
-          bestTimes: {
-            "5k": formatMinutes(avgPace * 5),
-            "10k": formatMinutes(avgPace * 10),
-            "100m": formatMinutes((avgPace * 0.1)),
-          },
-        };
-      }
-
-      // Expose API
-      window.mihFirebaseApi = {
-        loginOrCreateUser,
-        addActivity,
-        fetchEntriesForUser,
-        buildLeaderboard,
-        buildStats,
-        buildProfile,
-      };
-      console.log("Firebase initialised for Make It Happen.");
-    }
-
-    try {
-      if (firebaseConfig.apiKey && firebaseConfig.apiKey !== "YOUR_API_KEY") {
-        createApi();
-      } else {
-        console.log("Firebase config still placeholder. MIH will not work until you fill it in.");
-      }
-    } catch (err) {
-      console.warn("Firebase init error:", err);
-    }
-  </script>
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
 
   <style>
     body {
-      font-family: "Inter", sans-serif;
-      background: linear-gradient(to bottom, #000000, #ffffff);
-      color: #111;
-      scroll-behavior: smooth;
+      margin: 0;
+      font-family: Inter, sans-serif;
+      background: #000000;
+      color: #f7f7f7;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px 16px;
+      background: #111111;
+      border-bottom: 1px solid #333333;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    header nav button {
+      background: none;
+      border: none;
+      padding: 8px 12px;
+      font-size: 15px;
+      cursor: pointer;
+      color: #f7f7f7;
+    }
+
+    header nav button.active {
+      font-weight: bold;
+      color: #ff0026; /* Hitachi red */
     }
 
     .scene {
       display: none;
+      max-width: 900px;
+      margin: auto;
+      padding: 20px;
     }
     .scene.active {
       display: block;
     }
 
-    .fade-section {
-      opacity: 0;
-      transform: translateY(30px);
+    h1, h2 {
+      color: #ff0026; /* Hitachi red */
     }
 
-    button,
-    a {
-      transition: all 0.2s ease;
-    }
-    button:hover,
-    a:hover {
-      transform: translateY(-1px);
-    }
-
-    .popup {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      background: #16a34a;
-      color: #fff;
+    .btn {
+      background: #ff0026;
+      color: white;
+      border: none;
       padding: 10px 16px;
-      border-radius: 8px;
-      opacity: 0;
-      transition: opacity 0.25s ease;
-      z-index: 100;
-      font-size: 13px;
-    }
-    .popup.show {
-      opacity: 1;
-    }
-
-    #cartSidebar {
-      color: #000;
-      transition: transform 0.3s ease;
-    }
-    .hidden-during-cart {
-      transition: opacity 0.2s ease;
-    }
-
-    #exitHomeBtn {
-      position: fixed;
-      top: 12px;
-      left: 12px;
-      z-index: 70;
-      display: none;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 10px;
-      border-radius: 9999px;
-      background: rgba(0, 0, 0, 0.85);
-      color: #fff;
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      font-size: 11px;
+      border-radius: 6px;
       cursor: pointer;
-    }
-    .door-icon {
-      width: 14px;
-      height: 14px;
-      position: relative;
-    }
-    .door-icon::before {
-      content: "";
-      position: absolute;
-      left: 2px;
-      top: 1px;
-      width: 7px;
-      height: 12px;
-      border: 2px solid currentColor;
-      border-left-width: 4px;
-      border-right-width: 1px;
-      border-top-width: 2px;
-      border-bottom-width: 2px;
-      border-radius: 1px;
-    }
-    .door-icon::after {
-      content: "";
-      position: absolute;
-      right: -1px;
-      top: 5px;
-      width: 6px;
-      height: 4px;
-      border-top: 2px solid currentColor;
-      border-left: 2px solid currentColor;
-      border-bottom: 2px solid transparent;
-      border-right: 2px solid transparent;
-      transform: translateX(-1px);
+      font-weight: 600;
+      margin: 8px 0;
     }
 
-    #sepNav {
-      position: fixed;
-      top: 10px;
-      right: 12px;
-      z-index: 70;
-      display: none;
-      flex-direction: column;
-      gap: 6px;
-    }
-    .nav-toggle-btn {
-      background: rgba(0, 0, 0, 0.85);
-      color: #fff;
-      border-radius: 9999px;
+    .btn-small {
       padding: 6px 10px;
-      font-size: 10px;
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      cursor: pointer;
-    }
-    .nav-lines {
-      display: inline-block;
-      width: 14px;
-      height: 10px;
-      position: relative;
-    }
-    .nav-lines span {
-      position: absolute;
-      left: 0;
-      right: 0;
-      height: 2px;
-      background: #fff;
-      border-radius: 999px;
-    }
-    .nav-lines span:nth-child(1) { top: 0; }
-    .nav-lines span:nth-child(2) { top: 4px; }
-    .nav-lines span:nth-child(3) { top: 8px; }
-
-    #sepNavMenu {
-      margin-top: 4px;
-      background: rgba(0, 0, 0, 0.85);
-      border-radius: 9999px;
-      padding: 4px 6px;
-      border: 1px solid rgba(255, 255, 255, 0.25);
-      display: none;
-    }
-    #sepNavMenu.show {
-      display: flex;
-    }
-    #sepNavMenu button {
-      font-size: 10px;
-      padding: 4px 8px;
-      border-radius: 9999px;
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      background: transparent;
-      color: #f3f3f3;
-      white-space: nowrap;
-    }
-
-    .mih-card {
-      background: rgba(255, 255, 255, 0.04);
-      border-radius: 16px;
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      box-shadow: 0 18px 45px rgba(0, 0, 0, 0.45);
-    }
-    .profile-label {
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: #9ca3af;
-    }
-    .profile-value {
       font-size: 14px;
     }
+
+    .danger {
+      background: #ff0026;
+    }
+
+    .input {
+      width: 100%;
+      padding: 10px;
+      margin: 6px 0 14px;
+      border: 1px solid #555;
+      border-radius: 6px;
+      font-size: 16px;
+      background: #111;
+      color: #f7f7f7;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 14px;
+      background: #111111;
+    }
+
+    th, td {
+      padding: 8px;
+      border-bottom: 1px solid #333;
+      text-align: left;
+      color: #f7f7f7;
+    }
+
+    .badge-league {
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 12px;
+      color: white;
+    }
+    .amateurs { background: #6c757d; }
+    .intermediates { background: #007bff; }
+    .pros { background: #28a745; }
+    .legends { background: #ff0026; }
+    .pending { background: #888888; }
   </style>
 </head>
 
-<body class="text-sm md:text-base">
+<body>
 
-  <!-- EXIT TO HOME -->
-  <button id="exitHomeBtn" type="button">
-    <span class="door-icon"></span>
-    <span>Exit to home</span>
-  </button>
+<header>
+  <nav>
+    <button onclick="showScene('welcome')" data-i18n="nav.welcome"></button>
+    <button onclick="showScene('leaderboard')" data-i18n="nav.leaderboard"></button>
+    <button onclick="showScene('stats')" data-i18n="nav.stats"></button>
+    <button onclick="showScene('rules')" data-i18n="nav.rules"></button>
+    <button onclick="showScene('about')" data-i18n="nav.about"></button>
+    <button onclick="showScene('help')" data-i18n="nav.help"></button>
+    <button id="nav-login-btn" onclick="showScene('login')" data-i18n="nav.login"></button>
+  </nav>
 
-  <!-- SEP BURGER NAV -->
-  <div id="sepNav" class="hidden-during-cart">
-    <button id="sepNavToggle" class="nav-toggle-btn" type="button">
-      <span class="nav-lines">
-        <span></span><span></span><span></span>
-      </span>
-      <span>Menu</span>
-    </button>
-    <div id="sepNavMenu">
-      <button type="button" onclick="showScene('sep-shop')">SEP shop</button>
-      <button type="button" onclick="showScene('sep-about')">About SEP</button>
-    </div>
+  <div style="display:flex; gap:8px; align-items:center;">
+    <select id="lang-select">
+      <option value="en">English</option>
+      <option value="da">Dansk</option>
+      <option value="ja">日本語</option>
+    </select>
+
+    <div id="user-controls"></div>
   </div>
+</header>
 
-  <!-- HOME -->
-  <section id="scene-home" class="scene active">
-    <div class="min-h-screen flex items-center justify-center px-6 py-16">
-      <div class="max-w-3xl w-full text-center fade-section">
-        <p class="text-xs tracking-[0.25em] uppercase text-gray-400 mb-4">
-          SEP · Make It Happen
-        </p>
-        <h1 class="text-3xl md:text-4xl font-semibold text-white mb-4">
-          Two simple projects.<br class="hidden md:block" />
-          One calm starting point.
-        </h1>
-        <p class="text-gray-300 mb-10 max-w-xl mx-auto">
-          Choose where you want to go. SEP is a small clothing brand built in Copenhagen.
-          Make It Happen is a simple running challenge that lives in your browser.
-        </p>
+<!-- WELCOME SCENE -->
+<section id="scene-welcome" class="scene active">
+  <h1 data-i18n="welcome.title"></h1>
+  <p data-i18n="welcome.subtitle"></p>
+  <button class="btn" onclick="showScene('login')" data-i18n="welcome.cta"></button>
+</section>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <button
-            id="homeSepBtn"
-            type="button"
-            class="group bg-white/5 border border-white/15 rounded-2xl px-6 py-8 text-left hover:bg-white/10"
-          >
-            <div class="text-xs uppercase tracking-[0.25em] text-gray-400 mb-2">
-              Clothing
-            </div>
-            <div class="text-xl font-semibold text-white mb-2">
-              SEP shop
-            </div>
-            <p class="text-gray-300 text-sm mb-3">
-              Minimalist shirts, hoodies and trousers. Hand pressed in Copenhagen.
-            </p>
-            <div class="text-xs text-gray-400">
-              Enter shop →
-            </div>
-          </button>
+<!-- LOGIN SCENE -->
+<section id="scene-login" class="scene">
+  <h1 data-i18n="login.title"></h1>
+  <p data-i18n="login.description"></p>
 
-          <button
-            id="homeMihBtn"
-            type="button"
-            class="group bg-white/5 border border-white/15 rounded-2xl px-6 py-8 text-left hover:bg-white/10"
-          >
-            <div class="text-xs uppercase tracking-[0.25em] text-gray-400 mb-2">
-              Movement
-            </div>
-            <div class="text-xl font-semibold text-white mb-2">
-              Make It Happen
-            </div>
-            <p class="text-gray-300 text-sm mb-3">
-              Log your runs, walks and rides. Climb a shared leaderboard with your friends.
-            </p>
-            <div class="text-xs text-gray-400">
-              Enter challenge →
-            </div>
-          </button>
-        </div>
-      </div>
-    </div>
-  </section>
+  <form id="login-form">
+    <label data-i18n="login.name"></label>
+    <input id="login-name" class="input" type="text">
 
-  <!-- SEP SHOP -->
-  <section id="scene-sep-shop" class="scene">
-    <header class="pt-20 pb-16 text-center fade-section">
-      <h1 class="text-4xl md:text-5xl font-bold text-gray-100 mb-4">
-        Minimalist clothing made with intention.
-      </h1>
-      <p class="text-lg text-gray-300 mb-8">
-        Soft, clean and hand pressed in Copenhagen.
-      </p>
-      <div id="sepHeroButtons" class="flex justify-center gap-4 hidden-during-cart">
-        <a
-          href="#sep-products"
-          class="bg-white text-black px-6 py-3 rounded-full font-medium"
-        >
-          Shop Now
-        </a>
-        <button
-          id="viewCartBtn"
-          class="border border-white text-white px-6 py-3 rounded-full font-medium relative"
-          type="button"
-        >
-          View Cart
-          <span
-            id="cartCounter"
-            class="absolute -top-2 -right-2 bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hidden"
-          >
-            0
-          </span>
-        </button>
-      </div>
-    </header>
+    <label data-i18n="login.password"></label>
+    <input id="login-password" class="input" type="password">
 
-    <section id="sep-products" class="py-16 px-6 fade-section">
-      <div class="text-center mb-12">
-        <h2 class="text-3xl md:text-4xl font-bold text-gray-100 mb-3">
-          Three products. One choice.
-        </h2>
-        <p class="text-gray-300">
-          Soft, durable and calm pieces for everyday wear.
-        </p>
-      </div>
+    <label data-i18n="login.code"></label>
+    <input id="login-code" class="input" maxlength="20">
 
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-        <div class="product-card bg-white/10 p-6 rounded-xl shadow-md text-center backdrop-blur">
-          <div class="w-full h-64 bg-gray-200 rounded mb-4 flex items-center justify-center text-gray-500 text-xs uppercase tracking-widest">
-            White T shirt
-          </div>
-          <h3 class="text-xl font-bold mb-1">SEP White T shirt</h3>
-          <p class="mb-3">180 kr.</p>
-          <select class="border rounded px-3 py-2 mb-3 bg-transparent">
-            <option>XS</option><option>S</option><option>M</option><option>L</option><option>XL</option>
-          </select>
-          <div class="flex justify-center gap-2">
-            <input type="number" min="1" value="1" class="border rounded w-16 text-center bg-transparent quantity-selector" />
-            <button class="add-to-cart bg-white text-black px-4 py-2 rounded" type="button">Add</button>
-          </div>
-        </div>
+    <button class="btn" data-i18n="login.submit"></button>
+  </form>
 
-        <div class="product-card bg-white/10 p-6 rounded-xl shadow-md text-center backdrop-blur">
-          <div class="w-full h-64 bg-gray-200 rounded mb-4 flex items-center justify-center text-gray-500 text-xs uppercase tracking-widest">
-            Black Hoodie
-          </div>
-          <h3 class="text-xl font-bold mb-1">SEP Black Hoodie</h3>
-          <p class="mb-3">180 kr.</p>
-          <select class="border rounded px-3 py-2 mb-3 bg-transparent">
-            <option>XS</option><option>S</option><option>M</option><option>L</option><option>XL</option>
-          </select>
-          <div class="flex justify-center gap-2">
-            <input type="number" min="1" value="1" class="border rounded w-16 text-center bg-transparent quantity-selector" />
-            <button class="add-to-cart bg-white text-black px-4 py-2 rounded" type="button">Add</button>
-          </div>
-        </div>
+  <button id="view-code-btn" class="btn btn-small" type="button" style="margin-top:4px;">
+    View saved login password
+  </button>
+  <p id="saved-code-display" style="display:none; margin-top:6px;"></p>
 
-        <div class="product-card bg-white/10 p-6 rounded-xl shadow-md text-center backdrop-blur">
-          <div class="w-full h-64 bg-gray-200 rounded mb-4 flex items-center justify-center text-gray-500 text-xs uppercase tracking-widest">
-            Black Trousers
-          </div>
-          <h3 class="text-xl font-bold mb-1">SEP Black Trousers</h3>
-          <p class="mb-3">180 kr.</p>
-          <select class="border rounded px-3 py-2 mb-3 bg-transparent">
-            <option>XS</option><option>S</option><option>M</option><option>L</option><option>XL</option>
-          </select>
-          <div class="flex justify-center gap-2">
-            <input type="number" min="1" value="1" class="border rounded w-16 text-center bg-transparent quantity-selector" />
-            <button class="add-to-cart bg-white text-black px-4 py-2 rounded" type="button">Add</button>
-          </div>
-        </div>
-      </div>
-    </section>
+  <p data-i18n="login.note"></p>
+</section>
 
-    <div
-      id="cartSidebar"
-      class="fixed top-0 right-0 h-full w-80 bg-white shadow-xl translate-x-full z-50 overflow-y-auto"
-    >
-      <div class="p-6">
-        <div class="flex justify-between items-center mb-4">
-          <h3 class="text-xl font-bold">Your Cart</h3>
-          <button id="closeCart" type="button">✕</button>
-        </div>
+<!-- LEADERBOARD SCENE -->
+<section id="scene-leaderboard" class="scene">
+  <h1 data-i18n="leaderboard.title"></h1>
 
-        <div class="mb-4 text-sm">
-          <p class="mb-1 font-medium">Shipping destination</p>
-          <div class="flex gap-2 text-xs">
-            <button
-              id="shippingCph"
-              type="button"
-              class="px-3 py-1 rounded-full border border-gray-400 bg-gray-200"
-            >
-              Copenhagen
-            </button>
-            <button
-              id="shippingNonCph"
-              type="button"
-              class="px-3 py-1 rounded-full border border-gray-400 bg-transparent"
-            >
-              Rest of Denmark
-            </button>
-          </div>
-          <p class="mt-1 text-gray-500 text-xs">
-            Copenhagen = free shipping. Rest of Denmark = +45 kr.
-          </p>
-        </div>
+  <label data-i18n="leaderboard.filter"></label>
+  <select id="league-filter" class="input" style="max-width:260px;">
+    <option value="all" data-i18n="leaderboard.all"></option>
+    <option value="pending" data-i18n="league.pending"></option>
+    <option value="amateurs" data-i18n="league.amateurs"></option>
+    <option value="intermediates" data-i18n="league.intermediates"></option>
+    <option value="pros" data-i18n="league.pros"></option>
+    <option value="legends" data-i18n="league.legends"></option>
+  </select>
 
-        <div id="cartItems" class="space-y-4 text-sm"></div>
+  <table>
+    <thead>
+      <tr>
+        <th data-i18n="lb.rank"></th>
+        <th data-i18n="lb.name"></th>
+        <th data-i18n="lb.league"></th>
+        <th data-i18n="lb.distance"></th>
+        <th data-i18n="lb.time"></th>
+      </tr>
+    </thead>
+    <tbody id="leaderboard-body"></tbody>
+  </table>
 
-        <div class="border-t border-gray-300 pt-4 mt-4 text-sm">
-          <div class="flex justify-between mb-1">
-            <span>Subtotal:</span>
-            <span id="cartSubtotal" class="font-bold">0 kr.</span>
-          </div>
-          <div class="flex justify-between mb-2 text-xs text-gray-600">
-            <span>Shipping:</span>
-            <span id="cartShippingLabel">+45 kr.</span>
-          </div>
-          <div class="flex justify-between font-semibold border-t border-gray-300 pt-2 mb-3">
-            <span>Total:</span>
-            <span id="cartTotal">45 kr.</span>
-          </div>
+  <p id="no-entries" data-i18n="leaderboard.none"></p>
 
-          <button
-            id="openMobilePay"
-            class="w-full bg-green-500 text-white py-2 rounded mb-2"
-            type="button"
-          >
-            Open MobilePay
-          </button>
-          <p class="text-xs text-gray-500 mb-2 text-center">
-            “Open MobilePay” only works properly on mobile devices.
-          </p>
-          <button
-            id="copyMobilePay"
-            class="w-full bg-gray-200 py-2 rounded"
-            type="button"
-          >
-            Copy Order Message
-          </button>
-        </div>
-      </div>
-    </div>
-    <div id="cartOverlay" class="fixed inset-0 bg-black/50 hidden z-40"></div>
+  <!-- Pending view -->
+  <h2 data-i18n="pending.title"></h2>
+  <p data-i18n="pending.subtitle"></p>
 
-    <section class="py-20 text-center fade-section">
-      <h2 class="text-3xl font-bold mb-10 text-gray-100">
-        How to order
-      </h2>
-      <div class="grid grid-cols-1 md:grid-cols-5 gap-6 max-w-6xl mx-auto text-sm md:text-base">
-        <div class="bg-white/10 rounded-xl p-6 backdrop-blur">
-          <h3 class="font-bold text-lg mb-2">1. Choose</h3>
-          <p>Pick your favourite SEP piece. Then choose your size.</p>
-        </div>
-        <div class="bg-white/10 rounded-xl p-6 backdrop-blur">
-          <h3 class="font-bold text-lg mb-2">2. Add to cart</h3>
-          <p>Use the Add button on each card to build your cart.</p>
-        </div>
-        <div class="bg-white/10 rounded-xl p-6 backdrop-blur">
-          <h3 class="font-bold text-lg mb-2">3. Copy message</h3>
-          <p>Open the cart and tap “Copy Order Message”.</p>
-        </div>
-        <div class="bg-white/10 rounded-xl p-6 backdrop-blur">
-          <h3 class="font-bold text-lg mb-2">4. Pay with MobilePay</h3>
-          <p>Send the total to <b>5894BZ</b> on MobilePay.</p>
-        </div>
-        <div class="bg-white/10 rounded-xl p-6 backdrop-blur">
-          <h3 class="font-bold text-lg mb-2">5. Send your order</h3>
-          <p>Paste the message into a DM to <b>@seproairesis</b>.</p>
-        </div>
-      </div>
-    </section>
+  <table>
+    <thead>
+      <tr>
+        <th data-i18n="pending.rank"></th>
+        <th data-i18n="pending.name"></th>
+        <th data-i18n="pending.joinMonth"></th>
+      </tr>
+    </thead>
+    <tbody id="pending-body"></tbody>
+  </table>
 
-    <footer class="text-center py-10 fade-section text-sm">
-      <p>
-        © 2025 SEP – Se Proairesis (“Your Choice”) · MobilePay 5894BZ ·
-        +45 kr shipping, free in Copenhagen · Delivery only within Denmark.
-      </p>
-      <p class="mt-2 text-xs text-gray-400">
-        No data selling. No ads following you around. No creepy tracking.
-      </p>
-      <div class="flex justify-center gap-4 mt-4">
-        <a
-          href="https://instagram.com/seproairesis"
-          target="_blank"
-          class="bg-gradient-to-br from-pink-500 to-purple-600 text-white px-4 py-2 rounded-full text-sm"
-        >
-          Instagram
-        </a>
-        <a
-          href="https://tiktok.com/@seproairesis"
-          target="_blank"
-          class="bg-black text-white px-4 py-2 rounded-full text-sm"
-        >
-          TikTok
-        </a>
-      </div>
-    </footer>
-  </section>
+  <p id="no-pending" data-i18n="pending.none"></p>
+</section>
 
-  <!-- ABOUT SEP -->
-  <section id="scene-sep-about" class="scene">
-    <div class="min-h-screen bg-black text-white flex items-center justify-center px-6 py-16">
-      <div class="max-w-3xl mx-auto space-y-6">
-        <h2 class="text-3xl font-bold tracking-wide">About SEP</h2>
-        <p class="text-gray-300">
-          SEP stands for <span class="italic">Se Proairesis</span>, an ancient Greek idea that roughly
-          means “Your Choice”. The brand is built around that idea.
-        </p>
-        <p class="text-gray-300">
-          A white T shirt, a black hoodie and black trousers that feel good and work with almost anything.
-          Every print is hand pressed in Copenhagen in small batches.
-        </p>
-        <p class="text-gray-300">
-          There are no big collections and no hype drops. You pick your piece, copy your order message, pay and wait.
-        </p>
-        <p class="text-gray-400 text-xs">
-          There is no tracking across the internet. No data selling. No newsletter trying to drag you back.
-        </p>
-        <div class="flex flex-wrap gap-3 text-xs md:text-sm mt-4">
-          <button
-            class="px-4 py-2 rounded-full border border-white/20"
-            type="button"
-            onclick="showScene('sep-shop')"
-          >
-            Back to SEP shop
-          </button>
-        </div>
-      </div>
-    </div>
-  </section>
+<!-- STATS SCENE -->
+<section id="scene-stats" class="scene">
+  <h1 data-i18n="stats.title"></h1>
 
-  <!-- MIH WELCOME -->
-  <section id="scene-mih-welcome" class="scene">
-    <div class="min-h-screen bg-black text-white pt-16 pb-20 px-4 md:px-6">
-      <div class="max-w-5xl mx-auto mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div>
-          <div class="text-[10px] tracking-[0.5em] uppercase text-gray-400 mb-1">
-            Make It
-          </div>
-          <div class="text-2xl md:text-3xl font-semibold tracking-[0.5em] uppercase">
-            Happen
-          </div>
-        </div>
-        <div class="flex flex-wrap gap-2 text-xs md:text-sm">
-          <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" type="button" onclick="showScene('mih-login')">
-            Login
-          </button>
-          <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" type="button" onclick="showScene('mih-welcome')">
-            Welcome
-          </button>
-          <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" type="button" onclick="showScene('mih-leaderboard')">
-            Leaderboard
-          </button>
-          <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" type="button" onclick="showScene('mih-stats')">
-            Stats
-          </button>
-          <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" type="button" onclick="showScene('mih-about')">
-            About
-          </button>
-        </div>
-      </div>
+  <table>
+    <thead>
+      <tr>
+        <th data-i18n="lb.name"></th>
+        <th data-i18n="lb.league"></th>
+        <th data-i18n="stats.runs"></th>
+        <th data-i18n="stats.totaldistance"></th>
+        <th data-i18n="stats.totaltime"></th>
+        <th data-i18n="stats.avgdistance"></th>
+        <th data-i18n="stats.bestdistance"></th>
+        <th data-i18n="stats.improvement"></th>
+      </tr>
+    </thead>
+    <tbody id="stats-body"></tbody>
+  </table>
 
-      <main class="max-w-5xl mx-auto">
-        <div class="mih-card p-6 md:p-8 space-y-4 text-sm md:text-base">
-          <div>
-            <h1 class="text-2xl md:text-3xl font-semibold mb-2">
-              Move more. Compete. Make it happen.
-            </h1>
-            <p class="text-gray-300">
-              Run, walk or cycle. Log your distance and time. Slowly climb a shared leaderboard in your league.
-            </p>
-          </div>
-          <div class="flex flex-wrap gap-3 text-xs md:text-sm">
-            <button
-              class="px-5 py-2 rounded-full bg-white text-black"
-              type="button"
-              onclick="showScene('mih-leaderboard')"
-            >
-              See leaderboard →
-            </button>
-            <button
-              class="px-5 py-2 rounded-full border border-white/20 text-gray-200"
-              type="button"
-              onclick="showScene('mih-about')"
-            >
-              What is this?
-            </button>
-          </div>
-        </div>
-      </main>
-    </div>
-  </section>
+  <p id="no-stats" data-i18n="stats.none"></p>
+</section>
 
-  <!-- MIH LOGIN -->
-  <section id="scene-mih-login" class="scene">
-    <div class="min-h-screen bg-black text-white pt-16 pb-20 px-4 md:px-6">
-      <div class="max-w-5xl mx-auto mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div>
-          <div class="text-[10px] tracking-[0.5em] uppercase text-gray-400 mb-1">
-            Make It
-          </div>
-          <div class="text-2xl md:text-3xl font-semibold tracking-[0.5em] uppercase">
-            Happen
-          </div>
-        </div>
-        <div class="flex flex-wrap gap-2 text-xs md:text-sm">
-          <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" type="button" onclick="showScene('mih-login')">
-            Login
-          </button>
-          <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" type="button" onclick="showScene('mih-welcome')">
-            Welcome
-          </button>
-          <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" type="button" onclick="showScene('mih-leaderboard')">
-            Leaderboard
-          </button>
-          <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" type="button" onclick="showScene('mih-stats')">
-            Stats
-          </button>
-          <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" type="button" onclick="showScene('mih-about')">
-            About
-          </button>
-        </div>
-      </div>
+<!-- RULES SCENE -->
+<section id="scene-rules" class="scene">
+  <h1 data-i18n="rules.title"></h1>
 
-      <main class="max-w-5xl mx-auto">
-        <div class="mih-card p-6 md:p-8 text-sm md:text-base">
-          <h1 class="text-2xl md:text-3xl font-semibold mb-2">
-            Log in to Make It Happen
-          </h1>
-          <p class="text-gray-300 mb-4">
-            Create a simple account so the site knows who you are and only you can manage your activities.
-          </p>
-          <form id="login-form" class="space-y-3 mt-2">
-            <div>
-              <label for="login-name" class="block text-xs text-gray-400 mb-1">Name</label>
-              <input
-                id="login-name"
-                type="text"
-                placeholder="e.g. Daniel"
-                class="w-full px-3 py-2 rounded-full bg-black/40 border border-white/15 text-sm"
-                required
-              />
-            </div>
-            <div>
-              <label for="login-password" class="block text-xs text-gray-400 mb-1">Password</label>
-              <input
-                id="login-password"
-                type="password"
-                placeholder="Choose something simple"
-                class="w-full px-3 py-2 rounded-full bg-black/40 border border-white/15 text-sm"
-                required
-              />
-            </div>
-            <button
-              type="submit"
-              class="px-5 py-2 rounded-full bg-white text-black text-xs md:text-sm mt-1"
-            >
-              Log in / Create account
-            </button>
-            <p class="text-[11px] text-gray-400 mt-2">
-              If this is your first time with this name, a new account will be created and you will be placed into a league.
-            </p>
-          </form>
-          <p class="text-[11px] text-gray-500 mt-4">
-            Your login is stored with Firebase and your browser. There are no ads and no data selling.
-          </p>
-        </div>
-      </main>
-    </div>
-  </section>
+  <h2 data-i18n="rules.joiningtitle"></h2>
+  <p data-i18n="rules.joiningtext"></p>
 
-  <!-- MIH LEADERBOARD -->
-  <section id="scene-mih-leaderboard" class="scene">
-    <div class="min-h-screen bg-black text-white pt-16 pb-20 px-4 md:px-6">
-      <div class="max-w-5xl mx-auto mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div>
-          <div class="text-[10px] tracking-[0.5em] uppercase text-gray-400 mb-1">
-            Make It
-          </div>
-          <div class="text-2xl md:text-3xl font-semibold tracking-[0.5em] uppercase">
-            Happen
-          </div>
-        </div>
-        <div class="flex flex-wrap gap-2 text-xs md:text-sm">
-          <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" type="button" onclick="showScene('mih-login')">
-            Login
-          </button>
-          <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" type="button" onclick="showScene('mih-welcome')">
-            Welcome
-          </button>
-          <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" type="button" onclick="showScene('mih-leaderboard')">
-            Leaderboard
-          </button>
-          <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" type="button" onclick="showScene('mih-stats')">
-            Stats
-          </button>
-          <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" type="button" onclick="showScene('mih-about')">
-            About
-          </button>
-        </div>
-        <div class="flex flex-col items-end gap-2 text-[11px] text-gray-400 min-w-[160px]">
-          <div id="user-controls" class="flex flex-wrap gap-2 justify-end"></div>
-        </div>
-      </div>
+  <h2 data-i18n="rules.leaguetitle"></h2>
+  <p data-i18n="rules.leaguetext"></p>
 
-      <main class="max-w-5xl mx-auto space-y-6 text-sm md:text-base">
-        <div class="mih-card p-6 md:p-8">
-          <div class="grid md:grid-cols-2 gap-6">
-            <div>
-              <h2 class="text-xl font-semibold mb-2">Add your latest activity</h2>
-              <p class="text-sm text-gray-300 mb-3">
-                Log any run, walk or ride. Use kilometres and minutes so the leaderboard stays fair.
-              </p>
-              <form id="entry-form" class="space-y-3">
-                <div>
-                  <label for="name" class="block text-xs text-gray-400 mb-1">
-                    Your name
-                  </label>
-                  <input
-                    id="name"
-                    type="text"
-                    disabled
-                    placeholder="Log in to set your name"
-                    class="w-full px-3 py-2 rounded-full bg-black/40 border border-white/15 text-sm"
-                  />
-                  <p class="text-[11px] text-gray-500 mt-1">
-                    Name comes from your account. You cannot change it here.
-                  </p>
-                </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
-                    <label for="distance" class="block text-xs text-gray-400 mb-1">
-                      Distance (km)
-                    </label>
-                    <input
-                      id="distance"
-                      type="number"
-                      step="0.1"
-                      min="0"
-                      placeholder="e.g. 5"
-                      class="w-full px-3 py-2 rounded-full bg-black/40 border border-white/15 text-sm"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label for="time" class="block text-xs text-gray-400 mb-1">
-                      Time (minutes)
-                    </label>
-                    <input
-                      id="time"
-                      type="number"
-                      step="0.1"
-                      min="0"
-                      placeholder="e.g. 28"
-                      class="w-full px-3 py-2 rounded-full bg-black/40 border border-white/15 text-sm"
-                      required
-                    />
-                  </div>
-                </div>
-                <button
-                  type="submit"
-                  class="px-5 py-2 rounded-full bg-white text-black text-xs md:text-sm"
-                >
-                  Save my activity
-                </button>
-                <p class="text-[11px] text-gray-400 mt-2">
-                  New accounts are spread across leagues so numbers stay balanced.
-                </p>
-              </form>
-            </div>
+  <h2 data-i18n="rules.promotiontitle"></h2>
+  <p data-i18n="rules.promotiontext"></p>
 
-            <div>
-              <h3 class="text-lg font-semibold mb-2">How ranking works</h3>
-              <p class="text-sm text-gray-300">
-                The leaderboard gives credit for:
-              </p>
-              <ul class="text-sm text-gray-300 list-disc list-inside mt-2 space-y-1">
-                <li><strong>Total distance</strong> – moving more is good.</li>
-                <li><strong>Commitment over time</strong> – more sessions logged counts.</li>
-                <li><strong>Speed and improvement</strong> – faster pace helps, but it is not everything.</li>
-              </ul>
-            </div>
-          </div>
-        </div>
+  <h2 data-i18n="rules.prizetitle"></h2>
+  <p data-i18n="rules.prizetext"></p>
+</section>
 
-        <div class="mih-card p-6 md:p-8">
-          <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
-            <h2 class="text-xl font-semibold">Live leaderboard</h2>
-            <div class="flex items-center gap-2 text-xs text-gray-300">
-              <span>League:</span>
-              <select
-                id="league-filter"
-                class="px-3 py-1 rounded-full bg-black/40 border border-white/20 text-xs"
-                onchange="renderLeaderboard()"
-              >
-                <option value="all">All leagues</option>
-                <option value="amateurs">Amateurs</option>
-                <option value="intermediates">Intermediates</option>
-                <option value="pros">Pros</option>
-                <option value="legends">Legends</option>
-              </select>
-            </div>
-          </div>
-          <div class="overflow-x-auto text-xs md:text-sm">
-            <table class="w-full border-collapse min-w-full">
-              <thead class="text-gray-400 text-[11px] uppercase tracking-wide border-b border-white/10">
-                <tr>
-                  <th class="py-2 pr-2 text-left">#</th>
-                  <th class="py-2 px-2 text-left">Participant</th>
-                  <th class="py-2 px-2 text-left">League</th>
-                  <th class="py-2 px-2 text-left">Total distance</th>
-                  <th class="py-2 px-2 text-left">Total time</th>
-                </tr>
-              </thead>
-              <tbody id="leaderboard-body"></tbody>
-            </table>
-          </div>
-          <div id="no-entries" class="text-xs text-gray-400 mt-3">
-            No activities yet. Be the first to log a run and take the top spot.
-          </div>
-        </div>
+<!-- ABOUT SCENE -->
+<section id="scene-about" class="scene">
+  <h1 data-i18n="about.title"></h1>
+  <p data-i18n="about.text1"></p>
+  <p data-i18n="about.text2"></p>
+  <p data-i18n="about.text3"></p>
+</section>
 
-        <div class="mih-card p-6 md:p-8">
-          <h3 class="text-lg font-semibold mb-2">My activities</h3>
-          <p class="text-xs text-gray-400 mb-3">
-            Only activities from the account you are logged in with are shown here.
-          </p>
-          <div class="overflow-x-auto text-xs md:text-sm">
-            <table class="w-full border-collapse min-w-full">
-              <thead class="text-gray-400 text-[11px] uppercase tracking-wide border-b border-white/10">
-                <tr>
-                  <th class="py-2 px-2 text-left">Date</th>
-                  <th class="py-2 px-2 text-left">Distance</th>
-                  <th class="py-2 px-2 text-left">Time</th>
-                </tr>
-              </thead>
-              <tbody id="my-activities-body"></tbody>
-            </table>
-          </div>
-          <div id="no-my-activities" class="text-xs text-gray-400 mt-3">
-            No activities yet for this account.
-          </div>
-        </div>
-      </main>
-    </div>
-  </section>
+<!-- HELP SCENE -->
+<section id="scene-help" class="scene">
+  <h1 data-i18n="help.title"></h1>
+  <p data-i18n="help.text"></p>
+</section>
 
-  <!-- MIH STATS -->
-  <section id="scene-mih-stats" class="scene">
-    <div class="min-h-screen bg-black text-white pt-16 pb-20 px-4 md:px-6">
-      <div class="max-w-5xl mx-auto mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div>
-          <div class="text-[10px] tracking-[0.5em] uppercase text-gray-400 mb-1">
-            Make It
-          </div>
-          <div class="text-2xl md:text-3xl font-semibold tracking-[0.5em] uppercase">
-            Happen
-          </div>
-        </div>
-        <div class="flex flex-wrap gap-2 text-xs md:text-sm">
-          <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" type="button" onclick="showScene('mih-login')">
-            Login
-          </button>
-          <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" type="button" onclick="showScene('mih-welcome')">
-            Welcome
-          </button>
-          <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" type="button" onclick="showScene('mih-leaderboard')">
-            Leaderboard
-          </button>
-          <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" type="button" onclick="showScene('mih-stats')">
-            Stats
-          </button>
-          <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" type="button" onclick="showScene('mih-about')">
-            About
-          </button>
-        </div>
-      </div>
+<!-- ENTRY FORM + MY ACTIVITIES -->
+<section id="scene-entry" class="scene">
+  <h1 data-i18n="entry.title"></h1>
 
-      <main class="max-w-5xl mx-auto">
-        <div class="mih-card p-6 md:p-8">
-          <h2 class="text-xl font-semibold mb-2">Player stats</h2>
-          <p class="text-sm text-gray-300 mb-3">
-            Every activity builds your stats. This table looks at runs, total distance and more.
-          </p>
-          <div class="overflow-x-auto text-xs md:text-sm">
-            <table class="w-full border-collapse min-w-full">
-              <thead class="text-gray-400 text-[11px] uppercase tracking-wide border-b border-white/10">
-                <tr>
-                  <th class="py-2 px-2 text-left">Participant</th>
-                  <th class="py-2 px-2 text-left">League</th>
-                  <th class="py-2 px-2 text-left">Runs</th>
-                  <th class="py-2 px-2 text-left">Total distance</th>
-                  <th class="py-2 px-2 text-left">Total time</th>
-                  <th class="py-2 px-2 text-left">Avg distance</th>
-                  <th class="py-2 px-2 text-left">Best distance</th>
-                  <th class="py-2 px-2 text-left">Improvement</th>
-                </tr>
-              </thead>
-              <tbody id="stats-body"></tbody>
-            </table>
-          </div>
-          <div id="no-stats" class="text-xs text-gray-400 mt-3">
-            Stats will appear as soon as people start logging their activities.
-          </div>
-        </div>
-      </main>
-    </div>
-  </section>
+  <form id="entry-form">
+    <label data-i18n="entry.distance"></label>
+    <input id="distance" type="number" step="0.01" class="input">
 
-  <!-- MIH PROFILE -->
-  <section id="scene-mih-profile" class="scene">
-    <div class="min-h-screen bg-black text-white pt-16 pb-20 px-4 md:px-6">
-      <div class="max-w-3xl mx-auto space-y-6">
-        <div class="flex items-center justify-between">
-          <div>
-            <h2 class="text-2xl font-semibold" id="profileName">Runner profile</h2>
-            <p class="text-xs text-gray-400" id="profileLeague"></p>
-          </div>
-          <button
-            class="px-3 py-1 rounded-full border border-white/25 text-[11px]"
-            type="button"
-            onclick="showScene('mih-leaderboard')"
-          >
-            Back to leaderboard
-          </button>
-        </div>
+    <label data-i18n="entry.time"></label>
+    <input id="time" type="number" step="0.01" class="input">
 
-        <div class="mih-card p-6 space-y-4 text-sm">
-          <div class="grid grid-cols-2 gap-4">
-            <div>
-              <div class="profile-label">Total distance</div>
-              <div class="profile-value" id="profileTotalDistance">–</div>
-            </div>
-            <div>
-              <div class="profile-label">Total time</div>
-              <div class="profile-value" id="profileTotalTime">–</div>
-            </div>
-            <div>
-              <div class="profile-label">Runs logged</div>
-              <div class="profile-value" id="profileRuns">–</div>
-            </div>
-            <div>
-              <div class="profile-label">Average distance</div>
-              <div class="profile-value" id="profileAvgDistance">–</div>
-            </div>
-          </div>
+    <button class="btn" data-i18n="entry.submit"></button>
+  </form>
 
-          <hr class="border-white/10 my-4" />
+  <h2 data-i18n="entry.my"></h2>
+  <table>
+    <thead>
+      <tr>
+        <th data-i18n="entry.date"></th>
+        <th data-i18n="entry.distance"></th>
+        <th data-i18n="entry.time"></th>
+        <th data-i18n="entry.actions"></th>
+      </tr>
+    </thead>
+    <tbody id="my-activities-body"></tbody>
+  </table>
 
-          <h3 class="text-lg font-semibold mb-1">Estimated best times</h3>
-          <p class="text-xs text-gray-400 mb-3">
-            Based on the pace from your logged runs.
-          </p>
-          <div class="grid grid-cols-3 gap-4 text-sm">
-            <div>
-              <div class="profile-label">5 km</div>
-              <div class="profile-value" id="profileBest5k">–</div>
-            </div>
-            <div>
-              <div class="profile-label">10 km</div>
-              <div class="profile-value" id="profileBest10k">–</div>
-            </div>
-            <div>
-              <div class="profile-label">100 m</div>
-              <div class="profile-value" id="profileBest100m">–</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
+  <p id="no-my-activities" data-i18n="entry.none"></p>
+</section>
 
-  <!-- MIH ABOUT -->
-  <section id="scene-mih-about" class="scene">
-    <div class="min-h-screen bg-black text-white pt-16 pb-20 px-4 md:px-6">
-      <div class="max-w-5xl mx-auto mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div>
-          <div class="text-[10px] tracking-[0.5em] uppercase text-gray-400 mb-1">
-            Make It
-          </div>
-          <div class="text-2xl md:text-3xl font-semibold tracking-[0.5em] uppercase">
-            Happen
-          </div>
-        </div>
-        <div class="flex flex-wrap gap-2 text-xs md:text-sm">
-          <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" type="button" onclick="showScene('mih-login')">
-            Login
-          </button>
-          <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" type="button" onclick="showScene('mih-welcome')">
-            Welcome
-          </button>
-          <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" type="button" onclick="showScene('mih-leaderboard')">
-            Leaderboard
-          </button>
-          <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" type="button" onclick="showScene('mih-stats')">
-            Stats
-          </button>
-          <button class="px-3 py-1 rounded-full border border-white/20 text-gray-300" type="button" onclick="showScene('mih-about')">
-            About
-          </button>
-        </div>
-      </div>
+<!-- PROFILE SCENE -->
+<section id="profile-card" class="scene" style="display:none;">
+  <h1 id="profile-title"></h1>
+  <p id="profile-summary"></p>
 
-      <main class="max-w-5xl mx-auto">
-        <div class="mih-card p-6 md:p-8 space-y-4 text-sm md:text-base text-gray-200">
-          <h2 class="text-xl font-semibold mb-2">
-            About Make It Happen
-          </h2>
-          <p>
-            Make It Happen is a simple health challenge for anyone who wants to move a bit more without
-            subscriptions or complicated apps. You log what you do and see where you land in your league.
-          </p>
-          <p>
-            It is not about being the fastest in the world. It is about small sessions adding up over
-            weeks and months.
-          </p>
-          <p class="font-semibold">
-            It is built to be:
-          </p>
-          <ul class="list-disc list-inside space-y-1">
-            <li><strong>Healthy</strong> – even short walks and slow runs help your heart, sleep and energy.</li>
-            <li><strong>Free</strong> – no paid tiers and no hidden upgrades.</li>
-            <li><strong>Fun</strong> – gentle competition and visible progress instead of pressure.</li>
-          </ul>
-          <p class="text-sm text-gray-300">
-            Data lives in Firebase and is only used to run this simple leaderboard. No ads, no tracking across other sites.
-          </p>
-          <div class="flex flex-wrap gap-3 text-xs md:text-sm mt-2">
-            <button
-              class="px-4 py-2 rounded-full border border-white/20"
-              type="button"
-              onclick="showScene('mih-leaderboard')"
-            >
-              Go to leaderboard
-            </button>
-          </div>
-        </div>
-      </main>
-    </div>
-  </section>
+  <table>
+    <tr><th data-i18n="profile.runs"></th><td id="profile-runs"></td></tr>
+    <tr><th data-i18n="profile.totaldistance"></th><td id="profile-total-distance"></td></tr>
+    <tr><th data-i18n="profile.totaltime"></th><td id="profile-total-time"></td></tr>
+    <tr><th data-i18n="profile.avgdistance"></th><td id="profile-avg-distance"></td></tr>
+    <tr><th data-i18n="profile.avgpace"></th><td id="profile-avg-pace"></td></tr>
+    <tr><th data-i18n="profile.longest"></th><td id="profile-longest"></td></tr>
+    <tr><th data-i18n="profile.best10k"></th><td id="profile-10k"></td></tr>
+    <tr><th data-i18n="profile.best5k"></th><td id="profile-5k"></td></tr>
+  </table>
+</section>
 
-  <!-- MAIN SCRIPT (non-module) -->
-  <script>
-    // GSAP fade
-    window.addEventListener("load", function () {
-      if (window.gsap && window.ScrollTrigger) {
-        gsap.registerPlugin(ScrollTrigger);
-        gsap.utils.toArray(".fade-section").forEach(function (sec) {
-          gsap.to(sec, {
-            opacity: 1,
-            y: 0,
-            duration: 1,
-            scrollTrigger: {
-              trigger: sec,
-              start: "top 80%",
-              once: true,
-            },
-          });
-        });
-      }
-    });
+<!-- Firebase scripts -->
+<script src="https://www.gstatic.com/firebasejs/11.0.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore-compat.js"></script>
 
-    var exitHomeBtn = document.getElementById("exitHomeBtn");
-    var sepNav = document.getElementById("sepNav");
+<script>
+  // ==========================
+  //  CONFIG
+  // ==========================
 
-    function isSepScene(name) {
-      return name.indexOf("sep-") === 0;
+  const firebaseConfig = {
+    apiKey: "AIzaSyAkbH3mJkeheF3L7EaqN1kMgbFd_LJCIXo",
+    authDomain: "hitachi-vantara-make-it-happen.firebaseapp.com",
+    projectId: "hitachi-vantara-make-it-happen",
+    storageBucket: "hitachi-vantara-make-it-happen.firebasestorage.app",
+    messagingSenderId: "749690169824",
+    appId: "1:749690169824:web:21d6b8d2a5862847e4e385",
+    measurementId: "G-7WZ03E68MF"
+  };
+ 
+  const HITACHI_CODE = "27HG0QIBD2";
+  const LS_CODE_OK_KEY = "mih_hitachi_code_ok";
+  const LS_CURRENT_USER_KEY = "mih_current_user_id";
+  const LS_LANG_KEY = "mih_lang";
+  const LS_PASSWORD_KEY = "mih_saved_password";
+
+  const LEAGUES = ["amateurs", "intermediates", "pros", "legends"];
+  const MIN_RUNS_FOR_PLACEMENT = 3;
+
+  let db = null;
+  let users = [];
+  let entries = [];
+  let currentUser = null;
+  let currentLang = "en";
+  let autoRunning = false;
+
+  // ==========================
+  //  TRANSLATIONS
+  // ==========================
+
+  const translations = {
+    en: {
+      // nav
+      "nav.welcome": "Welcome",
+      "nav.leaderboard": "Leaderboard",
+      "nav.stats": "Stats",
+      "nav.rules": "Rules & prizes",
+      "nav.about": "About",
+      "nav.help": "Help",
+      "nav.login": "Login",
+
+      // welcome
+      "welcome.title": "Move more. Compete together.",
+      "welcome.subtitle": "Make It Happen is a health challenge for Hitachi Vantara. Walk, run or cycle, log your distance and climb the leagues.",
+      "welcome.cta": "Log in or create an account",
+
+      // login
+      "login.title": "Log in to Make It Happen",
+      "login.description": "Create a simple account so the site knows who you are and only you can manage your activities.",
+      "login.name": "Name",
+      "login.password": "Password",
+      "login.code": "Hitachi Vantara join code",
+      "login.submit": "Log in / Create account",
+      "login.note": "Only Hitachi Vantara members can join. Your account is stored in the shared database, not just on your device. If you do not use your account for a long time it may be cleaned up.",
+
+      // leagues
+      "league.amateurs": "Amateurs",
+      "league.intermediates": "Intermediates",
+      "league.pros": "Pros",
+      "league.legends": "Legends",
+      "league.pending": "Pending",
+
+      // leaderboard
+      "leaderboard.title": "Leaderboard",
+      "leaderboard.filter": "Filter by league:",
+      "leaderboard.all": "All leagues",
+      "leaderboard.none": "No activities yet. Be the first to log something.",
+      "lb.rank": "#",
+      "lb.name": "Name",
+      "lb.league": "League",
+      "lb.distance": "Total distance (km)",
+      "lb.time": "Total time (min)",
+
+      // pending
+      "pending.title": "Pending joiners",
+      "pending.subtitle": "New sign-ups who will be placed into leagues at the start of the next month.",
+      "pending.rank": "#",
+      "pending.name": "Name",
+      "pending.joinMonth": "Join month",
+      "pending.none": "No pending joiners right now.",
+
+      // stats
+      "stats.title": "Player stats and league moves",
+      "stats.runs": "Runs",
+      "stats.totaldistance": "Total distance (km)",
+      "stats.totaltime": "Total time (min)",
+      "stats.avgdistance": "Average distance (km)",
+      "stats.bestdistance": "Longest distance (km)",
+      "stats.improvement": "Improvement",
+      "stats.none": "Stats will appear once people start logging activities.",
+
+      // rules
+      "rules.title": "Rules, leagues and prizes",
+      "rules.joiningtitle": "Joining and signing up",
+      "rules.joiningtext":
+        "Only Hitachi Vantara members can join, using the access code. You can sign up any time. When you create an account you start as “Pending”. You can log activities straight away. At the start of the next month, the system automatically places all pending players into the leagues based on their distance, time and speed.",
+      "rules.leaguetitle": "Leagues and balance",
+      "rules.leaguetext":
+        "There are four leagues: Amateurs, Intermediates, Pros and Legends. The system tries to keep league sizes balanced. When placing new joiners it avoids making one league much larger than the others, so that the difference between the biggest and smallest league stays small.",
+      "rules.promotiontitle": "Promotions and relegations",
+      "rules.promotiontext":
+        "Each month the site automatically applies promotions and relegations. The number of players moved depends on how many people are active: with 8+ players there is 1 promotion and 1 relegation, with 16+ there are 2 of each, and with 32+ there are 3 of each. Rankings are based on total distance first, then total time, then average speed.",
+      "rules.prizetitle": "Prizes",
+      "rules.prizetext":
+        "Local teams can decide the exact prizes. A simple version is: a small prize for the monthly winner and a bigger prize at the end of the year for the player with the strongest overall performance.",
+
+      // about
+      "about.title": "About Make It Happen",
+      "about.text1":
+        "Make It Happen is a simple, fair health challenge for Hitachi Vantara. The goal is not to create elite athletes, but to give everyone a clear, friendly way to move more and see progress over time.",
+      "about.text2":
+        "You can walk, run or cycle and log your distance and time. The system looks at both how far you go and how long you spend moving. That means slower but very dedicated people still get rewarded, not only the fastest runners.",
+      "about.text3":
+        "New players sign up first, then officially join a league at the start of the next month. The site compares their first month to everyone else, then places them into the league that fits them best while keeping league sizes balanced.",
+
+      // help
+      "help.title": "Help and support",
+      "help.text":
+        "If you need any assistance, if something looks wrong, or if you have a question about Make It Happen, you can text +45 51 34 31 33.",
+
+      // entry
+      "entry.title": "Log a new activity",
+      "entry.distance": "Distance (km)",
+      "entry.time": "Time (minutes)",
+      "entry.submit": "Save my activity",
+      "entry.my": "My activities",
+      "entry.date": "Date",
+      "entry.actions": "Actions",
+      "entry.none": "You have no activities yet for this account.",
+
+      // profile
+      "profile.runs": "Runs",
+      "profile.totaldistance": "Total distance",
+      "profile.totaltime": "Total time",
+      "profile.avgdistance": "Average distance",
+      "profile.avgpace": "Average pace",
+      "profile.longest": "Longest activity",
+      "profile.best10k": "Fastest ~10 km",
+      "profile.best5k": "Fastest ~5 km",
+
+      // user header
+      "user.notLoggedIn": "Not logged in",
+      "user.loginButton": "Login",
+      "user.loggedInAs": "Logged in as {name}",
+      "user.leagueLabel": "League: {league}",
+      "user.addActivity": "Add activity",
+      "user.deleteAccount": "Delete account",
+
+      // alerts
+      "alert.loginMissing": "Please enter both name and password.",
+      "alert.codeWrong": "The Hitachi code is wrong.",
+      "alert.passwordWrong": "Wrong password for this name.",
+      "alert.firebase": "Firebase is not configured yet. Please add your Firebase config in the script.",
+      "alert.mustLogin": "Please log in before adding activities.",
+      "alert.activityInvalid": "Please fill in distance and time correctly with positive values.",
+      "alert.noPlayers": "No players yet.",
+      "alert.notEnoughPlayers": "You need at least 8 players for promotions and relegations.",
+      "alert.promotionsDone": "Promotions and relegations applied: {up} up, {down} down.",
+      "alert.noActivitiesToPlace": "No activities yet, nothing to place.",
+      "alert.noPending": "No pending joiners ready to place. New sign-ups will join at the start of the next month.",
+      "alert.placeSummary": "Placed {placed} new joiner(s) into leagues. {skipped}",
+      "alert.placeSkipped": "{count} left pending (not enough data yet or for balance).",
+      "alert.deleteActivityConfirm": "Delete this activity?",
+      "alert.deleteAccountConfirm": "This will delete your account and all your activities. Are you sure?",
+      "alert.alreadyLoggedIn": "You are already logged in. Delete your account if you want to start over."
+    },
+
+    da: {
+      "nav.welcome": "Velkomst",
+      "nav.leaderboard": "Rangliste",
+      "nav.stats": "Statistik",
+      "nav.rules": "Regler og præmier",
+      "nav.about": "Om projektet",
+      "nav.help": "Hjælp",
+      "nav.login": "Log ind",
+
+      "welcome.title": "Bevæg dig mere. Konkurrér sammen.",
+      "welcome.subtitle": "Make It Happen er en sundhedsudfordring for Hitachi Vantara. Gå, løb eller cykl, registrér din distance og ryk op gennem ligaerne.",
+      "welcome.cta": "Log ind eller opret konto",
+
+      "login.title": "Log ind på Make It Happen",
+      "login.description": "Lav en enkel konto, så siden ved, hvem du er, og kun du kan styre dine aktiviteter.",
+      "login.name": "Navn",
+      "login.password": "Adgangskode",
+      "login.code": "Hitachi Vantara adgangskode",
+      "login.submit": "Log ind / Opret konto",
+      "login.note": "Kun medarbejdere i Hitachi Vantara kan deltage, med adgangskoden. Din konto ligger i en delt database, ikke kun på din egen enhed. Hvis du ikke bruger din konto i lang tid, kan den blive ryddet op.",
+
+      "league.amateurs": "Amatører",
+      "league.intermediates": "Øvede",
+      "league.pros": "Prof",
+      "league.legends": "Legender",
+      "league.pending": "Afventer",
+
+      "leaderboard.title": "Rangliste",
+      "leaderboard.filter": "Filtrér efter liga:",
+      "leaderboard.all": "Alle ligaer",
+      "leaderboard.none": "Ingen aktiviteter endnu. Vær den første til at logge noget.",
+      "lb.rank": "#",
+      "lb.name": "Navn",
+      "lb.league": "Liga",
+      "lb.distance": "Samlet distance (km)",
+      "lb.time": "Samlet tid (min)",
+
+      "pending.title": "Afventende deltagere",
+      "pending.subtitle": "Nye tilmeldinger, som bliver placeret i ligaer ved starten af næste måned.",
+      "pending.rank": "#",
+      "pending.name": "Navn",
+      "pending.joinMonth": "Tilmeldingsmåned",
+      "pending.none": "Ingen afventende deltagere lige nu.",
+
+      "stats.title": "Spillerstatistik og ligaflytninger",
+      "stats.runs": "Ture",
+      "stats.totaldistance": "Samlet distance (km)",
+      "stats.totaltime": "Samlet tid (min)",
+      "stats.avgdistance": "Gennemsnitlig distance (km)",
+      "stats.bestdistance": "Længste tur (km)",
+      "stats.improvement": "Forbedring",
+      "stats.none": "Statistik vises, når deltagerne begynder at logge aktiviteter.",
+
+      "rules.title": "Regler, ligaer og præmier",
+      "rules.joiningtitle": "Tilmelding og opstart",
+      "rules.joiningtext":
+        "Kun medarbejdere i Hitachi Vantara kan deltage, ved hjælp af adgangskoden. Du kan tilmelde dig når som helst. Når du opretter en konto, starter du som “Afventer”. Du kan logge aktiviteter med det samme. Ved starten af næste måned placerer systemet automatisk alle afventende spillere i ligaerne ud fra deres distance, tid og hastighed.",
+      "rules.leaguetitle": "Ligaer og balance",
+      "rules.leaguetext":
+        "Der er fire ligaer: Amatører, Øvede, Prof og Legender. Systemet forsøger at holde ligastørrelserne nogenlunde i balance. Når nye deltagere placeres, undgår det at gøre én liga meget større end de andre, så forskellen mellem den største og mindste liga forbliver lille.",
+      "rules.promotiontitle": "Oprykning og nedrykning",
+      "rules.promotiontext":
+        "Hver måned udfører siden automatisk oprykning og nedrykning. Antallet af spillere der flyttes, afhænger af hvor mange der er aktive: ved 8+ spillere er der 1 oprykning og 1 nedrykning, ved 16+ er der 2 af hver, og ved 32+ er der 3 af hver. Ranglisten bygger først på samlet distance, derefter samlet tid, og til sidst gennemsnitlig hastighed.",
+      "rules.prizetitle": "Præmier",
+      "rules.prizetext":
+        "De lokale teams beslutter præmierne. En enkel model er: en lille præmie til den månedlige vinder og en større præmie ved årets slutning til den spiller, der samlet set har klaret sig bedst.",
+
+      "about.title": "Om Make It Happen",
+      "about.text1":
+        "Make It Happen er en enkel, fair sundhedsudfordring for Hitachi Vantara. Målet er ikke at skabe elitesportsfolk, men at give alle en klar og venlig måde at bevæge sig mere og se deres udvikling over tid.",
+      "about.text2":
+        "Du kan gå, løbe eller cykle og registrere din distance og tid. Systemet kigger både på hvor langt du kommer, og hvor længe du er i bevægelse. Det betyder, at langsommere men meget dedikerede deltagere også bliver belønnet, ikke kun de hurtigste løbere.",
+      "about.text3":
+        "Nye spillere tilmelder sig først og træder officielt ind i en liga ved starten af næste måned. Siden sammenligner deres første måned med resten af feltet og placerer dem i den liga, der passer bedst, samtidig med at ligastørrelserne holdes i balance.",
+
+      "help.title": "Hjælp og support",
+      "help.text":
+        "Hvis du har brug for hjælp, hvis noget ser forkert ud, eller hvis du har et spørgsmål til Make It Happen, kan du sende en sms til +45 51 34 31 33.",
+
+      "entry.title": "Registrér en ny aktivitet",
+      "entry.distance": "Distance (km)",
+      "entry.time": "Tid (minutter)",
+      "entry.submit": "Gem min aktivitet",
+      "entry.my": "Mine aktiviteter",
+      "entry.date": "Dato",
+      "entry.actions": "Handlinger",
+      "entry.none": "Du har ingen aktiviteter endnu på denne konto.",
+
+      "profile.runs": "Ture",
+      "profile.totaldistance": "Samlet distance",
+      "profile.totaltime": "Samlet tid",
+      "profile.avgdistance": "Gennemsnitlig distance",
+      "profile.avgpace": "Gennemsnitstempo",
+      "profile.longest": "Længste aktivitet",
+      "profile.best10k": "Hurtigste ~10 km",
+      "profile.best5k": "Hurtigste ~5 km",
+
+      "user.notLoggedIn": "Ikke logget ind",
+      "user.loginButton": "Log ind",
+      "user.loggedInAs": "Logget ind som {name}",
+      "user.leagueLabel": "Liga: {league}",
+      "user.addActivity": "Tilføj aktivitet",
+      "user.deleteAccount": "Slet konto",
+
+      "alert.loginMissing": "Indtast både navn og adgangskode.",
+      "alert.codeWrong": "Hitachi-adgangskoden er forkert.",
+      "alert.passwordWrong": "Forkert adgangskode til dette navn.",
+      "alert.firebase": "Firebase er ikke sat korrekt op. Indsæt din Firebase-konfiguration i scriptet.",
+      "alert.mustLogin": "Log ind, før du tilføjer aktiviteter.",
+      "alert.activityInvalid": "Udfyld distance og tid korrekt med positive værdier.",
+      "alert.noPlayers": "Ingen spillere endnu.",
+      "alert.notEnoughPlayers": "Du skal bruge mindst 8 spillere til oprykning og nedrykning.",
+      "alert.promotionsDone": "Oprykning og nedrykning udført: {up} op, {down} ned.",
+      "alert.noActivitiesToPlace": "Ingen aktiviteter endnu, intet at placere.",
+      "alert.noPending": "Ingen afventende deltagere klar til placering. Nye tilmeldinger kommer med ved starten af næste måned.",
+      "alert.placeSummary": "Placerede {placed} ny(e) deltager(e) i ligaer. {skipped}",
+      "alert.placeSkipped": "{count} blev efterladt som Afventer (mangler data eller for balance).",
+      "alert.deleteActivityConfirm": "Slet denne aktivitet?",
+      "alert.deleteAccountConfirm": "Dette sletter din konto og alle dine aktiviteter. Er du sikker?",
+      "alert.alreadyLoggedIn": "Du er allerede logget ind. Slet din konto, hvis du vil starte forfra."
+    },
+
+    ja: {
+      "nav.welcome": "ようこそ",
+      "nav.leaderboard": "ランキング",
+      "nav.stats": "統計",
+      "nav.rules": "ルールと賞品",
+      "nav.about": "このプロジェクトについて",
+      "nav.help": "ヘルプ",
+      "nav.login": "ログイン",
+
+      "welcome.title": "もっと動く。みんなで競う。",
+      "welcome.subtitle": "「Make It Happen」は Hitachi Vantara のためのヘルスチャレンジです。歩く・走る・自転車で移動した距離を記録して、リーグの中で順位を上げていきます。",
+      "welcome.cta": "ログインまたはアカウント作成",
+
+      "login.title": "Make It Happen にログイン",
+      "login.description": "シンプルなアカウントを作ることで、自分のアクティビティだけを管理できるようになります。",
+      "login.name": "名前",
+      "login.password": "パスワード",
+      "login.code": "Hitachi Vantara 参加コード",
+      "login.submit": "ログイン / アカウント作成",
+      "login.note": "参加できるのは Hitachi Vantara のメンバーのみで、コードが必要です。アカウントは自分の端末だけでなく、共有データベースに保存されます。長期間まったく利用されないアカウントは整理される場合があります。",
+
+      "league.amateurs": "アマチュア",
+      "league.intermediates": "ミドル",
+      "league.pros": "プロ",
+      "league.legends": "レジェンド",
+      "league.pending": "保留",
+
+      "leaderboard.title": "ランキング",
+      "leaderboard.filter": "リーグで絞り込み：",
+      "leaderboard.all": "すべてのリーグ",
+      "leaderboard.none": "まだアクティビティがありません。最初の記録者になりましょう。",
+      "lb.rank": "順位",
+      "lb.name": "名前",
+      "lb.league": "リーグ",
+      "lb.distance": "総距離（km）",
+      "lb.time": "総時間（分）",
+
+      "pending.title": "保留中の参加者",
+      "pending.subtitle": "翌月の開始時にリーグへ割り当てられる新規参加者。",
+      "pending.rank": "順",
+      "pending.name": "名前",
+      "pending.joinMonth": "参加月",
+      "pending.none": "現在、保留中の参加者はいません。",
+
+      "stats.title": "プレイヤー統計とリーグ昇降格",
+      "stats.runs": "回数",
+      "stats.totaldistance": "総距離（km）",
+      "stats.totaltime": "総時間（分）",
+      "stats.avgdistance": "平均距離（km）",
+      "stats.bestdistance": "最長距離（km）",
+      "stats.improvement": "改善度",
+      "stats.none": "参加者がアクティビティを記録すると統計が表示されます。",
+
+      "rules.title": "ルール・リーグ・賞品について",
+      "rules.joiningtitle": "参加方法とスタート",
+      "rules.joiningtext":
+        "参加できるのは Hitachi Vantara のメンバーのみで、アクセスコード が必要です。いつでもサインアップできます。アカウントを作成すると、最初は「保留」状態になりますが、すぐにアクティビティを記録できます。翌月の初めに、システムが距離・時間・スピードに基づいて保留中のプレイヤーを自動的に各リーグへ割り当てます。",
+      "rules.leaguetitle": "リーグとバランス",
+      "rules.leaguetext":
+        "リーグは4つあります：アマチュア、ミドル、プロ、レジェンド。システムはリーグごとの人数バランスを保つようにします。新規参加者を配置するとき、一部のリーグだけ極端に人数が多くならないよう調整します。",
+      "rules.promotiontitle": "昇格と降格",
+      "rules.promotiontext":
+        "毎月、サイトが自動的に昇格と降格を行います。移動人数はアクティブなプレイヤー数によって決まります：8人以上で1人昇格＋1人降格、16人以上で2人、32人以上で3人です。ランキングは総距離を最優先し、その次に総時間、最後に平均スピードを使って決められます。",
+      "rules.prizetitle": "賞品",
+      "rules.prizetext":
+        "具体的な賞品内容は各ローカルチームが決められます。シンプルな例としては、毎月のトッププレイヤーに小さな賞品を、年間で最も活躍したプレイヤーにより大きな賞品を用意する、などがあります。",
+
+      "about.title": "Make It Happen とは",
+      "about.text1":
+        "Make It Happen は Hitachi Vantara のためのシンプルで公平なヘルスチャレンジです。目的はエリートアスリートをつくることではなく、誰もがもっと動き、自分の変化をわかりやすく実感できる場をつくることです。",
+      "about.text2":
+        "歩く・走る・自転車など、好きな移動方法で距離と時間を記録できます。システムは「どれくらい速いか」だけでなく、「どれだけ長く動いたか」も評価します。つまり、スピードよりも継続して頑張る人もしっかり評価されます。",
+      "about.text3":
+        "新しい参加者はまずサインアップし、翌月のスタート時に正式にどこかのリーグへ入ります。サイトはその最初の1カ月を他の参加者と比較し、その人に合ったリーグに割り当てます。同時に、リーグごとの人数バランスも保つようにしています。",
+
+      "help.title": "ヘルプとサポート",
+      "help.text":
+        "何かおかしいと思ったとき、質問があるとき、またはサポートが必要なときは、+45 51 34 31 33 にテキストメッセージを送ってください。",
+
+      "entry.title": "新しいアクティビティを記録",
+      "entry.distance": "距離（km）",
+      "entry.time": "時間（分）",
+      "entry.submit": "アクティビティを保存",
+      "entry.my": "自分のアクティビティ",
+      "entry.date": "日付",
+      "entry.actions": "操作",
+      "entry.none": "このアカウントでは、まだアクティビティが記録されていません。",
+
+      "profile.runs": "回数",
+      "profile.totaldistance": "総距離",
+      "profile.totaltime": "総時間",
+      "profile.avgdistance": "平均距離",
+      "profile.avgpace": "平均ペース",
+      "profile.longest": "最長アクティビティ",
+      "profile.best10k": "最速 約10 km",
+      "profile.best5k": "最速 約5 km",
+
+      "user.notLoggedIn": "未ログイン",
+      "user.loginButton": "ログイン",
+      "user.loggedInAs": "{name} としてログイン中",
+      "user.leagueLabel": "リーグ：{league}",
+      "user.addActivity": "アクティビティを追加",
+      "user.deleteAccount": "アカウント削除",
+
+      "alert.loginMissing": "名前とパスワードを入力してください。",
+      "alert.codeWrong": "Hitachi の参加コードが正しくありません。",
+      "alert.passwordWrong": "この名前のパスワードが違います。",
+      "alert.firebase": "Firebase がまだ正しく設定されていません。スクリプト内に Firebase 設定を追加してください。",
+      "alert.mustLogin": "アクティビティを追加する前にログインしてください。",
+      "alert.activityInvalid": "距離と時間を正しく、正の数で入力してください。",
+      "alert.noPlayers": "まだプレイヤーがいません。",
+      "alert.notEnoughPlayers": "昇格・降格には最低 8 人のプレイヤーが必要です。",
+      "alert.promotionsDone": "昇格と降格を実行しました：{up} 人昇格、{down} 人降格。",
+      "alert.noActivitiesToPlace": "まだアクティビティがないため、配置するものがありません。",
+      "alert.noPending": "リーグに配置できる保留中プレイヤーはいません。新規参加者は翌月の開始時にリーグに入ります。",
+      "alert.placeSummary": "{placed} 人の新規参加者をリーグに配置しました。{skipped}",
+      "alert.placeSkipped": "{count} 人は保留のままです（データ不足またはバランス調整のため）。",
+      "alert.deleteActivityConfirm": "このアクティビティを削除しますか？",
+      "alert.deleteAccountConfirm": "アカウントとすべてのアクティビティを削除します。本当に続けますか？",
+      "alert.alreadyLoggedIn": "すでにログインしています。初めからやり直したい場合はアカウントを削除してください。"
     }
-    function isMihScene(name) {
-      return name.indexOf("mih-") === 0;
-    }
+  };
 
-    function updateURLForScene(name) {
-      var path = window.location.pathname || "/";
-      var base = path.replace(/\/(sepshop|MIH)$/, "");
-      if (name === "home") {
-        history.pushState({ scene: "home" }, "", base || "/");
-      } else if (isSepScene(name)) {
-        history.pushState({ scene: name }, "", base + "/sepshop");
-      } else if (isMihScene(name)) {
-        history.pushState({ scene: name }, "", base + "/MIH");
-      }
-    }
-
-    function showScene(name, pushState) {
-      if (pushState === undefined) pushState = true;
-      document.querySelectorAll(".scene").forEach(function (s) {
-        s.classList.remove("active");
-      });
-      var target = document.getElementById("scene-" + name);
-      if (target) {
-        target.classList.add("active");
-      }
-      window.scrollTo({ top: 0, left: 0, behavior: "instant" });
-
-      if (name === "home") {
-        exitHomeBtn.style.display = "none";
-      } else {
-        exitHomeBtn.style.display = "flex";
-      }
-
-      if (isSepScene(name)) {
-        sepNav.style.display = "flex";
-      } else {
-        sepNav.style.display = "none";
-      }
-
-      if (pushState) {
-        updateURLForScene(name);
-      }
-    }
-
-    window.addEventListener("popstate", function (event) {
-      var scene = event.state && event.state.scene ? event.state.scene : "home";
-      showScene(scene, false);
-    });
-
-    function initRouteFromPath() {
-      var path = window.location.pathname || "/";
-      if (/\/sepshop$/.test(path)) {
-        showScene("sep-shop", false);
-      } else if (/\/MIH$/.test(path)) {
-        showScene("mih-welcome", false);
-      } else {
-        showScene("home", false);
-      }
-      var activeScene = document.querySelector(".scene.active");
-      if (activeScene) {
-        history.replaceState({ scene: activeScene.id.replace("scene-", "") }, "", window.location.pathname);
-      }
-    }
-
-    exitHomeBtn.addEventListener("click", function () {
-      showScene("home");
-    });
-    document.getElementById("homeSepBtn").addEventListener("click", function () {
-      showScene("sep-shop");
-    });
-    document.getElementById("homeMihBtn").addEventListener("click", function () {
-      showScene("mih-welcome");
-    });
-
-    var sepNavToggle = document.getElementById("sepNavToggle");
-    var sepNavMenu = document.getElementById("sepNavMenu");
-    sepNavToggle.addEventListener("click", function () {
-      sepNavMenu.classList.toggle("show");
-    });
-
-    // SEP CART (localStorage)
-    var cart = JSON.parse(localStorage.getItem("sep_cart")) || [];
-    var cartSidebar = document.getElementById("cartSidebar");
-    var cartOverlay = document.getElementById("cartOverlay");
-    var SHIPPING_BASE = 45;
-    var isCopenhagen = false;
-    var sepHeroButtons = document.getElementById("sepHeroButtons");
-
-    function setShippingButtons() {
-      var btnCph = document.getElementById("shippingCph");
-      var btnNon = document.getElementById("shippingNonCph");
-      if (isCopenhagen) {
-        btnCph.classList.add("bg-gray-200");
-        btnNon.classList.remove("bg-gray-200");
-        btnNon.classList.add("bg-transparent");
-      } else {
-        btnCph.classList.remove("bg-gray-200");
-        btnNon.classList.add("bg-gray-200");
-      }
-    }
-    function currentShippingCost() {
-      return isCopenhagen ? 0 : SHIPPING_BASE;
-    }
-    function updateCounter() {
-      var c = document.getElementById("cartCounter");
-      var t = cart.reduce(function (sum, i) {
-        return sum + i.qty;
-      }, 0);
-      if (t > 0) {
-        c.textContent = t;
-        c.classList.remove("hidden");
-      } else {
-        c.classList.add("hidden");
-      }
-    }
-    function updateCart() {
-      var items = document.getElementById("cartItems");
-      var subtotal = document.getElementById("cartSubtotal");
-      var total = document.getElementById("cartTotal");
-      var shippingLabel = document.getElementById("cartShippingLabel");
-      items.innerHTML = "";
-      var sum = 0;
-
-      if (cart.length === 0) {
-        items.innerHTML = '<p class="text-center text-gray-500 py-10">Cart is empty</p>';
-        subtotal.textContent = "0 kr.";
-      } else {
-        cart.forEach(function (it, i) {
-          var priceNum = parseInt(String(it.price).replace(/\D/g, "")) || 0;
-          var linePrice = priceNum * it.qty;
-          sum += linePrice;
-          items.innerHTML +=
-            '<div class="border-b pb-2">' +
-            '<div class="flex justify-between"><span>' +
-            it.name +
-            "</span><span>" +
-            linePrice +
-            " kr.</span></div>" +
-            '<div class="text-gray-500 text-xs">Size: ' +
-            it.size +
-            " | Qty: " +
-            it.qty +
-            "</div>" +
-            '<button class="text-red-500 text-xs mt-1" onclick="removeFromCart(' +
-            i +
-            ')">Remove</button>' +
-            "</div>";
-        });
-        subtotal.textContent = sum + " kr.";
-      }
-
-      var ship = currentShippingCost();
-      shippingLabel.textContent =
-        ship === 0 ? "0 kr. (FREE in Copenhagen)" : "+" + ship + " kr.";
-      total.textContent = sum + ship + " kr.";
-
-      localStorage.setItem("sep_cart", JSON.stringify(cart));
-      updateCounter();
-    }
-    function addToCart(name, price, size, qty) {
-      if (qty <= 0 || !Number.isFinite(qty)) return;
-      var f = cart.findIndex(function (i) {
-        return i.name === name && i.size === size;
-      });
-      if (f >= 0) {
-        cart[f].qty += qty;
-      } else {
-        cart.push({ name: name, price: price, size: size, qty: qty });
-      }
-      updateCart();
-      showPopup("Added to cart");
-    }
-    function removeFromCart(i) {
-      cart.splice(i, 1);
-      updateCart();
-    }
-    function showPopup(text) {
-      var popup = document.createElement("div");
-      popup.className = "popup";
-      popup.textContent = text;
-      document.body.appendChild(popup);
-      setTimeout(function () {
-        popup.classList.add("show");
-      }, 10);
-      setTimeout(function () {
-        popup.classList.remove("show");
-        setTimeout(function () {
-          popup.remove
-          popup.remove();
-        }, 250);
-      }, 2000);
-    }
-
-    // Attach add-to-cart handlers
-    document.querySelectorAll(".add-to-cart").forEach(function (btn) {
-      btn.addEventListener("click", function () {
-        var card = btn.closest(".product-card");
-        var name = card.querySelector("h3").textContent;
-        var price = card.querySelector("p").textContent;
-        var size = card.querySelector("select").value;
-        var qty = parseInt(card.querySelector(".quantity-selector").value, 10);
-        addToCart(name, price, size, qty);
-      });
-    });
-
-    // Cart open / close
-    var viewCartBtn = document.getElementById("viewCartBtn");
-    if (viewCartBtn) {
-      viewCartBtn.addEventListener("click", function () {
-        cartSidebar.classList.remove("translate-x-full");
-        cartOverlay.classList.remove("hidden");
-        sepNav.style.opacity = "0";
-        if (sepHeroButtons) sepHeroButtons.style.opacity = "0";
+  function t(key, vars) {
+    const dict = translations[currentLang] || translations.en;
+    let str = dict[key] || translations.en[key] || key;
+    if (vars) {
+      Object.keys(vars).forEach(k => {
+        str = str.replace(`{${k}}`, vars[k]);
       });
     }
-    document.getElementById("closeCart").addEventListener("click", closeCart);
-    cartOverlay.addEventListener("click", closeCart);
+    return str;
+  }
 
-    function closeCart() {
-      cartSidebar.classList.add("translate-x-full");
-      cartOverlay.classList.add("hidden");
-      sepNav.style.opacity = "1";
-      if (sepHeroButtons) sepHeroButtons.style.opacity = "1";
+  function applyTranslations() {
+    document.querySelectorAll("[data-i18n]").forEach(el => {
+      const key = el.getAttribute("data-i18n");
+      el.textContent = t(key);
+    });
+    renderHeaderUser();
+    renderLeaderboard();
+    renderStats();
+    renderMyActivities();
+    renderPendingList();
+  }
+
+  function initLanguage() {
+    const select = document.getElementById("lang-select");
+    const saved = localStorage.getItem(LS_LANG_KEY) || "en";
+
+    currentLang = saved;
+
+    if (select) {
+      select.value = saved;
+      select.addEventListener("change", () => {
+        currentLang = select.value;
+        localStorage.setItem(LS_LANG_KEY, currentLang);
+        applyTranslations();
+      });
     }
 
-    // Shipping buttons
-    document
-      .getElementById("shippingCph")
-      .addEventListener("click", function () {
-        isCopenhagen = true;
-        setShippingButtons();
-        updateCart();
-      });
-    document
-      .getElementById("shippingNonCph")
-      .addEventListener("click", function () {
-        isCopenhagen = false;
-        setShippingButtons();
-        updateCart();
-      });
+    applyTranslations();
+  }
 
-    setShippingButtons();
-    updateCart();
+  // ==========================
+  //  BASIC HELPERS
+  // ==========================
 
-    // MobilePay behaviour
-    var mobilePayNum = "5894BZ";
-    document
-      .getElementById("openMobilePay")
-      .addEventListener("click", function () {
-        var digits = mobilePayNum.replace(/\D/g, "");
-        if (digits) {
-          window.location.href = "mobilepay://transfer?phone=" + digits;
+  function currentMonthKey(ts) {
+    const d = ts ? new Date(ts) : new Date();
+    const y = d.getFullYear();
+    const m = d.getMonth() + 1;
+    return `${y}-${String(m).padStart(2, "0")}`;
+  }
+
+  function formatDate(ts) {
+    const d = new Date(ts);
+    if (isNaN(d.getTime())) return "";
+    return d.toLocaleDateString();
+  }
+
+  function formatMinutesPretty(minutes) {
+    if (!isFinite(minutes) || minutes <= 0) return "0:00";
+    const totalSeconds = Math.round(minutes * 60);
+    const m = Math.floor(totalSeconds / 60);
+    const s = totalSeconds % 60;
+    return `${m}:${s.toString().padStart(2, "0")}`;
+  }
+
+  function formatSecondsPretty(seconds) {
+    if (!isFinite(seconds) || seconds <= 0) return "–";
+    return `${seconds.toFixed(1)} s`;
+  }
+
+  function leagueIndex(league) {
+    return LEAGUES.indexOf(league);
+  }
+
+  function formatImprovement(value) {
+    if (!isFinite(value) || value === 0) return "0%";
+    const rounded = Math.round(value);
+    return (rounded > 0 ? "+" : "") + rounded + "%";
+  }
+
+  function getLeagueCounts() {
+    const counts = { amateurs: 0, intermediates: 0, pros: 0, legends: 0 };
+    users.forEach(u => {
+      if (counts[u.league] !== undefined) counts[u.league]++;
+    });
+    return counts;
+  }
+
+  function canMoveLeague(user, targetLeague) {
+    if (!LEAGUES.includes(targetLeague)) return false;
+    const counts = getLeagueCounts();
+    const from = LEAGUES.includes(user.league) ? user.league : null;
+
+    if (from && counts[from] !== undefined) {
+      counts[from] = Math.max(0, counts[from] - 1);
+    }
+    counts[targetLeague] = (counts[targetLeague] || 0) + 1;
+
+    const values = Object.values(counts);
+    const max = Math.max(...values);
+    const min = Math.min(...values);
+    return max - min <= 2;
+  }
+
+  // ==========================
+  //  NAVIGATION
+  // ==========================
+
+  function showScene(name) {
+    const scenes = document.querySelectorAll(".scene");
+    scenes.forEach(scene => {
+      scene.classList.remove("active");
+      scene.style.display = "none";
+    });
+
+    const el =
+      document.getElementById("scene-" + name) ||
+      document.getElementById(name);
+
+    if (el) {
+      el.classList.add("active");
+      el.style.display = "block";
+    }
+
+    const navButtons = document.querySelectorAll("header nav button");
+    navButtons.forEach(btn => btn.classList.remove("active"));
+    navButtons.forEach(btn => {
+      const onclick = btn.getAttribute("onclick") || "";
+      if (onclick.includes("'" + name + "'")) {
+        btn.classList.add("active");
+      }
+    });
+  }
+
+  function updateNavLoginVisibility() {
+    const btn = document.getElementById("nav-login-btn");
+    if (!btn) return;
+    if (currentUser) {
+      btn.style.display = "none";
+    } else {
+      btn.style.display = "inline-block";
+    }
+  }
+
+  // ==========================
+  //  FIREBASE INIT
+  // ==========================
+
+  function initFirebase() {
+    try {
+      firebase.initializeApp(firebaseConfig);
+      db = firebase.firestore();
+    } catch (e) {
+      console.error("Firebase init error:", e);
+      alert(t("alert.firebase"));
+    }
+  }
+
+  // ==========================
+  //  DATA LOADING
+  // ==========================
+
+  async function loadAllData() {
+    if (!db) return;
+    const [usersSnap, actsSnap] = await Promise.all([
+      db.collection("users").get(),
+      db.collection("activities").get()
+    ]);
+
+    users = usersSnap.docs.map(doc => {
+      const data = doc.data();
+      if (!data.league) data.league = "pending";
+      if (!data.joinMonth) data.joinMonth = currentMonthKey(data.createdAt || Date.now());
+      return { id: doc.id, ...data };
+    });
+
+    entries = actsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+    renderLeaderboard();
+    renderStats();
+    renderMyActivities();
+    renderPendingList();
+
+    if (!autoRunning) {
+      autoMonthlyUpdates();
+    }
+  }
+
+  function restoreCurrentUser() {
+    const storedId = localStorage.getItem(LS_CURRENT_USER_KEY);
+    if (!storedId) {
+      currentUser = null;
+      renderHeaderUser();
+      updateEntryFormLockState();
+      updateNavLoginVisibility();
+      return;
+    }
+    const found = users.find(u => u.id === storedId);
+    if (found) {
+      currentUser = found;
+    } else {
+      localStorage.removeItem(LS_CURRENT_USER_KEY);
+      currentUser = null;
+    }
+    renderHeaderUser();
+    updateEntryFormLockState();
+    updateNavLoginVisibility();
+  }
+
+  // ==========================
+  //  PLAYER STATS
+  // ==========================
+
+  function getPlayerStats() {
+    const byUser = {};
+
+    entries.forEach(e => {
+      const user = users.find(u => u.id === e.userId);
+      if (!user) return;
+      const key = user.id;
+      if (!byUser[key]) {
+        byUser[key] = {
+          userId: user.id,
+          name: user.name,
+          league: user.league || "pending",
+          runs: 0,
+          totalDistance: 0,
+          totalTime: 0,
+          bestDistance: 0,
+          firstEntry: null
+        };
+      }
+      const stats = byUser[key];
+
+      if (!stats.firstEntry || e.timestamp < stats.firstEntry.timestamp) {
+        stats.firstEntry = {
+          distanceKm: e.distanceKm,
+          timeMinutes: e.timeMinutes,
+          timestamp: e.timestamp
+        };
+      }
+
+      stats.runs++;
+      stats.totalDistance += e.distanceKm;
+      stats.totalTime += e.timeMinutes;
+      if (e.distanceKm > stats.bestDistance) stats.bestDistance = e.distanceKm;
+    });
+
+    let players = Object.values(byUser);
+
+    players.forEach(p => {
+      p.avgDistance = p.runs > 0 ? p.totalDistance / p.runs : 0;
+      p.speed = p.totalTime > 0 ? p.totalDistance / p.totalTime : 0;
+      let improvement = 0;
+      if (
+        p.firstEntry &&
+        p.firstEntry.distanceKm > 0 &&
+        p.firstEntry.timeMinutes > 0 &&
+        p.totalDistance > 0 &&
+        p.totalTime > 0
+      ) {
+        const baselinePace = p.firstEntry.timeMinutes / p.firstEntry.distanceKm;
+        const avgPace = p.totalTime / p.totalDistance;
+        if (baselinePace > 0) {
+          improvement = ((baselinePace - avgPace) / baselinePace) * 100;
         }
-        alert("Thank you for supporting SEP.");
-      });
-
-    document
-      .getElementById("copyMobilePay")
-      .addEventListener("click", function () {
-        var subtotal = document.getElementById("cartSubtotal").textContent;
-        var total = document.getElementById("cartTotal").textContent;
-        var shipping = document.getElementById("cartShippingLabel").textContent;
-
-        var lines = cart.map(function (i) {
-          return i.qty + "× " + i.name + " (Size: " + i.size + ")";
-        });
-
-        var msg =
-          "Hi SEP, here is my order:\n" +
-          (lines.length ? lines.join("\n") : "[Cart is empty]") +
-          "\n\nSubtotal: " +
-          subtotal +
-          "\nShipping: " +
-          shipping +
-          "\nTotal: " +
-          total;
-
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-          navigator.clipboard.writeText(msg).then(function () {
-            showPopup("Order message copied.");
-          });
-        } else {
-          // Fallback
-          var ta = document.createElement("textarea");
-          ta.value = msg;
-          document.body.appendChild(ta);
-          ta.select();
-          try {
-            document.execCommand("copy");
-            showPopup("Order message copied.");
-          } catch (e) {
-            alert("Copy this message:\n\n" + msg);
-          }
-          document.body.removeChild(ta);
-        }
-      });
-
-    // -----------------------------
-    // MAKE IT HAPPEN – FIREBASE
-    // -----------------------------
-    var STORAGE_KEY_CURRENT_USER = "mih_current_user_v1";
-    var currentUser = null;
-
-    function loadCurrentUser() {
-      var raw = localStorage.getItem(STORAGE_KEY_CURRENT_USER);
-      if (!raw) return;
-      try {
-        currentUser = JSON.parse(raw);
-      } catch (e) {
-        currentUser = null;
       }
-    }
+      p.improvement = improvement;
+    });
 
-    function saveCurrentUser() {
-      if (currentUser) {
-        localStorage.setItem(
-          STORAGE_KEY_CURRENT_USER,
-          JSON.stringify(currentUser)
-        );
-      } else {
-        localStorage.removeItem(STORAGE_KEY_CURRENT_USER);
+    players.sort((a, b) => {
+      if (b.totalDistance !== a.totalDistance) {
+        return b.totalDistance - a.totalDistance;
       }
-    }
-
-    function setEntryFormEnabled(enabled) {
-      var nameInput = document.getElementById("name");
-      var distance = document.getElementById("distance");
-      var time = document.getElementById("time");
-      var btn = document.querySelector("#entry-form button[type='submit']");
-      if (!nameInput || !distance || !time || !btn) return;
-
-      if (enabled) {
-        nameInput.disabled = true;
-        distance.disabled = false;
-        time.disabled = false;
-        btn.disabled = false;
-        nameInput.value = currentUser ? currentUser.name : "";
-      } else {
-        nameInput.disabled = true;
-        distance.disabled = true;
-        time.disabled = true;
-        btn.disabled = true;
-        nameInput.value = "Log in to set your name";
+      if (b.totalTime !== a.totalTime) {
+        return b.totalTime - a.totalTime;
       }
-    }
+      return b.speed - a.speed;
+    });
 
-    function updateUserControlsUI() {
-      var container = document.getElementById("user-controls");
-      if (!container) return;
-      container.innerHTML = "";
+    players = players.map((p, index) => ({ ...p, rank: index + 1 }));
+    return players;
+  }
 
-      if (!currentUser) {
-        container.innerHTML =
-          '<span class="text-gray-500">Not logged in</span>';
-        setEntryFormEnabled(false);
+  // ==========================
+  //  MONTHLY: AUTO UPDATES (after 3rd)
+  // ==========================
+
+  async function autoMonthlyUpdates() {
+    if (!db) return;
+    autoRunning = true;
+    try {
+      const today = new Date();
+      const monthKey = currentMonthKey(today);
+      const day = today.getDate();
+
+      // Only run on or after the 3rd of the month
+      if (day < 3) {
+        autoRunning = false;
         return;
       }
 
-      var span = document.createElement("span");
-      span.textContent =
-        "Logged in as " +
-        currentUser.name +
-        (currentUser.league ? " · " + currentUser.league : "");
-      span.className = "text-gray-300";
+      const metaRef = db.collection("meta").doc("global_state");
+      const snap = await metaRef.get();
+      const data = snap.exists ? snap.data() : {};
 
-      var btn = document.createElement("button");
-      btn.type = "button";
-      btn.textContent = "Log out";
-      btn.className =
-        "px-3 py-1 rounded-full border border-white/25 text-[11px]";
-      btn.addEventListener("click", function () {
-        currentUser = null;
-        saveCurrentUser();
-        updateUserControlsUI();
-        renderLeaderboard();
-        renderStats();
-        renderMyActivities();
-      });
+      // If we already ran for this month, do nothing
+      if (data.lastPromotionMonth === monthKey) {
+        autoRunning = false;
+        return;
+      }
 
+      // Run automatic placement + promotions
+      await placeNewJoiners(true);
+      await applyPromotions(true);
+
+      // Mark month as updated
+      await metaRef.set({ lastPromotionMonth: monthKey }, { merge: true });
+    } catch (e) {
+      console.error("Auto monthly updates error:", e);
+    } finally {
+      autoRunning = false;
+    }
+  }
+
+  // ==========================
+  //  MONTHLY: PLACE NEW JOINERS
+  // ==========================
+
+  async function placeNewJoiners(auto = false) {
+    if (!db) return;
+
+    const players = getPlayerStats();
+    if (!players.length) {
+      if (!auto) alert(t("alert.noActivitiesToPlace"));
+      return;
+    }
+
+    const nowKey = currentMonthKey();
+    const rankMap = {};
+    players.forEach(p => { rankMap[p.userId] = p; });
+
+    const candidates = users.filter(u =>
+      u.league === "pending" &&
+      u.joinMonth &&
+      u.joinMonth < nowKey
+    );
+
+    if (!candidates.length) {
+      if (!auto) alert(t("alert.noPending"));
+      return;
+    }
+
+    const batch = db.batch();
+    let placed = 0;
+    let skipped = 0;
+
+    function preferredLeaguesForTarget(target) {
+      if (target === "legends") return ["legends", "pros"];
+      if (target === "pros") return ["pros", "intermediates", "legends"];
+      if (target === "intermediates") return ["intermediates", "amateurs", "pros"];
+      if (target === "amateurs") return ["amateurs", "intermediates"];
+      return ["amateurs"];
+    }
+
+    candidates.forEach(user => {
+      const stats = rankMap[user.id];
+      if (!stats || stats.runs < MIN_RUNS_FOR_PLACEMENT) {
+        skipped++;
+        return;
+      }
+
+      const N = players.length;
+      const q = stats.rank / N;
+      let targetLeague = "amateurs";
+      if (q <= 0.25) targetLeague = "legends";
+      else if (q <= 0.5) targetLeague = "pros";
+      else if (q <= 0.75) targetLeague = "intermediates";
+      else targetLeague = "amateurs";
+
+      const prefs = preferredLeaguesForTarget(targetLeague);
+      let finalLeague = null;
+
+      for (const lg of prefs) {
+        if (canMoveLeague(user, lg)) {
+          finalLeague = lg;
+          break;
+        }
+      }
+
+      if (!finalLeague) {
+        skipped++;
+        return;
+      }
+
+      user.league = finalLeague;
+      const userRef = db.collection("users").doc(user.id);
+      batch.update(userRef, { league: finalLeague });
+      placed++;
+    });
+
+    if (!placed) {
+      if (!auto) {
+        alert("No new joiners could be placed yet. They may need more activities or the leagues are already very balanced.");
+      }
+      return;
+    }
+
+    await batch.commit();
+    await loadAllData();
+    restoreCurrentUser();
+
+    if (!auto) {
+      let skippedText = "";
+      if (skipped > 0) {
+        skippedText = t("alert.placeSkipped", { count: skipped });
+      }
+      alert(t("alert.placeSummary", { placed, skipped: skippedText }));
+    }
+  }
+
+  // ==========================
+  //  MONTHLY: PROMOTIONS
+  // ==========================
+
+  async function applyPromotions(auto = false) {
+    if (!db) return;
+
+    const players = getPlayerStats();
+    const total = players.length;
+    if (total === 0) {
+      if (!auto) alert(t("alert.noPlayers"));
+      return;
+    }
+
+    let moves = 0;
+    if (total >= 32) moves = 3;
+    else if (total >= 16) moves = 2;
+    else if (total >= 8) moves = 1;
+    else moves = 0;
+
+    if (moves === 0) {
+      if (!auto) alert(t("alert.notEnoughPlayers"));
+      return;
+    }
+
+    const batch = db.batch();
+
+    let promoted = 0;
+    for (let i = 0; i < players.length && promoted < moves; i++) {
+      const p = players[i];
+      if (!LEAGUES.includes(p.league)) continue;
+      const idx = leagueIndex(p.league);
+      if (idx < 0 || idx >= LEAGUES.length - 1) continue;
+      const userRef = db.collection("users").doc(p.userId);
+      batch.update(userRef, { league: LEAGUES[idx + 1] });
+      promoted++;
+    }
+
+    let relegated = 0;
+    for (let i = players.length - 1; i >= 0 && relegated < moves; i--) {
+      const p = players[i];
+      if (!LEAGUES.includes(p.league)) continue;
+      const idx = leagueIndex(p.league);
+      if (idx <= 0) continue;
+      const userRef = db.collection("users").doc(p.userId);
+      batch.update(userRef, { league: LEAGUES[idx - 1] });
+      relegated++;
+    }
+
+    await batch.commit();
+    await loadAllData();
+    restoreCurrentUser();
+    if (!auto) {
+      alert(t("alert.promotionsDone", { up: moves, down: moves }));
+    }
+  }
+
+  // ==========================
+  //  PROFILE VIEW
+  // ==========================
+
+  function showProfile(userId) {
+    const card = document.getElementById("profile-card");
+    const title = document.getElementById("profile-title");
+    const summary = document.getElementById("profile-summary");
+
+    const runsCell = document.getElementById("profile-runs");
+    const totalDistCell = document.getElementById("profile-total-distance");
+    const totalTimeCell = document.getElementById("profile-total-time");
+    const avgDistCell = document.getElementById("profile-avg-distance");
+    const avgPaceCell = document.getElementById("profile-avg-pace");
+    const longestCell = document.getElementById("profile-longest");
+    const best10kCell = document.getElementById("profile-10k");
+    const best5kCell = document.getElementById("profile-5k");
+
+    const user = users.find(u => u.id === userId);
+    if (!user) return;
+
+    const myEntries = entries
+      .filter(e => e.userId === userId)
+      .slice()
+      .sort((a, b) => a.timestamp - b.timestamp);
+
+    if (!myEntries.length) {
+      title.textContent = `Profile: ${user.name}`;
+      summary.textContent = "No activities logged yet.";
+      runsCell.textContent = "0";
+      totalDistCell.textContent = "0 km";
+      totalTimeCell.textContent = "0";
+      avgDistCell.textContent = "–";
+      avgPaceCell.textContent = "–";
+      longestCell.textContent = "–";
+      best10kCell.textContent = "–";
+      best5kCell.textContent = "–";
+      showScene("profile-card");
+      return;
+    }
+
+    let runs = myEntries.length;
+    let totalDistance = 0;
+    let totalTime = 0;
+    let longest = 0;
+    let best10kMinutes = Infinity;
+    let best5kMinutes = Infinity;
+
+    myEntries.forEach(e => {
+      totalDistance += e.distanceKm;
+      totalTime += e.timeMinutes;
+      if (e.distanceKm > longest) longest = e.distanceKm;
+
+      if (e.distanceKm > 0 && e.timeMinutes > 0) {
+        const paceMinutesPerKm = e.timeMinutes / e.distanceKm;
+
+        if (e.distanceKm >= 9.5) {
+          const tenKMinutes = paceMinutesPerKm * 10;
+          if (tenKMinutes < best10kMinutes) best10kMinutes = tenKMinutes;
+        }
+
+        if (e.distanceKm >= 4.5) {
+          const fiveKMinutes = paceMinutesPerKm * 5;
+          if (fiveKMinutes < best5kMinutes) best5kMinutes = fiveKMinutes;
+        }
+      }
+    });
+
+    const avgDistance = totalDistance / runs;
+    const avgPaceMinutesPerKm =
+      totalDistance > 0 && totalTime > 0 ? totalTime / totalDistance : 0;
+
+    function formatPace(minPerKm) {
+      if (!isFinite(minPerKm) || minPerKm <= 0) return "–";
+      const totalSeconds = Math.round(minPerKm * 60);
+      const m = Math.floor(totalSeconds / 60);
+      const s = totalSeconds % 60;
+      return `${m}:${s.toString().padStart(2, "0")} min/km`;
+    }
+
+    title.textContent = `Profile: ${user.name}`;
+    const leagueLabel = LEAGUES.includes(user.league)
+      ? t("league." + user.league)
+      : t("league.pending");
+
+    summary.textContent = `${t("user.leagueLabel", { league: leagueLabel })}, ${t("stats.runs")}: ${runs}`;
+
+    runsCell.textContent = runs.toString();
+    totalDistCell.textContent = `${totalDistance.toFixed(2)} km`;
+    totalTimeCell.textContent = formatMinutesPretty(totalTime);
+    avgDistCell.textContent = `${avgDistance.toFixed(2)} km`;
+    avgPaceCell.textContent = formatPace(avgPaceMinutesPerKm);
+    longestCell.textContent = `${longest.toFixed(2)} km`;
+    best10kCell.textContent =
+      isFinite(best10kMinutes) && best10kMinutes > 0
+        ? formatMinutesPretty(best10kMinutes)
+        : "–";
+    best5kCell.textContent =
+      isFinite(best5kMinutes) && best5kMinutes > 0
+        ? formatMinutesPretty(best5kMinutes)
+        : "–";
+
+    showScene("profile-card");
+  }
+
+  function attachProfileLinks() {
+    document.querySelectorAll(".link-name").forEach(btn => {
+      const userId = btn.getAttribute("data-user-id");
+      btn.onclick = () => showProfile(userId);
+    });
+  }
+
+  // ==========================
+  //  RENDER FUNCTIONS
+  // ==========================
+
+  function renderHeaderUser() {
+    const container = document.getElementById("user-controls");
+    if (!container) return;
+    container.innerHTML = "";
+
+    if (!currentUser) {
+      const span = document.createElement("span");
+      span.textContent = t("user.notLoggedIn");
       container.appendChild(span);
+
+      const btn = document.createElement("button");
+      btn.className = "btn btn-small";
+      btn.textContent = t("user.loginButton");
+      btn.onclick = () => showScene("login");
       container.appendChild(btn);
-      setEntryFormEnabled(true);
+
+      updateNavLoginVisibility();
+      return;
     }
 
-    function formatKm(val) {
-      var v = Number(val) || 0;
-      return v.toFixed(1) + " km";
+    const name = currentUser.name;
+    const leagueKey = LEAGUES.includes(currentUser.league)
+      ? "league." + currentUser.league
+      : "league.pending";
+    const leagueLabel = t(leagueKey);
+
+    const info = document.createElement("span");
+    info.textContent = `${t("user.loggedInAs", { name })} · ${t("user.leagueLabel", { league: leagueLabel })}`;
+    container.appendChild(info);
+
+    const addBtn = document.createElement("button");
+    addBtn.className = "btn btn-small";
+    addBtn.style.marginLeft = "8px";
+    addBtn.textContent = t("user.addActivity");
+    addBtn.onclick = () => showScene("entry");
+    container.appendChild(addBtn);
+
+    const deleteBtn = document.createElement("button");
+    deleteBtn.className = "btn btn-small danger";
+    deleteBtn.style.marginLeft = "4px";
+    deleteBtn.textContent = t("user.deleteAccount");
+    deleteBtn.onclick = deleteAccount;
+    container.appendChild(deleteBtn);
+
+    updateNavLoginVisibility();
+  }
+
+  function renderLeaderboard() {
+    const tbody = document.getElementById("leaderboard-body");
+    const empty = document.getElementById("no-entries");
+    if (!tbody) return;
+    tbody.innerHTML = "";
+
+    const players = getPlayerStats();
+    const filterSel = document.getElementById("league-filter");
+    const filter = filterSel ? filterSel.value : "all";
+
+    let filtered = players;
+    if (filter !== "all") {
+      filtered = players.filter(p => p.league === filter);
     }
-    function formatMinutes(val) {
-      var v = Number(val) || 0;
-      return v.toFixed(1) + " min";
+
+    if (!filtered.length) {
+      if (empty) empty.style.display = "block";
+      return;
+    }
+    if (empty) empty.style.display = "none";
+
+    filtered.forEach(player => {
+      const tr = document.createElement("tr");
+
+      let rankSymbol = player.rank;
+      if (player.rank === 1) rankSymbol = "🥇";
+      else if (player.rank === 2) rankSymbol = "🥈";
+      else if (player.rank === 3) rankSymbol = "🥉";
+
+      const leagueClass = LEAGUES.includes(player.league)
+        ? player.league
+        : "pending";
+      const leagueLabel = LEAGUES.includes(player.league)
+        ? t("league." + player.league)
+        : t("league.pending");
+
+      tr.innerHTML = `
+        <td>${rankSymbol}</td>
+        <td>
+          <button type="button" class="link-name" data-user-id="${player.userId}" style="background:none;border:none;color:#007bff;cursor:pointer;text-decoration:underline;">
+            ${player.name}
+          </button>
+        </td>
+        <td><span class="badge-league ${leagueClass}">${leagueLabel}</span></td>
+        <td>${player.totalDistance.toFixed(2)}</td>
+        <td>${player.totalTime.toFixed(1)}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    attachProfileLinks();
+  }
+
+  function renderStats() {
+    const tbody = document.getElementById("stats-body");
+    const empty = document.getElementById("no-stats");
+    if (!tbody) return;
+    tbody.innerHTML = "";
+
+    if (!entries.length) {
+      if (empty) empty.style.display = "block";
+      return;
+    }
+    if (empty) empty.style.display = "none";
+
+    const players = getPlayerStats();
+
+    players.forEach(stats => {
+      const leagueClass = LEAGUES.includes(stats.league)
+        ? stats.league
+        : "pending";
+      const leagueLabel = LEAGUES.includes(stats.league)
+        ? t("league." + stats.league)
+        : t("league.pending");
+
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>
+          <button type="button" class="link-name" data-user-id="${stats.userId}" style="background:none;border:none;color:#007bff;cursor:pointer;text-decoration:underline;">
+            ${stats.name}
+          </button>
+        </td>
+        <td><span class="badge-league ${leagueClass}">${leagueLabel}</span></td>
+        <td>${stats.runs}</td>
+        <td>${stats.totalDistance.toFixed(2)}</td>
+        <td>${stats.totalTime.toFixed(1)}</td>
+        <td>${stats.avgDistance.toFixed(2)}</td>
+        <td>${stats.bestDistance.toFixed(2)}</td>
+        <td>${formatImprovement(stats.improvement)}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    attachProfileLinks();
+  }
+
+  function renderPendingList() {
+    const tbody = document.getElementById("pending-body");
+    const empty = document.getElementById("no-pending");
+    if (!tbody) return;
+    tbody.innerHTML = "";
+
+    const pending = users
+      .filter(u => u.league === "pending")
+      .slice()
+      .sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+
+    if (!pending.length) {
+      if (empty) empty.style.display = "block";
+      return;
+    }
+    if (empty) empty.style.display = "none";
+
+    pending.forEach((u, index) => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${index + 1}</td>
+        <td>${u.name}</td>
+        <td>${u.joinMonth || ""}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  function renderMyActivities() {
+    const tbody = document.getElementById("my-activities-body");
+    const empty = document.getElementById("no-my-activities");
+    if (!tbody) return;
+    tbody.innerHTML = "";
+
+    if (!currentUser) {
+      if (empty) {
+        empty.style.display = "block";
+        empty.textContent = t("user.notLoggedIn");
+      }
+      return;
     }
 
-    async function renderLeaderboard() {
-      var body = document.getElementById("leaderboard-body");
-      var empty = document.getElementById("no-entries");
-      if (!body) return;
+    const myEntries = entries.filter(e => e.userId === currentUser.id);
 
-      body.innerHTML = "";
-      if (!window.mihFirebaseApi) {
-        if (empty) {
-          empty.textContent =
-            "Leaderboard will appear when Firebase is configured.";
-        }
-        return;
+    if (!myEntries.length) {
+      if (empty) {
+        empty.style.display = "block";
+        empty.textContent = t("entry.none");
       }
+      return;
+    }
+    if (empty) empty.style.display = "none";
 
-      var rows;
-      try {
-        rows = await window.mihFirebaseApi.buildLeaderboard();
-      } catch (e) {
-        console.warn("Leaderboard error:", e);
-        if (empty) {
-          empty.textContent = "Could not load leaderboard right now.";
-        }
-        return;
-      }
-
-      var leagueFilter = document.getElementById("league-filter");
-      var filterValue = leagueFilter ? leagueFilter.value : "all";
-      if (filterValue && filterValue !== "all") {
-        rows = rows.filter(function (r) {
-          return r.league === filterValue;
-        });
-      }
-
-      if (!rows.length) {
-        if (empty) empty.style.display = "block";
-        return;
-      }
-      if (empty) empty.style.display = "none";
-
-      rows.forEach(function (row, index) {
-        var tr = document.createElement("tr");
-        tr.className = index % 2 === 0 ? "bg-black/10" : "bg-black/5";
-        tr.innerHTML =
-          '<td class="py-2 pr-2">' +
-          (index + 1) +
-          "</td>" +
-          '<td class="py-2 px-2">' +
-          row.name +
-          "</td>" +
-          '<td class="py-2 px-2 capitalize">' +
-          (row.league || "") +
-          "</td>" +
-          '<td class="py-2 px-2">' +
-          formatKm(row.totalDistance) +
-          "</td>" +
-          '<td class="py-2 px-2">' +
-          formatMinutes(row.totalTime) +
-          "</td>";
-        body.appendChild(tr);
+    myEntries
+      .slice()
+      .sort((a, b) => b.timestamp - a.timestamp)
+      .forEach(e => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${formatDate(e.timestamp)}</td>
+          <td>${e.distanceKm.toFixed(2)}</td>
+          <td>${e.timeMinutes.toFixed(1)}</td>
+          <td>
+            <button class="btn btn-small danger" style="padding:4px 8px;font-size:12px;" onclick="deleteActivity('${e.id}')">
+              ✕
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
       });
+  }
+
+  function updateEntryFormLockState() {
+    const distanceInput = document.getElementById("distance");
+    const timeInput = document.getElementById("time");
+    const form = document.getElementById("entry-form");
+    if (!form) return;
+    const submit = form.querySelector("button[type='submit']");
+    const locked = !currentUser;
+
+    if (distanceInput) distanceInput.disabled = locked;
+    if (timeInput) timeInput.disabled = locked;
+    if (submit) submit.disabled = locked;
+  }
+
+  // ==========================
+  //  ACTIVITY DELETION
+  // ==========================
+
+  async function deleteActivity(id) {
+    if (!currentUser) {
+      alert(t("alert.mustLogin"));
+      return;
+    }
+    const entry = entries.find(e => e.id === id);
+    if (!entry) return;
+    if (entry.userId !== currentUser.id) {
+      alert("You can only delete your own activities.");
+      return;
+    }
+    if (!confirm(t("alert.deleteActivityConfirm"))) return;
+
+    await db.collection("activities").doc(id).delete();
+    await loadAllData();
+    restoreCurrentUser();
+  }
+
+  // ==========================
+  //  AUTH
+  // ==========================
+
+  async function login(name, password, codeInput) {
+    if (!db) {
+      alert(t("alert.firebase"));
+      return;
+    }
+    if (currentUser) {
+      alert(t("alert.alreadyLoggedIn"));
+      return;
     }
 
-    async function renderStats() {
-      var body = document.getElementById("stats-body");
-      var empty = document.getElementById("no-stats");
-      if (!body) return;
-
-      body.innerHTML = "";
-      if (!window.mihFirebaseApi) {
-        if (empty) {
-          empty.textContent =
-            "Stats will appear when Firebase is configured correctly.";
-        }
-        return;
-      }
-
-      var rows;
-      try {
-        rows = await window.mihFirebaseApi.buildStats();
-      } catch (e) {
-        console.warn("Stats error:", e);
-        if (empty) empty.textContent = "Could not load stats right now.";
-        return;
-      }
-
-      if (!rows.length) {
-        if (empty) empty.style.display = "block";
-        return;
-      }
-      if (empty) empty.style.display = "none";
-
-      rows.forEach(function (row) {
-        var tr = document.createElement("tr");
-        tr.className = "bg-black/5";
-        tr.innerHTML =
-          '<td class="py-2 px-2">' +
-          row.name +
-          "</td>" +
-          '<td class="py-2 px-2 capitalize">' +
-          (row.league || "") +
-          "</td>" +
-          '<td class="py-2 px-2">' +
-          (row.runs || 0) +
-          "</td>" +
-          '<td class="py-2 px-2">' +
-          formatKm(row.totalDistance) +
-          "</td>" +
-          '<td class="py-2 px-2">' +
-          formatMinutes(row.totalTime) +
-          "</td>" +
-          '<td class="py-2 px-2">' +
-          formatKm(row.avgDistance) +
-          "</td>" +
-          '<td class="py-2 px-2">' +
-          (row.bestDistance ? formatKm(row.bestDistance) : "–") +
-          "</td>" +
-          '<td class="py-2 px-2">' +
-          (row.improvement ? row.improvement.toFixed(1) + "%" : "–") +
-          "</td>";
-        body.appendChild(tr);
-      });
+    const trimmedName = (name || "").trim();
+    if (!trimmedName || !password) {
+      alert(t("alert.loginMissing"));
+      return;
     }
 
-    async function renderMyActivities() {
-      var body = document.getElementById("my-activities-body");
-      var empty = document.getElementById("no-my-activities");
-      if (!body) return;
+    let codeOk = localStorage.getItem(LS_CODE_OK_KEY) === "true";
+    const typedCodeRaw = (codeInput || "").trim().toUpperCase();
+    const typedCode = typedCodeRaw || HITACHI_CODE;
 
-      body.innerHTML = "";
-      if (!currentUser || !window.mihFirebaseApi) {
-        if (empty) {
-          empty.textContent =
-            "Log in to see the activities for your account.";
-          empty.style.display = "block";
-        }
+    if (!codeOk) {
+      if (typedCode !== HITACHI_CODE) {
+        alert(t("alert.codeWrong"));
         return;
       }
-
-      var entries;
-      try {
-        entries = await window.mihFirebaseApi.fetchEntriesForUser(
-          currentUser.id
-        );
-      } catch (e) {
-        console.warn("My activities error:", e);
-        if (empty) {
-          empty.textContent = "Could not load your activities right now.";
-          empty.style.display = "block";
-        }
-        return;
-      }
-
-      if (!entries.length) {
-        if (empty) {
-          empty.textContent = "No activities yet for this account.";
-          empty.style.display = "block";
-        }
-        return;
-      }
-      if (empty) empty.style.display = "none";
-
-      entries.forEach(function (e) {
-        var tr = document.createElement("tr");
-        tr.className = "bg-black/5";
-        var dateText = e.createdAt && e.createdAt.toDate
-          ? e.createdAt.toDate().toLocaleDateString()
-          : "";
-        tr.innerHTML =
-          '<td class="py-2 px-2">' +
-          dateText +
-          "</td>" +
-          '<td class="py-2 px-2">' +
-          formatKm(e.distanceKm) +
-          "</td>" +
-          '<td class="py-2 px-2">' +
-          formatMinutes(e.timeMinutes) +
-          "</td>";
-        body.appendChild(tr);
-      });
+      localStorage.setItem(LS_CODE_OK_KEY, "true");
+      codeOk = true;
     }
 
-    async function renderProfileForCurrentUser() {
-      if (!currentUser || !window.mihFirebaseApi) return;
-      try {
-        var profile = await window.mihFirebaseApi.buildProfile(currentUser.id);
-        document.getElementById("profileName").textContent =
-          profile.user.name || "Runner profile";
-        document.getElementById("profileLeague").textContent =
-          "League: " + (profile.user.league || "amateurs");
-        document.getElementById("profileTotalDistance").textContent =
-          formatKm(profile.totalDistance);
-        document.getElementById("profileTotalTime").textContent =
-          formatMinutes(profile.totalTime);
-        document.getElementById("profileRuns").textContent = profile.runs || 0;
-        document.getElementById("profileAvgDistance").textContent =
-          formatKm(profile.avgDistance);
-        document.getElementById("profileBest5k").textContent =
-          profile.bestTimes["5k"];
-        document.getElementById("profileBest10k").textContent =
-          profile.bestTimes["10k"];
-        document.getElementById("profileBest100m").textContent =
-          profile.bestTimes["100m"];
-      } catch (e) {
-        console.warn("Profile error:", e);
+    const existingSnap = await db
+      .collection("users")
+      .where("name", "==", trimmedName)
+      .limit(1)
+      .get();
+
+    let userDoc = null;
+    if (existingSnap.empty) {
+      const joinMonth = currentMonthKey();
+      const newUser = {
+        name: trimmedName,
+        password,
+        league: "pending",
+        createdAt: Date.now(),
+        joinMonth
+      };
+      const docRef = await db.collection("users").add(newUser);
+      userDoc = { id: docRef.id, ...newUser };
+    } else {
+      const doc = existingSnap.docs[0];
+      const data = doc.data();
+      if (data.password !== password) {
+        alert(t("alert.passwordWrong"));
+        return;
       }
+      if (!data.league) data.league = "pending";
+      if (!data.joinMonth) data.joinMonth = currentMonthKey(data.createdAt || Date.now());
+      userDoc = { id: doc.id, ...data };
     }
 
-    // Login form submit
-    var loginForm = document.getElementById("login-form");
+    currentUser = userDoc;
+    localStorage.setItem(LS_CURRENT_USER_KEY, currentUser.id);
+    localStorage.setItem(LS_PASSWORD_KEY, password);
+
+    await loadAllData();
+    restoreCurrentUser();
+    updateEntryFormLockState();
+    showScene("leaderboard");
+  }
+
+  async function deleteAccount() {
+    if (!currentUser) return;
+    if (!confirm(t("alert.deleteAccountConfirm"))) return;
+
+    const userId = currentUser.id;
+
+    const actsSnap = await db
+      .collection("activities")
+      .where("userId", "==", userId)
+      .get();
+    const batch = db.batch();
+    actsSnap.forEach(doc => batch.delete(doc.ref));
+    batch.delete(db.collection("users").doc(userId));
+    await batch.commit();
+
+    currentUser = null;
+    localStorage.removeItem(LS_CURRENT_USER_KEY);
+    localStorage.removeItem(LS_PASSWORD_KEY);
+
+    await loadAllData();
+    renderHeaderUser();
+    updateEntryFormLockState();
+    renderMyActivities();
+    showScene("welcome");
+  }
+
+  // ==========================
+  //  VIEW SAVED PASSWORD BUTTON
+  // ==========================
+
+  function setupViewCodeButton() {
+    const btn = document.getElementById("view-code-btn");
+    const display = document.getElementById("saved-code-display");
+    if (!btn || !display) return;
+    btn.addEventListener("click", () => {
+      const saved = localStorage.getItem(LS_PASSWORD_KEY);
+      if (saved) {
+        display.textContent = "Saved login password on this device: " + saved;
+      } else {
+        display.textContent = "No login password has been saved on this device yet.";
+      }
+      display.style.display = "block";
+    });
+  }
+
+  // ==========================
+  //  FORMS
+  // ==========================
+
+  function setupForms() {
+    const loginForm = document.getElementById("login-form");
     if (loginForm) {
-      loginForm.addEventListener("submit", async function (e) {
+      loginForm.addEventListener("submit", function (e) {
         e.preventDefault();
-        if (!window.mihFirebaseApi) {
-          alert(
-            "Make It Happen is still initialising. Please wait a few seconds and try again."
-          );
-          return;
-        }
-        var name = document.getElementById("login-name").value.trim();
-        var password = document.getElementById("login-password").value.trim();
-        if (!name || !password) return;
-
-        var submitBtn = loginForm.querySelector("button[type='submit']");
-        if (submitBtn) submitBtn.disabled = true;
-
-        try {
-          var user = await window.mihFirebaseApi.loginOrCreateUser(
-            name,
-            password
-          );
-          currentUser = {
-            id: user.id,
-            name: user.name,
-            league: user.league,
-          };
-          saveCurrentUser();
-          updateUserControlsUI();
-          setEntryFormEnabled(true);
-          showPopup("Logged in as " + user.name);
-          showScene("mih-leaderboard");
-          renderLeaderboard();
-          renderStats();
-          renderMyActivities();
-          renderProfileForCurrentUser();
-        } catch (err) {
-          console.warn("Login error:", err);
-          if (err && err.message === "wrong-password") {
-            alert("Wrong password for this name. Please try again.");
-          } else {
-            alert("Could not log in right now. Please try again later.");
-          }
-        } finally {
-          if (submitBtn) submitBtn.disabled = false;
-        }
+        const name = document.getElementById("login-name").value;
+        const password = document.getElementById("login-password").value;
+        const code = document.getElementById("login-code").value;
+        login(name, password, code);
       });
     }
 
-    // Entry form submit
-    var entryForm = document.getElementById("entry-form");
+    const codeInput = document.getElementById("login-code");
+    if (codeInput) {
+      codeInput.addEventListener("input", () => {
+        codeInput.value = codeInput.value.toUpperCase();
+      });
+    }
+
+    const entryForm = document.getElementById("entry-form");
     if (entryForm) {
       entryForm.addEventListener("submit", async function (e) {
         e.preventDefault();
         if (!currentUser) {
-          alert("Please log in before adding an activity.");
-          return;
-        }
-        if (!window.mihFirebaseApi) {
-          alert(
-            "Make It Happen is still initialising. Please wait and try again."
-          );
+          alert(t("alert.mustLogin"));
+          showScene("login");
           return;
         }
 
-        var distance = parseFloat(
-          document.getElementById("distance").value || "0"
-        );
-        var time = parseFloat(document.getElementById("time").value || "0");
-        if (!distance || !time) {
-          alert("Please enter a valid distance and time.");
+        const distance = parseFloat(document.getElementById("distance").value);
+        const time = parseFloat(document.getElementById("time").value);
+
+        if (isNaN(distance) || isNaN(time) || distance <= 0 || time <= 0) {
+          alert(t("alert.activityInvalid"));
           return;
         }
 
-        var btn = entryForm.querySelector("button[type='submit']");
-        if (btn) btn.disabled = true;
+        await db.collection("activities").add({
+          userId: currentUser.id,
+          distanceKm: distance,
+          timeMinutes: time,
+          timestamp: Date.now()
+        });
 
-        try {
-          await window.mihFirebaseApi.addActivity(
-            currentUser.id,
-            distance,
-            time
-          );
-          document.getElementById("distance").value = "";
-          document.getElementById("time").value = "";
-          showPopup("Activity saved.");
-          renderLeaderboard();
-          renderStats();
-          renderMyActivities();
-          renderProfileForCurrentUser();
-        } catch (err) {
-          console.warn("Add activity error:", err);
-          alert("Could not save this activity. Please try again.");
-        } finally {
-          if (btn) btn.disabled = false;
-        }
+        await loadAllData();
+        restoreCurrentUser();
+        entryForm.reset();
+        showScene("leaderboard");
       });
     }
 
-    // Initialisation
-    loadCurrentUser();
-    updateUserControlsUI();
-    initRouteFromPath();
-    renderLeaderboard();
-    renderStats();
-    renderMyActivities();
+    const leagueFilter = document.getElementById("league-filter");
+    if (leagueFilter) {
+      leagueFilter.addEventListener("change", renderLeaderboard);
+    }
+  }
 
-  </script>
+  // ==========================
+  //  INIT
+  // ==========================
+
+  async function init() {
+    initLanguage();
+    initFirebase();
+    setupForms();
+    setupViewCodeButton();
+
+    if (!db) return;
+
+    await loadAllData();
+    restoreCurrentUser();
+    updateEntryFormLockState();
+    updateNavLoginVisibility();
+
+    if (currentUser) {
+      showScene("leaderboard");
+    } else {
+      showScene("welcome");
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", init);
+</script>
 </body>
 </html>
