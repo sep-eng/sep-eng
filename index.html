@@ -1,1800 +1,1063 @@
+<!-- ===========================
+  PART 1/10 – BASIC HTML & STYLES
+=========================== -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Make It Happen – SEP</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-
-  <!-- Icons (swap these files to SEP logos if you like) -->
-  <link rel="apple-touch-icon" href="hitachi-logo.jpg">
-  <link rel="icon" type="image/jpeg" sizes="192x192" href="hitachi-logo.jpg">
-
-  <!-- Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-
+  <meta charset="UTF-8" />
+  <title>9-5 to Business (Prototype)</title>
   <style>
-    body {
+    html, body {
       margin: 0;
-      font-family: Inter, sans-serif;
-      background: #000000;
-      color: #f7f7f7;
-    }
-
-    header {
-      display: flex;
-      justify-content: space-between;
-      padding: 12px 16px;
-      background: #111111;
-      border-bottom: 1px solid #333333;
-      position: sticky;
-      top: 0;
-      z-index: 10;
-    }
-
-    header nav button {
-      background: none;
-      border: none;
-      padding: 8px 12px;
-      font-size: 15px;
-      cursor: pointer;
-      color: #f7f7f7;
-    }
-
-    header nav button.active {
-      font-weight: bold;
-      color: #f5f5f5;
-      text-decoration: underline;
-      text-decoration-thickness: 2px;
-    }
-
-    .scene {
-      display: none;
-      max-width: 900px;
-      margin: auto;
-      padding: 20px;
-    }
-    .scene.active {
-      display: block;
-    }
-
-    h1, h2 {
-      color: #f5f5f5;
-    }
-
-    .btn {
-      background: #ffffff;
-      color: #000000;
-      border: none;
-      padding: 10px 16px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: 600;
-      margin: 8px 0;
-    }
-
-    .btn-small {
-      padding: 6px 10px;
-      font-size: 14px;
-    }
-
-    .danger {
-      background: #ef4444;
-      color: #ffffff;
-    }
-
-    .input {
-      width: 100%;
-      padding: 10px;
-      margin: 6px 0 14px;
-      border: 1px solid #555;
-      border-radius: 6px;
-      font-size: 16px;
+      padding: 0;
       background: #111;
-      color: #f7f7f7;
+      color: #eee;
+      font-family: monospace;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      height: 100vh;
     }
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 14px;
-      background: #111111;
+    #gameCanvas {
+      margin-top: 10px;
+      border: 2px solid #555;
+      image-rendering: pixelated;
+      background: #222;
     }
 
-    th, td {
-      padding: 8px;
-      border-bottom: 1px solid #333;
-      text-align: left;
-      color: #f7f7f7;
+    #inputArea {
+      margin-top: 8px;
+      width: 960px;
+      display: flex;
+      gap: 4px;
     }
 
-    .badge-league {
-      padding: 3px 8px;
-      border-radius: 6px;
-      font-size: 12px;
-      color: white;
+    #playerInput {
+      flex: 1;
+      padding: 6px;
+      font-family: monospace;
+      font-size: 14px;
+      background: #000;
+      color: #0f0;
+      border: 1px solid #555;
     }
-    .amateurs { background: #6c757d; }
-    .intermediates { background: #007bff; }
-    .pros { background: #22c55e; }
-    .legends { background: #e5e5e5; color: #111111; }
-    .pending { background: #888888; }
+
+    #sendBtn {
+      padding: 6px 12px;
+      font-family: monospace;
+      background: #333;
+      color: #eee;
+      border: 1px solid #666;
+      cursor: pointer;
+    }
+
+    #inputArea.hidden {
+      display: none;
+    }
+
+    canvas {
+      cursor: default;
+    }
   </style>
 </head>
-
 <body>
 
-<header>
-  <nav>
-    <button onclick="showScene('welcome')" data-i18n="nav.welcome"></button>
-    <button onclick="showScene('leaderboard')" data-i18n="nav.leaderboard"></button>
-    <button onclick="showScene('stats')" data-i18n="nav.stats"></button>
-    <button onclick="showScene('rules')" data-i18n="nav.rules"></button>
-    <button onclick="showScene('about')" data-i18n="nav.about"></button>
-    <button onclick="showScene('help')" data-i18n="nav.help"></button>
-    <button id="nav-login-btn" onclick="showScene('login')" data-i18n="nav.login"></button>
-  </nav>
+  <!-- ===========================
+    PART 2/10 – CANVAS & INPUT UI
+  =========================== -->
 
-  <div style="display:flex; gap:8px; align-items:center;">
-    <select id="lang-select">
-      <option value="en">English</option>
-      <option value="da">Dansk</option>
-      <option value="cs">Čeština</option>
-    </select>
+  <canvas id="gameCanvas" width="960" height="540"></canvas>
 
-    <div id="user-controls"></div>
+  <div id="inputArea" class="hidden">
+    <input id="playerInput" type="text" placeholder="Type what you say to the NPC..." />
+    <button id="sendBtn">Send</button>
   </div>
-</header>
 
-<!-- WELCOME SCENE -->
-<section id="scene-welcome" class="scene active">
-  <h1 data-i18n="welcome.title"></h1>
-  <p data-i18n="welcome.subtitle"></p>
-  <button class="btn" onclick="showScene('login')" data-i18n="welcome.cta"></button>
-</section>
+  <script>
+  // ===========================
+  // PART 3/10 – CONSTANTS & UTILITIES
+  // ===========================
 
-<!-- LOGIN SCENE -->
-<section id="scene-login" class="scene">
-  <h1 data-i18n="login.title"></h1>
-  <p data-i18n="login.description"></p>
+  const canvas = document.getElementById('gameCanvas');
+  const ctx = canvas.getContext('2d');
 
-  <form id="login-form">
-    <label data-i18n="login.name"></label>
-    <input id="login-name" class="input" type="text">
+  const inputArea = document.getElementById('inputArea');
+  const playerInput = document.getElementById('playerInput');
+  const sendBtn = document.getElementById('sendBtn');
 
-    <label data-i18n="login.password"></label>
-    <input id="login-password" class="input" type="password">
-
-    <label data-i18n="login.code"></label>
-    <input id="login-code" class="input" maxlength="20">
-
-    <button class="btn" data-i18n="login.submit"></button>
-  </form>
-
-  <button id="view-code-btn" class="btn btn-small" type="button" style="margin-top:4px;">
-    View saved login password
-  </button>
-  <p id="saved-code-display" style="display:none; margin-top:6px;"></p>
-
-  <p data-i18n="login.note"></p>
-</section>
-
-<!-- LEADERBOARD SCENE -->
-<section id="scene-leaderboard" class="scene">
-  <h1 data-i18n="leaderboard.title"></h1>
-
-  <label data-i18n="leaderboard.filter"></label>
-  <select id="league-filter" class="input" style="max-width:260px;">
-    <option value="all" data-i18n="leaderboard.all"></option>
-    <option value="pending" data-i18n="league.pending"></option>
-    <option value="amateurs" data-i18n="league.amateurs"></option>
-    <option value="intermediates" data-i18n="league.intermediates"></option>
-    <option value="pros" data-i18n="league.pros"></option>
-    <option value="legends" data-i18n="league.legends"></option>
-  </select>
-
-  <table>
-    <thead>
-      <tr>
-        <th data-i18n="lb.rank"></th>
-        <th data-i18n="lb.name"></th>
-        <th data-i18n="lb.league"></th>
-        <th data-i18n="lb.distance"></th>
-        <th data-i18n="lb.time"></th>
-      </tr>
-    </thead>
-    <tbody id="leaderboard-body"></tbody>
-  </table>
-
-  <p id="no-entries" data-i18n="leaderboard.none"></p>
-
-  <!-- Pending view -->
-  <h2 data-i18n="pending.title"></h2>
-  <p data-i18n="pending.subtitle"></p>
-
-  <table>
-    <thead>
-      <tr>
-        <th data-i18n="pending.rank"></th>
-        <th data-i18n="pending.name"></th>
-        <th data-i18n="pending.joinMonth"></th>
-      </tr>
-    </thead>
-    <tbody id="pending-body"></tbody>
-  </table>
-
-  <p id="no-pending" data-i18n="pending.none"></p>
-</section>
-
-<!-- STATS SCENE -->
-<section id="scene-stats" class="scene">
-  <h1 data-i18n="stats.title"></h1>
-
-  <table>
-    <thead>
-      <tr>
-        <th data-i18n="lb.name"></th>
-        <th data-i18n="lb.league"></th>
-        <th data-i18n="stats.runs"></th>
-        <th data-i18n="stats.totaldistance"></th>
-        <th data-i18n="stats.totaltime"></th>
-        <th data-i18n="stats.avgdistance"></th>
-        <th data-i18n="stats.bestdistance"></th>
-        <th data-i18n="stats.improvement"></th>
-      </tr>
-    </thead>
-    <tbody id="stats-body"></tbody>
-  </table>
-
-  <p id="no-stats" data-i18n="stats.none"></p>
-</section>
-
-<!-- RULES SCENE -->
-<section id="scene-rules" class="scene">
-  <h1 data-i18n="rules.title"></h1>
-
-  <h2 data-i18n="rules.joiningtitle"></h2>
-  <p data-i18n="rules.joiningtext"></p>
-
-  <h2 data-i18n="rules.leaguetitle"></h2>
-  <p data-i18n="rules.leaguetext"></p>
-
-  <h2 data-i18n="rules.promotiontitle"></h2>
-  <p data-i18n="rules.promotiontext"></p>
-
-  <h2 data-i18n="rules.prizetitle"></h2>
-  <p data-i18n="rules.prizetext"></p>
-</section>
-
-<!-- ABOUT SCENE -->
-<section id="scene-about" class="scene">
-  <h1 data-i18n="about.title"></h1>
-  <p data-i18n="about.text1"></p>
-  <p data-i18n="about.text2"></p>
-  <p data-i18n="about.text3"></p>
-</section>
-
-<!-- HELP SCENE -->
-<section id="scene-help" class="scene">
-  <h1 data-i18n="help.title"></h1>
-  <p data-i18n="help.text"></p>
-</section>
-
-<!-- ENTRY FORM + MY ACTIVITIES -->
-<section id="scene-entry" class="scene">
-  <h1 data-i18n="entry.title"></h1>
-
-  <form id="entry-form">
-    <label data-i18n="entry.distance"></label>
-    <input id="distance" type="number" step="0.01" class="input">
-
-    <label data-i18n="entry.time"></label>
-    <input id="time" type="number" step="0.01" class="input">
-
-    <button class="btn" data-i18n="entry.submit"></button>
-  </form>
-
-  <h2 data-i18n="entry.my"></h2>
-  <table>
-    <thead>
-      <tr>
-        <th data-i18n="entry.date"></th>
-        <th data-i18n="entry.distance"></th>
-        <th data-i18n="entry.time"></th>
-        <th data-i18n="entry.actions"></th>
-      </tr>
-    </thead>
-    <tbody id="my-activities-body"></tbody>
-  </table>
-
-  <p id="no-my-activities" data-i18n="entry.none"></p>
-</section>
-
-<!-- PROFILE SCENE -->
-<section id="profile-card" class="scene" style="display:none;">
-  <h1 id="profile-title"></h1>
-  <p id="profile-summary"></p>
-
-  <table>
-    <tr><th data-i18n="profile.runs"></th><td id="profile-runs"></td></tr>
-    <tr><th data-i18n="profile.totaldistance"></th><td id="profile-total-distance"></td></tr>
-    <tr><th data-i18n="profile.totaltime"></th><td id="profile-total-time"></td></tr>
-    <tr><th data-i18n="profile.avgdistance"></th><td id="profile-avg-distance"></td></tr>
-    <tr><th data-i18n="profile.avgpace"></th><td id="profile-avg-pace"></td></tr>
-    <tr><th data-i18n="profile.longest"></th><td id="profile-longest"></td></tr>
-    <tr><th data-i18n="profile.best10k"></th><td id="profile-10k"></td></tr>
-    <tr><th data-i18n="profile.best5k"></th><td id="profile-5k"></td></tr>
-  </table>
-</section>
-
-<!-- Firebase scripts -->
-<script src="https://www.gstatic.com/firebasejs/11.0.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore-compat.js"></script>
-
-<script>
-  // ==========================
-  //  CONFIG
-  // ==========================
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyAkbH3mJkeheF3L7EaqN1kMgbFd_LJCIXo",
-    authDomain: "hitachi-vantara-make-it-happen.firebaseapp.com",
-    projectId: "hitachi-vantara-make-it-happen",
-    storageBucket: "hitachi-vantara-make-it-happen.firebasestorage.app",
-    messagingSenderId: "749690169824",
-    appId: "1:749690169824:web:21d6b8d2a5862847e4e385",
-    measurementId: "G-7WZ03E68MF"
+  const GAME_STATE = {
+    INTRO: 'intro',
+    EMPLOYEE_DAY: 'employee_day',
+    LUNCH_BREAK: 'lunch_break',
+    CALL: 'call',
+    RULES: 'rules',
+    OWNER_DAY: 'owner_day',
+    SHOP: 'shop',
+    GAME_OVER: 'game_over',
   };
 
-  const HITACHI_CODE = "27HG0QIBD2"; // change this if you want a new join code
-  const LS_CODE_OK_KEY = "mih_hitachi_code_ok";
-  const LS_CURRENT_USER_KEY = "mih_current_user_id";
-  const LS_LANG_KEY = "mih_lang";
-  const LS_PASSWORD_KEY = "mih_saved_password";
-
-  const LEAGUES = ["amateurs", "intermediates", "pros", "legends"];
-  const MIN_RUNS_FOR_PLACEMENT = 3;
-
-  let db = null;
-  let users = [];
-  let entries = [];
-  let currentUser = null;
-  let currentLang = "en";
-  let autoRunning = false;
-
-  // ==========================
-  //  TRANSLATIONS
-  // ==========================
-
-  const translations = {
-    en: {
-      // nav
-      "nav.welcome": "Welcome",
-      "nav.leaderboard": "Leaderboard",
-      "nav.stats": "Stats",
-      "nav.rules": "Rules & prizes",
-      "nav.about": "About",
-      "nav.help": "Help",
-      "nav.login": "Login",
-
-      // welcome
-      "welcome.title": "Move more. Compete together.",
-      "welcome.subtitle": "Make It Happen is a simple health challenge. Walk, run or cycle, log your distance and climb the leagues.",
-      "welcome.cta": "Log in or create an account",
-
-      // login
-      "login.title": "Log in to Make It Happen",
-      "login.description": "Create a simple account so the site knows who you are and only you can manage your activities.",
-      "login.name": "Name",
-      "login.password": "Password",
-      "login.code": "Join code",
-      "login.submit": "Log in / Create account",
-      "login.note": "Your account is stored in a shared database, not just on your own device. If you do not use it for a long time it might be cleaned up.",
-
-      // leagues
-      "league.amateurs": "Amateurs",
-      "league.intermediates": "Intermediates",
-      "league.pros": "Pros",
-      "league.legends": "Legends",
-      "league.pending": "Pending",
-
-      // leaderboard
-      "leaderboard.title": "Leaderboard",
-      "leaderboard.filter": "Filter by league:",
-      "leaderboard.all": "All leagues",
-      "leaderboard.none": "No activities yet. Be the first to log something.",
-      "lb.rank": "#",
-      "lb.name": "Name",
-      "lb.league": "League",
-      "lb.distance": "Total distance (km)",
-      "lb.time": "Total time (min)",
-
-      // pending
-      "pending.title": "Pending joiners",
-      "pending.subtitle": "New sign-ups who will be placed into leagues at the start of the next month.",
-      "pending.rank": "#",
-      "pending.name": "Name",
-      "pending.joinMonth": "Join month",
-      "pending.none": "No pending joiners right now.",
-
-      // stats
-      "stats.title": "Player stats and league moves",
-      "stats.runs": "Runs",
-      "stats.totaldistance": "Total distance (km)",
-      "stats.totaltime": "Total time (min)",
-      "stats.avgdistance": "Average distance (km)",
-      "stats.bestdistance": "Longest distance (km)",
-      "stats.improvement": "Improvement",
-      "stats.none": "Stats will appear once people start logging activities.",
-
-      // rules
-      "rules.title": "Rules, leagues and prizes",
-      "rules.joiningtitle": "Joining and signing up",
-      "rules.joiningtext":
-        "You can sign up any time using the join code. When you create an account you start as “Pending”. You can log activities straight away. At the start of the next month, the system automatically places all pending players into the leagues based on their distance, time and speed.",
-      "rules.leaguetitle": "Leagues and balance",
-      "rules.leaguetext":
-        "There are four leagues: Amateurs, Intermediates, Pros and Legends. The system tries to keep league sizes balanced, so one league does not become much larger than the others.",
-      "rules.promotiontitle": "Promotions and relegations",
-      "rules.promotiontext":
-        "Each month the site automatically applies promotions and relegations. The number of players moved depends on how many people are active: with 8+ players there is 1 promotion and 1 relegation, with 16+ there are 2 of each, and with 32+ there are 3 of each. Rankings are based on total distance first, then total time, then average speed.",
-      "rules.prizetitle": "Prizes",
-      "rules.prizetext":
-        "Local teams can decide the exact prizes. A simple version is: a small prize for the monthly winner and a bigger prize at the end of the year for the player with the strongest overall performance.",
-
-      // about
-      "about.title": "About Make It Happen",
-      "about.text1":
-        "Make It Happen is a simple, fair health challenge. The goal is not to create elite athletes, but to give everyone a clear, friendly way to move more and see progress over time.",
-      "about.text2":
-        "You can walk, run or cycle and log your distance and time. The system looks at both how far you go and how long you spend moving, so slower but very dedicated people still get rewarded, not only the fastest runners.",
-      "about.text3":
-        "New players sign up first, then officially join a league at the start of the next month. The site compares their first month to everyone else, then places them into the league that fits them best while keeping league sizes balanced.",
-
-      // help
-      "help.title": "Help and support",
-      "help.text":
-        "If you need any assistance, if something looks wrong, or if you have a question about Make It Happen, you can text +45 51 34 31 33.",
-
-      // entry
-      "entry.title": "Log a new activity",
-      "entry.distance": "Distance (km)",
-      "entry.time": "Time (minutes)",
-      "entry.submit": "Save my activity",
-      "entry.my": "My activities",
-      "entry.date": "Date",
-      "entry.actions": "Actions",
-      "entry.none": "You have no activities yet for this account.",
-
-      // profile
-      "profile.runs": "Runs",
-      "profile.totaldistance": "Total distance",
-      "profile.totaltime": "Total time",
-      "profile.avgdistance": "Average distance",
-      "profile.avgpace": "Average pace",
-      "profile.longest": "Longest activity",
-      "profile.best10k": "Fastest ~10 km",
-      "profile.best5k": "Fastest ~5 km",
-
-      // user header
-      "user.notLoggedIn": "Not logged in",
-      "user.loginButton": "Login",
-      "user.loggedInAs": "Logged in as {name}",
-      "user.leagueLabel": "League: {league}",
-      "user.addActivity": "Add activity",
-      "user.deleteAccount": "Delete account",
-
-      // alerts
-      "alert.loginMissing": "Please enter both name and password.",
-      "alert.codeWrong": "The join code is wrong.",
-      "alert.passwordWrong": "Wrong password for this name.",
-      "alert.firebase": "Firebase is not configured yet. Please add your Firebase config in the script.",
-      "alert.mustLogin": "Please log in before adding activities.",
-      "alert.activityInvalid": "Please fill in distance and time correctly with positive values.",
-      "alert.noPlayers": "No players yet.",
-      "alert.notEnoughPlayers": "You need at least 8 players for promotions and relegations.",
-      "alert.promotionsDone": "Promotions and relegations applied: {up} up, {down} down.",
-      "alert.noActivitiesToPlace": "No activities yet, nothing to place.",
-      "alert.noPending": "No pending joiners ready to place. New sign-ups will join at the start of the next month.",
-      "alert.placeSummary": "Placed {placed} new joiner(s) into leagues. {skipped}",
-      "alert.placeSkipped": "{count} left pending (not enough data yet or for balance).",
-      "alert.deleteActivityConfirm": "Delete this activity?",
-      "alert.deleteAccountConfirm": "This will delete your account and all your activities. Are you sure?",
-      "alert.alreadyLoggedIn": "You are already logged in. Delete your account if you want to start over."
-    },
-
-    da: {
-      "nav.welcome": "Velkomst",
-      "nav.leaderboard": "Rangliste",
-      "nav.stats": "Statistik",
-      "nav.rules": "Regler og præmier",
-      "nav.about": "Om projektet",
-      "nav.help": "Hjælp",
-      "nav.login": "Log ind",
-
-      "welcome.title": "Bevæg dig mere. Konkurrér sammen.",
-      "welcome.subtitle": "Make It Happen er en sundhedsudfordring. Gå, løb eller cykl, registrér din distance og ryk op gennem ligaerne.",
-      "welcome.cta": "Log ind eller opret konto",
-
-      "login.title": "Log ind på Make It Happen",
-      "login.description": "Lav en enkel konto, så siden ved, hvem du er, og kun du kan styre dine aktiviteter.",
-      "login.name": "Navn",
-      "login.password": "Adgangskode",
-      "login.code": "Adgangskode",
-      "login.submit": "Log ind / Opret konto",
-      "login.note": "Din konto ligger i en delt database, ikke kun på din egen enhed. Hvis du ikke bruger din konto i lang tid, kan den blive ryddet op.",
-
-      "league.amateurs": "Amatører",
-      "league.intermediates": "Øvede",
-      "league.pros": "Prof",
-      "league.legends": "Legender",
-      "league.pending": "Afventer",
-
-      "leaderboard.title": "Rangliste",
-      "leaderboard.filter": "Filtrér efter liga:",
-      "leaderboard.all": "Alle ligaer",
-      "leaderboard.none": "Ingen aktiviteter endnu. Vær den første til at logge noget.",
-      "lb.rank": "#",
-      "lb.name": "Navn",
-      "lb.league": "Liga",
-      "lb.distance": "Samlet distance (km)",
-      "lb.time": "Samlet tid (min)",
-
-      "pending.title": "Afventende deltagere",
-      "pending.subtitle": "Nye tilmeldinger, som bliver placeret i ligaer ved starten af næste måned.",
-      "pending.rank": "#",
-      "pending.name": "Navn",
-      "pending.joinMonth": "Tilmeldingsmåned",
-      "pending.none": "Ingen afventende deltagere lige nu.",
-
-      "stats.title": "Spillerstatistik og ligaflytninger",
-      "stats.runs": "Ture",
-      "stats.totaldistance": "Samlet distance (km)",
-      "stats.totaltime": "Samlet tid (min)",
-      "stats.avgdistance": "Gennemsnitlig distance (km)",
-      "stats.bestdistance": "Længste tur (km)",
-      "stats.improvement": "Forbedring",
-      "stats.none": "Statistik vises, når deltagerne begynder at logge aktiviteter.",
-
-      "rules.title": "Regler, ligaer og præmier",
-      "rules.joiningtitle": "Tilmelding og opstart",
-      "rules.joiningtext":
-        "Du kan tilmelde dig når som helst med adgangskoden. Når du opretter en konto, starter du som “Afventer”. Du kan logge aktiviteter med det samme. Ved starten af næste måned placerer systemet automatisk alle afventende spillere i ligaerne ud fra deres distance, tid og hastighed.",
-      "rules.leaguetitle": "Ligaer og balance",
-      "rules.leaguetext":
-        "Der er fire ligaer: Amatører, Øvede, Prof og Legender. Systemet forsøger at holde ligastørrelserne nogenlunde i balance, så én liga ikke bliver meget større end de andre.",
-      "rules.promotiontitle": "Oprykning og nedrykning",
-      "rules.promotiontext":
-        "Hver måned udfører siden automatisk oprykning og nedrykning. Antallet af spillere der flyttes, afhænger af hvor mange der er aktive: ved 8+ spillere er der 1 oprykning og 1 nedrykning, ved 16+ er der 2 af hver, og ved 32+ er der 3 af hver. Ranglisten bygger først på samlet distance, derefter samlet tid, og til sidst gennemsnitlig hastighed.",
-      "rules.prizetitle": "Præmier",
-      "rules.prizetext":
-        "De lokale teams kan beslutte præmierne. En enkel model er: en lille præmie til den månedlige vinder og en større præmie ved årets slutning til den spiller, der samlet set har klaret sig bedst.",
-
-      "about.title": "Om Make It Happen",
-      "about.text1":
-        "Make It Happen er en enkel, fair sundhedsudfordring. Målet er ikke at skabe elitesportsfolk, men at give alle en klar og venlig måde at bevæge sig mere og se deres udvikling over tid.",
-      "about.text2":
-        "Du kan gå, løbe eller cykle og registrere din distance og tid. Systemet kigger både på hvor langt du kommer, og hvor længe du er i bevægelse. Det betyder, at langsommere men meget dedikerede deltagere også bliver belønnet, ikke kun de hurtigste løbere.",
-      "about.text3":
-        "Nye spillere tilmelder sig først og træder officielt ind i en liga ved starten af næste måned. Siden sammenligner deres første måned med resten af feltet og placerer dem i den liga, der passer bedst, samtidig med at ligastørrelserne holdes i balance.",
-
-      "help.title": "Hjælp og support",
-      "help.text":
-        "Hvis du har brug for hjælp, hvis noget ser forkert ud, eller hvis du har et spørgsmål til Make It Happen, kan du sende en sms til +45 51 34 31 33.",
-
-      "entry.title": "Registrér en ny aktivitet",
-      "entry.distance": "Distance (km)",
-      "entry.time": "Tid (minutter)",
-      "entry.submit": "Gem min aktivitet",
-      "entry.my": "Mine aktiviteter",
-      "entry.date": "Dato",
-      "entry.actions": "Handlinger",
-      "entry.none": "Du har ingen aktiviteter endnu på denne konto.",
-
-      "profile.runs": "Ture",
-      "profile.totaldistance": "Samlet distance",
-      "profile.totaltime": "Samlet tid",
-      "profile.avgdistance": "Gennemsnitlig distance",
-      "profile.avgpace": "Gennemsnitstempo",
-      "profile.longest": "Længste aktivitet",
-      "profile.best10k": "Hurtigste ~10 km",
-      "profile.best5k": "Hurtigste ~5 km",
-
-      "user.notLoggedIn": "Ikke logget ind",
-      "user.loginButton": "Log ind",
-      "user.loggedInAs": "Logget ind som {name}",
-      "user.leagueLabel": "Liga: {league}",
-      "user.addActivity": "Tilføj aktivitet",
-      "user.deleteAccount": "Slet konto",
-
-      "alert.loginMissing": "Indtast både navn og adgangskode.",
-      "alert.codeWrong": "Adgangskoden er forkert.",
-      "alert.passwordWrong": "Forkert adgangskode til dette navn.",
-      "alert.firebase": "Firebase er ikke sat korrekt op. Indsæt din Firebase-konfiguration i scriptet.",
-      "alert.mustLogin": "Log ind, før du tilføjer aktiviteter.",
-      "alert.activityInvalid": "Udfyld distance og tid korrekt med positive værdier.",
-      "alert.noPlayers": "Ingen spillere endnu.",
-      "alert.notEnoughPlayers": "Du skal bruge mindst 8 spillere til oprykning og nedrykning.",
-      "alert.promotionsDone": "Oprykning og nedrykning udført: {up} op, {down} ned.",
-      "alert.noActivitiesToPlace": "Ingen aktiviteter endnu, intet at placere.",
-      "alert.noPending": "Ingen afventende deltagere klar til placering. Nye tilmeldinger kommer med ved starten af næste måned.",
-      "alert.placeSummary": "Placerede {placed} ny(e) deltager(e) i ligaer. {skipped}",
-      "alert.placeSkipped": "{count} blev efterladt som Afventer (mangler data eller for balance).",
-      "alert.deleteActivityConfirm": "Slet denne aktivitet?",
-      "alert.deleteAccountConfirm": "Dette sletter din konto og alle dine aktiviteter. Er du sikker?",
-      "alert.alreadyLoggedIn": "Du er allerede logget ind. Slet din konto, hvis du vil starte forfra."
-    },
-
-    cs: {
-      "nav.welcome": "Vítejte",
-      "nav.leaderboard": "Žebříček",
-      "nav.stats": "Statistiky",
-      "nav.rules": "Pravidla a ceny",
-      "nav.about": "O projektu",
-      "nav.help": "Pomoc",
-      "nav.login": "Přihlásit se",
-
-      "welcome.title": "Hýbej se víc. Soutěž společně.",
-      "welcome.subtitle": "Make It Happen je jednoduchá výzva pro zdraví. Choď, běhej nebo jezdi na kole, zapisuj vzdálenost a posouvej se v ligách.",
-      "welcome.cta": "Přihlásit se nebo vytvořit účet",
-
-      "login.title": "Přihlášení do Make It Happen",
-      "login.description": "Vytvoř si jednoduchý účet, aby stránka věděla, kdo jsi, a jen ty mohl spravovat své aktivity.",
-      "login.name": "Jméno",
-      "login.password": "Heslo",
-      "login.code": "Přístupový kód",
-      "login.submit": "Přihlásit / Vytvořit účet",
-      "login.note": "Tvůj účet je uložený ve sdílené databázi, ne jen v tomto zařízení. Pokud ho dlouho nepoužíváš, může být později smazán.",
-
-      "league.amateurs": "Amatéři",
-      "league.intermediates": "Středně pokročilí",
-      "league.pros": "Profíci",
-      "league.legends": "Legendární",
-      "league.pending": "Čekající",
-
-      "leaderboard.title": "Žebříček",
-      "leaderboard.filter": "Filtrovat podle ligy:",
-      "leaderboard.all": "Všechny ligy",
-      "leaderboard.none": "Zatím žádné aktivity. Buď první, kdo něco zaznamená.",
-      "lb.rank": "#",
-      "lb.name": "Jméno",
-      "lb.league": "Liga",
-      "lb.distance": "Celková vzdálenost (km)",
-      "lb.time": "Celkový čas (min)",
-
-      "pending.title": "Čekající hráči",
-      "pending.subtitle": "Noví hráči, kteří budou zařazeni do lig na začátku příštího měsíce.",
-      "pending.rank": "#",
-      "pending.name": "Jméno",
-      "pending.joinMonth": "Měsíc přihlášení",
-      "pending.none": "Momentálně žádní čekající hráči.",
-
-      "stats.title": "Statistiky hráčů a přesuny mezi ligami",
-      "stats.runs": "Aktivity",
-      "stats.totaldistance": "Celková vzdálenost (km)",
-      "stats.totaltime": "Celkový čas (min)",
-      "stats.avgdistance": "Průměrná vzdálenost (km)",
-      "stats.bestdistance": "Nejdelší aktivita (km)",
-      "stats.improvement": "Zlepšení",
-      "stats.none": "Statistiky se objeví, jakmile začnou lidé zapisovat aktivity.",
-
-      "rules.title": "Pravidla, ligy a ceny",
-      "rules.joiningtitle": "Přihlášení a začátek",
-      "rules.joiningtext":
-        "Můžeš se přidat kdykoliv pomocí přístupového kódu. Když si vytvoříš účet, začneš jako „Čekající“. Aktivity můžeš zapisovat hned. Na začátku dalšího měsíce systém automaticky zařadí všechny čekající hráče do lig podle jejich vzdálenosti, času a rychlosti.",
-      "rules.leaguetitle": "Ligy a rovnováha",
-      "rules.leaguetext":
-        "Existují čtyři ligy: Amatéři, Středně pokročilí, Profíci a Legendární. Systém se snaží udržovat ligy přibližně stejně velké, aby jedna liga nebyla výrazně větší než ostatní.",
-      "rules.promotiontitle": "Postupy a sestupy",
-      "rules.promotiontext":
-        "Každý měsíc systém automaticky provede postupy a sestupy. Počet hráčů, kteří se posouvají, závisí na počtu aktivních lidí: při 8+ hráčích 1 postup a 1 sestup, při 16+ jsou 2, při 32+ jsou 3. Pořadí se určuje hlavně podle celkové vzdálenosti, potom podle celkového času a nakonec podle průměrné rychlosti.",
-      "rules.prizetitle": "Ceny",
-      "rules.prizetext":
-        "Konkrétní ceny si může domluvit každý tým sám. Jednoduchá varianta: malá cena pro měsíčního vítěze a větší cena na konci roku pro hráče s nejlepší celkovou formou.",
-
-      "about.title": "O Make It Happen",
-      "about.text1":
-        "Make It Happen je jednoduchá a férová výzva pro zdraví. Cílem není dělat z lidí profesionální sportovce, ale dát každému jasný a přátelský způsob, jak se hýbat víc a vidět svůj pokrok.",
-      "about.text2":
-        "Můžeš chodit, běhat nebo jezdit na kole a zapisovat vzdálenost a čas. Systém sleduje, jak daleko jdeš i jak dlouho jsi v pohybu, takže se ocení i pomalejší, ale vytrvalí hráči, nejen ti nejrychlejší.",
-      "about.text3":
-        "Noví hráči se nejdřív jen přihlásí a do ligy oficiálně vstoupí až na začátku dalšího měsíce. Stránka porovná jejich první měsíc s ostatními a zařadí je do ligy, která jim nejlépe sedí, a zároveň hlídá vyváženou velikost lig.",
-
-      "help.title": "Pomoc a podpora",
-      "help.text":
-        "Pokud něco nefunguje, vypadá zvláštně nebo máš otázku k Make It Happen, můžeš napsat SMS na +45 51 34 31 33.",
-
-      "entry.title": "Zapsat novou aktivitu",
-      "entry.distance": "Vzdálenost (km)",
-      "entry.time": "Čas (minuty)",
-      "entry.submit": "Uložit aktivitu",
-      "entry.my": "Moje aktivity",
-      "entry.date": "Datum",
-      "entry.actions": "Akce",
-      "entry.none": "Pro tento účet ještě nemáš žádné aktivity.",
-
-      "profile.runs": "Aktivity",
-      "profile.totaldistance": "Celková vzdálenost",
-      "profile.totaltime": "Celkový čas",
-      "profile.avgdistance": "Průměrná vzdálenost",
-      "profile.avgpace": "Průměrné tempo",
-      "profile.longest": "Nejdelší aktivita",
-      "profile.best10k": "Nejrychlejší ~10 km",
-      "profile.best5k": "Nejrychlejší ~5 km",
-
-      "user.notLoggedIn": "Nepřihlášen",
-      "user.loginButton": "Přihlásit se",
-      "user.loggedInAs": "Přihlášen jako {name}",
-      "user.leagueLabel": "Liga: {league}",
-      "user.addActivity": "Přidat aktivitu",
-      "user.deleteAccount": "Smazat účet",
-
-      "alert.loginMissing": "Zadej prosím jméno i heslo.",
-      "alert.codeWrong": "Přístupový kód není správný.",
-      "alert.passwordWrong": "Špatné heslo pro toto jméno.",
-      "alert.firebase": "Firebase ještě není správně nastavený. Přidej konfiguraci do skriptu.",
-      "alert.mustLogin": "Před přidáním aktivit se musíš přihlásit.",
-      "alert.activityInvalid": "Vyplň vzdálenost a čas správně a s kladnými hodnotami.",
-      "alert.noPlayers": "Zatím žádní hráči.",
-      "alert.notEnoughPlayers": "Na postupy a sestupy je potřeba alespoň 8 hráčů.",
-      "alert.promotionsDone": "Postupy a sestupy hotové: {up} nahoru, {down} dolů.",
-      "alert.noActivitiesToPlace": "Zatím nejsou žádné aktivity, není co zařazovat.",
-      "alert.noPending": "Žádní čekající hráči připravení k zařazení. Noví hráči se přidají na začátku dalšího měsíce.",
-      "alert.placeSummary": "Zařazeno {placed} nových hráčů do lig. {skipped}",
-      "alert.placeSkipped": "{count} zůstává jako Čekající (málo dat nebo kvůli rovnováze lig).",
-      "alert.deleteActivityConfirm": "Opravdu smazat tuto aktivitu?",
-      "alert.deleteAccountConfirm": "Tímto smažeš svůj účet i všechny aktivity. Jsi si jistý?",
-      "alert.alreadyLoggedIn": "Už jsi přihlášen. Pokud chceš začít znovu, smaž svůj účet."
-    }
+  const PHASE = {
+    EMPLOYEE: 'employee',
+    OWNER: 'owner',
   };
 
-  function t(key, vars) {
-    const dict = translations[currentLang] || translations.en;
-    let str = dict[key] || translations.en[key] || key;
-    if (vars) {
-      Object.keys(vars).forEach(k => {
-        str = str.replace(`{${k}}`, vars[k]);
-      });
+  const WORKDAY_EMPLOYEE_START = { hour: 9, minute: 0 };
+  const WORKDAY_EMPLOYEE_END   = { hour: 17, minute: 0 };
+  const WORKDAY_OWNER_START    = { hour: 10, minute: 0 };
+
+  // 1 real second = 1 in-game minute
+  const MS_PER_GAME_MINUTE = 1000;
+
+  function cloneTime(t) {
+    return { hour: t.hour, minute: t.minute };
+  }
+
+  function advanceTime(time, minutes) {
+    time.minute += minutes;
+    while (time.minute >= 60) {
+      time.minute -= 60;
+      time.hour += 1;
     }
-    return str;
   }
 
-  function applyTranslations() {
-    document.querySelectorAll("[data-i18n]").forEach(el => {
-      const key = el.getAttribute("data-i18n");
-      el.textContent = t(key);
-    });
-    renderHeaderUser();
-    renderLeaderboard();
-    renderStats();
-    renderMyActivities();
-    renderPendingList();
+  function timeGreaterOrEqual(a, b) {
+    if (a.hour > b.hour) return true;
+    if (a.hour < b.hour) return false;
+    return a.minute >= b.minute;
   }
 
-  function initLanguage() {
-    const select = document.getElementById("lang-select");
-    const saved = localStorage.getItem(LS_LANG_KEY) || "en";
+  function timeToString(t) {
+    const hh = String(t.hour).padStart(2, '0');
+    const mm = String(t.minute).padStart(2, '0');
+    return `${hh}:${mm}`;
+  }
 
-    currentLang = saved;
+  function randInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
 
-    if (select) {
-      select.value = saved;
-      select.addEventListener("change", () => {
-        currentLang = select.value;
-        localStorage.setItem(LS_LANG_KEY, currentLang);
-        applyTranslations();
-      });
+  function randChoice(arr) {
+    return arr[Math.floor(Math.random() * arr.length)];
+  }
+
+  // ===========================
+  // PART 4/10 – CORE GAME STATE
+  // ===========================
+
+  const game = {
+    phase: PHASE.EMPLOYEE,
+    state: GAME_STATE.INTRO,
+    currentTime: cloneTime(WORKDAY_EMPLOYEE_START),
+    lastMinuteMs: 0,
+    dayNumber: 1,
+
+    money: 0,
+    reputation: 50,
+    warnings: [],      // store days when warnings happened (owner phase)
+
+    hasHadLunchToday: false,
+
+    // Call-related
+    isInCall: false,
+    callLog: [],
+    callNPCMood: 0,
+    callProduct: null,
+    callStep: 0,
+
+    // Shop / inventory / employees (owner phase)
+    inventory: [], // { id, name, buyPrice, sellPrice, difficulty, stock }
+    availableProducts: [],
+    availableEmployees: [],
+    employees: [], // { id, name, dailyCost, skill }
+
+    // Game over info
+    gameOverReason: '',
+  };
+
+  // Employee-phase products
+  const EMPLOYEE_PRODUCTS = [
+    { id: 'printer',       name: 'Office Printer',     price: 200,  difficulty: 1, repGain: 3,  repLoss: 2 },
+    { id: 'software',      name: 'Software License',   price: 500,  difficulty: 2, repGain: 5,  repLoss: 4 },
+    { id: 'gaming_pc',     name: 'High-End Gaming PC', price: 1200, difficulty: 3, repGain: 9,  repLoss: 7 },
+    { id: 'military_pc',   name: 'Military Grade PC',  price: 3000, difficulty: 4, repGain: 15, repLoss: 12},
+  ];
+
+  let nextProductId = 1;
+  let nextEmployeeId = 1;
+
+  // ===========================
+  // PART 5/10 – RENDERING HELPERS & BUTTONS
+  // ===========================
+
+  const clickRegions = []; // { x, y, w, h, onClick }
+
+  function addClickRegion(x, y, w, h, onClick) {
+    clickRegions.push({ x, y, w, h, onClick });
+  }
+
+  function drawButton(x, y, w, h, label) {
+    ctx.fillStyle = '#333';
+    ctx.fillRect(x, y, w, h);
+    ctx.strokeStyle = '#777';
+    ctx.strokeRect(x, y, w, h);
+    ctx.fillStyle = '#eee';
+    ctx.font = '16px monospace';
+    ctx.textBaseline = 'middle';
+    ctx.textAlign = 'left';
+    ctx.fillText(label, x + 10, y + h / 2);
+  }
+
+  function drawHUD() {
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, canvas.width, 40);
+
+    ctx.fillStyle = '#0f0';
+    ctx.font = '16px monospace';
+    ctx.textBaseline = 'middle';
+    ctx.textAlign = 'left';
+
+    ctx.fillText(`Day: ${game.dayNumber}`, 10, 20);
+    ctx.fillText(`Time: ${timeToString(game.currentTime)}`, 140, 20);
+    ctx.fillText(`Money: $${game.money.toFixed(2)}`, 320, 20);
+    ctx.fillText(`Reputation: ${game.reputation}`, 580, 20);
+
+    if (game.phase === PHASE.OWNER && game.warnings.length > 0) {
+      ctx.fillStyle = '#ff0';
+      ctx.fillText(`Warnings (last 7 days): ${game.warnings.length}`, 780, 20);
     }
-
-    applyTranslations();
   }
 
-  // ==========================
-  //  BASIC HELPERS
-  // ==========================
+  function drawIntro() {
+    ctx.fillStyle = '#111';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  function currentMonthKey(ts) {
-    const d = ts ? new Date(ts) : new Date();
-    const y = d.getFullYear();
-    const m = d.getMonth() + 1;
-    return `${y}-${String(m).padStart(2, "0")}`;
-  }
-
-  function formatDate(ts) {
-    const d = new Date(ts);
-    if (isNaN(d.getTime())) return "";
-    return d.toLocaleDateString();
-  }
-
-  function formatMinutesPretty(minutes) {
-    if (!isFinite(minutes) || minutes <= 0) return "0:00";
-    const totalSeconds = Math.round(minutes * 60);
-    const m = Math.floor(totalSeconds / 60);
-    const s = totalSeconds % 60;
-    return `${m}:${s.toString().padStart(2, "0")}`;
-  }
-
-  function formatSecondsPretty(seconds) {
-    if (!isFinite(seconds) || seconds <= 0) return "–";
-    return `${seconds.toFixed(1)} s`;
-  }
-
-  function leagueIndex(league) {
-    return LEAGUES.indexOf(league);
-  }
-
-  function formatImprovement(value) {
-    if (!isFinite(value) || value === 0) return "0%";
-    const rounded = Math.round(value);
-    return (rounded > 0 ? "+" : "") + rounded + "%";
-  }
-
-  function getLeagueCounts() {
-    const counts = { amateurs: 0, intermediates: 0, pros: 0, legends: 0 };
-    users.forEach(u => {
-      if (counts[u.league] !== undefined) counts[u.league]++;
-    });
-    return counts;
-  }
-
-  function canMoveLeague(user, targetLeague) {
-    if (!LEAGUES.includes(targetLeague)) return false;
-    const counts = getLeagueCounts();
-    const from = LEAGUES.includes(user.league) ? user.league : null;
-
-    if (from && counts[from] !== undefined) {
-      counts[from] = Math.max(0, counts[from] - 1);
-    }
-    counts[targetLeague] = (counts[targetLeague] || 0) + 1;
-
-    const values = Object.values(counts);
-    const max = Math.max(...values);
-    const min = Math.min(...values);
-    return max - min <= 2;
-  }
-
-  // ==========================
-  //  NAVIGATION
-  // ==========================
-
-  function showScene(name) {
-    const scenes = document.querySelectorAll(".scene");
-    scenes.forEach(scene => {
-      scene.classList.remove("active");
-      scene.style.display = "none";
-    });
-
-    const el =
-      document.getElementById("scene-" + name) ||
-      document.getElementById(name);
-
-    if (el) {
-      el.classList.add("active");
-      el.style.display = "block";
-    }
-
-    const navButtons = document.querySelectorAll("header nav button");
-    navButtons.forEach(btn => btn.classList.remove("active"));
-    navButtons.forEach(btn => {
-      const onclick = btn.getAttribute("onclick") || "";
-      if (onclick.includes("'" + name + "'")) {
-        btn.classList.add("active");
+    ctx.fillStyle = '#444';
+    for (let y = 80; y <= 360; y += 80) {
+      for (let x = 80; x <= 880; x += 160) {
+        ctx.fillRect(x - 60, y - 30, 120, 60);
       }
+    }
+
+    // highlight player cubicle
+    ctx.fillStyle = '#666';
+    ctx.fillRect(440, 210, 120, 60);
+
+    ctx.fillStyle = '#eee';
+    ctx.font = '20px monospace';
+    ctx.textAlign = 'center';
+
+    ctx.fillText('You are tired of working a 9-5.', canvas.width / 2, 420);
+    ctx.fillText('Make enough money to start your own business.', canvas.width / 2, 450);
+    ctx.fillText('Good luck!', canvas.width / 2, 480);
+
+    drawButton(canvas.width / 2 - 80, 500 - 30, 160, 30, 'Start');
+    addClickRegion(canvas.width / 2 - 80, 500 - 30, 160, 30, () => {
+      startNewDayEmployee();
+      game.state = GAME_STATE.EMPLOYEE_DAY;
     });
   }
 
-  function updateNavLoginVisibility() {
-    const btn = document.getElementById("nav-login-btn");
-    if (!btn) return;
-    if (currentUser) {
-      btn.style.display = "none";
+  function drawEmployeeOffice() {
+    ctx.fillStyle = '#222';
+    ctx.fillRect(0, 40, canvas.width, canvas.height - 40);
+
+    ctx.fillStyle = '#444';
+    ctx.fillRect(50, 100, 860, 350);
+
+    // Computer
+    ctx.fillStyle = '#111';
+    ctx.fillRect(200, 130, 400, 250);
+    ctx.fillStyle = '#333';
+    ctx.fillRect(210, 140, 380, 230);
+
+    // Phone
+    ctx.fillStyle = '#222';
+    ctx.fillRect(640, 200, 80, 40);
+
+    // Screen text
+    ctx.fillStyle = '#0f0';
+    ctx.font = '18px monospace';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'top';
+    ctx.fillText('> Make a sales call', 230, 180);
+    ctx.fillText('> Rules', 230, 210);
+
+    addClickRegion(220, 180, 280, 24, () => {
+      startCallSelection();
+    });
+
+    addClickRegion(220, 210, 100, 24, () => {
+      game.state = GAME_STATE.RULES;
+    });
+  }
+
+  function drawOwnerOffice() {
+    ctx.fillStyle = '#232';
+    ctx.fillRect(0, 40, canvas.width, canvas.height - 40);
+
+    ctx.fillStyle = '#454';
+    ctx.fillRect(50, 100, 860, 350);
+
+    // new computer
+    ctx.fillStyle = '#111';
+    ctx.fillRect(220, 120, 420, 260);
+    ctx.fillStyle = '#333';
+    ctx.fillRect(230, 130, 400, 240);
+
+    ctx.fillStyle = '#0f0';
+    ctx.font = '18px monospace';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'top';
+    ctx.fillText('> Make a sales call', 250, 160);
+    ctx.fillText('> Shop', 250, 190);
+    ctx.fillText('> Rules', 250, 220);
+    ctx.fillText('> Finish work day', 250, 250);
+
+    addClickRegion(240, 160, 260, 24, () => startCallSelection());
+    addClickRegion(240, 190, 100, 24, () => {
+      game.state = GAME_STATE.SHOP;
+      generateShopIfEmpty();
+    });
+    addClickRegion(240, 220, 100, 24, () => {
+      game.state = GAME_STATE.RULES;
+    });
+    addClickRegion(240, 250, 200, 24, () => {
+      endOfDay();
+    });
+  }
+
+  function drawLunchBreak() {
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#fff';
+    ctx.font = '32px monospace';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('Lunch break', canvas.width / 2, canvas.height / 2);
+  }
+
+  function drawRules() {
+    ctx.fillStyle = '#111';
+    ctx.fillRect(0, 40, canvas.width, canvas.height - 40);
+    ctx.fillStyle = '#eee';
+    ctx.font = '16px monospace';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'top';
+
+    const lines = [];
+    if (game.phase === PHASE.EMPLOYEE) {
+      lines.push('EMPLOYEE RULES:');
+      lines.push('- Work from 09:00 to 17:00, with a lunch break at 12:00.');
+      lines.push('- 1 real second = 1 in-game minute.');
+      lines.push('- Start with reputation 50/100.');
+      lines.push('- If reputation goes below 0, you get fired and lose the game.');
+      lines.push('- Company takes 60% of each sale.');
+      lines.push('- The remaining 40% that reaches your bank is taxed at 35%.');
+      lines.push('- End of each day you pay: $20 rent, $20 food, $5 water/electricity.');
+      lines.push('- Get your own business by: reputation > 100 OR earning $5,000.');
+      lines.push('- When you start your own business you only keep $1,000 of that money.');
     } else {
-      btn.style.display = "inline-block";
-    }
-  }
-
-  // ==========================
-  //  FIREBASE INIT
-  // ==========================
-
-  function initFirebase() {
-    try {
-      firebase.initializeApp(firebaseConfig);
-      db = firebase.firestore();
-    } catch (e) {
-      console.error("Firebase init error:", e);
-      alert(t("alert.firebase"));
-    }
-  }
-
-  // ==========================
-  //  DATA LOADING
-  // ==========================
-
-  async function loadAllData() {
-    if (!db) return;
-    const [usersSnap, actsSnap] = await Promise.all([
-      db.collection("users").get(),
-      db.collection("activities").get()
-    ]);
-
-    users = usersSnap.docs.map(doc => {
-      const data = doc.data();
-      if (!data.league) data.league = "pending";
-      if (!data.joinMonth) data.joinMonth = currentMonthKey(data.createdAt || Date.now());
-      return { id: doc.id, ...data };
-    });
-
-    entries = actsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
-    renderLeaderboard();
-    renderStats();
-    renderMyActivities();
-    renderPendingList();
-
-    if (!autoRunning) {
-      autoMonthlyUpdates();
-    }
-  }
-
-  function restoreCurrentUser() {
-    const storedId = localStorage.getItem(LS_CURRENT_USER_KEY);
-    if (!storedId) {
-      currentUser = null;
-      renderHeaderUser();
-      updateEntryFormLockState();
-      updateNavLoginVisibility();
-      return;
-    }
-    const found = users.find(u => u.id === storedId);
-    if (found) {
-      currentUser = found;
-    } else {
-      localStorage.removeItem(LS_CURRENT_USER_KEY);
-      currentUser = null;
-    }
-    renderHeaderUser();
-    updateEntryFormLockState();
-    updateNavLoginVisibility();
-  }
-
-  // ==========================
-  //  PLAYER STATS
-  // ==========================
-
-  function getPlayerStats() {
-    const byUser = {};
-
-    entries.forEach(e => {
-      const user = users.find(u => u.id === e.userId);
-      if (!user) return;
-      const key = user.id;
-      if (!byUser[key]) {
-        byUser[key] = {
-          userId: user.id,
-          name: user.name,
-          league: user.league || "pending",
-          runs: 0,
-          totalDistance: 0,
-          totalTime: 0,
-          bestDistance: 0,
-          firstEntry: null
-        };
-      }
-      const stats = byUser[key];
-
-      if (!stats.firstEntry || e.timestamp < stats.firstEntry.timestamp) {
-        stats.firstEntry = {
-          distanceKm: e.distanceKm,
-          timeMinutes: e.timeMinutes,
-          timestamp: e.timestamp
-        };
-      }
-
-      stats.runs++;
-      stats.totalDistance += e.distanceKm;
-      stats.totalTime += e.timeMinutes;
-      if (e.distanceKm > stats.bestDistance) stats.bestDistance = e.distanceKm;
-    });
-
-    let players = Object.values(byUser);
-
-    players.forEach(p => {
-      p.avgDistance = p.runs > 0 ? p.totalDistance / p.runs : 0;
-      p.speed = p.totalTime > 0 ? p.totalDistance / p.totalTime : 0;
-      let improvement = 0;
-      if (
-        p.firstEntry &&
-        p.firstEntry.distanceKm > 0 &&
-        p.firstEntry.timeMinutes > 0 &&
-        p.totalDistance > 0 &&
-        p.totalTime > 0
-      ) {
-        const baselinePace = p.firstEntry.timeMinutes / p.firstEntry.distanceKm;
-        const avgPace = p.totalTime / p.totalDistance;
-        if (baselinePace > 0) {
-          improvement = ((baselinePace - avgPace) / baselinePace) * 100;
-        }
-      }
-      p.improvement = improvement;
-    });
-
-    players.sort((a, b) => {
-      if (b.totalDistance !== a.totalDistance) {
-        return b.totalDistance - a.totalDistance;
-      }
-      if (b.totalTime !== a.totalTime) {
-        return b.totalTime - a.totalTime;
-      }
-      return b.speed - a.speed;
-    });
-
-    players = players.map((p, index) => ({ ...p, rank: index + 1 }));
-    return players;
-  }
-
-  // ==========================
-  //  MONTHLY: AUTO UPDATES (from 12th)
-  // ==========================
-
-  async function autoMonthlyUpdates() {
-    if (!db) return;
-    autoRunning = true;
-    try {
-      const today = new Date();
-      const monthKey = currentMonthKey(today);
-      const day = today.getDate();
-
-      // Only run on or after the 12th of the month
-      if (day < 12) {
-        autoRunning = false;
-        return;
-      }
-
-      const metaRef = db.collection("meta").doc("global_state");
-      const snap = await metaRef.get();
-      const data = snap.exists ? snap.data() : {};
-
-      if (data.lastPromotionMonth === monthKey) {
-        autoRunning = false;
-        return;
-      }
-
-      await placeNewJoiners(true);
-      await applyPromotions(true);
-
-      await metaRef.set({ lastPromotionMonth: monthKey }, { merge: true });
-    } catch (e) {
-      console.error("Auto monthly updates error:", e);
-    } finally {
-      autoRunning = false;
-    }
-  }
-
-  // ==========================
-  //  MONTHLY: PLACE NEW JOINERS
-  // ==========================
-
-  async function placeNewJoiners(auto = false) {
-    if (!db) return;
-
-    const players = getPlayerStats();
-    if (!players.length) {
-      if (!auto) alert(t("alert.noActivitiesToPlace"));
-      return;
+      lines.push('BUSINESS OWNER RULES:');
+      lines.push('- No more fixed 9-5. You start at 10:00 and end when you choose.');
+      lines.push('- No lunch break.');
+      lines.push('- No company cut. You keep 100% gross, but pay 45% tax.');
+      lines.push('- Use the Shop to restock products and hire employees.');
+      lines.push('- Employees have a daily cost that adds to your bills.');
+      lines.push('- If you cannot pay your daily bills, you get a warning.');
+      lines.push('- If you get 3 warnings within 7 days, you lose the game.');
+      lines.push('- If reputation reaches 0 as an owner, you go bankrupt,');
+      lines.push('  lose all money, and go back to working for the company.');
     }
 
-    const nowKey = currentMonthKey();
-    const rankMap = {};
-    players.forEach(p => { rankMap[p.userId] = p; });
-
-    const candidates = users.filter(u =>
-      u.league === "pending" &&
-      u.joinMonth &&
-      u.joinMonth < nowKey
-    );
-
-    if (!candidates.length) {
-      if (!auto) alert(t("alert.noPending"));
-      return;
+    let y = 60;
+    for (const line of lines) {
+      ctx.fillText(line, 40, y);
+      y += 20;
     }
 
-    const batch = db.batch();
-    let placed = 0;
-    let skipped = 0;
-
-    function preferredLeaguesForTarget(target) {
-      if (target === "legends") return ["legends", "pros"];
-      if (target === "pros") return ["pros", "intermediates", "legends"];
-      if (target === "intermediates") return ["intermediates", "amateurs", "pros"];
-      if (target === "amateurs") return ["amateurs", "intermediates"];
-      return ["amateurs"];
-    }
-
-    candidates.forEach(user => {
-      const stats = rankMap[user.id];
-      if (!stats || stats.runs < MIN_RUNS_FOR_PLACEMENT) {
-        skipped++;
-        return;
-      }
-
-      const N = players.length;
-      const q = stats.rank / N;
-      let targetLeague = "amateurs";
-      if (q <= 0.25) targetLeague = "legends";
-      else if (q <= 0.5) targetLeague = "pros";
-      else if (q <= 0.75) targetLeague = "intermediates";
-      else targetLeague = "amateurs";
-
-      const prefs = preferredLeaguesForTarget(targetLeague);
-      let finalLeague = null;
-
-      for (const lg of prefs) {
-        if (canMoveLeague(user, lg)) {
-          finalLeague = lg;
-          break;
-        }
-      }
-
-      if (!finalLeague) {
-        skipped++;
-        return;
-      }
-
-      user.league = finalLeague;
-      const userRef = db.collection("users").doc(user.id);
-      batch.update(userRef, { league: finalLeague });
-      placed++;
-    });
-
-    if (!placed) {
-      if (!auto) {
-        alert("No new joiners could be placed yet. They may need more activities or the leagues are already very balanced.");
-      }
-      return;
-    }
-
-    await batch.commit();
-    await loadAllData();
-    restoreCurrentUser();
-
-    if (!auto) {
-      let skippedText = "";
-      if (skipped > 0) {
-        skippedText = t("alert.placeSkipped", { count: skipped });
-      }
-      alert(t("alert.placeSummary", { placed, skipped: skippedText }));
-    }
-  }
-
-  // ==========================
-  //  MONTHLY: PROMOTIONS
-  // ==========================
-
-  async function applyPromotions(auto = false) {
-    if (!db) return;
-
-    const players = getPlayerStats();
-    const total = players.length;
-    if (total === 0) {
-      if (!auto) alert(t("alert.noPlayers"));
-      return;
-    }
-
-    let moves = 0;
-    if (total >= 32) moves = 3;
-    else if (total >= 16) moves = 2;
-    else if (total >= 8) moves = 1;
-    else moves = 0;
-
-    if (moves === 0) {
-      if (!auto) alert(t("alert.notEnoughPlayers"));
-      return;
-    }
-
-    const batch = db.batch();
-
-    let promoted = 0;
-    for (let i = 0; i < players.length && promoted < moves; i++) {
-      const p = players[i];
-      if (!LEAGUES.includes(p.league)) continue;
-      const idx = leagueIndex(p.league);
-      if (idx < 0 || idx >= LEAGUES.length - 1) continue;
-      const userRef = db.collection("users").doc(p.userId);
-      batch.update(userRef, { league: LEAGUES[idx + 1] });
-      promoted++;
-    }
-
-    let relegated = 0;
-    for (let i = players.length - 1; i >= 0 && relegated < moves; i--) {
-      const p = players[i];
-      if (!LEAGUES.includes(p.league)) continue;
-      const idx = leagueIndex(p.league);
-      if (idx <= 0) continue;
-      const userRef = db.collection("users").doc(p.userId);
-      batch.update(userRef, { league: LEAGUES[idx - 1] });
-      relegated++;
-    }
-
-    await batch.commit();
-    await loadAllData();
-    restoreCurrentUser();
-    if (!auto) {
-      alert(t("alert.promotionsDone", { up: moves, down: moves }));
-    }
-  }
-
-  // ==========================
-  //  PROFILE VIEW
-  // ==========================
-
-  function showProfile(userId) {
-    const card = document.getElementById("profile-card");
-    const title = document.getElementById("profile-title");
-    const summary = document.getElementById("profile-summary");
-
-    const runsCell = document.getElementById("profile-runs");
-    const totalDistCell = document.getElementById("profile-total-distance");
-    const totalTimeCell = document.getElementById("profile-total-time");
-    const avgDistCell = document.getElementById("profile-avg-distance");
-    const avgPaceCell = document.getElementById("profile-avg-pace");
-    const longestCell = document.getElementById("profile-longest");
-    const best10kCell = document.getElementById("profile-10k");
-    const best5kCell = document.getElementById("profile-5k");
-
-    const user = users.find(u => u.id === userId);
-    if (!user) return;
-
-    const myEntries = entries
-      .filter(e => e.userId === userId)
-      .slice()
-      .sort((a, b) => a.timestamp - b.timestamp);
-
-    if (!myEntries.length) {
-      title.textContent = `Profile: ${user.name}`;
-      summary.textContent = "No activities logged yet.";
-      runsCell.textContent = "0";
-      totalDistCell.textContent = "0 km";
-      totalTimeCell.textContent = "0";
-      avgDistCell.textContent = "–";
-      avgPaceCell.textContent = "–";
-      longestCell.textContent = "–";
-      best10kCell.textContent = "–";
-      best5kCell.textContent = "–";
-      showScene("profile-card");
-      return;
-    }
-
-    let runs = myEntries.length;
-    let totalDistance = 0;
-    let totalTime = 0;
-    let longest = 0;
-    let best10kMinutes = Infinity;
-    let best5kMinutes = Infinity;
-
-    myEntries.forEach(e => {
-      totalDistance += e.distanceKm;
-      totalTime += e.timeMinutes;
-      if (e.distanceKm > longest) longest = e.distanceKm;
-
-      if (e.distanceKm > 0 && e.timeMinutes > 0) {
-        const paceMinutesPerKm = e.timeMinutes / e.distanceKm;
-
-        if (e.distanceKm >= 9.5) {
-          const tenKMinutes = paceMinutesPerKm * 10;
-          if (tenKMinutes < best10kMinutes) best10kMinutes = tenKMinutes;
-        }
-
-        if (e.distanceKm >= 4.5) {
-          const fiveKMinutes = paceMinutesPerKm * 5;
-          if (fiveKMinutes < best5kMinutes) best5kMinutes = fiveKMinutes;
-        }
-      }
-    });
-
-    const avgDistance = totalDistance / runs;
-    const avgPaceMinutesPerKm =
-      totalDistance > 0 && totalTime > 0 ? totalTime / totalDistance : 0;
-
-    function formatPace(minPerKm) {
-      if (!isFinite(minPerKm) || minPerKm <= 0) return "–";
-      const totalSeconds = Math.round(minPerKm * 60);
-      const m = Math.floor(totalSeconds / 60);
-      const s = totalSeconds % 60;
-      return `${m}:${s.toString().padStart(2, "0")} min/km`;
-    }
-
-    title.textContent = `Profile: ${user.name}`;
-    const leagueLabel = LEAGUES.includes(user.league)
-      ? t("league." + user.league)
-      : t("league.pending");
-
-    summary.textContent = `${t("user.leagueLabel", { league: leagueLabel })}, ${t("stats.runs")}: ${runs}`;
-
-    runsCell.textContent = runs.toString();
-    totalDistCell.textContent = `${totalDistance.toFixed(2)} km`;
-    totalTimeCell.textContent = formatMinutesPretty(totalTime);
-    avgDistCell.textContent = `${avgDistance.toFixed(2)} km`;
-    avgPaceCell.textContent = formatPace(avgPaceMinutesPerKm);
-    longestCell.textContent = `${longest.toFixed(2)} km`;
-    best10kCell.textContent =
-      isFinite(best10kMinutes) && best10kMinutes > 0
-        ? formatMinutesPretty(best10kMinutes)
-        : "–";
-    best5kCell.textContent =
-      isFinite(best5kMinutes) && best5kMinutes > 0
-        ? formatMinutesPretty(best5kMinutes)
-        : "–";
-
-    showScene("profile-card");
-  }
-
-  function attachProfileLinks() {
-    document.querySelectorAll(".link-name").forEach(btn => {
-      const userId = btn.getAttribute("data-user-id");
-      btn.onclick = () => showProfile(userId);
+    drawButton(40, canvas.height - 60, 140, 30, 'Back');
+    addClickRegion(40, canvas.height - 60, 140, 30, () => {
+      game.state = (game.phase === PHASE.EMPLOYEE) ? GAME_STATE.EMPLOYEE_DAY : GAME_STATE.OWNER_DAY;
     });
   }
 
-  // ==========================
-  //  RENDER FUNCTIONS
-  // ==========================
+  function drawGameOver() {
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#f00';
+    ctx.font = '32px monospace';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('GAME OVER', canvas.width / 2, canvas.height / 2 - 40);
 
-  function renderHeaderUser() {
-    const container = document.getElementById("user-controls");
-    if (!container) return;
-    container.innerHTML = "";
+    ctx.fillStyle = '#fff';
+    ctx.font = '18px monospace';
+    ctx.fillText(game.gameOverReason, canvas.width / 2, canvas.height / 2);
 
-    if (!currentUser) {
-      const span = document.createElement("span");
-      span.textContent = t("user.notLoggedIn");
-      container.appendChild(span);
-
-      const btn = document.createElement("button");
-      btn.className = "btn btn-small";
-      btn.textContent = t("user.loginButton");
-      btn.onclick = () => showScene("login");
-      container.appendChild(btn);
-
-      updateNavLoginVisibility();
-      return;
-    }
-
-    const name = currentUser.name;
-    const leagueKey = LEAGUES.includes(currentUser.league)
-      ? "league." + currentUser.league
-      : "league.pending";
-    const leagueLabel = t(leagueKey);
-
-    const info = document.createElement("span");
-    info.textContent = `${t("user.loggedInAs", { name })} · ${t("user.leagueLabel", { league: leagueLabel })}`;
-    container.appendChild(info);
-
-    const addBtn = document.createElement("button");
-    addBtn.className = "btn btn-small";
-    addBtn.style.marginLeft = "8px";
-    addBtn.textContent = t("user.addActivity");
-    addBtn.onclick = () => showScene("entry");
-    container.appendChild(addBtn);
-
-    const deleteBtn = document.createElement("button");
-    deleteBtn.className = "btn btn-small danger";
-    deleteBtn.style.marginLeft = "4px";
-    deleteBtn.textContent = t("user.deleteAccount");
-    deleteBtn.onclick = deleteAccount;
-    container.appendChild(deleteBtn);
-
-    updateNavLoginVisibility();
-  }
-
-  function renderLeaderboard() {
-    const tbody = document.getElementById("leaderboard-body");
-    const empty = document.getElementById("no-entries");
-    if (!tbody) return;
-    tbody.innerHTML = "";
-
-    const players = getPlayerStats();
-    const filterSel = document.getElementById("league-filter");
-    const filter = filterSel ? filterSel.value : "all";
-
-    let filtered = players;
-    if (filter !== "all") {
-      filtered = players.filter(p => p.league === filter);
-    }
-
-    if (!filtered.length) {
-      if (empty) empty.style.display = "block";
-      return;
-    }
-    if (empty) empty.style.display = "none";
-
-    filtered.forEach(player => {
-      const tr = document.createElement("tr");
-
-      let rankSymbol = player.rank;
-      if (player.rank === 1) rankSymbol = "🥇";
-      else if (player.rank === 2) rankSymbol = "🥈";
-      else if (player.rank === 3) rankSymbol = "🥉";
-
-      const leagueClass = LEAGUES.includes(player.league)
-        ? player.league
-        : "pending";
-      const leagueLabel = LEAGUES.includes(player.league)
-        ? t("league." + player.league)
-        : t("league.pending");
-
-      tr.innerHTML = `
-        <td>${rankSymbol}</td>
-        <td>
-          <button type="button" class="link-name" data-user-id="${player.userId}" style="background:none;border:none;color:#007bff;cursor:pointer;text-decoration:underline;">
-            ${player.name}
-          </button>
-        </td>
-        <td><span class="badge-league ${leagueClass}">${leagueLabel}</span></td>
-        <td>${player.totalDistance.toFixed(2)}</td>
-        <td>${player.totalTime.toFixed(1)}</td>
-      `;
-      tbody.appendChild(tr);
-    });
-
-    attachProfileLinks();
-  }
-
-  function renderStats() {
-    const tbody = document.getElementById("stats-body");
-    const empty = document.getElementById("no-stats");
-    if (!tbody) return;
-    tbody.innerHTML = "";
-
-    if (!entries.length) {
-      if (empty) empty.style.display = "block";
-      return;
-    }
-    if (empty) empty.style.display = "none";
-
-    const players = getPlayerStats();
-
-    players.forEach(stats => {
-      const leagueClass = LEAGUES.includes(stats.league)
-        ? stats.league
-        : "pending";
-      const leagueLabel = LEAGUES.includes(stats.league)
-        ? t("league." + stats.league)
-        : t("league.pending");
-
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>
-          <button type="button" class="link-name" data-user-id="${stats.userId}" style="background:none;border:none;color:#007bff;cursor:pointer;text-decoration:underline;">
-            ${stats.name}
-          </button>
-        </td>
-        <td><span class="badge-league ${leagueClass}">${leagueLabel}</span></td>
-        <td>${stats.runs}</td>
-        <td>${stats.totalDistance.toFixed(2)}</td>
-        <td>${stats.totalTime.toFixed(1)}</td>
-        <td>${stats.avgDistance.toFixed(2)}</td>
-        <td>${stats.bestDistance.toFixed(2)}</td>
-        <td>${formatImprovement(stats.improvement)}</td>
-      `;
-      tbody.appendChild(tr);
-    });
-
-    attachProfileLinks();
-  }
-
-  function renderPendingList() {
-    const tbody = document.getElementById("pending-body");
-    const empty = document.getElementById("no-pending");
-    if (!tbody) return;
-    tbody.innerHTML = "";
-
-    const pending = users
-      .filter(u => u.league === "pending")
-      .slice()
-      .sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
-
-    if (!pending.length) {
-      if (empty) empty.style.display = "block";
-      return;
-    }
-    if (empty) empty.style.display = "none";
-
-    pending.forEach((u, index) => {
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>${index + 1}</td>
-        <td>${u.name}</td>
-        <td>${u.joinMonth || ""}</td>
-      `;
-      tbody.appendChild(tr);
+    drawButton(canvas.width / 2 - 80, canvas.height / 2 + 60, 160, 30, 'Restart');
+    addClickRegion(canvas.width / 2 - 80, canvas.height / 2 + 60, 160, 30, () => {
+      resetGame();
     });
   }
 
-  function renderMyActivities() {
-    const tbody = document.getElementById("my-activities-body");
-    const empty = document.getElementById("no-my-activities");
-    if (!tbody) return;
-    tbody.innerHTML = "";
+  // ===========================
+  // PART 6/10 – SALES CALL UI & LOGIC
+  // ===========================
 
-    if (!currentUser) {
-      if (empty) {
-        empty.style.display = "block";
-        empty.textContent = t("user.notLoggedIn");
-      }
-      return;
-    }
-
-    const myEntries = entries.filter(e => e.userId === currentUser.id);
-
-    if (!myEntries.length) {
-      if (empty) {
-        empty.style.display = "block";
-        empty.textContent = t("entry.none");
-      }
-      return;
-    }
-    if (empty) empty.style.display = "none";
-
-    myEntries
-      .slice()
-      .sort((a, b) => b.timestamp - a.timestamp)
-      .forEach(e => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${formatDate(e.timestamp)}</td>
-          <td>${e.distanceKm.toFixed(2)}</td>
-          <td>${e.timeMinutes.toFixed(1)}</td>
-          <td>
-            <button class="btn btn-small danger" style="padding:4px 8px;font-size:12px;" onclick="deleteActivity('${e.id}')">
-              ✕
-            </button>
-          </td>
-        `;
-        tbody.appendChild(tr);
-      });
+  function startCallSelection() {
+    game.state = GAME_STATE.CALL;
+    game.isInCall = false;
+    game.callLog = [];
+    game.callNPCMood = 0;
+    game.callProduct = null;
+    game.callStep = 0;
+    hideInput();
   }
 
-  function updateEntryFormLockState() {
-    const distanceInput = document.getElementById("distance");
-    const timeInput = document.getElementById("time");
-    const form = document.getElementById("entry-form");
-    if (!form) return;
-    const submit = form.querySelector("button[type='submit']");
-    const locked = !currentUser;
+  function drawCallScreen() {
+    ctx.fillStyle = '#111';
+    ctx.fillRect(0, 40, canvas.width, canvas.height - 40);
 
-    if (distanceInput) distanceInput.disabled = locked;
-    if (timeInput) timeInput.disabled = locked;
-    if (submit) submit.disabled = locked;
-  }
+    if (!game.callProduct) {
+      ctx.fillStyle = '#eee';
+      ctx.font = '18px monospace';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'top';
+      ctx.fillText('Choose what to sell:', 40, 60);
 
-  // ==========================
-  //  ACTIVITY DELETION
-  // ==========================
+      const products = (game.phase === PHASE.EMPLOYEE)
+        ? EMPLOYEE_PRODUCTS
+        : game.inventory.filter(p => p.stock > 0);
 
-  async function deleteActivity(id) {
-    if (!currentUser) {
-      alert(t("alert.mustLogin"));
-      return;
-    }
-    const entry = entries.find(e => e.id === id);
-    if (!entry) return;
-    if (entry.userId !== currentUser.id) {
-      alert("You can only delete your own activities.");
-      return;
-    }
-    if (!confirm(t("alert.deleteActivityConfirm"))) return;
-
-    await db.collection("activities").doc(id).delete();
-    await loadAllData();
-    restoreCurrentUser();
-  }
-
-  // ==========================
-  //  AUTH
-  // ==========================
-
-  async function login(name, password, codeInput) {
-    if (!db) {
-      alert(t("alert.firebase"));
-      return;
-    }
-    if (currentUser) {
-      alert(t("alert.alreadyLoggedIn"));
-      return;
-    }
-
-    const trimmedName = (name || "").trim();
-    if (!trimmedName || !password) {
-      alert(t("alert.loginMissing"));
-      return;
-    }
-
-    let codeOk = localStorage.getItem(LS_CODE_OK_KEY) === "true";
-    const typedCodeRaw = (codeInput || "").trim().toUpperCase();
-    const typedCode = typedCodeRaw || HITACHI_CODE;
-
-    if (!codeOk) {
-      if (typedCode !== HITACHI_CODE) {
-        alert(t("alert.codeWrong"));
-        return;
-      }
-      localStorage.setItem(LS_CODE_OK_KEY, "true");
-      codeOk = true;
-    }
-
-    const existingSnap = await db
-      .collection("users")
-      .where("name", "==", trimmedName)
-      .limit(1)
-      .get();
-
-    let userDoc = null;
-    if (existingSnap.empty) {
-      const joinMonth = currentMonthKey();
-      const newUser = {
-        name: trimmedName,
-        password,
-        league: "pending",
-        createdAt: Date.now(),
-        joinMonth
-      };
-      const docRef = await db.collection("users").add(newUser);
-      userDoc = { id: docRef.id, ...newUser };
-    } else {
-      const doc = existingSnap.docs[0];
-      const data = doc.data();
-      if (data.password !== password) {
-        alert(t("alert.passwordWrong"));
-        return;
-      }
-      if (!data.league) data.league = "pending";
-      if (!data.joinMonth) data.joinMonth = currentMonthKey(data.createdAt || Date.now());
-      userDoc = { id: doc.id, ...data };
-    }
-
-    currentUser = userDoc;
-    localStorage.setItem(LS_CURRENT_USER_KEY, currentUser.id);
-    localStorage.setItem(LS_PASSWORD_KEY, password);
-
-    await loadAllData();
-    restoreCurrentUser();
-    updateEntryFormLockState();
-    updateNavLoginVisibility(); // hide login button once logged in
-    showScene("leaderboard");
-  }
-
-  async function deleteAccount() {
-    if (!currentUser) return;
-    if (!confirm(t("alert.deleteAccountConfirm"))) return;
-
-    const userId = currentUser.id;
-
-    const actsSnap = await db
-      .collection("activities")
-      .where("userId", "==", userId)
-      .get();
-    const batch = db.batch();
-    actsSnap.forEach(doc => batch.delete(doc.ref));
-    batch.delete(db.collection("users").doc(userId));
-    await batch.commit();
-
-    currentUser = null;
-    localStorage.removeItem(LS_CURRENT_USER_KEY);
-    localStorage.removeItem(LS_PASSWORD_KEY);
-
-    await loadAllData();
-    renderHeaderUser();
-    updateEntryFormLockState();
-    updateNavLoginVisibility(); // show login button again when logged out
-    renderMyActivities();
-    showScene("welcome");
-  }
-
-  // ==========================
-  //  VIEW SAVED PASSWORD BUTTON
-  // ==========================
-
-  function setupViewCodeButton() {
-    const btn = document.getElementById("view-code-btn");
-    const display = document.getElementById("saved-code-display");
-    if (!btn || !display) return;
-    btn.addEventListener("click", () => {
-      const saved = localStorage.getItem(LS_PASSWORD_KEY);
-      if (saved) {
-        display.textContent = "Saved login password on this device: " + saved;
-      } else {
-        display.textContent = "No login password has been saved on this device yet.";
-      }
-      display.style.display = "block";
-    });
-  }
-
-  // ==========================
-  //  FORMS
-  // ==========================
-
-  function setupForms() {
-    const loginForm = document.getElementById("login-form");
-    if (loginForm) {
-      loginForm.addEventListener("submit", function (e) {
-        e.preventDefault();
-        const name = document.getElementById("login-name").value;
-        const password = document.getElementById("login-password").value;
-        const code = document.getElementById("login-code").value;
-        login(name, password, code);
-      });
-    }
-
-    const codeInput = document.getElementById("login-code");
-    if (codeInput) {
-      codeInput.addEventListener("input", () => {
-        codeInput.value = codeInput.value.toUpperCase();
-      });
-    }
-
-    const entryForm = document.getElementById("entry-form");
-    if (entryForm) {
-      entryForm.addEventListener("submit", async function (e) {
-        e.preventDefault();
-        if (!currentUser) {
-          alert(t("alert.mustLogin"));
-          showScene("login");
-          return;
-        }
-
-        const distance = parseFloat(document.getElementById("distance").value);
-        const time = parseFloat(document.getElementById("time").value);
-
-        if (isNaN(distance) || isNaN(time) || distance <= 0 || time <= 0) {
-          alert(t("alert.activityInvalid"));
-          return;
-        }
-
-        await db.collection("activities").add({
-          userId: currentUser.id,
-          distanceKm: distance,
-          timeMinutes: time,
-          timestamp: Date.now()
+      if (products.length === 0 && game.phase === PHASE.OWNER) {
+        ctx.fillText('You have no stock. Go to the Shop and restock.', 40, 100);
+        drawButton(40, canvas.height - 60, 140, 30, 'Back');
+        addClickRegion(40, canvas.height - 60, 140, 30, () => {
+          game.state = (game.phase === PHASE.EMPLOYEE) ? GAME_STATE.EMPLOYEE_DAY : GAME_STATE.OWNER_DAY;
         });
+        return;
+      }
 
-        await loadAllData();
-        restoreCurrentUser();
-        entryForm.reset();
-        showScene("leaderboard");
+      let y = 100;
+      for (const p of products) {
+        const label = game.phase === PHASE.EMPLOYEE
+          ? `${p.name} ($${p.price})`
+          : `${p.name} (Stock: ${p.stock}, Sell: $${p.sellPrice})`;
+        drawButton(40, y, 400, 30, label);
+        addClickRegion(40, y, 400, 30, () => {
+          startCallWithProduct(p);
+        });
+        y += 40;
+      }
+
+      drawButton(500, canvas.height - 60, 140, 30, 'Back');
+      addClickRegion(500, canvas.height - 60, 140, 30, () => {
+        game.state = (game.phase === PHASE.EMPLOYEE) ? GAME_STATE.EMPLOYEE_DAY : GAME_STATE.OWNER_DAY;
+      });
+    } else {
+      ctx.fillStyle = '#eee';
+      ctx.font = '16px monospace';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'top';
+
+      ctx.fillText(`Calling about: ${game.callProduct.name}`, 40, 60);
+
+      // Dialogue box
+      ctx.fillStyle = '#222';
+      ctx.fillRect(40, 100, 430, 360);
+      ctx.strokeStyle = '#555';
+      ctx.strokeRect(40, 100, 430, 360);
+
+      let y = 110;
+      for (const line of game.callLog.slice(-12)) {
+        ctx.fillStyle = (line.from === 'npc') ? '#0ff' : '#0f0';
+        ctx.fillText((line.from === 'npc' ? 'NPC: ' : 'YOU: ') + line.text, 50, y);
+        y += 20;
+      }
+
+      // Info box
+      ctx.fillStyle = '#222';
+      ctx.fillRect(500, 100, 420, 160);
+      ctx.strokeStyle = '#555';
+      ctx.strokeRect(500, 100, 420, 160);
+
+      ctx.fillStyle = '#eee';
+      ctx.fillText('Type anything in the box below and press "Send".', 510, 110);
+      ctx.fillText('The NPC will respond based on what you say.', 510, 130);
+      ctx.fillText('Close the deal to earn money and reputation.', 510, 150);
+
+      drawButton(500, canvas.height - 60, 140, 30, 'Hang up');
+      addClickRegion(500, canvas.height - 60, 140, 30, () => {
+        endCall(false, true);
       });
     }
-
-    const leagueFilter = document.getElementById("league-filter");
-    if (leagueFilter) {
-      leagueFilter.addEventListener("change", renderLeaderboard);
-    }
   }
 
-  // ==========================
-  //  INIT
-  // ==========================
+  function startCallWithProduct(product) {
+    game.callProduct = product;
+    game.callLog = [];
+    game.callNPCMood = 0;
+    game.callStep = 0;
+    game.isInCall = true;
+    showInput();
 
-  async function init() {
-    initLanguage();
-    initFirebase();
-    setupForms();
-    setupViewCodeButton();
-
-    if (!db) return;
-
-    await loadAllData();
-    restoreCurrentUser();
-    updateEntryFormLockState();
-    updateNavLoginVisibility();
-
-    if (currentUser) {
-      showScene("leaderboard");
+    const talkChance = Math.max(5, Math.min(95, game.reputation));
+    if (Math.random() * 100 > talkChance) {
+      game.callLog.push({ from: 'npc', text: 'They hang up immediately.' });
+      game.isInCall = false;
+      hideInput();
     } else {
-      showScene("welcome");
+      game.callLog.push({ from: 'npc', text: 'Hello? What are you calling about?' });
     }
   }
 
-  document.addEventListener("DOMContentLoaded", init);
-</script>
+  function handlePlayerMessage(text) {
+    if (!game.isInCall || !game.callProduct) return;
+    if (!text.trim()) return;
+    game.callLog.push({ from: 'player', text });
+
+    const lower = text.toLowerCase();
+    let response = '';
+
+    if (lower.includes('discount') || lower.includes('price')) {
+      response = 'The price matters a lot to us. What can you offer?';
+      game.callNPCMood += 0;
+    } else if (lower.includes('quality') || lower.includes('best')) {
+      response = 'We do care about quality. Tell me more.';
+      game.callNPCMood += 1;
+    } else if (lower.includes('refund') || lower.includes('guarantee')) {
+      response = 'A guarantee sounds reassuring.';
+      game.callNPCMood += 1;
+    } else if (lower.includes('buy now') || lower.includes('today')) {
+      response = 'You are a bit pushy, but I\'m listening.';
+      game.callNPCMood -= 1;
+    } else {
+      response = randChoice([
+        'Hmm, I see.',
+        'Could you explain that a bit more?',
+        'I\'m not sure yet.',
+        'That sounds interesting.'
+      ]);
+    }
+
+    game.callLog.push({ from: 'npc', text: response });
+    game.callStep++;
+
+    if (game.callStep >= 3) {
+      concludeCall();
+    }
+  }
+
+  function concludeCall() {
+    if (!game.callProduct) return;
+
+    const diff = game.callProduct.difficulty || 1;
+    let successChance = 70 - diff * 12;
+
+    successChance += Math.floor(game.reputation / 20);
+    successChance += game.callNPCMood * 5;
+    successChance = Math.max(5, Math.min(95, successChance));
+
+    const roll = Math.random() * 100;
+    const success = roll < successChance;
+
+    endCall(success, false);
+  }
+
+  function endCall(success, forcedHangup) {
+    if (!game.callProduct) {
+      game.isInCall = false;
+      hideInput();
+      return;
+    }
+
+    if (!game.isInCall && !forcedHangup) {
+      hideInput();
+      return;
+    }
+
+    if (success) {
+      game.callLog.push({ from: 'npc', text: 'Okay, we will take it.' });
+      applySaleSuccess(game.callProduct);
+    } else {
+      if (!forcedHangup) {
+        game.callLog.push({ from: 'npc', text: 'Sorry, not interested.' });
+      } else {
+        game.callLog.push({ from: 'npc', text: 'Click.' });
+      }
+      applySaleFailure(game.callProduct);
+    }
+
+    game.isInCall = false;
+    hideInput();
+    game.callProduct = null;
+
+    setTimeout(() => {
+      game.state = (game.phase === PHASE.EMPLOYEE) ? GAME_STATE.EMPLOYEE_DAY : GAME_STATE.OWNER_DAY;
+    }, 800);
+  }
+
+  function showInput() {
+    inputArea.classList.remove('hidden');
+    playerInput.value = '';
+    playerInput.focus();
+  }
+
+  function hideInput() {
+    inputArea.classList.add('hidden');
+  }
+
+  sendBtn.addEventListener('click', () => {
+    const text = playerInput.value;
+    playerInput.value = '';
+    handlePlayerMessage(text);
+  });
+
+  playerInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      const text = playerInput.value;
+      playerInput.value = '';
+      handlePlayerMessage(text);
+    }
+  });
+
+  // ===========================
+  // PART 7/10 – MONEY, REPUTATION & DAY END
+  // ===========================
+
+  function applySaleSuccess(product) {
+    if (game.phase === PHASE.EMPLOYEE) {
+      const grossYourShare = product.price * 0.40;
+      const tax = grossYourShare * 0.35;
+      const net = grossYourShare - tax;
+      game.money += net;
+    } else {
+      const gross = product.sellPrice || product.price;
+      const tax = gross * 0.45;
+      const net = gross - tax;
+      game.money += net;
+
+      const invItem = game.inventory.find(p => p.id === product.id);
+      if (invItem) invItem.stock = Math.max(0, invItem.stock - 1);
+    }
+
+    const repGain = product.repGain || (3 + product.difficulty * 2);
+    game.reputation += repGain;
+
+    checkReputationAndMoneyForUpgrade();
+  }
+
+  function applySaleFailure(product) {
+    const repLoss = product.repLoss || (2 + product.difficulty * 2);
+    game.reputation -= repLoss;
+
+    if (game.phase === PHASE.EMPLOYEE && game.reputation < 0) {
+      game.state = GAME_STATE.GAME_OVER;
+      game.gameOverReason = 'You were fired. Reputation dropped below 0.';
+    }
+
+    if (game.phase === PHASE.OWNER && game.reputation <= 0) {
+      goBankruptToEmployee();
+    }
+  }
+
+  function checkReputationAndMoneyForUpgrade() {
+    if (game.phase === PHASE.EMPLOYEE) {
+      if (game.reputation > 100 || game.money >= 5000) {
+        game.money = 1000;
+        game.phase = PHASE.OWNER;
+        game.state = GAME_STATE.OWNER_DAY;
+        game.currentTime = cloneTime(WORKDAY_OWNER_START);
+        game.hasHadLunchToday = false;
+        game.warnings = [];
+        generateShopIfEmpty();
+      }
+    }
+  }
+
+  function endOfDay() {
+    if (game.phase === PHASE.EMPLOYEE) {
+      game.money -= 20; // rent
+      game.money -= 20; // food
+      game.money -= 5;  // utilities
+    }
+
+    if (game.phase === PHASE.OWNER) {
+      let totalEmployeeCost = 0;
+      for (const e of game.employees) {
+        totalEmployeeCost += e.dailyCost;
+      }
+
+      if (game.money >= totalEmployeeCost) {
+        game.money -= totalEmployeeCost;
+      } else {
+        game.warnings.push(game.dayNumber);
+        if (countRecentWarnings(7) >= 3) {
+          game.state = GAME_STATE.GAME_OVER;
+          game.gameOverReason = 'You failed to pay bills 3 times in 7 days.';
+          return;
+        }
+      }
+    }
+
+    game.dayNumber++;
+    game.hasHadLunchToday = false;
+
+    if (game.phase === PHASE.EMPLOYEE) {
+      startNewDayEmployee();
+    } else {
+      startNewDayOwner();
+    }
+  }
+
+  function countRecentWarnings(daysWindow) {
+    const currentDay = game.dayNumber;
+    return game.warnings.filter(d => currentDay - d < daysWindow).length;
+  }
+
+  function startNewDayEmployee() {
+    game.currentTime = cloneTime(WORKDAY_EMPLOYEE_START);
+    game.state = GAME_STATE.EMPLOYEE_DAY;
+  }
+
+  function startNewDayOwner() {
+    game.currentTime = cloneTime(WORKDAY_OWNER_START);
+    game.state = GAME_STATE.OWNER_DAY;
+  }
+
+  function goBankruptToEmployee() {
+    game.money = 0;
+    game.phase = PHASE.EMPLOYEE;
+    game.state = GAME_STATE.EMPLOYEE_DAY;
+    game.currentTime = cloneTime(WORKDAY_EMPLOYEE_START);
+    game.dayNumber++;
+    game.reputation = 50;
+    game.hasHadLunchToday = false;
+    game.warnings = [];
+    game.inventory = [];
+    game.employees = [];
+    game.availableProducts = [];
+    game.availableEmployees = [];
+  }
+
+  // ===========================
+  // PART 8/10 – SHOP: RESTOCK & EMPLOYEES
+  // ===========================
+
+  function generateShopIfEmpty() {
+    if (game.availableProducts.length === 0) {
+      game.availableProducts = [];
+      for (let i = 0; i < 20; i++) {
+        const basePrice = randInt(50, 800);
+        const difficulty = Math.ceil(basePrice / 200);
+        const sellPrice = Math.round(basePrice * randInt(120, 180) / 100);
+        game.availableProducts.push({
+          id: `p${nextProductId++}`,
+          name: `Product #${nextProductId}`,
+          buyPrice: basePrice,
+          sellPrice,
+          difficulty,
+        });
+      }
+    }
+
+    if (game.availableEmployees.length === 0) {
+      game.availableEmployees = [];
+      const names = ['Alex', 'Jordan', 'Sam', 'Casey', 'Taylor', 'Robin', 'Morgan'];
+      for (let i = 0; i < 5; i++) {
+        const skill = randInt(1, 5);
+        const dailyCost = 15 + skill * 5;
+        game.availableEmployees.push({
+          id: `e${nextEmployeeId++}`,
+          name: randChoice(names) + ' #' + nextEmployeeId,
+          skill,
+          dailyCost,
+        });
+      }
+    }
+  }
+
+  function drawShop() {
+    ctx.fillStyle = '#111';
+    ctx.fillRect(0, 40, canvas.width, canvas.height - 40);
+
+    ctx.fillStyle = '#eee';
+    ctx.font = '18px monospace';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'top';
+    ctx.fillText('SHOP', 40, 60);
+
+    ctx.fillText('1) Restock products', 40, 100);
+    ctx.fillText('2) Hire employees', 40, 130);
+
+    drawButton(40, 160, 180, 30, 'Restock');
+    addClickRegion(40, 160, 180, 30, () => {
+      drawRestockScreen(true);
+    });
+
+    drawButton(40, 200, 180, 30, 'Hire employee');
+    addClickRegion(40, 200, 180, 30, () => {
+      drawHireEmployeeScreen(true);
+    });
+
+    drawButton(40, canvas.height - 60, 140, 30, 'Back');
+    addClickRegion(40, canvas.height - 60, 140, 30, () => {
+      game.state = GAME_STATE.OWNER_DAY;
+    });
+
+    ctx.fillText('Inventory:', 260, 100);
+    let y = 120;
+    for (const item of game.inventory) {
+      ctx.fillText(`${item.name} - Stock: ${item.stock}, Sell: $${item.sellPrice}`, 260, y);
+      y += 20;
+    }
+    if (game.inventory.length === 0) {
+      ctx.fillText('(none)', 260, y);
+      y += 20;
+    }
+
+    ctx.fillText('Employees:', 260, y + 10);
+    y += 30;
+    for (const emp of game.employees) {
+      ctx.fillText(`${emp.name} - Skill: ${emp.skill}, Daily cost: $${emp.dailyCost}`, 260, y);
+      y += 20;
+    }
+    if (game.employees.length === 0) {
+      ctx.fillText('(none)', 260, y);
+    }
+  }
+
+  function drawRestockScreen() {
+    game.state = GAME_STATE.SHOP;
+    ctx.fillStyle = '#111';
+    ctx.fillRect(0, 40, canvas.width, canvas.height - 40);
+
+    ctx.fillStyle = '#eee';
+    ctx.font = '18px monospace';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'top';
+    ctx.fillText('RESTOCK PRODUCTS', 40, 60);
+    ctx.font = '14px monospace';
+    ctx.fillText('Click a product to buy 1 unit. If you do not have enough money, you cannot buy it.', 40, 80);
+
+    let y = 110;
+    for (const p of game.availableProducts) {
+      const label = `${p.name} - Buy: $${p.buyPrice}, Sell: $${p.sellPrice}, Diff: ${p.difficulty}`;
+      drawButton(40, y, 620, 26, label);
+      const copyP = p;
+      addClickRegion(40, y, 620, 26, () => {
+        buyProduct(copyP);
+      });
+      y += 32;
+      if (y > canvas.height - 120) break;
+    }
+
+    drawButton(40, canvas.height - 60, 140, 30, 'Back');
+    addClickRegion(40, canvas.height - 60, 140, 30, () => {
+      game.state = GAME_STATE.SHOP;
+    });
+  }
+
+  function buyProduct(p) {
+    if (game.money < p.buyPrice) {
+      alert('Not enough money to buy this product.');
+      return;
+    }
+    game.money -= p.buyPrice;
+    let inv = game.inventory.find(i => i.id === p.id);
+    if (!inv) {
+      inv = {
+        id: p.id,
+        name: p.name,
+        buyPrice: p.buyPrice,
+        sellPrice: p.sellPrice,
+        difficulty: p.difficulty,
+        stock: 0,
+      };
+      game.inventory.push(inv);
+    }
+    inv.stock += 1;
+  }
+
+  function drawHireEmployeeScreen() {
+    game.state = GAME_STATE.SHOP;
+    ctx.fillStyle = '#111';
+    ctx.fillRect(0, 40, canvas.width, canvas.height - 40);
+
+    ctx.fillStyle = '#eee';
+    ctx.font = '18px monospace';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'top';
+    ctx.fillText('HIRE EMPLOYEES', 40, 60);
+    ctx.font = '14px monospace';
+    ctx.fillText('Click an employee to hire them. Their daily cost is added to your expenses.', 40, 80);
+
+    let y = 110;
+    for (const e of game.availableEmployees) {
+      const label = `${e.name} - Skill: ${e.skill}, Daily cost: $${e.dailyCost}`;
+      drawButton(40, y, 500, 26, label);
+      const copyE = e;
+      addClickRegion(40, y, 500, 26, () => {
+        hireEmployee(copyE);
+      });
+      y += 32;
+      if (y > canvas.height - 120) break;
+    }
+
+    drawButton(40, canvas.height - 60, 140, 30, 'Back');
+    addClickRegion(40, canvas.height - 60, 140, 30, () => {
+      game.state = GAME_STATE.SHOP;
+    });
+  }
+
+  function hireEmployee(e) {
+    if (game.money < e.dailyCost) {
+      alert('Not enough money to hire this employee (you should afford at least one day).');
+      return;
+    }
+    game.employees.push({
+      id: e.id,
+      name: e.name,
+      skill: e.skill,
+      dailyCost: e.dailyCost,
+    });
+    game.availableEmployees = game.availableEmployees.filter(x => x.id !== e.id);
+  }
+
+  // ===========================
+  // PART 9/10 – LUNCH, INPUT & GAME LOOP
+  // ===========================
+
+  let lastTimestamp = 0;
+  let lunchTimer = 0;
+
+  canvas.addEventListener('click', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
+
+    for (const region of clickRegions) {
+      if (mx >= region.x && mx <= region.x + region.w &&
+          my >= region.y && my <= region.y + region.h) {
+        region.onClick();
+        break;
+      }
+    }
+  });
+
+  function update(deltaMs) {
+    if (game.state === GAME_STATE.INTRO || game.state === GAME_STATE.GAME_OVER) {
+      return;
+    }
+
+    if (game.state !== GAME_STATE.LUNCH_BREAK) {
+      game.lastMinuteMs += deltaMs;
+      while (game.lastMinuteMs >= MS_PER_GAME_MINUTE) {
+        game.lastMinuteMs -= MS_PER_GAME_MINUTE;
+        advanceTime(game.currentTime, 1);
+      }
+    }
+
+    if (game.phase === PHASE.EMPLOYEE) {
+      if (!game.hasHadLunchToday &&
+          game.currentTime.hour >= 12 && game.currentTime.minute === 0 &&
+          game.state !== GAME_STATE.LUNCH_BREAK) {
+        game.state = GAME_STATE.LUNCH_BREAK;
+        game.hasHadLunchToday = true;
+        lunchTimer = 0;
+      }
+
+      if (game.state === GAME_STATE.LUNCH_BREAK) {
+        lunchTimer += deltaMs;
+        if (lunchTimer > 3000) {
+          game.state = GAME_STATE.EMPLOYEE_DAY;
+        }
+      }
+
+      if (timeGreaterOrEqual(game.currentTime, WORKDAY_EMPLOYEE_END) &&
+          game.state !== GAME_STATE.LUNCH_BREAK &&
+          game.state !== GAME_STATE.CALL) {
+        endOfDay();
+      }
+    }
+  }
+
+  function render() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    clickRegions.length = 0;
+    drawHUD();
+
+    switch (game.state) {
+      case GAME_STATE.INTRO:
+        drawIntro();
+        break;
+      case GAME_STATE.EMPLOYEE_DAY:
+        drawEmployeeOffice();
+        break;
+      case GAME_STATE.OWNER_DAY:
+        drawOwnerOffice();
+        break;
+      case GAME_STATE.LUNCH_BREAK:
+        drawLunchBreak();
+        break;
+      case GAME_STATE.CALL:
+        drawCallScreen();
+        break;
+      case GAME_STATE.RULES:
+        drawRules();
+        break;
+      case GAME_STATE.SHOP:
+        drawShop();
+        break;
+      case GAME_STATE.GAME_OVER:
+        drawGameOver();
+        break;
+    }
+  }
+
+  function gameLoop(timestamp) {
+    if (!lastTimestamp) lastTimestamp = timestamp;
+    const delta = timestamp - lastTimestamp;
+    lastTimestamp = timestamp;
+
+    update(delta);
+    render();
+
+    requestAnimationFrame(gameLoop);
+  }
+
+  // ===========================
+  // PART 10/10 – RESET & START
+  // ===========================
+
+  function resetGame() {
+    game.phase = PHASE.EMPLOYEE;
+    game.state = GAME_STATE.INTRO;
+    game.currentTime = cloneTime(WORKDAY_EMPLOYEE_START);
+    game.lastMinuteMs = 0;
+    game.dayNumber = 1;
+    game.money = 0;
+    game.reputation = 50;
+    game.warnings = [];
+    game.hasHadLunchToday = false;
+    game.isInCall = false;
+    game.callLog = [];
+    game.callNPCMood = 0;
+    game.callProduct = null;
+    game.callStep = 0;
+    game.inventory = [];
+    game.availableProducts = [];
+    game.availableEmployees = [];
+    game.employees = [];
+    game.gameOverReason = '';
+    hideInput();
+  }
+
+  resetGame();
+  requestAnimationFrame(gameLoop);
+
+  </script>
 </body>
 </html>
