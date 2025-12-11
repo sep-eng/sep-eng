@@ -1,1732 +1,1123 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>SEP – Make It Happen</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-
-  <!-- Icons -->
-  <link rel="apple-touch-icon" href="sep-logo.jpg">
-  <link rel="icon" type="image/jpeg" sizes="192x192" href="sep-logo.jpg">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SEP & Make It Happen</title>
+  <meta name="description" content="SEP clothing and Make It Happen health challenge." />
+  <link rel="icon" href="https://upload.wikimedia.org/wikipedia/commons/3/3f/Black_square.jpg">
 
   <!-- Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind + GSAP for SEP -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+  <!-- Firebase for Make It Happen -->
+  <script src="https://www.gstatic.com/firebasejs/11.0.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore-compat.js"></script>
 
   <style>
-    body {
-      margin: 0;
-      font-family: Inter, sans-serif;
-      background: #000000;
-      color: #f7f7f7;
+    body{
+      margin:0;
+      font-family:'Inter',sans-serif;
+      background:linear-gradient(to bottom,#000,#fff);
+      color:#111;
+      scroll-behavior:smooth;
     }
 
-    header {
-      display: flex;
-      justify-content: space-between;
-      padding: 12px 16px;
-      background: #050505;
-      border-bottom: 1px solid #222222;
-      position: sticky;
-      top: 0;
-      z-index: 10;
+    button,a{transition:all .25s ease;}
+    button:hover,a:hover{transform:translateY(-2px);}
+
+    .popup{
+      position:fixed;top:20px;right:20px;
+      background:#16a34a;color:#fff;padding:10px 16px;border-radius:8px;
+      opacity:0;transition:opacity .3s;z-index:100;
+    }
+    .popup.show{opacity:1;}
+
+    .fade-section{opacity:0;transform:translateY(30px);}
+
+    #cartSidebar{color:#000;}
+
+    /* Burger menu styles (SEP) */
+    #menuToggle {
+      position:fixed;
+      top:16px;
+      right:16px;
+      z-index:60;
+      background:rgba(0,0,0,.6);
+      color:#fff;
+      border-radius:9999px;
+      padding:10px 12px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+    .menu-line {
+      width:20px;
+      height:2px;
+      background:#fff;
+      margin:2px 0;
+    }
+    #menuPanel {
+      transition:transform .3s ease;
     }
 
-    header nav button {
-      background: none;
-      border: none;
-      padding: 8px 12px;
-      font-size: 15px;
-      cursor: pointer;
-      color: #f7f7f7;
+    .hidden{display:none;}
+
+    /* Global welcome screen */
+    #welcome-screen{
+      min-height:100vh;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      padding:2rem;
+    }
+    #welcome-screen h1{
+      font-size:2.5rem;
+      margin-bottom:1rem;
+      color:#f5f5f5;
+    }
+    #welcome-screen p{
+      max-width:520px;
+      color:#e6e6e6;
+      margin-bottom:2rem;
+    }
+    #welcome-screen .welcome-btn{
+      background:#fff;
+      color:#000;
+      border:none;
+      padding:0.9rem 1.8rem;
+      border-radius:9999px;
+      font-weight:600;
+      cursor:pointer;
+      margin:0.25rem;
+    }
+    #welcome-screen .welcome-secondary{
+      background:transparent;
+      border:1px solid #fff;
+      color:#fff;
     }
 
-    header nav button.active {
-      font-weight: 600;
-      color: #ffffff;
-      border-bottom: 1px solid #ffffff;
+    /* MAKE IT HAPPEN styles (scoped) */
+    #mih-app{
+      background:#000;
+      color:#f7f7f7;
+      min-height:100vh;
     }
-
-    .scene {
-      display: none;
-      max-width: 900px;
-      margin: auto;
-      padding: 20px;
+    #mih-app header{
+      display:flex;
+      justify-content:space-between;
+      padding:12px 16px;
+      background:#111111;
+      border-bottom:1px solid #333333;
+      position:sticky;
+      top:0;
+      z-index:10;
     }
-    .scene.active {
-      display: block;
+    #mih-app header nav button{
+      background:none;
+      border:none;
+      padding:8px 12px;
+      font-size:15px;
+      cursor:pointer;
+      color:#f7f7f7;
     }
-
-    h1, h2 {
-      color: #ffffff;
+    #mih-app header nav button.active{
+      font-weight:bold;
+      color:#f5f5f5;
+      text-decoration:underline;
+      text-decoration-thickness:2px;
     }
-
-    .btn {
-      background: #ffffff;
-      color: #000000;
-      border: none;
-      padding: 10px 16px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: 600;
-      margin: 8px 0;
+    #mih-app .scene{
+      display:none;
+      max-width:900px;
+      margin:auto;
+      padding:20px;
     }
-
-    .btn-small {
-      padding: 6px 10px;
-      font-size: 14px;
+    #mih-app .scene.active{
+      display:block;
     }
-
-    .danger {
-      background: #b91c1c;
-      color: #ffffff;
+    #mih-app h1,#mih-app h2{
+      color:#f5f5f5;
     }
-
-    .input {
-      width: 100%;
-      padding: 10px;
-      margin: 6px 0 14px;
-      border: 1px solid #555;
-      border-radius: 6px;
-      font-size: 16px;
-      background: #111;
-      color: #f7f7f7;
+    #mih-app .btn{
+      background:#ffffff;
+      color:#000000;
+      border:none;
+      padding:10px 16px;
+      border-radius:6px;
+      cursor:pointer;
+      font-weight:600;
+      margin:8px 0;
     }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 14px;
-      background: #111111;
+    #mih-app .btn-small{
+      padding:6px 10px;
+      font-size:14px;
     }
-
-    th, td {
-      padding: 8px;
-      border-bottom: 1px solid #333;
-      text-align: left;
-      color: #f7f7f7;
+    #mih-app .danger{
+      background:#ef4444;
+      color:#ffffff;
     }
-
-    .badge-league {
-      padding: 3px 8px;
-      border-radius: 6px;
-      font-size: 12px;
-      color: white;
+    #mih-app .input{
+      width:100%;
+      padding:10px;
+      margin:6px 0 14px;
+      border:1px solid #555;
+      border-radius:6px;
+      font-size:16px;
+      background:#111;
+      color:#f7f7f7;
     }
-    .amateurs { background: #6c757d; }
-    .intermediates { background: #3b82f6; }
-    .pros { background: #22c55e; }
-    .legends { background: #e5e5e5; color:#000; }
-    .pending { background: #888888; }
+    #mih-app table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:14px;
+      background:#111111;
+    }
+    #mih-app th,#mih-app td{
+      padding:8px;
+      border-bottom:1px solid #333;
+      text-align:left;
+      color:#f7f7f7;
+    }
+    #mih-app .badge-league{
+      padding:3px 8px;
+      border-radius:6px;
+      font-size:12px;
+      color:white;
+    }
+    #mih-app .amateurs{background:#6c757d;}
+    #mih-app .intermediates{background:#007bff;}
+    #mih-app .pros{background:#22c55e;}
+    #mih-app .legends{background:#e5e5e5;color:#111111;}
+    #mih-app .pending{background:#888888;}
   </style>
+
+  <script>
+    // GSAP fade-in for SEP sections
+    window.addEventListener('load',()=>{
+      if (window.gsap && window.ScrollTrigger) {
+        gsap.registerPlugin(ScrollTrigger);
+        gsap.utils.toArray('.fade-section').forEach(sec=>{
+          gsap.to(sec,{
+            opacity:1,y:0,duration:1,
+            scrollTrigger:{trigger:sec,start:'top 80%',once:true}
+          });
+        });
+      }
+    });
+  </script>
 </head>
 
 <body>
 
-<header>
-  <nav>
-    <button onclick="showScene('welcome')" data-i18n="nav.welcome"></button>
-    <button onclick="showScene('leaderboard')" data-i18n="nav.leaderboard"></button>
-    <button onclick="showScene('stats')" data-i18n="nav.stats"></button>
-    <button onclick="showScene('rules')" data-i18n="nav.rules"></button>
-    <button onclick="showScene('about')" data-i18n="nav.about"></button>
-    <button onclick="showScene('entry')" data-i18n="nav.entry"></button>
-    <button id="nav-login-btn" onclick="showScene('login')" data-i18n="nav.login"></button>
-  </nav>
+<!-- GLOBAL WELCOME SCREEN -->
+<section id="welcome-screen">
+  <h1>Choose your path</h1>
+  <p>Shop SEP; or join the Make It Happen challenge and move more together.</p>
+  <div>
+    <button class="welcome-btn" onclick="openSep()">Enter SEP shop</button>
+    <button class="welcome-btn welcome-secondary" onclick="openMih()">Enter Make It Happen</button>
+  </div>
+</section>
 
-  <div style="display:flex; gap:8px; align-items:center;">
-    <select id="lang-select">
-      <option value="en">English</option>
-      <option value="da">Dansk</option>
-      <option value="cs">Čeština</option>
+<!-- =========================================================
+     SEP APP
+========================================================= -->
+<div id="sep-app" class="hidden">
+
+  <!-- Burger menu button -->
+  <button id="menuToggle" aria-label="Open menu">
+    <div class="flex flex-col">
+      <span class="menu-line"></span>
+      <span class="menu-line"></span>
+      <span class="menu-line"></span>
+    </div>
+  </button>
+
+  <!-- Burger menu panel -->
+  <div id="menuPanel" class="fixed top-0 right-0 h-full w-64 bg-black/90 text-white transform translate-x-full z-40 flex flex-col">
+    <div class="p-5 border-b border-white/10 flex justify-between items-center">
+      <span id="menuTitle" class="text-sm tracking-wide">SEP Menu</span>
+      <button id="closeMenuBtn" class="text-xl leading-none">✕</button>
+    </div>
+    <div class="p-5 space-y-4 text-sm">
+      <div>
+        <p class="mb-2 font-semibold text-xs tracking-wide uppercase text-white/70">Language</p>
+        <div class="flex flex-wrap gap-2">
+          <button data-lang="en" class="lang-btn px-3 py-1 rounded-full border border-white/30 text-xs">English</button>
+          <button data-lang="da" class="lang-btn px-3 py-1 rounded-full border border-white/30 text-xs">Dansk</button>
+          <button data-lang="cs" class="lang-btn px-3 py-1 rounded-full border border-white/30 text-xs">Čeština</button>
+        </div>
+      </div>
+      <div class="pt-4 border-t border-white/10">
+        <p class="mb-2 font-semibold text-xs tracking-wide uppercase text-white/70">Info</p>
+        <button id="menuAboutBtn" onclick="showSepScene('about')" class="w-full text-left px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-sm">
+          About SEP
+        </button>
+      </div>
+      <div class="pt-4 border-t border-white/10">
+        <p class="mb-2 font-semibold text-xs tracking-wide uppercase text-white/70">Exit</p>
+        <button onclick="goToWelcome()" class="w-full text-left px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-sm">
+          Back to main menu
+        </button>
+      </div>
+    </div>
+  </div>
+  <div id="menuOverlay" class="fixed inset-0 bg-black/40 hidden z-30"></div>
+
+  <!-- MAIN SCENE (shop) -->
+  <div id="sep-scene-main">
+    <header class="py-20 text-center fade-section">
+      <h1 id="heroTitle" class="theme-text text-5xl font-bold mb-4">
+        Minimalist clothing, made with intention.
+      </h1>
+      <p id="heroSubtitle" class="theme-text text-lg mb-8">
+        Soft, clean, and hand-pressed in Copenhagen.
+      </p>
+      <div class="flex justify-center gap-4">
+        <a id="btnShopNow" href="#products" class="bg-white text-black px-6 py-3 rounded-full font-medium">Shop Now</a>
+        <button id="viewCartBtn" class="border border-white text-white px-6 py-3 rounded-full font-medium relative">
+          <span id="btnViewCart">View Cart</span>
+          <span id="cartCounter" class="absolute -top-2 -right-2 bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hidden">0</span>
+        </button>
+      </div>
+    </header>
+
+    <section id="products" class="py-20 px-6 fade-section">
+      <div class="text-center mb-12">
+        <h2 id="productsTitle" class="theme-text text-4xl font-bold mb-4">Three products. One choice.</h2>
+        <p id="productsSubtitle" class="theme-text">Soft, durable, and timeless.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        <div class="product-card bg-white/10 p-6 rounded-xl shadow-md text-center backdrop-blur">
+          <img src="http://static.photos/textures/1024x576/1" class="w-full h-64 object-cover rounded mb-4" alt="White T-shirt">
+          <h3 id="product1Name" class="text-xl font-bold mb-2">SEP White T-shirt</h3>
+          <p class="mb-2">180 DKK</p>
+          <select class="theme-text border rounded px-3 py-2 mb-2 bg-transparent">
+            <option>XS</option><option>S</option><option>M</option><option>L</option><option>XL</option>
+          </select>
+          <div class="flex justify-center gap-2">
+            <input type="number" min="1" value="1" class="theme-text border rounded w-16 text-center bg-transparent quantity-selector">
+            <button class="add-to-cart bg-white text-black px-4 py-2 rounded" data-i18n-btn="addToCart">Add</button>
+          </div>
+        </div>
+
+        <div class="product-card bg-white/10 p-6 rounded-xl shadow-md text-center backdrop-blur">
+          <img src="http://static.photos/textures/1024x576/2" class="w-full h-64 object-cover rounded mb-4" alt="Black Hoodie">
+          <h3 id="product2Name" class="text-xl font-bold mb-2">SEP Black Hoodie</h3>
+          <p class="mb-2">180 DKK</p>
+          <select class="theme-text border rounded px-3 py-2 mb-2 bg-transparent">
+            <option>XS</option><option>S</option><option>M</option><option>L</option><option>XL</option>
+          </select>
+          <div class="flex justify-center gap-2">
+            <input type="number" min="1" value="1" class="theme-text border rounded w-16 text-center bg-transparent quantity-selector">
+            <button class="add-to-cart bg-white text-black px-4 py-2 rounded" data-i18n-btn="addToCart">Add</button>
+          </div>
+        </div>
+
+        <div class="product-card bg-white/10 p-6 rounded-xl shadow-md text-center backdrop-blur">
+          <img src="http://static.photos/textures/1024x576/3" class="w-full h-64 object-cover rounded mb-4" alt="Black Trousers">
+          <h3 id="product3Name" class="text-xl font-bold mb-2">SEP Black Trousers</h3>
+          <p class="mb-2">180 DKK</p>
+          <select class="theme-text border rounded px-3 py-2 mb-2 bg-transparent">
+            <option>XS</option><option>S</option><option>M</option><option>L</option><option>XL</option>
+          </select>
+          <div class="flex justify-center gap-2">
+            <input type="number" min="1" value="1" class="theme-text border rounded w-16 text-center bg-transparent quantity-selector">
+            <button class="add-to-cart bg-white text-black px-4 py-2 rounded" data-i18n-btn="addToCart">Add</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="py-20 text-center fade-section">
+      <h2 id="howToOrderTitle" class="text-3xl font-bold mb-10">How to Order</h2>
+      <div class="grid grid-cols-1 md:grid-cols-5 gap-6 max-w-6xl mx-auto text-sm md:text-base">
+        <div class="bg-white/10 rounded-xl p-6 backdrop-blur">
+          <h3 id="step1Title" class="font-bold text-lg mb-2">1. Choose</h3>
+          <p id="howStep1">Select your favourite SEP piece - T-shirt, Hoodie, or Trousers - then pick your size and quantity.</p>
+        </div>
+        <div class="bg-white/10 rounded-xl p-6 backdrop-blur">
+          <h3 id="step2Title" class="font-bold text-lg mb-2">2. Add to Cart</h3>
+          <p id="howStep2">Click “Add” to add your chosen items to your cart. When ready, click “View Cart” to review your order.</p>
+        </div>
+        <div class="bg-white/10 rounded-xl p-6 backdrop-blur">
+          <h3 id="step3Title" class="font-bold text-lg mb-2">3. Copy Order Message</h3>
+          <p id="howStep3">Inside your cart, press “Copy Order Message”. This copies your full order, including shipping, automatically.</p>
+        </div>
+        <div class="bg-white/10 rounded-xl p-6 backdrop-blur">
+          <h3 id="step4Title" class="font-bold text-lg mb-2">4. Pay with MobilePay</h3>
+          <p id="howStep4">Send the total amount (incl. +45 DKK shipping) to <b>51 34 31 33</b> using MobilePay.<br><span class="text-xs italic">“Open MobilePay” works only on mobile devices.</span></p>
+        </div>
+        <div class="bg-white/10 rounded-xl p-6 backdrop-blur">
+          <h3 id="step5Title" class="font-bold text-lg mb-2">5. Send us your order</h3>
+          <p id="howStep5">DM your copied message to <b>@seproairesis</b> (Instagram) or <b>@se.proairesis</b> (TikTok).<br>We currently deliver within Denmark.</p>
+        </div>
+      </div>
+    </section>
+
+    <footer class="text-center py-10 fade-section">
+      <p id="footerText">
+        © 2025 SEP - Se Proairesis • MobilePay 51 34 31 33 • +45 DKK Shipping • Made in Copenhagen. Delivered across Denmark.
+      </p>
+      <div class="flex justify-center gap-4 mt-4">
+        <a href="https://instagram.com/seproairesis" class="bg-gradient-to-br from-pink-500 to-purple-600 text-white p-3 rounded-full">IG</a>
+        <a href="https://tiktok.com/@se.proairesis" class="bg-black text-white p-3 rounded-full">TT</a>
+      </div>
+    </footer>
+  </div>
+
+  <!-- ABOUT SCENE -->
+  <section id="sep-scene-about" class="py-20 px-6 hidden">
+    <div class="max-w-3xl mx-auto text-center">
+      <h2 id="aboutTitle" class="theme-text text-3xl font-bold mb-4">About SEP</h2>
+      <p id="aboutBody1" class="theme-text mb-4">
+        SEP stands for Se Proairesis - your choice. Each piece is pressed by hand in Copenhagen in small batches.
+      </p>
+      <p id="aboutBody2" class="theme-text mb-4">
+        The goal is not hype. It is to make a small number of things that feel good on your skin, last a long time, and stay in your rotation.
+      </p>
+      <p id="aboutBody3" class="theme-text mb-8">
+        One tee, one hoodie, one pair of trousers; all built to be the first thing you reach for when you open your wardrobe.
+      </p>
+      <button id="aboutBackBtn" onclick="showSepScene('main')" class="mt-4 px-6 py-3 rounded-full border border-white/40 bg-white/10 hover:bg-white/20">
+        Back to shop
+      </button>
+      <div class="mt-6">
+        <button onclick="goToWelcome()" class="px-5 py-2 rounded-full border border-white/30 bg-transparent hover:bg-white/10 text-sm">
+          Exit to main menu
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <div id="cartSidebar" class="fixed top-0 right-0 h-full w-80 bg-white shadow-xl translate-x-full transition-transform duration-300 z-50 overflow-y-auto">
+    <div class="p-6">
+      <div class="flex justify-between items-center mb-4">
+        <h3 id="cartTitle" class="text-xl font-bold">Your Cart</h3>
+        <button id="closeCart">✕</button>
+      </div>
+      <div id="cartItems" class="space-y-4 text-sm"></div>
+      <div class="border-t border-gray-300 pt-4 mt-4">
+        <div class="flex justify-between mb-1">
+          <span id="cartSubtotalLabel">Subtotal:</span><span id="cartSubtotal" class="font-bold">0 DKK</span>
+        </div>
+        <div class="flex justify-between mb-2 text-sm text-gray-600">
+          <span id="cartShippingLabel">Shipping:</span><span id="cartShippingValue">+45 DKK</span>
+        </div>
+        <div class="flex justify-between font-semibold border-t border-gray-300 pt-2 mb-3">
+          <span id="cartTotalLabel">Total:</span><span id="cartTotal">45 DKK</span>
+        </div>
+        <button id="openMobilePay" class="w-full bg-green-500 text-white py-2 rounded mb-2">
+          <span id="cartMobilePayButton">Open MobilePay</span>
+        </button>
+        <p id="cartMobilePayNote" class="text-xs text-gray-500 mb-2 text-center">
+          Open MobilePay button is only a valid link on mobile.
+        </p>
+        <button id="copyMobilePay" class="w-full bg-gray-200 py-2 rounded">
+          <span id="cartCopyOrder">Copy Order Message</span>
+        </button>
+      </div>
+    </div>
+  </div>
+  <div id="cartOverlay" class="fixed inset-0 bg-black/50 hidden z-40"></div>
+</div>
+
+<!-- =========================================================
+     MAKE IT HAPPEN APP (original structure, just wrapped)
+========================================================= -->
+<div id="mih-app" class="hidden">
+
+  <header>
+    <nav>
+      <button onclick="mihShowScene('welcome')" data-i18n="nav.welcome"></button>
+      <button onclick="mihShowScene('leaderboard')" data-i18n="nav.leaderboard"></button>
+      <button onclick="mihShowScene('stats')" data-i18n="nav.stats"></button>
+      <button onclick="mihShowScene('rules')" data-i18n="nav.rules"></button>
+      <button onclick="mihShowScene('about')" data-i18n="nav.about"></button>
+      <button id="nav-login-btn" onclick="mihShowScene('login')" data-i18n="nav.login"></button>
+    </nav>
+
+    <div style="display:flex; gap:8px; align-items:center;">
+      <select id="lang-select">
+        <option value="en">English</option>
+        <option value="da">Dansk</option>
+        <option value="cs">Čeština</option>
+      </select>
+
+      <div id="user-controls"></div>
+      <button class="btn btn-small" onclick="goToWelcome()">Exit</button>
+    </div>
+  </header>
+
+  <!-- WELCOME SCENE -->
+  <section id="scene-welcome" class="scene active">
+    <h1 data-i18n="welcome.title"></h1>
+    <p data-i18n="welcome.subtitle"></p>
+    <button id="welcome-login-btn" class="btn" onclick="mihShowScene('login')" data-i18n="welcome.cta"></button>
+  </section>
+
+  <!-- LOGIN SCENE -->
+  <section id="scene-login" class="scene">
+    <h1 data-i18n="login.title"></h1>
+    <p data-i18n="login.description"></p>
+
+    <form id="login-form">
+      <label data-i18n="login.name"></label>
+      <input id="login-name" class="input" type="text">
+
+      <label data-i18n="login.password"></label>
+      <input id="login-password" class="input" type="password">
+
+      <button class="btn" data-i18n="login.submit"></button>
+    </form>
+
+    <button id="view-code-btn" class="btn btn-small" type="button" style="margin-top:4px;" data-i18n="login.viewSavedBtn"></button>
+    <p id="saved-code-display" style="display:none; margin-top:6px;"></p>
+
+    <p data-i18n="login.note"></p>
+  </section>
+
+  <!-- LEADERBOARD SCENE -->
+  <section id="scene-leaderboard" class="scene">
+    <h1 data-i18n="leaderboard.title"></h1>
+
+    <label data-i18n="leaderboard.filter"></label>
+    <select id="league-filter" class="input" style="max-width:260px;">
+      <option value="all" data-i18n="leaderboard.all"></option>
+      <option value="pending" data-i18n="league.pending"></option>
+      <option value="amateurs" data-i18n="league.amateurs"></option>
+      <option value="intermediates" data-i18n="league.intermediates"></option>
+      <option value="pros" data-i18n="league.pros"></option>
+      <option value="legends" data-i18n="league.legends"></option>
     </select>
 
-    <div id="user-controls"></div>
-  </div>
-</header>
+    <table>
+      <thead>
+        <tr>
+          <th data-i18n="lb.rank"></th>
+          <th data-i18n="lb.name"></th>
+          <th data-i18n="lb.league"></th>
+          <th data-i18n="lb.distance"></th>
+          <th data-i18n="lb.time"></th>
+        </tr>
+      </thead>
+      <tbody id="leaderboard-body"></tbody>
+    </table>
 
-<!-- WELCOME SCENE -->
-<section id="scene-welcome" class="scene active">
-  <h1 data-i18n="welcome.title"></h1>
-  <p data-i18n="welcome.subtitle"></p>
-  <button class="btn" onclick="showScene('login')" data-i18n="welcome.cta"></button>
-</section>
+    <p id="no-entries" data-i18n="leaderboard.none"></p>
 
-<!-- LOGIN SCENE -->
-<section id="scene-login" class="scene">
-  <h1 data-i18n="login.title"></h1>
-  <p data-i18n="login.description"></p>
+    <h2 data-i18n="pending.title"></h2>
+    <p data-i18n="pending.subtitle"></p>
 
-  <form id="login-form">
-    <label data-i18n="login.name"></label>
-    <input id="login-name" class="input" type="text">
+    <table>
+      <thead>
+        <tr>
+          <th data-i18n="pending.rank"></th>
+          <th data-i18n="pending.name"></th>
+          <th data-i18n="pending.joinMonth"></th>
+        </tr>
+      </thead>
+      <tbody id="pending-body"></tbody>
+    </table>
 
-    <label data-i18n="login.password"></label>
-    <input id="login-password" class="input" type="password">
+    <p id="no-pending" data-i18n="pending.none"></p>
+  </section>
 
-    <button class="btn" data-i18n="login.submit"></button>
-  </form>
+  <!-- STATS SCENE -->
+  <section id="scene-stats" class="scene">
+    <h1 data-i18n="stats.title"></h1>
 
-  <button id="view-code-btn" class="btn btn-small" type="button" style="margin-top:4px;">
-    View saved login password
-  </button>
-  <p id="saved-code-display" style="display:none; margin-top:6px;"></p>
+    <table>
+      <thead>
+        <tr>
+          <th data-i18n="lb.name"></th>
+          <th data-i18n="lb.league"></th>
+          <th data-i18n="stats.runs"></th>
+          <th data-i18n="stats.totaldistance"></th>
+          <th data-i18n="stats.totaltime"></th>
+          <th data-i18n="stats.avgdistance"></th>
+          <th data-i18n="stats.bestdistance"></th>
+          <th data-i18n="stats.improvement"></th>
+        </tr>
+      </thead>
+      <tbody id="stats-body"></tbody>
+    </table>
 
-  <p data-i18n="login.note"></p>
-</section>
+    <p id="no-stats" data-i18n="stats.none"></p>
+  </section>
 
-<!-- LEADERBOARD SCENE -->
-<section id="scene-leaderboard" class="scene">
-  <h1 data-i18n="leaderboard.title"></h1>
+  <!-- RULES SCENE -->
+  <section id="scene-rules" class="scene">
+    <h1 data-i18n="rules.title"></h1>
 
-  <label data-i18n="leaderboard.filter"></label>
-  <select id="league-filter" class="input" style="max-width:260px;">
-    <option value="all" data-i18n="leaderboard.all"></option>
-    <option value="pending" data-i18n="league.pending"></option>
-    <option value="amateurs" data-i18n="league.amateurs"></option>
-    <option value="intermediates" data-i18n="league.intermediates"></option>
-    <option value="pros" data-i18n="league.pros"></option>
-    <option value="legends" data-i18n="league.legends"></option>
-  </select>
+    <h2 data-i18n="rules.joiningtitle"></h2>
+    <p data-i18n="rules.joiningtext"></p>
 
-  <table>
-    <thead>
-      <tr>
-        <th data-i18n="lb.rank"></th>
-        <th data-i18n="lb.name"></th>
-        <th data-i18n="lb.league"></th>
-        <th data-i18n="lb.distance"></th>
-        <th data-i18n="lb.time"></th>
-      </tr>
-    </thead>
-    <tbody id="leaderboard-body"></tbody>
-  </table>
+    <h2 data-i18n="rules.leaguetitle"></h2>
+    <p data-i18n="rules.leaguetext"></p>
 
-  <p id="no-entries" data-i18n="leaderboard.none"></p>
+    <h2 data-i18n="rules.promotiontitle"></h2>
+    <p data-i18n="rules.promotiontext"></p>
+  </section>
 
-  <!-- Pending view -->
-  <h2 data-i18n="pending.title"></h2>
-  <p data-i18n="pending.subtitle"></p>
+  <!-- ABOUT SCENE -->
+  <section id="scene-about" class="scene">
+    <h1 data-i18n="about.title"></h1>
+    <p data-i18n="about.text1"></p>
+    <p data-i18n="about.text2"></p>
+    <p data-i18n="about.text3"></p>
+  </section>
 
-  <table>
-    <thead>
-      <tr>
-        <th data-i18n="pending.rank"></th>
-        <th data-i18n="pending.name"></th>
-        <th data-i18n="pending.joinMonth"></th>
-      </tr>
-    </thead>
-    <tbody id="pending-body"></tbody>
-  </table>
+  <!-- ENTRY FORM + MY ACTIVITIES -->
+  <section id="scene-entry" class="scene">
+    <h1 data-i18n="entry.title"></h1>
 
-  <p id="no-pending" data-i18n="pending.none"></p>
-</section>
+    <form id="entry-form">
+      <label data-i18n="entry.distance"></label>
+      <input id="distance" type="number" step="0.01" class="input">
 
-<!-- STATS SCENE -->
-<section id="scene-stats" class="scene">
-  <h1 data-i18n="stats.title"></h1>
+      <label data-i18n="entry.time"></label>
+      <input id="time" type="number" step="0.01" class="input">
 
-  <table>
-    <thead>
-      <tr>
-        <th data-i18n="lb.name"></th>
-        <th data-i18n="lb.league"></th>
-        <th data-i18n="stats.runs"></th>
-        <th data-i18n="stats.totaldistance"></th>
-        <th data-i18n="stats.totaltime"></th>
-        <th data-i18n="stats.avgdistance"></th>
-        <th data-i18n="stats.bestdistance"></th>
-        <th data-i18n="stats.improvement"></th>
-      </tr>
-    </thead>
-    <tbody id="stats-body"></tbody>
-  </table>
+      <button class="btn" data-i18n="entry.submit"></button>
+    </form>
 
-  <p id="no-stats" data-i18n="stats.none"></p>
-</section>
+    <h2 data-i18n="entry.my"></h2>
+    <table>
+      <thead>
+        <tr>
+          <th data-i18n="entry.date"></th>
+          <th data-i18n="entry.distance"></th>
+          <th data-i18n="entry.time"></th>
+          <th data-i18n="entry.actions"></th>
+        </tr>
+      </thead>
+      <tbody id="my-activities-body"></tbody>
+    </table>
 
-<!-- RULES SCENE -->
-<section id="scene-rules" class="scene">
-  <h1 data-i18n="rules.title"></h1>
+    <p id="no-my-activities" data-i18n="entry.none"></p>
+  </section>
 
-  <h2 data-i18n="rules.joiningtitle"></h2>
-  <p data-i18n="rules.joiningtext"></p>
+  <!-- PROFILE SCENE -->
+  <section id="profile-card" class="scene" style="display:none;">
+    <h1 id="profile-title"></h1>
+    <p id="profile-summary"></p>
 
-  <h2 data-i18n="rules.leaguetitle"></h2>
-  <p data-i18n="rules.leaguetext"></p>
+    <table>
+      <tr><th data-i18n="profile.runs"></th><td id="profile-runs"></td></tr>
+      <tr><th data-i18n="profile.totaldistance"></th><td id="profile-total-distance"></td></tr>
+      <tr><th data-i18n="profile.totaltime"></th><td id="profile-total-time"></td></tr>
+      <tr><th data-i18n="profile.avgdistance"></th><td id="profile-avg-distance"></td></tr>
+      <tr><th data-i18n="profile.avgpace"></th><td id="profile-avg-pace"></td></tr>
+      <tr><th data-i18n="profile.longest"></th><td id="profile-longest"></td></tr>
+      <tr><th data-i18n="profile.best10k"></th><td id="profile-10k"></td></tr>
+      <tr><th data-i18n="profile.best5k"></th><td id="profile-5k"></td></tr>
+    </table>
+  </section>
+</div>
 
-  <h2 data-i18n="rules.promotiontitle"></h2>
-  <p data-i18n="rules.promotiontext"></p>
-</section>
-
-<!-- ABOUT SCENE -->
-<section id="scene-about" class="scene">
-  <h1 data-i18n="about.title"></h1>
-  <p data-i18n="about.text1"></p>
-  <p data-i18n="about.text2"></p>
-  <p data-i18n="about.text3"></p>
-</section>
-
-<!-- ENTRY FORM + MY ACTIVITIES -->
-<section id="scene-entry" class="scene">
-  <h1 data-i18n="entry.title"></h1>
-
-  <form id="entry-form">
-    <label data-i18n="entry.distance"></label>
-    <input id="distance" type="number" step="0.01" class="input">
-
-    <label data-i18n="entry.time"></label>
-    <input id="time" type="number" step="0.01" class="input">
-
-    <button class="btn" data-i18n="entry.submit"></button>
-  </form>
-
-  <h2 data-i18n="entry.my"></h2>
-  <table>
-    <thead>
-      <tr>
-        <th data-i18n="entry.date"></th>
-        <th data-i18n="entry.distance"></th>
-        <th data-i18n="entry.time"></th>
-        <th data-i18n="entry.actions"></th>
-      </tr>
-    </thead>
-    <tbody id="my-activities-body"></tbody>
-  </table>
-
-  <p id="no-my-activities" data-i18n="entry.none"></p>
-</section>
-
-<!-- PROFILE SCENE -->
-<section id="profile-card" class="scene" style="display:none;">
-  <h1 id="profile-title"></h1>
-  <p id="profile-summary"></p>
-
-  <table>
-    <tr><th data-i18n="profile.runs"></th><td id="profile-runs"></td></tr>
-    <tr><th data-i18n="profile.totaldistance"></th><td id="profile-total-distance"></td></tr>
-    <tr><th data-i18n="profile.totaltime"></th><td id="profile-total-time"></td></tr>
-    <tr><th data-i18n="profile.avgdistance"></th><td id="profile-avg-distance"></td></tr>
-    <tr><th data-i18n="profile.avgpace"></th><td id="profile-avg-pace"></td></tr>
-    <tr><th data-i18n="profile.longest"></th><td id="profile-longest"></td></tr>
-    <tr><th data-i18n="profile.best10k"></th><td id="profile-10k"></td></tr>
-    <tr><th data-i18n="profile.best5k"></th><td id="profile-5k"></td></tr>
-  </table>
-</section>
-
-<!-- Firebase scripts -->
-<script src="https://www.gstatic.com/firebasejs/11.0.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore-compat.js"></script>
-
+<!-- =========================================================
+     SCRIPTS (SEP + MIH + global switching)
+========================================================= -->
 <script>
-  // ==========================
-  //  CONFIG
-  // ==========================
+/* ---------- SEP TRANSLATIONS ---------- */
+const sepTranslations = {
+  en: {
+    menuTitle: "SEP Menu",
+    navAboutSep: "About SEP",
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyAkbH3mJkeheF3L7EaqN1kMgbFd_LJCIXo",
-    authDomain: "hitachi-vantara-make-it-happen.firebaseapp.com",
-    projectId: "hitachi-vantara-make-it-happen",
-    storageBucket: "hitachi-vantara-make-it-happen.firebasestorage.app",
-    messagingSenderId: "749690169824",
-    appId: "1:749690169824:web:21d6b8d2a5862847e4e385",
-    measurementId: "G-7WZ03E68MF"
+    heroTitle: "Minimalist clothing, made with intention.",
+    heroSubtitle: "Soft, clean, and hand-pressed in Copenhagen.",
+    btnShopNow: "Shop Now",
+    btnViewCart: "View Cart",
+    addToCart: "Add",
+
+    productsTitle: "Three products. One choice.",
+    productsSubtitle: "Soft, durable, and timeless.",
+
+    product1Name: "SEP White T-shirt",
+    product2Name: "SEP Black Hoodie",
+    product3Name: "SEP Black Trousers",
+
+    aboutTitle: "About SEP",
+    aboutBody1: "SEP stands for Se Proairesis - your choice. Each piece is pressed by hand in Copenhagen in small batches.",
+    aboutBody2: "The goal is not hype. It is to make a small number of things that feel good on your skin, last a long time, and stay in your rotation.",
+    aboutBody3: "One tee, one hoodie, one pair of trousers; all built to be the first thing you reach for when you open your wardrobe.",
+    aboutBackBtn: "Back to shop",
+
+    howToOrderTitle: "How to Order",
+    step1Title: "1. Choose",
+    step2Title: "2. Add to Cart",
+    step3Title: "3. Copy Order Message",
+    step4Title: "4. Pay with MobilePay",
+    step5Title: "5. Send us your order",
+    howStep1: "Select your favourite SEP piece - T-shirt, Hoodie, or Trousers - then pick your size and quantity.",
+    howStep2: "Click “Add” to add your chosen items to your cart. When ready, click “View Cart” to review your order.",
+    howStep3: "Inside your cart, press “Copy Order Message”. This copies your full order, including shipping, automatically.",
+    howStep4: "Send the total amount (incl. +45 DKK shipping) to 51 34 31 33 using MobilePay.\n“Open MobilePay” works only on mobile devices.",
+    howStep5: "DM your copied message to @seproairesis (Instagram) or @se.proairesis (TikTok).\nWe currently deliver within Denmark.",
+
+    footerText: "© 2025 SEP - Se Proairesis • MobilePay 51 34 31 33 • +45 DKK Shipping • Made in Copenhagen. Delivered across Denmark.",
+
+    cartTitle: "Your Cart",
+    cartSubtotalLabel: "Subtotal:",
+    cartShippingLabel: "Shipping:",
+    cartShippingValue: "+45 DKK",
+    cartTotalLabel: "Total:",
+    cartMobilePayButton: "Open MobilePay",
+    cartMobilePayNote: "Open MobilePay button is only a valid link on mobile.",
+    cartCopyOrder: "Copy Order Message",
+    cartEmpty: "Cart is empty",
+
+    labelSizeQty: "Size: {size} | Qty: {qty}",
+    btnRemove: "Remove",
+
+    popupAdded: "Added to cart",
+    popupOrderCopied: "Order message copied!",
+    mobilePayThanks: "Thanks for supporting SEP!",
+
+    orderIntro: "Hi SEP, here is my order:",
+    orderSubtotalLabel: "Subtotal:",
+    orderShippingLabel: "Shipping:",
+    orderTotalLabel: "Total:",
+    orderItem: "{qty}× {name} (Size: {size})"
+  },
+  da: {
+    menuTitle: "SEP menu",
+    navAboutSep: "Om SEP",
+
+    heroTitle: "Minimalistisk tøj, lavet med omtanke.",
+    heroSubtitle: "Blødt, rent og håndpresset i København.",
+    btnShopNow: "Shop nu",
+    btnViewCart: "Se kurv",
+    addToCart: "Læg i kurv",
+
+    productsTitle: "Tre produkter. Ét valg.",
+    productsSubtitle: "Blødt, holdbart og tidløst.",
+
+    product1Name: "SEP Hvid T-shirt",
+    product2Name: "SEP Sort Hoodie",
+    product3Name: "SEP Sorte Bukser",
+
+    aboutTitle: "Om SEP",
+    aboutBody1: "SEP står for Se Proairesis - dit valg. Hver style bliver håndpresset i København i små batches.",
+    aboutBody2: "Målet er ikke hype. Det er at lave få ting, der føles godt på huden, holder længe og bliver i din rotation.",
+    aboutBody3: "En T-shirt, en hoodie, et par bukser; alt sammen lavet til at være det første, du rækker ud efter i garderoben.",
+    aboutBackBtn: "Tilbage til shop",
+
+    howToOrderTitle: "Sådan bestiller du",
+    step1Title: "1. Vælg",
+    step2Title: "2. Læg i kurv",
+    step3Title: "3. Kopiér ordrebesked",
+    step4Title: "4. Betal med MobilePay",
+    step5Title: "5. Send din ordre",
+    howStep1: "Vælg dit favorit-SEP - T-shirt, hoodie eller bukser - og vælg størrelse og antal.",
+    howStep2: "Tryk “Læg i kurv” for at lægge dine varer i kurven. Når du er klar, trykker du “Se kurv” for at tjekke din ordre.",
+    howStep3: "Inde i kurven trykker du “Kopiér ordrebesked”. Det kopierer hele din ordre automatisk, inkl. fragt.",
+    howStep4: "Send det samlede beløb (inkl. +45 DKK fragt) til 51 34 31 33 via MobilePay.\n“Åbn MobilePay” virker kun på mobilenheder.",
+    howStep5: "Send din kopierede besked som DM til @seproairesis (Instagram) eller @se.proairesis (TikTok).\nVi leverer i Danmark.",
+
+    footerText: "© 2025 SEP - Se Proairesis • MobilePay 51 34 31 33 • +45 DKK fragt • Lavet i København. Leveret i Danmark.",
+
+    cartTitle: "Din kurv",
+    cartSubtotalLabel: "Subtotal:",
+    cartShippingLabel: "Fragt:",
+    cartShippingValue: "+45 DKK",
+    cartTotalLabel: "Total:",
+    cartMobilePayButton: "Åbn MobilePay",
+    cartMobilePayNote: "Knap til MobilePay virker kun som link på mobil.",
+    cartCopyOrder: "Kopiér ordrebesked",
+    cartEmpty: "Kurven er tom",
+
+    labelSizeQty: "Størrelse: {size} | Antal: {qty}",
+    btnRemove: "Fjern",
+
+    popupAdded: "Lagt i kurv",
+    popupOrderCopied: "Ordrebesked kopieret!",
+    mobilePayThanks: "Tak fordi du støtter SEP!",
+
+    orderIntro: "Hej SEP, her er min ordre:",
+    orderSubtotalLabel: "Subtotal:",
+    orderShippingLabel: "Fragt:",
+    orderTotalLabel: "Total:",
+    orderItem: "{qty}× {name} (Størrelse: {size})"
+  },
+  cs: {
+    menuTitle: "Nabídka SEP",
+    navAboutSep: "O značce SEP",
+
+    heroTitle: "Minimalistické oblečení dělané s úmyslem.",
+    heroSubtitle: "Měkké, čisté a ručně lisované v Kodani.",
+    btnShopNow: "Nakoupit",
+    btnViewCart: "Zobrazit košík",
+    addToCart: "Přidat do košíku",
+
+    productsTitle: "Tři produkty. Jedna volba.",
+    productsSubtitle: "Měkké, odolné a nadčasové.",
+
+    product1Name: "SEP bílé tričko",
+    product2Name: "SEP černá mikina",
+    product3Name: "SEP černé kalhoty",
+
+    aboutTitle: "O značce SEP",
+    aboutBody1: "SEP znamená Se Proairesis - tvoje volba. Každý kousek je ručně lisovaný v Kodani v malých sériích.",
+    aboutBody2: "Cílem není hype. Jde o to dělat pár věcí, které jsou příjemné na těle, dlouho vydrží a pořád po nich saháš.",
+    aboutBody3: "Jedno tričko, jedna mikina, jedny kalhoty; všechno tak, aby to byl první kousek, po kterém sáhneš ve skříni.",
+    aboutBackBtn: "Zpět do shopu",
+
+    howToOrderTitle: "Jak objednat",
+    step1Title: "1. Vyber",
+    step2Title: "2. Přidej do košíku",
+    step3Title: "3. Zkopíruj zprávu s objednávkou",
+    step4Title: "4. Zaplať přes MobilePay",
+    step5Title: "5. Pošli nám objednávku",
+    howStep1: "Vyber si svůj oblíbený SEP kousek - tričko, mikinu nebo kalhoty - a zvol velikost a množství.",
+    howStep2: "Klikni na “Přidat do košíku”, aby se věci přidaly do košíku. Až budeš připravený, klikni na “Zobrazit košík” a zkontroluj objednávku.",
+    howStep3: "V košíku stiskni “Zkopírovat zprávu s objednávkou”. Tím se automaticky zkopíruje celá objednávka včetně dopravy.",
+    howStep4: "Pošli celkovou částku (včetně +45 DKK poštovného) na 51 34 31 33 přes MobilePay.\n“Open MobilePay” funguje jen v mobilu.",
+    howStep5: "Pošli zkopírovanou zprávu do DM na @seproairesis (Instagram) nebo @se.proairesis (TikTok).\nAktuálně doručujeme v Dánsku.",
+
+    footerText: "© 2025 SEP - Se Proairesis • MobilePay 51 34 31 33 • +45 DKK poštovné • Vyrobeno v Kodani. Doručujeme v Dánsku.",
+
+    cartTitle: "Košík",
+    cartSubtotalLabel: "Mezisoučet:",
+    cartShippingLabel: "Poštovné:",
+    cartShippingValue: "+45 DKK",
+    cartTotalLabel: "Celkem:",
+    cartMobilePayButton: "Otevřít MobilePay",
+    cartMobilePayNote: "Tlačítko MobilePay funguje jako odkaz pouze na mobilu.",
+    cartCopyOrder: "Zkopírovat zprávu s objednávkou",
+    cartEmpty: "Košík je prázdný",
+
+    labelSizeQty: "Velikost: {size} | Počet: {qty}",
+    btnRemove: "Odebrat",
+
+    popupAdded: "Přidáno do košíku",
+    popupOrderCopied: "Zpráva s objednávkou zkopírována!",
+    mobilePayThanks: "Díky, že podporuješ SEP!",
+
+    orderIntro: "Ahoj SEP, tady je moje objednávka:",
+    orderSubtotalLabel: "Mezisoučet:",
+    orderShippingLabel: "Poštovné:",
+    orderTotalLabel: "Celkem:",
+    orderItem: "{qty}× {name} (Velikost: {size})"
+  }
+};
+
+let sepCurrentLang = 'en';
+
+function sepTr(key){
+  const pack = sepTranslations[sepCurrentLang] || sepTranslations.en;
+  return pack[key] || key;
+}
+
+function sepApplyLanguage(){
+  const t = sepTranslations[sepCurrentLang] || sepTranslations.en;
+  const set = (id,text)=>{
+    const el=document.getElementById(id);
+    if(!el)return;
+    if(typeof text!=='string'){el.textContent=text;return;}
+    if(text.includes("\n")){
+      const parts=text.split("\n");
+      el.innerHTML=parts.join("<br>");
+    }else el.textContent=text;
   };
 
-  const LS_CURRENT_USER_KEY = "mih_current_user_id";
-  const LS_LANG_KEY = "mih_lang";
-  const LS_PASSWORD_KEY = "mih_saved_password";
+  document.documentElement.lang = sepCurrentLang;
 
-  const LEAGUES = ["amateurs", "intermediates", "pros", "legends"];
-  const MIN_RUNS_FOR_PLACEMENT = 3;
+  set('menuTitle', t.menuTitle);
+  const menuAboutBtn = document.getElementById('menuAboutBtn');
+  if(menuAboutBtn) menuAboutBtn.textContent = t.navAboutSep;
 
-  let db = null;
-  let users = [];
-  let entries = [];
-  let currentUser = null;
-  let currentLang = "en";
-  let autoRunning = false;
+  set('heroTitle', t.heroTitle);
+  set('heroSubtitle', t.heroSubtitle);
+  set('btnShopNow', t.btnShopNow);
+  set('btnViewCart', t.btnViewCart);
 
-  // ==========================
-  //  TRANSLATIONS
-  // ==========================
+  set('productsTitle', t.productsTitle);
+  set('productsSubtitle', t.productsSubtitle);
 
-  const translations = {
-    en: {
-      // nav
-      "nav.welcome": "Welcome",
-      "nav.leaderboard": "Leaderboard",
-      "nav.stats": "Stats",
-      "nav.rules": "Rules",
-      "nav.about": "About",
-      "nav.entry": "Log activity",
-      "nav.login": "Login",
+  set('product1Name', t.product1Name);
+  set('product2Name', t.product2Name);
+  set('product3Name', t.product3Name);
 
-      // welcome
-      "welcome.title": "Move more. Compete together.",
-      "welcome.subtitle": "Make It Happen is a simple challenge by SEP. Walk, run or cycle, log your distance and climb the leagues.",
-      "welcome.cta": "Log in or create an account",
+  set('aboutTitle', t.aboutTitle);
+  set('aboutBody1', t.aboutBody1);
+  set('aboutBody2', t.aboutBody2);
+  set('aboutBody3', t.aboutBody3);
+  set('aboutBackBtn', t.aboutBackBtn);
 
-      // login
-      "login.title": "Log in to Make It Happen",
-      "login.description": "Create a simple account so the site knows who you are and only you can manage your activities.",
-      "login.name": "Name",
-      "login.password": "Password",
-      "login.submit": "Log in / Create account",
-      "login.note": "Your account is stored in the shared database, not just on your device. If you do not use your account for a long time it may be cleaned up.",
+  set('howToOrderTitle', t.howToOrderTitle);
+  set('step1Title', t.step1Title);
+  set('step2Title', t.step2Title);
+  set('step3Title', t.step3Title);
+  set('step4Title', t.step4Title);
+  set('step5Title', t.step5Title);
+  set('howStep1', t.howStep1);
+  set('howStep2', t.howStep2);
+  set('howStep3', t.howStep3);
+  set('howStep4', t.howStep4);
+  set('howStep5', t.howStep5);
 
-      // leagues
-      "league.amateurs": "Amateurs",
-      "league.intermediates": "Intermediates",
-      "league.pros": "Pros",
-      "league.legends": "Legends",
-      "league.pending": "Pending",
+  set('footerText', t.footerText);
 
-      // leaderboard
-      "leaderboard.title": "Leaderboard",
-      "leaderboard.filter": "Filter by league:",
-      "leaderboard.all": "All leagues",
-      "leaderboard.none": "No activities yet. Be the first to log something.",
-      "lb.rank": "#",
-      "lb.name": "Name",
-      "lb.league": "League",
-      "lb.distance": "Total distance (km)",
-      "lb.time": "Total time (min)",
+  set('cartTitle', t.cartTitle);
+  set('cartSubtotalLabel', t.cartSubtotalLabel);
+  set('cartShippingLabel', t.cartShippingLabel);
+  set('cartShippingValue', t.cartShippingValue);
+  set('cartTotalLabel', t.cartTotalLabel);
+  set('cartMobilePayButton', t.cartMobilePayButton);
+  set('cartMobilePayNote', t.cartMobilePayNote);
+  set('cartCopyOrder', t.cartCopyOrder);
 
-      // pending
-      "pending.title": "Pending joiners",
-      "pending.subtitle": "New sign-ups who will be placed into leagues automatically.",
-      "pending.rank": "#",
-      "pending.name": "Name",
-      "pending.joinMonth": "Join month",
-      "pending.none": "No pending joiners right now.",
+  document.querySelectorAll('[data-i18n-btn="addToCart"]').forEach(btn=>{
+    btn.textContent = t.addToCart;
+  });
 
-      // stats
-      "stats.title": "Player stats and league moves",
-      "stats.runs": "Runs",
-      "stats.totaldistance": "Total distance (km)",
-      "stats.totaltime": "Total time (min)",
-      "stats.avgdistance": "Average distance (km)",
-      "stats.bestdistance": "Longest distance (km)",
-      "stats.improvement": "Improvement",
-      "stats.none": "Stats will appear once people start logging activities.",
-
-      // rules
-      "rules.title": "Rules and leagues",
-      "rules.joiningtitle": "Joining and signing up",
-      "rules.joiningtext":
-        "You can sign up any time. When you create an account you start as “Pending”. You can log activities straight away. The system places players into leagues based on distance, time and speed while keeping league sizes balanced.",
-      "rules.leaguetitle": "Leagues and balance",
-      "rules.leaguetext":
-        "There are four leagues: Amateurs, Intermediates, Pros and Legends. The system tries to keep league sizes balanced so that no league becomes much larger than the others.",
-      "rules.promotiontitle": "Promotions and relegations",
-      "rules.promotiontext":
-        "Each month the site automatically applies promotions and relegations. The number of players moved depends on how many people are active: with 8+ players there is 1 promotion and 1 relegation, with 16+ there are 2 of each, and with 32+ there are 3 of each. Rankings are based on total distance first, then total time, then average speed.",
-
-      // about
-      "about.title": "About Make It Happen",
-      "about.text1":
-        "Make It Happen is a simple, fair health challenge created under SEP. The goal is not to create elite athletes, but to give everyone a clear, friendly way to move more and see progress over time.",
-      "about.text2":
-        "You can walk, run or cycle and log your distance and time. The system looks at both how far you go and how long you spend moving. That means slower but very dedicated people still get rewarded, not only the fastest runners.",
-      "about.text3":
-        "New players start as “Pending” and are automatically placed into a league over time in a way that keeps league sizes balanced.",
-
-      // entry
-      "entry.title": "Log a new activity",
-      "entry.distance": "Distance (km)",
-      "entry.time": "Time (minutes)",
-      "entry.submit": "Save my activity",
-      "entry.my": "My activities",
-      "entry.date": "Date",
-      "entry.actions": "Actions",
-      "entry.none": "You have no activities yet for this account.",
-
-      // profile
-      "profile.runs": "Runs",
-      "profile.totaldistance": "Total distance",
-      "profile.totaltime": "Total time",
-      "profile.avgdistance": "Average distance",
-      "profile.avgpace": "Average pace",
-      "profile.longest": "Longest activity",
-      "profile.best10k": "Fastest ~10 km",
-      "profile.best5k": "Fastest ~5 km",
-
-      // user header
-      "user.notLoggedIn": "Not logged in",
-      "user.loginButton": "Login",
-      "user.loggedInAs": "Logged in as {name}",
-      "user.leagueLabel": "League: {league}",
-      "user.addActivity": "Add activity",
-      "user.deleteAccount": "Delete account",
-
-      // alerts
-      "alert.loginMissing": "Please enter both name and password.",
-      "alert.firebase": "Firebase is not configured yet. Please add your Firebase config in the script.",
-      "alert.mustLogin": "Please log in before adding activities.",
-      "alert.activityInvalid": "Please fill in distance and time correctly with positive values.",
-      "alert.noPlayers": "No players yet.",
-      "alert.notEnoughPlayers": "You need at least 8 players for promotions and relegations.",
-      "alert.promotionsDone": "Promotions and relegations applied: {up} up, {down} down.",
-      "alert.noActivitiesToPlace": "No activities yet, nothing to place.",
-      "alert.noPending": "No pending joiners ready to place.",
-      "alert.placeSummary": "Placed {placed} new joiner(s) into leagues. {skipped}",
-      "alert.placeSkipped": "{count} left pending (not enough data yet or for balance).",
-      "alert.deleteActivityConfirm": "Delete this activity?",
-      "alert.deleteAccountConfirm": "This will delete your account and all your activities. Are you sure?",
-      "alert.alreadyLoggedIn": "You are already logged in. Delete your account if you want to start over.",
-      "alert.passwordWrong": "Wrong password for this name."
-    },
-
-    da: {
-      "nav.welcome": "Velkomst",
-      "nav.leaderboard": "Rangliste",
-      "nav.stats": "Statistik",
-      "nav.rules": "Regler",
-      "nav.about": "Om projektet",
-      "nav.entry": "Registrér aktivitet",
-      "nav.login": "Log ind",
-
-      "welcome.title": "Bevæg dig mere. Konkurrér sammen.",
-      "welcome.subtitle": "Make It Happen er en enkel udfordring fra SEP. Gå, løb eller cykl, registrér din distance og ryk op gennem ligaerne.",
-      "welcome.cta": "Log ind eller opret konto",
-
-      "login.title": "Log ind på Make It Happen",
-      "login.description": "Lav en enkel konto, så siden ved, hvem du er, og kun du kan styre dine aktiviteter.",
-      "login.name": "Navn",
-      "login.password": "Adgangskode",
-      "login.submit": "Log ind / Opret konto",
-      "login.note": "Din konto ligger i en delt database, ikke kun på din egen enhed. Hvis du ikke bruger den i lang tid, kan den blive ryddet op.",
-
-      "league.amateurs": "Amatører",
-      "league.intermediates": "Øvede",
-      "league.pros": "Prof",
-      "league.legends": "Legender",
-      "league.pending": "Afventer",
-
-      "leaderboard.title": "Rangliste",
-      "leaderboard.filter": "Filtrér efter liga:",
-      "leaderboard.all": "Alle ligaer",
-      "leaderboard.none": "Ingen aktiviteter endnu. Vær den første til at logge noget.",
-      "lb.rank": "#",
-      "lb.name": "Navn",
-      "lb.league": "Liga",
-      "lb.distance": "Samlet distance (km)",
-      "lb.time": "Samlet tid (min)",
-
-      "pending.title": "Afventende deltagere",
-      "pending.subtitle": "Nye tilmeldinger, som bliver placeret i ligaer automatisk.",
-      "pending.rank": "#",
-      "pending.name": "Navn",
-      "pending.joinMonth": "Tilmeldingsmåned",
-      "pending.none": "Ingen afventende deltagere lige nu.",
-
-      "stats.title": "Spillerstatistik og ligaflytninger",
-      "stats.runs": "Ture",
-      "stats.totaldistance": "Samlet distance (km)",
-      "stats.totaltime": "Samlet tid (min)",
-      "stats.avgdistance": "Gennemsnitlig distance (km)",
-      "stats.bestdistance": "Længste tur (km)",
-      "stats.improvement": "Forbedring",
-      "stats.none": "Statistik vises, når deltagerne begynder at logge aktiviteter.",,
-
-      "rules.title": "Regler og ligaer",
-      "rules.joiningtitle": "Tilmelding og opstart",
-      "rules.joiningtext":
-        "Du kan tilmelde dig når som helst. Når du opretter en konto, starter du som “Afventer”. Du kan logge aktiviteter med det samme. Systemet placerer spillere i ligaer ud fra distance, tid og hastighed, samtidig med at ligastørrelserne holdes nogenlunde i balance.",
-      "rules.leaguetitle": "Ligaer og balance",
-      "rules.leaguetext":
-        "Der er fire ligaer: Amatører, Øvede, Prof og Legender. Systemet forsøger at holde ligastørrelserne i balance, så én liga ikke bliver markant større end de andre.",
-      "rules.promotiontitle": "Oprykning og nedrykning",
-      "rules.promotiontext":
-        "Hver måned udfører siden automatisk oprykning og nedrykning. Antallet af spillere der flyttes, afhænger af hvor mange der er aktive: ved 8+ spillere er der 1 oprykning og 1 nedrykning, ved 16+ er der 2 af hver, og ved 32+ er der 3 af hver. Ranglisten bygger først på samlet distance, derefter samlet tid og til sidst gennemsnitlig hastighed.",
-
-      "about.title": "Om Make It Happen",
-      "about.text1":
-        "Make It Happen er en enkel, fair sundhedsudfordring under SEP. Målet er ikke at skabe elitesportsfolk, men at give alle en klar og venlig måde at bevæge sig mere og se deres udvikling over tid.",
-      "about.text2":
-        "Du kan gå, løbe eller cykle og registrere din distance og tid. Systemet kigger både på hvor langt du kommer, og hvor længe du er i bevægelse. Det betyder, at langsommere men meget dedikerede deltagere også bliver belønnet, ikke kun de hurtigste løbere.",
-      "about.text3":
-        "Nye spillere starter som “Afventer” og bliver automatisk placeret i en liga hen ad vejen, på en måde der holder ligastørrelserne i balance.",
-
-      "entry.title": "Registrér en ny aktivitet",
-      "entry.distance": "Distance (km)",
-      "entry.time": "Tid (minutter)",
-      "entry.submit": "Gem min aktivitet",
-      "entry.my": "Mine aktiviteter",
-      "entry.date": "Dato",
-      "entry.actions": "Handlinger",
-      "entry.none": "Du har ingen aktiviteter endnu på denne konto.",
-
-      "profile.runs": "Ture",
-      "profile.totaldistance": "Samlet distance",
-      "profile.totaltime": "Samlet tid",
-      "profile.avgdistance": "Gennemsnitlig distance",
-      "profile.avgpace": "Gennemsnitstempo",
-      "profile.longest": "Længste aktivitet",
-      "profile.best10k": "Hurtigste ~10 km",
-      "profile.best5k": "Hurtigste ~5 km",
-
-      "user.notLoggedIn": "Ikke logget ind",
-      "user.loginButton": "Log ind",
-      "user.loggedInAs": "Logget ind som {name}",
-      "user.leagueLabel": "Liga: {league}",
-      "user.addActivity": "Tilføj aktivitet",
-      "user.deleteAccount": "Slet konto",
-
-      "alert.loginMissing": "Indtast både navn og adgangskode.",
-      "alert.firebase": "Firebase er ikke sat korrekt op. Indsæt din Firebase-konfiguration i scriptet.",
-      "alert.mustLogin": "Log ind, før du tilføjer aktiviteter.",
-      "alert.activityInvalid": "Udfyld distance og tid korrekt med positive værdier.",
-      "alert.noPlayers": "Ingen spillere endnu.",
-      "alert.notEnoughPlayers": "Du skal bruge mindst 8 spillere til oprykning og nedrykning.",
-      "alert.promotionsDone": "Oprykning og nedrykning udført: {up} op, {down} ned.",
-      "alert.noActivitiesToPlace": "Ingen aktiviteter endnu, intet at placere.",
-      "alert.noPending": "Ingen afventende deltagere klar til placering.",
-      "alert.placeSummary": "Placerede {placed} ny(e) deltager(e) i ligaer. {skipped}",
-      "alert.placeSkipped": "{count} blev efterladt som Afventer (mangler data eller for balance).",
-      "alert.deleteActivityConfirm": "Slet denne aktivitet?",
-      "alert.deleteAccountConfirm": "Dette sletter din konto og alle dine aktiviteter. Er du sikker?",
-      "alert.alreadyLoggedIn": "Du er allerede logget ind. Slet din konto, hvis du vil starte forfra.",
-      "alert.passwordWrong": "Forkert adgangskode til dette navn."
-    },
-
-    cs: {
-      "nav.welcome": "Vítejte",
-      "nav.leaderboard": "Žebříček",
-      "nav.stats": "Statistiky",
-      "nav.rules": "Pravidla",
-      "nav.about": "O projektu",
-      "nav.entry": "Zapsat aktivitu",
-      "nav.login": "Přihlášení",
-
-      "welcome.title": "Hýbej se víc. Soutěž spolu s ostatními.",
-      "welcome.subtitle": "Make It Happen je jednoduchá výzva od SEP. Choď, běhej nebo jezdi na kole, zapisuj kilometry a stoupej ligami nahoru.",
-      "welcome.cta": "Přihlásit se nebo vytvořit účet",
-
-      "login.title": "Přihlášení do Make It Happen",
-      "login.description": "Vytvoř si jednoduchý účet, aby systém věděl, kdo jsi, a jen ty mohl/a spravovat své aktivity.",
-      "login.name": "Jméno",
-      "login.password": "Heslo",
-      "login.submit": "Přihlásit / Vytvořit účet",
-      "login.note": "Tvůj účet je uložený ve sdílené databázi, ne jen v tomto zařízení. Pokud ho dlouho nepoužíváš, může být smazán.",
-
-      "league.amateurs": "Amatéři",
-      "league.intermediates": "Středně pokročilí",
-      "league.pros": "Profíci",
-      "league.legends": "Legendy",
-      "league.pending": "Čeká na zařazení",
-
-      "leaderboard.title": "Žebříček",
-      "leaderboard.filter": "Filtrovat podle ligy:",
-      "leaderboard.all": "Všechny ligy",
-      "leaderboard.none": "Zatím žádné aktivity. Buď první, kdo něco zapíše.",
-      "lb.rank": "#",
-      "lb.name": "Jméno",
-      "lb.league": "Liga",
-      "lb.distance": "Celková vzdálenost (km)",
-      "lb.time": "Celkový čas (min)",
-
-      "pending.title": "Čekající účastníci",
-      "pending.subtitle": "Nové registrace, které budou automaticky rozděleny do lig.",
-      "pending.rank": "#",
-      "pending.name": "Jméno",
-      "pending.joinMonth": "Měsíc registrace",
-      "pending.none": "Momentálně žádní čekající účastníci.",
-
-      "stats.title": "Statistiky hráčů a pohyb mezi ligami",
-      "stats.runs": "Aktivity",
-      "stats.totaldistance": "Celková vzdálenost (km)",
-      "stats.totaltime": "Celkový čas (min)",
-      "stats.avgdistance": "Průměrná vzdálenost (km)",
-      "stats.bestdistance": "Nejdelší aktivita (km)",
-      "stats.improvement": "Zlepšení",
-      "stats.none": "Statistiky se objeví, jakmile lidé začnou zapisovat aktivity.",
-
-      "rules.title": "Pravidla a ligy",
-      "rules.joiningtitle": "Registrace a začátek",
-      "rules.joiningtext":
-        "Zaregistrovat se můžeš kdykoliv. Po vytvoření účtu začínáš ve stavu „Čeká na zařazení“. Aktivity můžeš zapisovat hned. Systém tě postupně zařadí do ligy podle vzdálenosti, času a rychlosti a zároveň se snaží udržet velikost lig vyrovnanou.",
-      "rules.leaguetitle": "Ligy a rovnováha",
-      "rules.leaguetext":
-        "Existují čtyři ligy: Amatéři, Středně pokročilí, Profíci a Legendy. Systém se snaží, aby žádná liga nebyla výrazně větší než ostatní.",
-      "rules.promotiontitle": "Postupy a sestupy",
-      "rules.promotiontext":
-        "Každý měsíc systém automaticky provede postupy a sestupy. Počet přesunů závisí na počtu aktivních hráčů: při 8+ hráčích 1 postup a 1 sestup, při 16+ dva, při 32+ tři. Pořadí se určuje podle celkové vzdálenosti, pak podle celkového času a nakonec podle průměrné rychlosti.",
-
-      "about.title": "O Make It Happen",
-      "about.text1":
-        "Make It Happen je jednoduchá, férová zdravotní výzva vytvořená pod SEP. Cílem není z tebe udělat profesionálního sportovce, ale dát ti přehledný a přátelský způsob, jak se víc hýbat a vidět svůj pokrok.",
-      "about.text2":
-        "Můžeš chodit, běhat nebo jezdit na kole a zapisovat vzdálenost a čas. Systém hodnotí jak to, jak daleko jdeš, tak to, jak dlouho se hýbeš. Díky tomu se odměňuje i vytrvalost, ne jen rychlost.",
-      "about.text3":
-        "Noví hráči začínají jako „Čeká na zařazení“ a systém je postupně automaticky zařadí do lig tak, aby zůstaly vyvážené.",
-
-      "entry.title": "Zapsat novou aktivitu",
-      "entry.distance": "Vzdálenost (km)",
-      "entry.time": "Čas (minuty)",
-      "entry.submit": "Uložit aktivitu",
-      "entry.my": "Moje aktivity",
-      "entry.date": "Datum",
-      "entry.actions": "Akce",
-      "entry.none": "V tomto účtu zatím nemáš žádné aktivity.",
-
-      "profile.runs": "Aktivity",
-      "profile.totaldistance": "Celková vzdálenost",
-      "profile.totaltime": "Celkový čas",
-      "profile.avgdistance": "Průměrná vzdálenost",
-      "profile.avgpace": "Průměrné tempo",
-      "profile.longest": "Nejdelší aktivita",
-      "profile.best10k": "Nejrychlejší ~10 km",
-      "profile.best5k": "Nejrychlejší ~5 km",
-
-      "user.notLoggedIn": "Nepřihlášen",
-      "user.loginButton": "Přihlásit",
-      "user.loggedInAs": "Přihlášen jako {name}",
-      "user.leagueLabel": "Liga: {league}",
-      "user.addActivity": "Přidat aktivitu",
-      "user.deleteAccount": "Smazat účet",
-
-      "alert.loginMissing": "Zadej prosím jméno i heslo.",
-      "alert.firebase": "Firebase ještě není správně nastavené. Přidej konfiguraci Firebase do skriptu.",
-      "alert.mustLogin": "Nejdřív se přihlas, než přidáš aktivitu.",
-      "alert.activityInvalid": "Vyplň vzdálenost i čas jako kladná čísla.",
-      "alert.noPlayers": "Zatím žádní hráči.",
-      "alert.notEnoughPlayers": "Na postupy a sestupy je potřeba alespoň 8 hráčů.",
-      "alert.promotionsDone": "Postupy a sestupy provedeny: {up} nahoru, {down} dolů.",
-      "alert.noActivitiesToPlace": "Zatím žádné aktivity, není co zařazovat.",
-      "alert.noPending": "Žádní čekající hráči připravení k zařazení.",
-      "alert.placeSummary": "Zařazeno {placed} nových hráčů do lig. {skipped}",
-      "alert.placeSkipped": "{count} zůstalo ve stavu Čeká na zařazení (málo dat nebo kvůli rovnováze).",
-      "alert.deleteActivityConfirm": "Opravdu chceš smazat tuto aktivitu?",
-      "alert.deleteAccountConfirm": "Tímto smažeš svůj účet i všechny aktivity. Pokračovat?",
-      "alert.alreadyLoggedIn": "Už jsi přihlášený/á. Pokud chceš začít znovu, smaž účet.",
-      "alert.passwordWrong": "Špatné heslo pro toto jméno."
+  document.querySelectorAll('.lang-btn').forEach(btn=>{
+    if(btn.getAttribute('data-lang')===sepCurrentLang){
+      btn.classList.add('bg-white','text-black');
+    }else{
+      btn.classList.remove('bg-white','text-black');
     }
+  });
+
+  sepUpdateCart();
+}
+
+function setSepLanguage(lang){
+  sepCurrentLang = lang;
+  sepApplyLanguage();
+}
+
+/* Burger menu controls */
+const menuToggle = document.getElementById('menuToggle');
+const menuPanel = document.getElementById('menuPanel');
+const menuOverlay = document.getElementById('menuOverlay');
+const closeMenuBtn = document.getElementById('closeMenuBtn');
+
+function openMenu(){
+  menuPanel.classList.remove('translate-x-full');
+  menuOverlay.classList.remove('hidden');
+}
+function closeMenu(){
+  menuPanel.classList.add('translate-x-full');
+  menuOverlay.classList.add('hidden');
+}
+if(menuToggle){
+  menuToggle.addEventListener('click', ()=>{
+    const closed = menuPanel.classList.contains('translate-x-full');
+    if(closed) openMenu(); else closeMenu();
+  });
+}
+if(menuOverlay) menuOverlay.addEventListener('click', closeMenu);
+if(closeMenuBtn) closeMenuBtn.addEventListener('click', closeMenu);
+
+document.querySelectorAll('.lang-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    const lang = btn.getAttribute('data-lang');
+    setSepLanguage(lang);
+  });
+});
+
+/* Scene switching SEP (shop vs about) */
+function showSepScene(scene){
+  const main = document.getElementById('sep-scene-main');
+  const about = document.getElementById('sep-scene-about');
+  if(!main||!about)return;
+
+  if(scene==='about'){
+    main.classList.add('hidden');
+    about.classList.remove('hidden');
+  }else{
+    about.classList.add('hidden');
+    main.classList.remove('hidden');
+  }
+  window.scrollTo({top:0,behavior:'smooth'});
+  closeMenu();
+}
+
+/* Cart + MobilePay (SEP) */
+let cart = JSON.parse(localStorage.getItem('cart'))||[];
+const cartSidebar=document.getElementById('cartSidebar');
+const cartOverlay=document.getElementById('cartOverlay');
+const SHIPPING_COST=45;
+
+function sepUpdateCart(){
+  const items=document.getElementById('cartItems');
+  const subtotal=document.getElementById('cartSubtotal');
+  const total=document.getElementById('cartTotal');
+  if(!items)return;
+  items.innerHTML=''; let sum=0;
+  if(cart.length===0){
+    items.innerHTML='<p class="text-center text-gray-500 py-10">'+sepTr('cartEmpty')+'</p>';
+    subtotal.textContent='0 DKK';
+    total.textContent='45 DKK';
+  }else{
+    cart.forEach((it,i)=>{
+      const price=parseInt(it.price.replace(/\D/g,''))*it.qty; sum+=price;
+      const labelSizeQty = sepTr('labelSizeQty')
+        .replace('{size}', it.size)
+        .replace('{qty}', it.qty);
+      items.innerHTML+=`
+        <div class="border-b pb-2">
+          <div class="flex justify-between"><span>${it.name}</span><span>${price} DKK</span></div>
+          <div class="text-gray-500">${labelSizeQty}</div>
+          <button onclick="removeFromCart(${i})" class="text-red-500 text-xs mt-1">${sepTr('btnRemove')}</button>
+        </div>`;
+    });
+    subtotal.textContent=sum+' DKK';
+    total.textContent=(sum+SHIPPING_COST)+' DKK';
+  }
+  localStorage.setItem('cart',JSON.stringify(cart));
+  updateCounter();
+}
+function addToCart(n,p,s,q){
+  const f=cart.findIndex(i=>i.name===n&&i.size===s);
+  if(f>=0) cart[f].qty+=q; else cart.push({name:n,price:p,size:s,qty:q});
+  sepUpdateCart();
+  const popup=document.createElement('div'); popup.className='popup'; popup.textContent=sepTr('popupAdded');
+  document.body.appendChild(popup);
+  setTimeout(()=>popup.classList.add('show'),10);
+  setTimeout(()=>{popup.classList.remove('show'); setTimeout(()=>popup.remove(),300);},2000);
+}
+function removeFromCart(i){cart.splice(i,1);sepUpdateCart();}
+function updateCounter(){
+  const c=document.getElementById('cartCounter');
+  if(!c)return;
+  const t=cart.reduce((s,i)=>s+i.qty,0);
+  if(t>0){c.textContent=t;c.classList.remove('hidden');}
+  else c.classList.add('hidden');
+}
+document.querySelectorAll('.add-to-cart').forEach(b=>{
+  b.onclick=()=>{
+    const card=b.closest('.product-card');
+    const name=card.querySelector('h3').textContent;
+    const price=card.querySelector('p').textContent;
+    const size=card.querySelector('select').value;
+    const qty=parseInt(card.querySelector('.quantity-selector').value);
+    addToCart(name,price,size,qty);
   };
+});
+const viewCartBtn=document.getElementById('viewCartBtn');
+if(viewCartBtn){
+  viewCartBtn.onclick=()=>{
+    closeMenu();
+    cartSidebar.classList.remove('translate-x-full');
+    cartOverlay.classList.remove('hidden');
+  };
+}
+if(document.getElementById('closeCart')) document.getElementById('closeCart').onclick=closeCart;
+if(cartOverlay) cartOverlay.onclick=closeCart;
+function closeCart(){
+  cartSidebar.classList.add('translate-x-full');
+  cartOverlay.classList.add('hidden');
+}
+sepUpdateCart();
 
-  function t(key, vars) {
-    const dict = translations[currentLang] || translations.en;
-    let str = dict[key] || translations.en[key] || key;
-    if (vars) {
-      Object.keys(vars).forEach(k => {
-        str = str.replace(`{${k}}`, vars[k]);
+const mobilePayNum='51 34 31 33';
+const openMobilePayBtn=document.getElementById('openMobilePay');
+if(openMobilePayBtn){
+  openMobilePayBtn.onclick=()=>{
+    window.location.href='mobilepay://transfer?phone='+mobilePayNum.replace(/\D/g,'');
+    alert(sepTr('mobilePayThanks'));
+  };
+}
+const copyMobilePayBtn=document.getElementById('copyMobilePay');
+if(copyMobilePayBtn){
+  copyMobilePayBtn.onclick=()=>{
+    const subtotal=document.getElementById('cartSubtotal').textContent;
+    const total=document.getElementById('cartTotal').textContent;
+    const lines=[];
+    lines.push(sepTr('orderIntro'));
+    if(cart.length>0){
+      const itemLines=cart.map(i=>{
+        return sepTr('orderItem')
+          .replace('{qty}',i.qty)
+          .replace('{name}',i.name)
+          .replace('{size}',i.size);
       });
+      lines.push(itemLines.join('\n'));
     }
-    return str;
-  }
-
-  function applyTranslations() {
-    document.querySelectorAll("[data-i18n]").forEach(el => {
-      const key = el.getAttribute("data-i18n");
-      el.textContent = t(key);
-    });
-    renderHeaderUser();
-    renderLeaderboard();
-    renderStats();
-    renderMyActivities();
-    renderPendingList();
-  }
-
-  function initLanguage() {
-    const select = document.getElementById("lang-select");
-    const saved = localStorage.getItem(LS_LANG_KEY) || "en";
-
-    currentLang = saved;
-
-    if (select) {
-      select.value = saved;
-      select.addEventListener("change", () => {
-        currentLang = select.value;
-        localStorage.setItem(LS_LANG_KEY, currentLang);
-        applyTranslations();
-      });
-    }
-
-    applyTranslations();
-  }
-
-  // ==========================
-  //  BASIC HELPERS
-  // ==========================
-
-  function currentMonthKey(ts) {
-    const d = ts ? new Date(ts) : new Date();
-    const y = d.getFullYear();
-    const m = d.getMonth() + 1;
-    return `${y}-${String(m).padStart(2, "0")}`;
-  }
-
-  function formatDate(ts) {
-    const d = new Date(ts);
-    if (isNaN(d.getTime())) return "";
-    return d.toLocaleDateString();
-  }
-
-  function formatMinutesPretty(minutes) {
-    if (!isFinite(minutes) || minutes <= 0) return "0:00";
-    const totalSeconds = Math.round(minutes * 60);
-    const m = Math.floor(totalSeconds / 60);
-    const s = totalSeconds % 60;
-    return `${m}:${s.toString().padStart(2, "0")}`;
-  }
-
-  function formatImprovement(value) {
-    if (!isFinite(value) || value === 0) return "0%";
-    const rounded = Math.round(value);
-    return (rounded > 0 ? "+" : "") + rounded + "%";
-  }
-
-  function leagueIndex(league) {
-    return LEAGUES.indexOf(league);
-  }
-
-  function getLeagueCounts() {
-    const counts = { amateurs: 0, intermediates: 0, pros: 0, legends: 0 };
-    users.forEach(u => {
-      if (counts[u.league] !== undefined) counts[u.league]++;
-    });
-    return counts;
-  }
-
-  function canMoveLeague(user, targetLeague) {
-    if (!LEAGUES.includes(targetLeague)) return false;
-    const counts = getLeagueCounts();
-    const from = LEAGUES.includes(user.league) ? user.league : null;
-
-    if (from && counts[from] !== undefined) {
-      counts[from] = Math.max(0, counts[from] - 1);
-    }
-    counts[targetLeague] = (counts[targetLeague] || 0) + 1;
-
-    const values = Object.values(counts);
-    const max = Math.max(...values);
-    const min = Math.min(...values);
-    return max - min <= 2;
-  }
-
-  // ==========================
-  //  NAVIGATION
-  // ==========================
-
-  function showScene(name) {
-    const scenes = document.querySelectorAll(".scene");
-    scenes.forEach(scene => {
-      scene.classList.remove("active");
-      scene.style.display = "none";
-    });
-
-    const el =
-      document.getElementById("scene-" + name) ||
-      document.getElementById(name);
-
-    if (el) {
-      el.classList.add("active");
-      el.style.display = "block";
-    }
-
-    const navButtons = document.querySelectorAll("header nav button");
-    navButtons.forEach(btn => btn.classList.remove("active"));
-    navButtons.forEach(btn => {
-      const onclick = btn.getAttribute("onclick") || "";
-      if (onclick.includes("'" + name + "'")) {
-        btn.classList.add("active");
-      }
-    });
-  }
-
-  function updateNavLoginVisibility() {
-    const btn = document.getElementById("nav-login-btn");
-    if (!btn) return;
-    if (currentUser) {
-      btn.style.display = "none";
-    } else {
-      btn.style.display = "inline-block";
-    }
-  }
-
-  // ==========================
-  //  FIREBASE INIT
-  // ==========================
-
-  function initFirebase() {
-    try {
-      firebase.initializeApp(firebaseConfig);
-      db = firebase.firestore();
-  } catch (e) {
-      console.error("Firebase init error:", e);
-      alert(t("alert.firebase"));
-    }
-  }
-
-  // ==========================
-  //  DATA LOADING
-  // ==========================
-
-  async function loadAllData() {
-    if (!db) return;
-    const [usersSnap, actsSnap] = await Promise.all([
-      db.collection("users").get(),
-      db.collection("activities").get()
-    ]);
-
-    users = usersSnap.docs.map(doc => {
-      const data = doc.data();
-      if (!data.league) data.league = "pending";
-      if (!data.joinMonth) data.joinMonth = currentMonthKey(data.createdAt || Date.now());
-      return { id: doc.id, ...data };
-    });
-
-    entries = actsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
-    renderLeaderboard();
-    renderStats();
-    renderMyActivities();
-    renderPendingList();
-
-    if (!autoRunning) {
-      autoMonthlyUpdates();
-    }
-  }
-
-  function restoreCurrentUser() {
-    const storedId = localStorage.getItem(LS_CURRENT_USER_KEY);
-    if (!storedId) {
-      currentUser = null;
-      renderHeaderUser();
-      updateEntryFormLockState();
-      updateNavLoginVisibility();
-      return;
-    }
-    const found = users.find(u => u.id === storedId);
-    if (found) {
-      currentUser = found;
-    } else {
-      localStorage.removeItem(LS_CURRENT_USER_KEY);
-      currentUser = null;
-    }
-    renderHeaderUser();
-    updateEntryFormLockState();
-    updateNavLoginVisibility();
-  }
-
-  // ==========================
-  //  PLAYER STATS
-  // ==========================
-
-  function getPlayerStats() {
-    const byUser = {};
-
-    entries.forEach(e => {
-      const user = users.find(u => u.id === e.userId);
-      if (!user) return;
-      const key = user.id;
-      if (!byUser[key]) {
-        byUser[key] = {
-          userId: user.id,
-          name: user.name,
-          league: user.league || "pending",
-          runs: 0,
-          totalDistance: 0,
-          totalTime: 0,
-          bestDistance: 0,
-          firstEntry: null
-        };
-      }
-      const stats = byUser[key];
-
-      if (!stats.firstEntry || e.timestamp < stats.firstEntry.timestamp) {
-        stats.firstEntry = {
-          distanceKm: e.distanceKm,
-          timeMinutes: e.timeMinutes,
-          timestamp: e.timestamp
-        };
-      }
-
-      stats.runs++;
-      stats.totalDistance += e.distanceKm;
-      stats.totalTime += e.timeMinutes;
-      if (e.distanceKm > stats.bestDistance) stats.bestDistance = e.distanceKm;
-    });
-
-    let players = Object.values(byUser);
-
-    players.forEach(p => {
-      p.avgDistance = p.runs > 0 ? p.totalDistance / p.runs : 0;
-      p.speed = p.totalTime > 0 ? p.totalDistance / p.totalTime : 0;
-      let improvement = 0;
-      if (
-        p.firstEntry &&
-        p.firstEntry.distanceKm > 0 &&
-        p.firstEntry.timeMinutes > 0 &&
-        p.totalDistance > 0 &&
-        p.totalTime > 0
-      ) {
-        const baselinePace = p.firstEntry.timeMinutes / p.firstEntry.distanceKm;
-        const avgPace = p.totalTime / p.totalDistance;
-        if (baselinePace > 0) {
-          improvement = ((baselinePace - avgPace) / baselinePace) * 100;
-        }
-      }
-      p.improvement = improvement;
-    });
-
-    players.sort((a, b) => {
-      if (b.totalDistance !== a.totalDistance) {
-        return b.totalDistance - a.totalDistance;
-      }
-      if (b.totalTime !== a.totalTime) {
-        return b.totalTime - a.totalTime;
-      }
-      return b.speed - a.speed;
-    });
-
-    players = players.map((p, index) => ({ ...p, rank: index + 1 }));
-    return players;
-  }
-
-  // ==========================
-  //  MONTHLY: AUTO UPDATES (from 12th)
-  // ==========================
-
-  async function autoMonthlyUpdates() {
-    if (!db) return;
-    autoRunning = true;
-    try {
-      const today = new Date();
-      const monthKey = currentMonthKey(today);
-      const day = today.getDate();
-
-      // Only run on or after the 12th of the month
-      if (day < 12) {
-        autoRunning = false;
-        return;
-      }
-
-      const metaRef = db.collection("meta").doc("global_state");
-      const snap = await metaRef.get();
-      const data = snap.exists ? snap.data() : {};
-
-      // If we already ran for this month, do nothing
-      if (data.lastPromotionMonth === monthKey) {
-        autoRunning = false;
-        return;
-      }
-
-      // Run automatic placement + promotions
-      await placeNewJoiners(true);
-      await applyPromotions(true);
-
-      // Mark month as updated
-      await metaRef.set({ lastPromotionMonth: monthKey }, { merge: true });
-    } catch (e) {
-      console.error("Auto monthly updates error:", e);
-    } finally {
-      autoRunning = false;
-    }
-  }
-
-  // ==========================
-  //  MONTHLY: PLACE NEW JOINERS
-  // ==========================
-
-  async function placeNewJoiners(auto = false) {
-    if (!db) return;
-
-    const players = getPlayerStats();
-    if (!players.length) {
-      if (!auto) alert(t("alert.noActivitiesToPlace"));
-      return;
-    }
-
-    const nowKey = currentMonthKey();
-    const rankMap = {};
-    players.forEach(p => { rankMap[p.userId] = p; });
-
-    const candidates = users.filter(u =>
-      u.league === "pending" &&
-      u.joinMonth &&
-      u.joinMonth < nowKey
-    );
-
-    if (!candidates.length) {
-      if (!auto) alert(t("alert.noPending"));
-      return;
-    }
-
-    const batch = db.batch();
-    let placed = 0;
-    let skipped = 0;
-
-    function preferredLeaguesForTarget(target) {
-      if (target === "legends") return ["legends", "pros"];
-      if (target === "pros") return ["pros", "intermediates", "legends"];
-      if (target === "intermediates") return ["intermediates", "amateurs", "pros"];
-      if (target === "amateurs") return ["amateurs", "intermediates"];
-      return ["amateurs"];
-    }
-
-    candidates.forEach(user => {
-      const stats = rankMap[user.id];
-      if (!stats || stats.runs < MIN_RUNS_FOR_PLACEMENT) {
-        skipped++;
-        return;
-      }
-
-      const N = players.length;
-      const q = stats.rank / N;
-      let targetLeague = "amateurs";
-      if (q <= 0.25) targetLeague = "legends";
-      else if (q <= 0.5) targetLeague = "pros";
-      else if (q <= 0.75) targetLeague = "intermediates";
-      else targetLeague = "amateurs";
-
-      const prefs = preferredLeaguesForTarget(targetLeague);
-      let finalLeague = null;
-
-      for (const lg of prefs) {
-        if (canMoveLeague(user, lg)) {
-          finalLeague = lg;
-          break;
-        }
-      }
-
-      if (!finalLeague) {
-        skipped++;
-        return;
-      }
-
-      user.league = finalLeague;
-      const userRef = db.collection("users").doc(user.id);
-      batch.update(userRef, { league: finalLeague });
-      placed++;
-    });
-
-    if (!placed) {
-      if (!auto) {
-        alert("No new joiners could be placed yet. They may need more activities or the leagues are already very balanced.");
-      }
-      return;
-    }
-
-    await batch.commit();
-    await loadAllData();
-    restoreCurrentUser();
-
-    if (!auto) {
-      let skippedText = "";
-      if (skipped > 0) {
-        skippedText = t("alert.placeSkipped", { count: skipped });
-      }
-      alert(t("alert.placeSummary", { placed, skipped: skippedText }));
-    }
-  }
-
-  // ==========================
-  //  MONTHLY: PROMOTIONS
-  // ==========================
-
-  async function applyPromotions(auto = false) {
-    if (!db) return;
-
-    const players = getPlayerStats();
-    const total = players.length;
-    if (total === 0) {
-      if (!auto) alert(t("alert.noPlayers"));
-      return;
-    }
-
-    let moves = 0;
-    if (total >= 32) moves = 3;
-    else if (total >= 16) moves = 2;
-    else if (total >= 8) moves = 1;
-    else moves = 0;
-
-    if (moves === 0) {
-      if (!auto) alert(t("alert.notEnoughPlayers"));
-      return;
-    }
-
-    const batch = db.batch();
-
-    let promoted = 0;
-    for (let i = 0; i < players.length && promoted < moves; i++) {
-      const p = players[i];
-      if (!LEAGUES.includes(p.league)) continue;
-      const idx = leagueIndex(p.league);
-      if (idx < 0 || idx >= LEAGUES.length - 1) continue;
-      const userRef = db.collection("users").doc(p.userId);
-      batch.update(userRef, { league: LEAGUES[idx + 1] });
-      promoted++;
-    }
-
-    let relegated = 0;
-    for (let i = players.length - 1; i >= 0 && relegated < moves; i--) {
-      const p = players[i];
-      if (!LEAGUES.includes(p.league)) continue;
-      const idx = leagueIndex(p.league);
-      if (idx <= 0) continue;
-      const userRef = db.collection("users").doc(p.userId);
-      batch.update(userRef, { league: LEAGUES[idx - 1] });
-      relegated++;
-    }
-
-    await batch.commit();
-    await loadAllData();
-    restoreCurrentUser();
-    if (!auto) {
-      alert(t("alert.promotionsDone", { up: moves, down: moves }));
-    }
-  }
-
-  // ==========================
-  //  PROFILE VIEW
-  // ==========================
-
-  function showProfile(userId) {
-    const card = document.getElementById("profile-card");
-    const title = document.getElementById("profile-title");
-    const summary = document.getElementById("profile-summary");
-
-    const runsCell = document.getElementById("profile-runs");
-    const totalDistCell = document.getElementById("profile-total-distance");
-    const totalTimeCell = document.getElementById("profile-total-time");
-    const avgDistCell = document.getElementById("profile-avg-distance");
-    const avgPaceCell = document.getElementById("profile-avg-pace");
-    const longestCell = document.getElementById("profile-longest");
-    const best10kCell = document.getElementById("profile-10k");
-    const best5kCell = document.getElementById("profile-5k");
-
-    const user = users.find(u => u.id === userId);
-    if (!user) return;
-
-    const myEntries = entries
-      .filter(e => e.userId === userId)
-      .slice()
-      .sort((a, b) => a.timestamp - b.timestamp);
-
-    if (!myEntries.length) {
-      title.textContent = `Profile: ${user.name}`;
-      summary.textContent = "No activities logged yet.";
-      runsCell.textContent = "0";
-      totalDistCell.textContent = "0 km";
-      totalTimeCell.textContent = "0";
-      avgDistCell.textContent = "–";
-      avgPaceCell.textContent = "–";
-      longestCell.textContent = "–";
-      best10kCell.textContent = "–";
-      best5kCell.textContent = "–";
-      showScene("profile-card");
-      return;
-    }
-
-    let runs = myEntries.length;
-    let totalDistance = 0;
-    let totalTime = 0;
-    let longest = 0;
-    let best10kMinutes = Infinity;
-    let best5kMinutes = Infinity;
-
-    myEntries.forEach(e => {
-      totalDistance += e.distanceKm;
-      totalTime += e.timeMinutes;
-      if (e.distanceKm > longest) longest = e.distanceKm;
-
-      if (e.distanceKm > 0 && e.timeMinutes > 0) {
-        const paceMinutesPerKm = e.timeMinutes / e.distanceKm;
-
-        if (e.distanceKm >= 9.5) {
-          const tenKMinutes = paceMinutesPerKm * 10;
-          if (tenKMinutes < best10kMinutes) best10kMinutes = tenKMinutes;
-        }
-
-        if (e.distanceKm >= 4.5) {
-          const fiveKMinutes = paceMinutesPerKm * 5;
-          if (fiveKMinutes < best5kMinutes) best5kMinutes = fiveKMinutes;
-        }
-      }
-    });
-
-    const avgDistance = totalDistance / runs;
-    const avgPaceMinutesPerKm =
-      totalDistance > 0 && totalTime > 0 ? totalTime / totalDistance : 0;
-
-    function formatPace(minPerKm) {
-      if (!isFinite(minPerKm) || minPerKm <= 0) return "–";
-      const totalSeconds = Math.round(minPerKm * 60);
-      const m = Math.floor(totalSeconds / 60);
-      const s = totalSeconds % 60;
-      return `${m}:${s.toString().padStart(2, "0")} min/km`;
-    }
-
-    title.textContent = `Profile: ${user.name}`;
-    const leagueLabel = LEAGUES.includes(user.league)
-      ? t("league." + user.league)
-      : t("league.pending");
-
-    summary.textContent = `${t("user.leagueLabel", { league: leagueLabel })}, ${t("stats.runs")}: ${runs}`;
-
-    runsCell.textContent = runs.toString();
-    totalDistCell.textContent = `${totalDistance.toFixed(2)} km`;
-    totalTimeCell.textContent = formatMinutesPretty(totalTime);
-    avgDistCell.textContent = `${avgDistance.toFixed(2)} km`;
-    avgPaceCell.textContent = formatPace(avgPaceMinutesPerKm);
-    longestCell.textContent = `${longest.toFixed(2)} km`;
-    best10kCell.textContent =
-      isFinite(best10kMinutes) && best10kMinutes > 0
-        ? formatMinutesPretty(best10kMinutes)
-        : "–";
-    best5kCell.textContent =
-      isFinite(best5kMinutes) && best5kMinutes > 0
-        ? formatMinutesPretty(best5kMinutes)
-        : "–";
-
-    showScene("profile-card");
-  }
-
-  function attachProfileLinks() {
-    document.querySelectorAll(".link-name").forEach(btn => {
-      const userId = btn.getAttribute("data-user-id");
-      btn.onclick = () => showProfile(userId);
-    });
-  }
-
-  // ==========================
-  //  RENDER FUNCTIONS
-  // ==========================
-
-  function renderHeaderUser() {
-    const container = document.getElementById("user-controls");
-    if (!container) return;
-    container.innerHTML = "";
-
-    if (!currentUser) {
-      const span = document.createElement("span");
-      span.textContent = t("user.notLoggedIn");
-      container.appendChild(span);
-
-      const btn = document.createElement("button");
-      btn.className = "btn btn-small";
-      btn.textContent = t("user.loginButton");
-      btn.onclick = () => showScene("login");
-      container.appendChild(btn);
-
-      updateNavLoginVisibility();
-      return;
-    }
-
-    const name = currentUser.name;
-    const leagueKey = LEAGUES.includes(currentUser.league)
-      ? "league." + currentUser.league
-      : "league.pending";
-    const leagueLabel = t(leagueKey);
-
-    const info = document.createElement("span");
-    info.textContent = `${t("user.loggedInAs", { name })} · ${t("user.leagueLabel", { league: leagueLabel })}`;
-    container.appendChild(info);
-
-    const addBtn = document.createElement("button");
-    addBtn.className = "btn btn-small";
-    addBtn.style.marginLeft = "8px";
-    addBtn.textContent = t("user.addActivity");
-    addBtn.onclick = () => showScene("entry");
-    container.appendChild(addBtn);
-
-    const deleteBtn = document.createElement("button");
-    deleteBtn.className = "btn btn-small danger";
-    deleteBtn.style.marginLeft = "4px";
-    deleteBtn.textContent = t("user.deleteAccount");
-    deleteBtn.onclick = deleteAccount;
-    container.appendChild(deleteBtn);
-
-    updateNavLoginVisibility();
-  }
-
-  function renderLeaderboard() {
-    const tbody = document.getElementById("leaderboard-body");
-    const empty = document.getElementById("no-entries");
-    if (!tbody) return;
-    tbody.innerHTML = "";
-
-    const players = getPlayerStats();
-    const filterSel = document.getElementById("league-filter");
-    const filter = filterSel ? filterSel.value : "all";
-
-    let filtered = players;
-    if (filter !== "all") {
-      filtered = players.filter(p => p.league === filter);
-    }
-
-    if (!filtered.length) {
-      if (empty) empty.style.display = "block";
-      return;
-    }
-    if (empty) empty.style.display = "none";
-
-    filtered.forEach(player => {
-      const tr = document.createElement("tr");
-
-      let rankSymbol = player.rank;
-      if (player.rank === 1) rankSymbol = "🥇";
-      else if (player.rank === 2) rankSymbol = "🥈";
-      else if (player.rank === 3) rankSymbol = "🥉";
-
-      const leagueClass = LEAGUES.includes(player.league)
-        ? player.league
-        : "pending";
-      const leagueLabel = LEAGUES.includes(player.league)
-        ? t("league." + player.league)
-        : t("league.pending");
-
-      tr.innerHTML = `
-        <td>${rankSymbol}</td>
-        <td>
-          <button type="button" class="link-name" data-user-id="${player.userId}" style="background:none;border:none;color:#3b82f6;cursor:pointer;text-decoration:underline;">
-            ${player.name}
-          </button>
-        </td>
-        <td><span class="badge-league ${leagueClass}">${leagueLabel}</span></td>
-        <td>${player.totalDistance.toFixed(2)}</td>
-        <td>${player.totalTime.toFixed(1)}</td>
-      `;
-      tbody.appendChild(tr);
-    });
-
-    attachProfileLinks();
-  }
-
-  function renderStats() {
-    const tbody = document.getElementById("stats-body");
-    const empty = document.getElementById("no-stats");
-    if (!tbody) return;
-    tbody.innerHTML = "";
-
-    if (!entries.length) {
-      if (empty) empty.style.display = "block";
-      return;
-    }
-    if (empty) empty.style.display = "none";
-
-    const players = getPlayerStats();
-
-    players.forEach(stats => {
-      const leagueClass = LEAGUES.includes(stats.league)
-        ? stats.league
-        : "pending";
-      const leagueLabel = LEAGUES.includes(stats.league)
-        ? t("league." + stats.league)
-        : t("league.pending");
-
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>
-          <button type="button" class="link-name" data-user-id="${stats.userId}" style="background:none;border:none;color:#3b82f6;cursor:pointer;text-decoration:underline;">
-            ${stats.name}
-          </button>
-        </td>
-        <td><span class="badge-league ${leagueClass}">${leagueLabel}</span></td>
-        <td>${stats.runs}</td>
-        <td>${stats.totalDistance.toFixed(2)}</td>
-        <td>${stats.totalTime.toFixed(1)}</td>
-        <td>${stats.avgDistance.toFixed(2)}</td>
-        <td>${stats.bestDistance.toFixed(2)}</td>
-        <td>${formatImprovement(stats.improvement)}</td>
-      `;
-      tbody.appendChild(tr);
-    });
-
-    attachProfileLinks();
-  }
-
-  function renderPendingList() {
-    const tbody = document.getElementById("pending-body");
-    const empty = document.getElementById("no-pending");
-    if (!tbody) return;
-    tbody.innerHTML = "";
-
-    const pending = users
-      .filter(u => u.league === "pending")
-      .slice()
-      .sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
-
-    if (!pending.length) {
-      if (empty) empty.style.display = "block";
-      return;
-    }
-    if (empty) empty.style.display = "none";
-
-    pending.forEach((u, index) => {
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>${index + 1}</td>
-        <td>${u.name}</td>
-        <td>${u.joinMonth || ""}</td>
-      `;
-      tbody.appendChild(tr);
-    });
-  }
-
-  function renderMyActivities() {
-    const tbody = document.getElementById("my-activities-body");
-    const empty = document.getElementById("no-my-activities");
-    if (!tbody) return;
-    tbody.innerHTML = "";
-
-    if (!currentUser) {
-      if (empty) {
-        empty.style.display = "block";
-        empty.textContent = t("user.notLoggedIn");
-      }
-      return;
-    }
-
-    const myEntries = entries.filter(e => e.userId === currentUser.id);
-
-    if (!myEntries.length) {
-      if (empty) {
-        empty.style.display = "block";
-        empty.textContent = t("entry.none");
-      }
-      return;
-    }
-    if (empty) empty.style.display = "none";
-
-    myEntries
-      .slice()
-      .sort((a, b) => b.timestamp - a.timestamp)
-      .forEach(e => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${formatDate(e.timestamp)}</td>
-          <td>${e.distanceKm.toFixed(2)}</td>
-          <td>${e.timeMinutes.toFixed(1)}</td>
-          <td>
-            <button class="btn btn-small danger" style="padding:4px 8px;font-size:12px;" onclick="deleteActivity('${e.id}')">
-              ✕
-            </button>
-          </td>
-        `;
-        tbody.appendChild(tr);
-      });
-  }
-
-  function updateEntryFormLockState() {
-    const distanceInput = document.getElementById("distance");
-    const timeInput = document.getElementById("time");
-    const form = document.getElementById("entry-form");
-    if (!form) return;
-    const submit = form.querySelector("button[type='submit']");
-    const locked = !currentUser;
-
-    if (distanceInput) distanceInput.disabled = locked;
-    if (timeInput) timeInput.disabled = locked;
-    if (submit) submit.disabled = locked;
-  }
-
-  // ==========================
-  //  ACTIVITY DELETION
-  // ==========================
-
-  async function deleteActivity(id) {
-    if (!currentUser) {
-      alert(t("alert.mustLogin"));
-      return;
-    }
-    const entry = entries.find(e => e.id === id);
-    if (!entry) return;
-    if (entry.userId !== currentUser.id) {
-      alert("You can only delete your own activities.");
-      return;
-    }
-    if (!confirm(t("alert.deleteActivityConfirm"))) return;
-
-    await db.collection("activities").doc(id).delete();
-    await loadAllData();
-    restoreCurrentUser();
-  }
-
-  // ==========================
-  //  AUTH
-  // ==========================
-
-  async function login(name, password) {
-    if (!db) {
-      alert(t("alert.firebase"));
-      return;
-    }
-    if (currentUser) {
-      alert(t("alert.alreadyLoggedIn"));
-      return;
-    }
-
-    const trimmedName = (name || "").trim();
-    if (!trimmedName || !password) {
-      alert(t("alert.loginMissing"));
-      return;
-    }
-
-    const existingSnap = await db
-      .collection("users")
-      .where("name", "==", trimmedName)
-      .limit(1)
-      .get();
-
-    let userDoc = null;
-    if (existingSnap.empty) {
-      const joinMonth = currentMonthKey();
-      const newUser = {
-        name: trimmedName,
-        password,
-        league: "pending",
-        createdAt: Date.now(),
-        joinMonth
-      };
-      const docRef = await db.collection("users").add(newUser);
-      userDoc = { id: docRef.id, ...newUser };
-    } else {
-      const doc = existingSnap.docs[0];
-      const data = doc.data();
-      if (data.password !== password) {
-        alert(t("alert.passwordWrong"));
-        return;
-      }
-      if (!data.league) data.league = "pending";
-      if (!data.joinMonth) data.joinMonth = currentMonthKey(data.createdAt || Date.now());
-      userDoc = { id: doc.id, ...data };
-    }
-
-    currentUser = userDoc;
-    localStorage.setItem(LS_CURRENT_USER_KEY, currentUser.id);
-    localStorage.setItem(LS_PASSWORD_KEY, password);
-
-    await loadAllData();
-    restoreCurrentUser();
-    updateEntryFormLockState();
-    showScene("leaderboard");
-  }
-
-  async function deleteAccount() {
-    if (!currentUser) return;
-    if (!confirm(t("alert.deleteAccountConfirm"))) return;
-
-    const userId = currentUser.id;
-
-    const actsSnap = await db
-      .collection("activities")
-      .where("userId", "==", userId)
-      .get();
-    const batch = db.batch();
-    actsSnap.forEach(doc => batch.delete(doc.ref));
-    batch.delete(db.collection("users").doc(userId));
-    await batch.commit();
-
-    currentUser = null;
-    localStorage.removeItem(LS_CURRENT_USER_KEY);
-    localStorage.removeItem(LS_PASSWORD_KEY);
-
-    await loadAllData();
-    renderHeaderUser();
-    updateEntryFormLockState();
-    renderMyActivities();
-    showScene("welcome");
-  }
-
-  // ==========================
-  //  VIEW SAVED PASSWORD BUTTON
-  // ==========================
-
-  function setupViewCodeButton() {
-    const btn = document.getElementById("view-code-btn");
-    const display = document.getElementById("saved-code-display");
-    if (!btn || !display) return;
-    btn.addEventListener("click", () => {
-      const saved = localStorage.getItem(LS_PASSWORD_KEY);
-      if (saved) {
-        display.textContent = "Saved login password on this device: " + saved;
-      } else {
-        display.textContent = "No login password has been saved on this device yet.";
-      }
-      display.style.display = "block";
-    });
-  }
-
-  // ==========================
-  //  FORMS
-  // ==========================
-
-  function setupForms() {
-    const loginForm = document.getElementById("login-form");
-    if (loginForm) {
-      loginForm.addEventListener("submit", function (e) {
-        e.preventDefault();
-        const name = document.getElementById("login-name").value;
-        const password = document.getElementById("login-password").value;
-        login(name, password);
-      });
-    }
-
-    const entryForm = document.getElementById("entry-form");
-    if (entryForm) {
-      entryForm.addEventListener("submit", async function (e) {
-        e.preventDefault();
-        if (!currentUser) {
-          alert(t("alert.mustLogin"));
-          showScene("login");
-          return;
-        }
-
-        const distance = parseFloat(document.getElementById("distance").value);
-        const time = parseFloat(document.getElementById("time").value);
-
-        if (isNaN(distance) || isNaN(time) || distance <= 0 || time <= 0) {
-          alert(t("alert.activityInvalid"));
-          return;
-        }
-
-        await db.collection("activities").add({
-          userId: currentUser.id,
-          distanceKm: distance,
-          timeMinutes: time,
-          timestamp: Date.now()
-        });
-
-        await loadAllData();
-        restoreCurrentUser();
-        entryForm.reset();
-        showScene("leaderboard");
-      });
-    }
-
-    const leagueFilter = document.getElementById("league-filter");
-    if (leagueFilter) {
-      leagueFilter.addEventListener("change", renderLeaderboard);
-    }
-  }
-
-  // ==========================
-  //  INIT
-  // ==========================
-
-  async function init() {
-    initLanguage();
-    initFirebase();
-    setupForms();
-    setupViewCodeButton();
-
-    if (!db) return;
-
-    await loadAllData();
-    restoreCurrentUser();
-    updateEntryFormLockState();
-    updateNavLoginVisibility();
-
-    if (currentUser) {
-      showScene("leaderboard");
-    } else {
-      showScene("welcome");
-    }
-  }
-
-  document.addEventListener("DOMContentLoaded", init);
+    lines.push(`${sepTr('orderSubtotalLabel')} ${subtotal}`);
+    lines.push(`${sepTr('orderShippingLabel')} +45 DKK`);
+    lines.push(`${sepTr('orderTotalLabel')} ${total}`);
+    const msg=lines.join('\n');
+    navigator.clipboard.writeText(msg);
+    const popup=document.createElement('div');
+    popup.className='popup';
+    popup.textContent=sepTr('popupOrderCopied');
+    document.body.appendChild(popup);
+    setTimeout(()=>popup.classList.add('show'),10);
+    setTimeout(()=>{popup.classList.remove('show');setTimeout(()=>popup.remove(),300);},2000);
+  };
+}
+
+/* Init SEP language */
+sepApplyLanguage();
+
+/* ---------- GLOBAL APP SWITCHING ---------- */
+function openSep(){
+  document.getElementById('welcome-screen').classList.add('hidden');
+  document.getElementById('sep-app').classList.remove('hidden');
+  document.getElementById('mih-app').classList.add('hidden');
+  window.scrollTo(0,0);
+}
+function openMih(){
+  document.getElementById('welcome-screen').classList.add('hidden');
+  document.getElementById('sep-app').classList.add('hidden');
+  document.getElementById('mih-app').classList.remove('hidden');
+  window.scrollTo(0,0);
+}
+function goToWelcome(){
+  document.getElementById('welcome-screen').classList.remove('hidden');
+  document.getElementById('sep-app').classList.add('hidden');
+  document.getElementById('mih-app').classList.add('hidden');
+  closeMenu();
+  closeCart();
+  window.scrollTo(0,0);
+}
+
+/* ============================================================
+   MAKE IT HAPPEN SCRIPT (unchanged except showScene->mihShowScene)
+============================================================ */
+const firebaseConfig = {
+  apiKey: "AIzaSyAkbH3mJkeheF3L7EaqN1kMgbFd_LJCIXo",
+  authDomain: "hitachi-vantara-make-it-happen.firebaseapp.com",
+  projectId: "hitachi-vantara-make-it-happen",
+  storageBucket: "hitachi-vantara-make-it-happen.firebasestorage.app",
+  messagingSenderId: "749690169824",
+  appId: "1:749690169824:web:21d6b8d2a5862847e4e385",
+  measurementId: "G-7WZ03E68MF"
+};
+
+const LS_CURRENT_USER_KEY = "mih_current_user_id";
+const LS_LANG_KEY = "mih_lang";
+const LS_PASSWORD_KEY = "mih_saved_password";
+
+const LEAGUES = ["amateurs", "intermediates", "pros", "legends"];
+const MIN_RUNS_FOR_PLACEMENT = 3;
+
+let db = null;
+let users = [];
+let entries = [];
+let currentUser = null;
+let currentLang = "en";
+let autoRunning = false;
+
+const translations = /* the big translations object from your MIH code, unchanged */ <?php /* placeholder to keep length small */ ?>;
 </script>
+<!-- NOTE: For brevity here, paste the full original Make It Happen JS (from your second code block)
+     AFTER the 'translations =' line above, but change every 'function showScene(' to 'function mihShowScene('
+     and any calls to 'showScene(' to 'mihShowScene('. Keep everything else exactly the same. -->
 </body>
 </html>
