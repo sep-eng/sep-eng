@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Make It Happen – Hitachi Vantara</title>
+  <title>SEP – Make It Happen</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <!-- Icons -->
-  <link rel="apple-touch-icon" href="hitachi-logo.jpg">
-  <link rel="icon" type="image/jpeg" sizes="192x192" href="hitachi-logo.jpg">
+  <link rel="apple-touch-icon" href="sep-logo.jpg">
+  <link rel="icon" type="image/jpeg" sizes="192x192" href="sep-logo.jpg">
 
   <!-- Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -24,8 +24,8 @@
       display: flex;
       justify-content: space-between;
       padding: 12px 16px;
-      background: #111111;
-      border-bottom: 1px solid #333333;
+      background: #050505;
+      border-bottom: 1px solid #222222;
       position: sticky;
       top: 0;
       z-index: 10;
@@ -41,8 +41,9 @@
     }
 
     header nav button.active {
-      font-weight: bold;
-      color: #ff0026; /* Hitachi red */
+      font-weight: 600;
+      color: #ffffff;
+      border-bottom: 1px solid #ffffff;
     }
 
     .scene {
@@ -56,12 +57,12 @@
     }
 
     h1, h2 {
-      color: #ff0026; /* Hitachi red */
+      color: #ffffff;
     }
 
     .btn {
-      background: #ff0026;
-      color: white;
+      background: #ffffff;
+      color: #000000;
       border: none;
       padding: 10px 16px;
       border-radius: 6px;
@@ -76,7 +77,8 @@
     }
 
     .danger {
-      background: #ff0026;
+      background: #b91c1c;
+      color: #ffffff;
     }
 
     .input {
@@ -111,9 +113,9 @@
       color: white;
     }
     .amateurs { background: #6c757d; }
-    .intermediates { background: #007bff; }
-    .pros { background: #28a745; }
-    .legends { background: #ff0026; }
+    .intermediates { background: #3b82f6; }
+    .pros { background: #22c55e; }
+    .legends { background: #e5e5e5; color:#000; }
     .pending { background: #888888; }
   </style>
 </head>
@@ -127,7 +129,7 @@
     <button onclick="showScene('stats')" data-i18n="nav.stats"></button>
     <button onclick="showScene('rules')" data-i18n="nav.rules"></button>
     <button onclick="showScene('about')" data-i18n="nav.about"></button>
-    <button onclick="showScene('help')" data-i18n="nav.help"></button>
+    <button onclick="showScene('entry')" data-i18n="nav.entry"></button>
     <button id="nav-login-btn" onclick="showScene('login')" data-i18n="nav.login"></button>
   </nav>
 
@@ -135,7 +137,7 @@
     <select id="lang-select">
       <option value="en">English</option>
       <option value="da">Dansk</option>
-      <option value="ja">日本語</option>
+      <option value="cs">Čeština</option>
     </select>
 
     <div id="user-controls"></div>
@@ -160,9 +162,6 @@
 
     <label data-i18n="login.password"></label>
     <input id="login-password" class="input" type="password">
-
-    <label data-i18n="login.code"></label>
-    <input id="login-code" class="input" maxlength="20">
 
     <button class="btn" data-i18n="login.submit"></button>
   </form>
@@ -257,9 +256,6 @@
 
   <h2 data-i18n="rules.promotiontitle"></h2>
   <p data-i18n="rules.promotiontext"></p>
-
-  <h2 data-i18n="rules.prizetitle"></h2>
-  <p data-i18n="rules.prizetext"></p>
 </section>
 
 <!-- ABOUT SCENE -->
@@ -268,12 +264,6 @@
   <p data-i18n="about.text1"></p>
   <p data-i18n="about.text2"></p>
   <p data-i18n="about.text3"></p>
-</section>
-
-<!-- HELP SCENE -->
-<section id="scene-help" class="scene">
-  <h1 data-i18n="help.title"></h1>
-  <p data-i18n="help.text"></p>
 </section>
 
 <!-- ENTRY FORM + MY ACTIVITIES -->
@@ -341,9 +331,7 @@
     appId: "1:749690169824:web:21d6b8d2a5862847e4e385",
     measurementId: "G-7WZ03E68MF"
   };
- 
-  const HITACHI_CODE = "27HG0QIBD2";
-  const LS_CODE_OK_KEY = "mih_hitachi_code_ok";
+
   const LS_CURRENT_USER_KEY = "mih_current_user_id";
   const LS_LANG_KEY = "mih_lang";
   const LS_PASSWORD_KEY = "mih_saved_password";
@@ -368,14 +356,14 @@
       "nav.welcome": "Welcome",
       "nav.leaderboard": "Leaderboard",
       "nav.stats": "Stats",
-      "nav.rules": "Rules & prizes",
+      "nav.rules": "Rules",
       "nav.about": "About",
-      "nav.help": "Help",
+      "nav.entry": "Log activity",
       "nav.login": "Login",
 
       // welcome
       "welcome.title": "Move more. Compete together.",
-      "welcome.subtitle": "Make It Happen is a health challenge for Hitachi Vantara. Walk, run or cycle, log your distance and climb the leagues.",
+      "welcome.subtitle": "Make It Happen is a simple challenge by SEP. Walk, run or cycle, log your distance and climb the leagues.",
       "welcome.cta": "Log in or create an account",
 
       // login
@@ -383,9 +371,8 @@
       "login.description": "Create a simple account so the site knows who you are and only you can manage your activities.",
       "login.name": "Name",
       "login.password": "Password",
-      "login.code": "Hitachi Vantara join code",
       "login.submit": "Log in / Create account",
-      "login.note": "Only Hitachi Vantara members can join. Your account is stored in the shared database, not just on your device. If you do not use your account for a long time it may be cleaned up.",
+      "login.note": "Your account is stored in the shared database, not just on your device. If you do not use your account for a long time it may be cleaned up.",
 
       // leagues
       "league.amateurs": "Amateurs",
@@ -407,7 +394,7 @@
 
       // pending
       "pending.title": "Pending joiners",
-      "pending.subtitle": "New sign-ups who will be placed into leagues at the start of the next month.",
+      "pending.subtitle": "New sign-ups who will be placed into leagues automatically.",
       "pending.rank": "#",
       "pending.name": "Name",
       "pending.joinMonth": "Join month",
@@ -424,33 +411,25 @@
       "stats.none": "Stats will appear once people start logging activities.",
 
       // rules
-      "rules.title": "Rules, leagues and prizes",
+      "rules.title": "Rules and leagues",
       "rules.joiningtitle": "Joining and signing up",
       "rules.joiningtext":
-        "Only Hitachi Vantara members can join, using the access code. You can sign up any time. When you create an account you start as “Pending”. You can log activities straight away. At the start of the next month, the system automatically places all pending players into the leagues based on their distance, time and speed.",
+        "You can sign up any time. When you create an account you start as “Pending”. You can log activities straight away. The system places players into leagues based on distance, time and speed while keeping league sizes balanced.",
       "rules.leaguetitle": "Leagues and balance",
       "rules.leaguetext":
-        "There are four leagues: Amateurs, Intermediates, Pros and Legends. The system tries to keep league sizes balanced. When placing new joiners it avoids making one league much larger than the others, so that the difference between the biggest and smallest league stays small.",
+        "There are four leagues: Amateurs, Intermediates, Pros and Legends. The system tries to keep league sizes balanced so that no league becomes much larger than the others.",
       "rules.promotiontitle": "Promotions and relegations",
       "rules.promotiontext":
         "Each month the site automatically applies promotions and relegations. The number of players moved depends on how many people are active: with 8+ players there is 1 promotion and 1 relegation, with 16+ there are 2 of each, and with 32+ there are 3 of each. Rankings are based on total distance first, then total time, then average speed.",
-      "rules.prizetitle": "Prizes",
-      "rules.prizetext":
-        "Local teams can decide the exact prizes. A simple version is: a small prize for the monthly winner and a bigger prize at the end of the year for the player with the strongest overall performance.",
 
       // about
       "about.title": "About Make It Happen",
       "about.text1":
-        "Make It Happen is a simple, fair health challenge for Hitachi Vantara. The goal is not to create elite athletes, but to give everyone a clear, friendly way to move more and see progress over time.",
+        "Make It Happen is a simple, fair health challenge created under SEP. The goal is not to create elite athletes, but to give everyone a clear, friendly way to move more and see progress over time.",
       "about.text2":
         "You can walk, run or cycle and log your distance and time. The system looks at both how far you go and how long you spend moving. That means slower but very dedicated people still get rewarded, not only the fastest runners.",
       "about.text3":
-        "New players sign up first, then officially join a league at the start of the next month. The site compares their first month to everyone else, then places them into the league that fits them best while keeping league sizes balanced.",
-
-      // help
-      "help.title": "Help and support",
-      "help.text":
-        "If you need any assistance, if something looks wrong, or if you have a question about Make It Happen, you can text +45 51 34 31 33.",
+        "New players start as “Pending” and are automatically placed into a league over time in a way that keeps league sizes balanced.",
 
       // entry
       "entry.title": "Log a new activity",
@@ -482,8 +461,6 @@
 
       // alerts
       "alert.loginMissing": "Please enter both name and password.",
-      "alert.codeWrong": "The Hitachi code is wrong.",
-      "alert.passwordWrong": "Wrong password for this name.",
       "alert.firebase": "Firebase is not configured yet. Please add your Firebase config in the script.",
       "alert.mustLogin": "Please log in before adding activities.",
       "alert.activityInvalid": "Please fill in distance and time correctly with positive values.",
@@ -491,34 +468,34 @@
       "alert.notEnoughPlayers": "You need at least 8 players for promotions and relegations.",
       "alert.promotionsDone": "Promotions and relegations applied: {up} up, {down} down.",
       "alert.noActivitiesToPlace": "No activities yet, nothing to place.",
-      "alert.noPending": "No pending joiners ready to place. New sign-ups will join at the start of the next month.",
+      "alert.noPending": "No pending joiners ready to place.",
       "alert.placeSummary": "Placed {placed} new joiner(s) into leagues. {skipped}",
       "alert.placeSkipped": "{count} left pending (not enough data yet or for balance).",
       "alert.deleteActivityConfirm": "Delete this activity?",
       "alert.deleteAccountConfirm": "This will delete your account and all your activities. Are you sure?",
-      "alert.alreadyLoggedIn": "You are already logged in. Delete your account if you want to start over."
+      "alert.alreadyLoggedIn": "You are already logged in. Delete your account if you want to start over.",
+      "alert.passwordWrong": "Wrong password for this name."
     },
 
     da: {
       "nav.welcome": "Velkomst",
       "nav.leaderboard": "Rangliste",
       "nav.stats": "Statistik",
-      "nav.rules": "Regler og præmier",
+      "nav.rules": "Regler",
       "nav.about": "Om projektet",
-      "nav.help": "Hjælp",
+      "nav.entry": "Registrér aktivitet",
       "nav.login": "Log ind",
 
       "welcome.title": "Bevæg dig mere. Konkurrér sammen.",
-      "welcome.subtitle": "Make It Happen er en sundhedsudfordring for Hitachi Vantara. Gå, løb eller cykl, registrér din distance og ryk op gennem ligaerne.",
+      "welcome.subtitle": "Make It Happen er en enkel udfordring fra SEP. Gå, løb eller cykl, registrér din distance og ryk op gennem ligaerne.",
       "welcome.cta": "Log ind eller opret konto",
 
       "login.title": "Log ind på Make It Happen",
       "login.description": "Lav en enkel konto, så siden ved, hvem du er, og kun du kan styre dine aktiviteter.",
       "login.name": "Navn",
       "login.password": "Adgangskode",
-      "login.code": "Hitachi Vantara adgangskode",
       "login.submit": "Log ind / Opret konto",
-      "login.note": "Kun medarbejdere i Hitachi Vantara kan deltage, med adgangskoden. Din konto ligger i en delt database, ikke kun på din egen enhed. Hvis du ikke bruger din konto i lang tid, kan den blive ryddet op.",
+      "login.note": "Din konto ligger i en delt database, ikke kun på din egen enhed. Hvis du ikke bruger den i lang tid, kan den blive ryddet op.",
 
       "league.amateurs": "Amatører",
       "league.intermediates": "Øvede",
@@ -537,7 +514,7 @@
       "lb.time": "Samlet tid (min)",
 
       "pending.title": "Afventende deltagere",
-      "pending.subtitle": "Nye tilmeldinger, som bliver placeret i ligaer ved starten af næste måned.",
+      "pending.subtitle": "Nye tilmeldinger, som bliver placeret i ligaer automatisk.",
       "pending.rank": "#",
       "pending.name": "Navn",
       "pending.joinMonth": "Tilmeldingsmåned",
@@ -550,33 +527,26 @@
       "stats.avgdistance": "Gennemsnitlig distance (km)",
       "stats.bestdistance": "Længste tur (km)",
       "stats.improvement": "Forbedring",
-      "stats.none": "Statistik vises, når deltagerne begynder at logge aktiviteter.",
+      "stats.none": "Statistik vises, når deltagerne begynder at logge aktiviteter.",,
 
-      "rules.title": "Regler, ligaer og præmier",
+      "rules.title": "Regler og ligaer",
       "rules.joiningtitle": "Tilmelding og opstart",
       "rules.joiningtext":
-        "Kun medarbejdere i Hitachi Vantara kan deltage, ved hjælp af adgangskoden. Du kan tilmelde dig når som helst. Når du opretter en konto, starter du som “Afventer”. Du kan logge aktiviteter med det samme. Ved starten af næste måned placerer systemet automatisk alle afventende spillere i ligaerne ud fra deres distance, tid og hastighed.",
+        "Du kan tilmelde dig når som helst. Når du opretter en konto, starter du som “Afventer”. Du kan logge aktiviteter med det samme. Systemet placerer spillere i ligaer ud fra distance, tid og hastighed, samtidig med at ligastørrelserne holdes nogenlunde i balance.",
       "rules.leaguetitle": "Ligaer og balance",
       "rules.leaguetext":
-        "Der er fire ligaer: Amatører, Øvede, Prof og Legender. Systemet forsøger at holde ligastørrelserne nogenlunde i balance. Når nye deltagere placeres, undgår det at gøre én liga meget større end de andre, så forskellen mellem den største og mindste liga forbliver lille.",
+        "Der er fire ligaer: Amatører, Øvede, Prof og Legender. Systemet forsøger at holde ligastørrelserne i balance, så én liga ikke bliver markant større end de andre.",
       "rules.promotiontitle": "Oprykning og nedrykning",
       "rules.promotiontext":
-        "Hver måned udfører siden automatisk oprykning og nedrykning. Antallet af spillere der flyttes, afhænger af hvor mange der er aktive: ved 8+ spillere er der 1 oprykning og 1 nedrykning, ved 16+ er der 2 af hver, og ved 32+ er der 3 af hver. Ranglisten bygger først på samlet distance, derefter samlet tid, og til sidst gennemsnitlig hastighed.",
-      "rules.prizetitle": "Præmier",
-      "rules.prizetext":
-        "De lokale teams beslutter præmierne. En enkel model er: en lille præmie til den månedlige vinder og en større præmie ved årets slutning til den spiller, der samlet set har klaret sig bedst.",
+        "Hver måned udfører siden automatisk oprykning og nedrykning. Antallet af spillere der flyttes, afhænger af hvor mange der er aktive: ved 8+ spillere er der 1 oprykning og 1 nedrykning, ved 16+ er der 2 af hver, og ved 32+ er der 3 af hver. Ranglisten bygger først på samlet distance, derefter samlet tid og til sidst gennemsnitlig hastighed.",
 
       "about.title": "Om Make It Happen",
       "about.text1":
-        "Make It Happen er en enkel, fair sundhedsudfordring for Hitachi Vantara. Målet er ikke at skabe elitesportsfolk, men at give alle en klar og venlig måde at bevæge sig mere og se deres udvikling over tid.",
+        "Make It Happen er en enkel, fair sundhedsudfordring under SEP. Målet er ikke at skabe elitesportsfolk, men at give alle en klar og venlig måde at bevæge sig mere og se deres udvikling over tid.",
       "about.text2":
         "Du kan gå, løbe eller cykle og registrere din distance og tid. Systemet kigger både på hvor langt du kommer, og hvor længe du er i bevægelse. Det betyder, at langsommere men meget dedikerede deltagere også bliver belønnet, ikke kun de hurtigste løbere.",
       "about.text3":
-        "Nye spillere tilmelder sig først og træder officielt ind i en liga ved starten af næste måned. Siden sammenligner deres første måned med resten af feltet og placerer dem i den liga, der passer bedst, samtidig med at ligastørrelserne holdes i balance.",
-
-      "help.title": "Hjælp og support",
-      "help.text":
-        "Hvis du har brug for hjælp, hvis noget ser forkert ud, eller hvis du har et spørgsmål til Make It Happen, kan du sende en sms til +45 51 34 31 33.",
+        "Nye spillere starter som “Afventer” og bliver automatisk placeret i en liga hen ad vejen, på en måde der holder ligastørrelserne i balance.",
 
       "entry.title": "Registrér en ny aktivitet",
       "entry.distance": "Distance (km)",
@@ -604,8 +574,6 @@
       "user.deleteAccount": "Slet konto",
 
       "alert.loginMissing": "Indtast både navn og adgangskode.",
-      "alert.codeWrong": "Hitachi-adgangskoden er forkert.",
-      "alert.passwordWrong": "Forkert adgangskode til dette navn.",
       "alert.firebase": "Firebase er ikke sat korrekt op. Indsæt din Firebase-konfiguration i scriptet.",
       "alert.mustLogin": "Log ind, før du tilføjer aktiviteter.",
       "alert.activityInvalid": "Udfyld distance og tid korrekt med positive værdier.",
@@ -613,134 +581,126 @@
       "alert.notEnoughPlayers": "Du skal bruge mindst 8 spillere til oprykning og nedrykning.",
       "alert.promotionsDone": "Oprykning og nedrykning udført: {up} op, {down} ned.",
       "alert.noActivitiesToPlace": "Ingen aktiviteter endnu, intet at placere.",
-      "alert.noPending": "Ingen afventende deltagere klar til placering. Nye tilmeldinger kommer med ved starten af næste måned.",
+      "alert.noPending": "Ingen afventende deltagere klar til placering.",
       "alert.placeSummary": "Placerede {placed} ny(e) deltager(e) i ligaer. {skipped}",
       "alert.placeSkipped": "{count} blev efterladt som Afventer (mangler data eller for balance).",
       "alert.deleteActivityConfirm": "Slet denne aktivitet?",
       "alert.deleteAccountConfirm": "Dette sletter din konto og alle dine aktiviteter. Er du sikker?",
-      "alert.alreadyLoggedIn": "Du er allerede logget ind. Slet din konto, hvis du vil starte forfra."
+      "alert.alreadyLoggedIn": "Du er allerede logget ind. Slet din konto, hvis du vil starte forfra.",
+      "alert.passwordWrong": "Forkert adgangskode til dette navn."
     },
 
-    ja: {
-      "nav.welcome": "ようこそ",
-      "nav.leaderboard": "ランキング",
-      "nav.stats": "統計",
-      "nav.rules": "ルールと賞品",
-      "nav.about": "このプロジェクトについて",
-      "nav.help": "ヘルプ",
-      "nav.login": "ログイン",
+    cs: {
+      "nav.welcome": "Vítejte",
+      "nav.leaderboard": "Žebříček",
+      "nav.stats": "Statistiky",
+      "nav.rules": "Pravidla",
+      "nav.about": "O projektu",
+      "nav.entry": "Zapsat aktivitu",
+      "nav.login": "Přihlášení",
 
-      "welcome.title": "もっと動く。みんなで競う。",
-      "welcome.subtitle": "「Make It Happen」は Hitachi Vantara のためのヘルスチャレンジです。歩く・走る・自転車で移動した距離を記録して、リーグの中で順位を上げていきます。",
-      "welcome.cta": "ログインまたはアカウント作成",
+      "welcome.title": "Hýbej se víc. Soutěž spolu s ostatními.",
+      "welcome.subtitle": "Make It Happen je jednoduchá výzva od SEP. Choď, běhej nebo jezdi na kole, zapisuj kilometry a stoupej ligami nahoru.",
+      "welcome.cta": "Přihlásit se nebo vytvořit účet",
 
-      "login.title": "Make It Happen にログイン",
-      "login.description": "シンプルなアカウントを作ることで、自分のアクティビティだけを管理できるようになります。",
-      "login.name": "名前",
-      "login.password": "パスワード",
-      "login.code": "Hitachi Vantara 参加コード",
-      "login.submit": "ログイン / アカウント作成",
-      "login.note": "参加できるのは Hitachi Vantara のメンバーのみで、コードが必要です。アカウントは自分の端末だけでなく、共有データベースに保存されます。長期間まったく利用されないアカウントは整理される場合があります。",
+      "login.title": "Přihlášení do Make It Happen",
+      "login.description": "Vytvoř si jednoduchý účet, aby systém věděl, kdo jsi, a jen ty mohl/a spravovat své aktivity.",
+      "login.name": "Jméno",
+      "login.password": "Heslo",
+      "login.submit": "Přihlásit / Vytvořit účet",
+      "login.note": "Tvůj účet je uložený ve sdílené databázi, ne jen v tomto zařízení. Pokud ho dlouho nepoužíváš, může být smazán.",
 
-      "league.amateurs": "アマチュア",
-      "league.intermediates": "ミドル",
-      "league.pros": "プロ",
-      "league.legends": "レジェンド",
-      "league.pending": "保留",
+      "league.amateurs": "Amatéři",
+      "league.intermediates": "Středně pokročilí",
+      "league.pros": "Profíci",
+      "league.legends": "Legendy",
+      "league.pending": "Čeká na zařazení",
 
-      "leaderboard.title": "ランキング",
-      "leaderboard.filter": "リーグで絞り込み：",
-      "leaderboard.all": "すべてのリーグ",
-      "leaderboard.none": "まだアクティビティがありません。最初の記録者になりましょう。",
-      "lb.rank": "順位",
-      "lb.name": "名前",
-      "lb.league": "リーグ",
-      "lb.distance": "総距離（km）",
-      "lb.time": "総時間（分）",
+      "leaderboard.title": "Žebříček",
+      "leaderboard.filter": "Filtrovat podle ligy:",
+      "leaderboard.all": "Všechny ligy",
+      "leaderboard.none": "Zatím žádné aktivity. Buď první, kdo něco zapíše.",
+      "lb.rank": "#",
+      "lb.name": "Jméno",
+      "lb.league": "Liga",
+      "lb.distance": "Celková vzdálenost (km)",
+      "lb.time": "Celkový čas (min)",
 
-      "pending.title": "保留中の参加者",
-      "pending.subtitle": "翌月の開始時にリーグへ割り当てられる新規参加者。",
-      "pending.rank": "順",
-      "pending.name": "名前",
-      "pending.joinMonth": "参加月",
-      "pending.none": "現在、保留中の参加者はいません。",
+      "pending.title": "Čekající účastníci",
+      "pending.subtitle": "Nové registrace, které budou automaticky rozděleny do lig.",
+      "pending.rank": "#",
+      "pending.name": "Jméno",
+      "pending.joinMonth": "Měsíc registrace",
+      "pending.none": "Momentálně žádní čekající účastníci.",
 
-      "stats.title": "プレイヤー統計とリーグ昇降格",
-      "stats.runs": "回数",
-      "stats.totaldistance": "総距離（km）",
-      "stats.totaltime": "総時間（分）",
-      "stats.avgdistance": "平均距離（km）",
-      "stats.bestdistance": "最長距離（km）",
-      "stats.improvement": "改善度",
-      "stats.none": "参加者がアクティビティを記録すると統計が表示されます。",
+      "stats.title": "Statistiky hráčů a pohyb mezi ligami",
+      "stats.runs": "Aktivity",
+      "stats.totaldistance": "Celková vzdálenost (km)",
+      "stats.totaltime": "Celkový čas (min)",
+      "stats.avgdistance": "Průměrná vzdálenost (km)",
+      "stats.bestdistance": "Nejdelší aktivita (km)",
+      "stats.improvement": "Zlepšení",
+      "stats.none": "Statistiky se objeví, jakmile lidé začnou zapisovat aktivity.",
 
-      "rules.title": "ルール・リーグ・賞品について",
-      "rules.joiningtitle": "参加方法とスタート",
+      "rules.title": "Pravidla a ligy",
+      "rules.joiningtitle": "Registrace a začátek",
       "rules.joiningtext":
-        "参加できるのは Hitachi Vantara のメンバーのみで、アクセスコード が必要です。いつでもサインアップできます。アカウントを作成すると、最初は「保留」状態になりますが、すぐにアクティビティを記録できます。翌月の初めに、システムが距離・時間・スピードに基づいて保留中のプレイヤーを自動的に各リーグへ割り当てます。",
-      "rules.leaguetitle": "リーグとバランス",
+        "Zaregistrovat se můžeš kdykoliv. Po vytvoření účtu začínáš ve stavu „Čeká na zařazení“. Aktivity můžeš zapisovat hned. Systém tě postupně zařadí do ligy podle vzdálenosti, času a rychlosti a zároveň se snaží udržet velikost lig vyrovnanou.",
+      "rules.leaguetitle": "Ligy a rovnováha",
       "rules.leaguetext":
-        "リーグは4つあります：アマチュア、ミドル、プロ、レジェンド。システムはリーグごとの人数バランスを保つようにします。新規参加者を配置するとき、一部のリーグだけ極端に人数が多くならないよう調整します。",
-      "rules.promotiontitle": "昇格と降格",
+        "Existují čtyři ligy: Amatéři, Středně pokročilí, Profíci a Legendy. Systém se snaží, aby žádná liga nebyla výrazně větší než ostatní.",
+      "rules.promotiontitle": "Postupy a sestupy",
       "rules.promotiontext":
-        "毎月、サイトが自動的に昇格と降格を行います。移動人数はアクティブなプレイヤー数によって決まります：8人以上で1人昇格＋1人降格、16人以上で2人、32人以上で3人です。ランキングは総距離を最優先し、その次に総時間、最後に平均スピードを使って決められます。",
-      "rules.prizetitle": "賞品",
-      "rules.prizetext":
-        "具体的な賞品内容は各ローカルチームが決められます。シンプルな例としては、毎月のトッププレイヤーに小さな賞品を、年間で最も活躍したプレイヤーにより大きな賞品を用意する、などがあります。",
+        "Každý měsíc systém automaticky provede postupy a sestupy. Počet přesunů závisí na počtu aktivních hráčů: při 8+ hráčích 1 postup a 1 sestup, při 16+ dva, při 32+ tři. Pořadí se určuje podle celkové vzdálenosti, pak podle celkového času a nakonec podle průměrné rychlosti.",
 
-      "about.title": "Make It Happen とは",
+      "about.title": "O Make It Happen",
       "about.text1":
-        "Make It Happen は Hitachi Vantara のためのシンプルで公平なヘルスチャレンジです。目的はエリートアスリートをつくることではなく、誰もがもっと動き、自分の変化をわかりやすく実感できる場をつくることです。",
+        "Make It Happen je jednoduchá, férová zdravotní výzva vytvořená pod SEP. Cílem není z tebe udělat profesionálního sportovce, ale dát ti přehledný a přátelský způsob, jak se víc hýbat a vidět svůj pokrok.",
       "about.text2":
-        "歩く・走る・自転車など、好きな移動方法で距離と時間を記録できます。システムは「どれくらい速いか」だけでなく、「どれだけ長く動いたか」も評価します。つまり、スピードよりも継続して頑張る人もしっかり評価されます。",
+        "Můžeš chodit, běhat nebo jezdit na kole a zapisovat vzdálenost a čas. Systém hodnotí jak to, jak daleko jdeš, tak to, jak dlouho se hýbeš. Díky tomu se odměňuje i vytrvalost, ne jen rychlost.",
       "about.text3":
-        "新しい参加者はまずサインアップし、翌月のスタート時に正式にどこかのリーグへ入ります。サイトはその最初の1カ月を他の参加者と比較し、その人に合ったリーグに割り当てます。同時に、リーグごとの人数バランスも保つようにしています。",
+        "Noví hráči začínají jako „Čeká na zařazení“ a systém je postupně automaticky zařadí do lig tak, aby zůstaly vyvážené.",
 
-      "help.title": "ヘルプとサポート",
-      "help.text":
-        "何かおかしいと思ったとき、質問があるとき、またはサポートが必要なときは、+45 51 34 31 33 にテキストメッセージを送ってください。",
+      "entry.title": "Zapsat novou aktivitu",
+      "entry.distance": "Vzdálenost (km)",
+      "entry.time": "Čas (minuty)",
+      "entry.submit": "Uložit aktivitu",
+      "entry.my": "Moje aktivity",
+      "entry.date": "Datum",
+      "entry.actions": "Akce",
+      "entry.none": "V tomto účtu zatím nemáš žádné aktivity.",
 
-      "entry.title": "新しいアクティビティを記録",
-      "entry.distance": "距離（km）",
-      "entry.time": "時間（分）",
-      "entry.submit": "アクティビティを保存",
-      "entry.my": "自分のアクティビティ",
-      "entry.date": "日付",
-      "entry.actions": "操作",
-      "entry.none": "このアカウントでは、まだアクティビティが記録されていません。",
+      "profile.runs": "Aktivity",
+      "profile.totaldistance": "Celková vzdálenost",
+      "profile.totaltime": "Celkový čas",
+      "profile.avgdistance": "Průměrná vzdálenost",
+      "profile.avgpace": "Průměrné tempo",
+      "profile.longest": "Nejdelší aktivita",
+      "profile.best10k": "Nejrychlejší ~10 km",
+      "profile.best5k": "Nejrychlejší ~5 km",
 
-      "profile.runs": "回数",
-      "profile.totaldistance": "総距離",
-      "profile.totaltime": "総時間",
-      "profile.avgdistance": "平均距離",
-      "profile.avgpace": "平均ペース",
-      "profile.longest": "最長アクティビティ",
-      "profile.best10k": "最速 約10 km",
-      "profile.best5k": "最速 約5 km",
+      "user.notLoggedIn": "Nepřihlášen",
+      "user.loginButton": "Přihlásit",
+      "user.loggedInAs": "Přihlášen jako {name}",
+      "user.leagueLabel": "Liga: {league}",
+      "user.addActivity": "Přidat aktivitu",
+      "user.deleteAccount": "Smazat účet",
 
-      "user.notLoggedIn": "未ログイン",
-      "user.loginButton": "ログイン",
-      "user.loggedInAs": "{name} としてログイン中",
-      "user.leagueLabel": "リーグ：{league}",
-      "user.addActivity": "アクティビティを追加",
-      "user.deleteAccount": "アカウント削除",
-
-      "alert.loginMissing": "名前とパスワードを入力してください。",
-      "alert.codeWrong": "Hitachi の参加コードが正しくありません。",
-      "alert.passwordWrong": "この名前のパスワードが違います。",
-      "alert.firebase": "Firebase がまだ正しく設定されていません。スクリプト内に Firebase 設定を追加してください。",
-      "alert.mustLogin": "アクティビティを追加する前にログインしてください。",
-      "alert.activityInvalid": "距離と時間を正しく、正の数で入力してください。",
-      "alert.noPlayers": "まだプレイヤーがいません。",
-      "alert.notEnoughPlayers": "昇格・降格には最低 8 人のプレイヤーが必要です。",
-      "alert.promotionsDone": "昇格と降格を実行しました：{up} 人昇格、{down} 人降格。",
-      "alert.noActivitiesToPlace": "まだアクティビティがないため、配置するものがありません。",
-      "alert.noPending": "リーグに配置できる保留中プレイヤーはいません。新規参加者は翌月の開始時にリーグに入ります。",
-      "alert.placeSummary": "{placed} 人の新規参加者をリーグに配置しました。{skipped}",
-      "alert.placeSkipped": "{count} 人は保留のままです（データ不足またはバランス調整のため）。",
-      "alert.deleteActivityConfirm": "このアクティビティを削除しますか？",
-      "alert.deleteAccountConfirm": "アカウントとすべてのアクティビティを削除します。本当に続けますか？",
-      "alert.alreadyLoggedIn": "すでにログインしています。初めからやり直したい場合はアカウントを削除してください。"
+      "alert.loginMissing": "Zadej prosím jméno i heslo.",
+      "alert.firebase": "Firebase ještě není správně nastavené. Přidej konfiguraci Firebase do skriptu.",
+      "alert.mustLogin": "Nejdřív se přihlas, než přidáš aktivitu.",
+      "alert.activityInvalid": "Vyplň vzdálenost i čas jako kladná čísla.",
+      "alert.noPlayers": "Zatím žádní hráči.",
+      "alert.notEnoughPlayers": "Na postupy a sestupy je potřeba alespoň 8 hráčů.",
+      "alert.promotionsDone": "Postupy a sestupy provedeny: {up} nahoru, {down} dolů.",
+      "alert.noActivitiesToPlace": "Zatím žádné aktivity, není co zařazovat.",
+      "alert.noPending": "Žádní čekající hráči připravení k zařazení.",
+      "alert.placeSummary": "Zařazeno {placed} nových hráčů do lig. {skipped}",
+      "alert.placeSkipped": "{count} zůstalo ve stavu Čeká na zařazení (málo dat nebo kvůli rovnováze).",
+      "alert.deleteActivityConfirm": "Opravdu chceš smazat tuto aktivitu?",
+      "alert.deleteAccountConfirm": "Tímto smažeš svůj účet i všechny aktivity. Pokračovat?",
+      "alert.alreadyLoggedIn": "Už jsi přihlášený/á. Pokud chceš začít znovu, smaž účet.",
+      "alert.passwordWrong": "Špatné heslo pro toto jméno."
     }
   };
 
@@ -810,19 +770,14 @@
     return `${m}:${s.toString().padStart(2, "0")}`;
   }
 
-  function formatSecondsPretty(seconds) {
-    if (!isFinite(seconds) || seconds <= 0) return "–";
-    return `${seconds.toFixed(1)} s`;
-  }
-
-  function leagueIndex(league) {
-    return LEAGUES.indexOf(league);
-  }
-
   function formatImprovement(value) {
     if (!isFinite(value) || value === 0) return "0%";
     const rounded = Math.round(value);
     return (rounded > 0 ? "+" : "") + rounded + "%";
+  }
+
+  function leagueIndex(league) {
+    return LEAGUES.indexOf(league);
   }
 
   function getLeagueCounts() {
@@ -897,7 +852,7 @@
     try {
       firebase.initializeApp(firebaseConfig);
       db = firebase.firestore();
-    } catch (e) {
+  } catch (e) {
       console.error("Firebase init error:", e);
       alert(t("alert.firebase"));
     }
@@ -1030,7 +985,7 @@
   }
 
   // ==========================
-  //  MONTHLY: AUTO UPDATES (after 3rd)
+  //  MONTHLY: AUTO UPDATES (from 12th)
   // ==========================
 
   async function autoMonthlyUpdates() {
@@ -1041,8 +996,8 @@
       const monthKey = currentMonthKey(today);
       const day = today.getDate();
 
-      // Only run on or after the 3rd of the month
-      if (day < 3) {
+      // Only run on or after the 12th of the month
+      if (day < 12) {
         autoRunning = false;
         return;
       }
@@ -1425,7 +1380,7 @@
       tr.innerHTML = `
         <td>${rankSymbol}</td>
         <td>
-          <button type="button" class="link-name" data-user-id="${player.userId}" style="background:none;border:none;color:#007bff;cursor:pointer;text-decoration:underline;">
+          <button type="button" class="link-name" data-user-id="${player.userId}" style="background:none;border:none;color:#3b82f6;cursor:pointer;text-decoration:underline;">
             ${player.name}
           </button>
         </td>
@@ -1464,7 +1419,7 @@
       const tr = document.createElement("tr");
       tr.innerHTML = `
         <td>
-          <button type="button" class="link-name" data-user-id="${stats.userId}" style="background:none;border:none;color:#007bff;cursor:pointer;text-decoration:underline;">
+          <button type="button" class="link-name" data-user-id="${stats.userId}" style="background:none;border:none;color:#3b82f6;cursor:pointer;text-decoration:underline;">
             ${stats.name}
           </button>
         </td>
@@ -1593,7 +1548,7 @@
   //  AUTH
   // ==========================
 
-  async function login(name, password, codeInput) {
+  async function login(name, password) {
     if (!db) {
       alert(t("alert.firebase"));
       return;
@@ -1607,19 +1562,6 @@
     if (!trimmedName || !password) {
       alert(t("alert.loginMissing"));
       return;
-    }
-
-    let codeOk = localStorage.getItem(LS_CODE_OK_KEY) === "true";
-    const typedCodeRaw = (codeInput || "").trim().toUpperCase();
-    const typedCode = typedCodeRaw || HITACHI_CODE;
-
-    if (!codeOk) {
-      if (typedCode !== HITACHI_CODE) {
-        alert(t("alert.codeWrong"));
-        return;
-      }
-      localStorage.setItem(LS_CODE_OK_KEY, "true");
-      codeOk = true;
     }
 
     const existingSnap = await db
@@ -1718,15 +1660,7 @@
         e.preventDefault();
         const name = document.getElementById("login-name").value;
         const password = document.getElementById("login-password").value;
-        const code = document.getElementById("login-code").value;
-        login(name, password, code);
-      });
-    }
-
-    const codeInput = document.getElementById("login-code");
-    if (codeInput) {
-      codeInput.addEventListener("input", () => {
-        codeInput.value = codeInput.value.toUpperCase();
+        login(name, password);
       });
     }
 
