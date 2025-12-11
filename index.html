@@ -5,164 +5,64 @@
   <title>SEP · Make It Happen</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <!-- Favicon placeholders (you can change the URLs later) -->
-  <link rel="icon" type="image/png" href="sep-icon.png">
-  <link rel="apple-touch-icon" href="sep-icon.png">
-
-  <!-- Fonts -->
-  <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
-    rel="stylesheet"
-  >
-
-  <!-- Firebase compat (used later, script near bottom) -->
-  <script src="https://www.gstatic.com/firebasejs/11.0.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore-compat.js"></script>
+  <!-- Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
-    /* ================================
-       GLOBAL RESET + ROOT VARIABLES
-       ================================ */
+    :root {
+      --bg-main: #020617;
+      --bg-surface: #050814;
+      --bg-soft: #0b1020;
+      --border-soft: #1e293b;
+      --sep-accent: #f9fafb;
+      --sep-accent-soft: #d1d5db;
+      --mih-accent: #22c55e;
+      --text-main: #f9fafb;
+      --text-subtle: #9ca3af;
+      --radius-card: 16px;
+      --radius-pill: 999px;
+      --shadow-soft: 0 24px 70px rgba(0, 0, 0, 0.85);
+      --transition-fast: 160ms ease-out;
+    }
 
     * {
       box-sizing: border-box;
+    }
+
+    body {
       margin: 0;
-      padding: 0;
-    }
-
-    :root {
-      /* Core palette: dark, calm, SEP-focused */
-      --bg-main: #000000;
-      --bg-alt: #050505;
-      --bg-card: #111111;
-      --bg-card-soft: #141414;
-      --bg-elevated: #181818;
-
-      --border-soft: #262626;
-      --border-subtle: #303030;
-
-      --text-primary: #f9fafb;
-      --text-muted: #9ca3af;
-      --text-soft: #6b7280;
-
-      --accent-sep: #ffffff;
-      --accent-mih: #22c55e;
-      --accent-focus: #38bdf8;
-
-      --danger: #ef4444;
-
-      --radius-card: 16px;
-      --radius-pill: 999px;
-
-      --shadow-soft: 0 18px 40px rgba(0, 0, 0, 0.55);
-      --shadow-subtle: 0 10px 28px rgba(0, 0, 0, 0.45);
-
-      --transition-fast: 0.18s ease-out;
-      --transition-med: 0.22s ease-out;
-    }
-
-    /* ================================
-       BASE ELEMENTS
-       ================================ */
-
-    html,
-    body {
-      height: 100%;
-      width: 100%;
-    }
-
-    body {
-      font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-      background: radial-gradient(circle at top, #111111 0, #000000 55%, #020617 100%);
-      color: var(--text-primary);
-      line-height: 1.5;
+      min-height: 100vh;
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #111827, #020617 55%);
+      color: var(--text-main);
       -webkit-font-smoothing: antialiased;
     }
 
-    a {
-      color: inherit;
-      text-decoration: none;
-    }
+    /* Layout shell */
 
-    button {
-      font-family: inherit;
-    }
-
-    /* Utility classes */
-
-    .hidden {
-      display: none !important;
-    }
-
-    .sr-only {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      padding: 0;
-      margin: -1px;
-      overflow: hidden;
-      clip: rect(0, 0, 0, 0);
-      white-space: nowrap;
-      border: 0;
-    }
-
-    /* ================================
-       LAYOUT: PAGE SHELL
-       ================================ */
-
-    .app-shell {
+    .page-shell {
       min-height: 100vh;
       display: flex;
       flex-direction: column;
-      background: radial-gradient(circle at top, #111827 0, #020617 45%, #000000 100%);
     }
 
-    .app-inner {
-      flex: 1;
-      width: 100%;
-      max-width: 1120px;
-      margin: 0 auto;
-      padding: 16px 16px 40px;
-    }
-
-    @media (min-width: 768px) {
-      .app-inner {
-        padding: 20px 24px 56px;
-      }
-    }
-
-    /* ================================
-       HEADER
-       ================================ */
-
-    .app-header {
+    header {
       position: sticky;
       top: 0;
-      z-index: 30;
+      z-index: 20;
       backdrop-filter: blur(16px);
-      background: linear-gradient(
-        to bottom,
-        rgba(0, 0, 0, 0.92),
-        rgba(0, 0, 0, 0.86),
-        transparent
-      );
+      background: rgba(2, 6, 23, 0.88);
       border-bottom: 1px solid rgba(31, 41, 55, 0.9);
     }
 
-    .app-header-inner {
+    .header-inner {
       max-width: 1120px;
       margin: 0 auto;
-      padding: 10px 16px 10px;
+      padding: 10px 16px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 12px;
-    }
-
-    @media (min-width: 768px) {
-      .app-header-inner {
-        padding: 10px 24px 12px;
-      }
+      gap: 10px;
     }
 
     .brand-lockup {
@@ -172,626 +72,466 @@
     }
 
     .brand-mark {
-      width: 28px;
-      height: 28px;
-      border-radius: 8px;
-      border: 1px solid rgba(148, 163, 184, 0.45);
+      width: 26px;
+      height: 26px;
+      border-radius: 11px;
+      background: radial-gradient(circle at 30% 0%, #f9fafb, #4b5563 48%, #020617 100%);
+      border: 1px solid rgba(148, 163, 184, 0.85);
+      box-shadow: 0 10px 26px rgba(15, 23, 42, 0.9);
       display: flex;
       align-items: center;
       justify-content: center;
-      background: radial-gradient(circle at top, #f9fafb 0, #d1d5db 45%, #020617 100%);
-      box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.8);
-    }
-
-    .brand-mark span {
-      font-size: 16px;
+      font-size: 14px;
       font-weight: 700;
-      letter-spacing: 0.1em;
       color: #020617;
     }
 
-    .brand-text {
-      display: flex;
-      flex-direction: column;
-      gap: 1px;
-    }
-
-    .brand-title {
-      font-size: 13px;
-      letter-spacing: 0.18em;
+    .brand-text-main {
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.16em;
       text-transform: uppercase;
-      color: #e5e7eb;
     }
 
-    .brand-subtitle {
+    .brand-text-sub {
       font-size: 11px;
-      color: #9ca3af;
+      color: var(--text-subtle);
     }
 
-    /* Header right cluster */
-
-    .header-right {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .header-toggle-wrap {
+    .lang-select-wrapper {
       display: flex;
       align-items: center;
       gap: 6px;
-      padding: 2px;
-      border-radius: 999px;
-      background: rgba(15, 23, 42, 0.88);
-      border: 1px solid rgba(55, 65, 81, 0.9);
     }
 
-    .header-mode-pill {
-      border-radius: 999px;
-      padding: 4px 10px;
+    .lang-label {
       font-size: 11px;
-      border: none;
-      cursor: pointer;
-      color: #9ca3af;
-      background: transparent;
-      transition: background var(--transition-fast), color var(--transition-fast);
+      color: var(--text-subtle);
     }
 
-    .header-mode-pill.active {
-      background: radial-gradient(circle at top left, #ffffff 0, #d1d5db 50%, #111827 100%);
-      color: #020617;
-      font-weight: 600;
-    }
-
-    .lang-select {
+    select {
+      border-radius: var(--radius-pill);
+      border: 1px solid rgba(75, 85, 99, 0.95);
+      background: #020617;
+      color: var(--text-main);
+      font-size: 11px;
       padding: 4px 8px;
-      font-size: 11px;
-      border-radius: 999px;
-      border: 1px solid rgba(75, 85, 99, 0.9);
-      background: rgba(15, 23, 42, 0.96);
-      color: #e5e7eb;
-      outline: none;
     }
 
-    .lang-select:focus-visible {
-      box-shadow: 0 0 0 1px var(--accent-focus);
+    main {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      padding: 20px 12px 32px;
     }
 
-    /* ================================
-       SCENES
-       ================================ */
+    .main-inner {
+      width: 100%;
+      max-width: 1120px;
+    }
 
-    /*
-      We use .scene for all main panels (home, sep, mih).
-      .scene is display:none by default.
-      .scene--active is display:block.
-      The initial HTML marks the Home scene as .scene scene--active
-      so it shows even before JavaScript runs.
-    */
+    /* Scenes */
 
     .scene {
       display: none;
-      padding-top: 16px;
+      animation: fadeIn 220ms ease-out;
     }
 
-    .scene--active {
+    .scene.active {
       display: block;
     }
 
-    @media (min-width: 768px) {
-      .scene {
-        padding-top: 24px;
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(4px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
       }
     }
 
-    /* ================================
-       HOME SCENE: SPLASH
-       ================================ */
+    /* Generic cards/buttons */
 
-    .home-layout {
+    .card {
+      border-radius: var(--radius-card);
+      border: 1px solid var(--border-soft);
+      background: radial-gradient(circle at top left, rgba(248, 250, 252, 0.07), transparent 55%),
+                  var(--bg-surface);
+      box-shadow: var(--shadow-soft);
+      padding: 18px 16px;
+    }
+
+    .card-title {
+      margin: 0 0 6px;
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    .card-body {
+      margin: 0;
+      font-size: 13px;
+      color: var(--text-subtle);
+    }
+
+    .stack-vertical {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .stack-horizontal {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius-pill);
+      border: 1px solid rgba(148, 163, 184, 0.9);
+      font-size: 11px;
+      padding: 4px 10px;
+      color: var(--text-main);
+      background: rgba(15, 23, 42, 0.95);
+    }
+
+    .btn {
+      border-radius: var(--radius-pill);
+      border: none;
+      padding: 8px 14px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: transform var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast), color var(--transition-fast);
+    }
+
+    .btn-primary {
+      background: #f9fafb;
+      color: #020617;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.95);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 1);
+    }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--text-main);
+      border: 1px solid rgba(148, 163, 184, 0.9);
+    }
+
+    .btn-outline:hover {
+      background: rgba(15, 23, 42, 0.95);
+    }
+
+    .btn-ghost {
+      background: rgba(15, 23, 42, 0.95);
+      color: var(--text-subtle);
+      border-radius: var(--radius-pill);
+      border: 1px solid rgba(55, 65, 81, 0.9);
+      padding: 4px 10px;
+      font-size: 11px;
+    }
+
+    .btn-ghost:hover {
+      background: rgba(15, 23, 42, 1);
+      color: var(--text-main);
+    }
+
+    .btn-small {
+      padding: 5px 10px;
+      font-size: 11px;
+    }
+
+    .tag {
+      border-radius: var(--radius-pill);
+      border: 1px solid rgba(55, 65, 81, 0.95);
+      padding: 3px 8px;
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-subtle);
+    }
+
+    .muted {
+      font-size: 11px;
+      color: var(--text-subtle);
+    }
+
+    /* START PAGE */
+
+    #scene-start .grid {
       display: grid;
-      grid-template-columns: minmax(0, 1.1fr);
-      gap: 18px;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 14px;
     }
 
     @media (min-width: 900px) {
-      .home-layout {
-        grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.75fr);
-        align-items: stretch;
+      #scene-start .grid {
+        grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.1fr);
       }
     }
 
-    .home-hero-card {
-      border-radius: var(--radius-card);
-      border: 1px solid var(--border-soft);
-      background: radial-gradient(circle at top left, #020617 0, #020617 30%, #000000 100%);
-      box-shadow: var(--shadow-soft);
-      padding: 20px 18px 20px;
+    .start-hero {
+      margin-bottom: 16px;
+    }
+
+    .start-title {
+      margin: 0 0 6px;
+      font-size: 26px;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+    }
+
+    .start-subtitle {
+      margin: 0;
+      font-size: 13px;
+      color: var(--text-subtle);
+    }
+
+    .start-card-sep {
+      background: radial-gradient(circle at top left, rgba(249, 250, 251, 0.12), transparent 55%),
+                  linear-gradient(135deg, #020617, #030712);
+    }
+
+    .start-card-mih {
+      background: radial-gradient(circle at top left, rgba(34, 197, 94, 0.18), transparent 55%),
+                  linear-gradient(135deg, #020617, #030712);
+    }
+
+    .start-card-header {
       display: flex;
-      flex-direction: column;
+      justify-content: space-between;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .start-card-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin: 0;
+    }
+
+    .start-card-kicker {
+      font-size: 11px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--text-subtle);
+    }
+
+    /* SEP SECTION */
+
+    #scene-sep {
+      margin-top: 4px;
+    }
+
+    .sep-shell {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr);
       gap: 16px;
     }
 
-    @media (min-width: 768px) {
-      .home-hero-card {
-        padding: 26px 24px 26px;
-      }
-    }
-
-    .home-kicker {
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.28em;
-      color: #6b7280;
-    }
-
-    .home-title {
-      font-size: 26px;
-      line-height: 1.25;
-      font-weight: 600;
-      color: #f9fafb;
-    }
-
-    @media (min-width: 768px) {
-      .home-title {
-        font-size: 30px;
-      }
-    }
-
-    .home-body {
-      font-size: 14px;
-      color: var(--text-muted);
-      max-width: 560px;
-    }
-
-    .home-pill-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      margin-top: 4px;
-      margin-bottom: 6px;
-    }
-
-    .home-pill {
-      padding: 3px 8px;
-      border-radius: 999px;
-      border: 1px solid rgba(75, 85, 99, 0.9);
-      font-size: 10px;
-      text-transform: uppercase;
-      letter-spacing: 0.14em;
-      color: #9ca3af;
-    }
-
-    .home-footer-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      align-items: center;
-      margin-top: 6px;
-    }
-
-    .home-primary-btn {
-      border-radius: 999px;
-      padding: 8px 16px;
-      font-size: 13px;
-      font-weight: 500;
-      border: none;
-      cursor: pointer;
-      background: #ffffff;
-      color: #020617;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.75);
-      transition: transform var(--transition-fast), box-shadow var(--transition-fast),
-                  background var(--transition-fast), color var(--transition-fast);
-    }
-
-    .home-primary-btn span.chevron {
-      font-size: 14px;
-      transform: translateY(1px);
-    }
-
-    .home-primary-btn:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 16px 36px rgba(15, 23, 42, 0.9);
-    }
-
-    .home-secondary-btn {
-      border-radius: 999px;
-      padding: 7px 13px;
-      font-size: 12px;
-      border: 1px solid rgba(75, 85, 99, 0.95);
-      cursor: pointer;
-      background: transparent;
-      color: #e5e7eb;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      transition: background var(--transition-fast), border-color var(--transition-fast),
-                  color var(--transition-fast), transform var(--transition-fast);
-    }
-
-    .home-secondary-btn:hover {
-      background: rgba(17, 24, 39, 0.9);
-      transform: translateY(-1px);
-    }
-
-    /* Right column: project cards */
-
-    .home-projects-column {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    @media (min-width: 1200px) {
-      .home-projects-column {
-        gap: 12px;
-      }
-    }
-
-    .project-card {
-      border-radius: var(--radius-card);
-      border: 1px solid var(--border-soft);
-      background: linear-gradient(
-        135deg,
-        rgba(15, 23, 42, 0.98),
-        rgba(10, 10, 10, 1)
-      );
-      box-shadow: var(--shadow-subtle);
-      padding: 14px 14px 16px;
-      cursor: pointer;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      transition: border-color var(--transition-med), transform var(--transition-med),
-                  box-shadow var(--transition-med), background var(--transition-med);
-    }
-
-    @media (min-width: 768px) {
-      .project-card {
-        padding: 16px 16px 18px;
-      }
-    }
-
-    .project-card:hover {
-      transform: translateY(-3px);
-      border-color: rgba(148, 163, 184, 0.9);
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.9);
-    }
-
-    .project-tag-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .project-tag {
-      padding: 2px 8px;
-      border-radius: 999px;
-      border: 1px solid rgba(75, 85, 99, 0.75);
-      font-size: 10px;
-      text-transform: uppercase;
-      letter-spacing: 0.18em;
-      color: #9ca3af;
-    }
-
-    .project-tag-right {
-      font-size: 10px;
-      color: #6b7280;
-    }
-
-    .project-title {
-      font-size: 16px;
-      font-weight: 600;
-      color: #f9fafb;
-    }
-
-    .project-body {
-      font-size: 13px;
-      color: #9ca3af;
-    }
-
-    .project-meta-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 11px;
-      color: #6b7280;
-      margin-top: 3px;
-    }
-
-    .project-meta-left {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-    }
-
-    .dot {
-      width: 3px;
-      height: 3px;
-      border-radius: 999px;
-      background: #4b5563;
-    }
-
-    .project-meta-right {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      color: #9ca3af;
-    }
-
-    .project-meta-right span.chevron {
-      font-size: 13px;
-      transform: translateY(1px);
-    }
-
-    /* ================================
-       SEP SECTION (shell only here)
-       ================================ */
-
-    .sep-layout {
-      display: flex;
-      flex-direction: column;
-      gap: 24px;
-    }
-
     @media (min-width: 960px) {
-      .sep-layout {
-        gap: 28px;
+      .sep-shell {
+        grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.1fr);
       }
-    }
-
-    .sep-hero {
-      border-radius: var(--radius-card);
-      border: 1px solid var(--border-soft);
-      background: radial-gradient(circle at top left, #020617 0, #020617 40%, #000000 100%);
-      box-shadow: var(--shadow-soft);
-      padding: 22px 18px 20px;
-      display: grid;
-      grid-template-columns: minmax(0, 1.2fr);
-      gap: 18px;
-    }
-
-    @media (min-width: 900px) {
-      .sep-hero {
-        padding: 26px 24px 22px;
-        grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
-        align-items: center;
-      }
-    }
-
-    .sep-hero-copy {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .sep-hero-kicker {
-      font-size: 11px;
-      letter-spacing: 0.26em;
-      text-transform: uppercase;
-      color: #9ca3af;
     }
 
     .sep-hero-title {
-      font-size: 24px;
-      line-height: 1.2;
+      margin: 0 0 6px;
+      font-size: 26px;
       font-weight: 600;
-      color: #f9fafb;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
     }
 
-    @media (min-width: 768px) {
-      .sep-hero-title {
-        font-size: 28px;
-      }
+    .sep-hero-sub {
+      margin: 0;
+      font-size: 13px;
+      color: var(--sep-accent-soft);
     }
 
-    .sep-hero-body {
-      font-size: 14px;
-      color: var(--text-muted);
-      max-width: 520px;
-    }
-
-    .sep-hero-actions {
+    .sep-meta-row {
       display: flex;
       flex-wrap: wrap;
-      gap: 8px;
+      gap: 6px;
       margin-top: 10px;
     }
 
-    .sep-primary-btn {
-      border-radius: 999px;
-      padding: 8px 16px;
-      border: none;
-      cursor: pointer;
-      font-size: 13px;
-      font-weight: 500;
-      background: #f9fafb;
-      color: #020617;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.9);
-      transition: transform var(--transition-fast), box-shadow var(--transition-fast);
-    }
-
-    .sep-primary-btn:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 18px 40px rgba(15, 23, 42, 0.95);
-    }
-
-    .sep-secondary-btn {
-      border-radius: 999px;
-      padding: 7px 13px;
-      border: 1px solid rgba(75, 85, 99, 0.9);
-      cursor: pointer;
-      font-size: 12px;
-      background: transparent;
-      color: #e5e7eb;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      transition: background var(--transition-fast), border-color var(--transition-fast),
-                  transform var(--transition-fast);
-    }
-
-    .sep-secondary-btn:hover {
-      background: rgba(15, 23, 42, 0.95);
-      border-color: rgba(148, 163, 184, 0.9);
-      transform: translateY(-1px);
-    }
-
-    .sep-hero-meta {
+    .sep-meta-pill {
+      border-radius: var(--radius-pill);
+      border: 1px solid rgba(148, 163, 184, 0.95);
+      padding: 4px 10px;
       font-size: 11px;
-      color: #6b7280;
-      margin-top: 6px;
+      color: var(--sep-accent-soft);
     }
 
-    .sep-hero-visual {
-      border-radius: 18px;
-      border: 1px solid rgba(55, 65, 81, 0.9);
-      background:
-        radial-gradient(circle at top, #f9fafb 0, #cbd5f5 30%, #020617 100%);
-      min-height: 180px;
-      position: relative;
-      overflow: hidden;
-      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.75);
+    .sep-shop-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 10px;
+      margin-top: 10px;
     }
 
-    @media (min-width: 900px) {
-      .sep-hero-visual {
-        min-height: 220px;
+    @media (min-width: 600px) {
+      .sep-shop-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
       }
     }
 
-    /* simple "floating tee" placeholder */
-    .sep-tee {
-      width: 140px;
-      height: 120px;
-      border-radius: 30px;
-      border: 2px solid rgba(15, 23, 42, 0.9);
-      background: linear-gradient(to bottom, #ffffff 0, #f3f4f6 42%, #e5e7eb 100%);
-      position: absolute;
-      left: 50%;
-      top: 52%;
-      transform: translate(-50%, -50%);
-      box-shadow: 0 18px 40px rgba(15, 23, 42, 0.85);
+    .sep-product-card {
+      border-radius: 14px;
+      border: 1px solid rgba(55, 65, 81, 0.95);
+      background: radial-gradient(circle at top, rgba(249, 250, 251, 0.06), transparent 50%),
+                  var(--bg-soft);
+      padding: 10px 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
     }
 
-    .sep-tee-neck {
-      position: absolute;
-      top: 8px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 52px;
-      height: 26px;
-      border-radius: 999px;
-      border: 2px solid rgba(15, 23, 42, 0.9);
-      background: #ffffff;
+    .sep-product-name {
+      font-size: 13px;
+      font-weight: 500;
     }
 
-    .sep-tee-sleeve {
-      position: absolute;
-      top: 32px;
-      width: 38px;
-      height: 30px;
-      border-radius: 18px;
-      border: 2px solid rgba(15, 23, 42, 0.9);
-      background: linear-gradient(to bottom, #ffffff 0, #f3f4f6 100%);
+    .sep-product-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: var(--sep-accent-soft);
     }
 
-    .sep-tee-sleeve.left {
-      left: -22px;
+    .sep-product-price {
+      font-weight: 500;
+      color: var(--sep-accent);
     }
 
-    .sep-tee-sleeve.right {
-      right: -22px;
+    /* MIH SECTION (WRAPPER ONLY – detailed UI later parts) */
+
+    #scene-mih {
+      margin-top: 4px;
     }
 
-    .sep-tee-label {
-      position: absolute;
-      bottom: 8px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 62px;
-      height: 16px;
-      border-radius: 999px;
-      background: #020617;
+    .mih-shell {
+      display: grid;
+      grid-template-columns: minmax(0, 1.25fr);
+      gap: 16px;
     }
 
-    .sep-hero-pill {
-      position: absolute;
-      bottom: 16px;
-      right: 18px;
-      padding: 4px 10px;
-      border-radius: 999px;
-      background: rgba(15, 23, 42, 0.9);
-      border: 1px solid rgba(148, 163, 184, 0.9);
-      font-size: 10px;
+    @media (min-width: 960px) {
+      .mih-shell {
+        grid-template-columns: minmax(0, 1.25fr) minmax(0, 1.05fr);
+      }
+    }
+
+    .mih-kicker {
+      font-size: 11px;
+      letter-spacing: 0.3em;
       text-transform: uppercase;
-      letter-spacing: 0.16em;
-      color: #e5e7eb;
+      color: var(--text-subtle);
     }
 
-    /* Products grid + order flow will be defined in Part 2 */
+    .mih-title {
+      margin: 4px 0 6px;
+      font-size: 24px;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+    }
 
+    .mih-subtitle {
+      margin: 0;
+      font-size: 13px;
+      color: var(--text-subtle);
+    }
+
+    .mih-nav-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 12px;
+    }
+
+    .mih-nav-btn {
+      border-radius: var(--radius-pill);
+      border: 1px solid rgba(75, 85, 99, 1);
+      background: rgba(15, 23, 42, 0.95);
+      color: var(--text-main);
+      font-size: 11px;
+      padding: 5px 10px;
+      cursor: pointer;
+    }
+
+    .mih-nav-btn.active {
+      background: #22c55e;
+      border-color: #22c55e;
+      color: #020617;
+    }
+
+    .mih-placeholder-box {
+      border-radius: 14px;
+      border: 1px dashed rgba(75, 85, 99, 1);
+      padding: 10px 10px 12px;
+      font-size: 12px;
+      color: var(--text-subtle);
+      margin-top: 10px;
+    }
+
+    .mih-exit-row,
+    .sep-exit-row {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 10px;
+    }
+
+    footer {
+      border-top: 1px solid rgba(31, 41, 55, 0.9);
+      padding: 12px 16px;
+      font-size: 11px;
+      color: var(--text-subtle);
+      text-align: center;
+      background: rgba(2, 6, 23, 0.96);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        scroll-behavior: auto !important;
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+      }
+    }
   </style>
 </head>
 
 <body>
-  <div class="app-shell">
-    <!-- ===========================
-         HEADER
-         =========================== -->
-    <header class="app-header">
-      <div class="app-header-inner">
+  <div class="page-shell">
+    <header>
+      <div class="header-inner">
         <div class="brand-lockup">
-          <div class="brand-mark">
-            <span>SP</span>
-          </div>
-          <div class="brand-text">
-            <div class="brand-title">
-              SEP · Make It Happen
-            </div>
-            <div class="brand-subtitle">
-              A tiny clothing brand and a simple running challenge.
-            </div>
+          <div class="brand-mark">S</div>
+          <div>
+            <div class="brand-text-main">Se Proairesis</div>
+            <div class="brand-text-sub">SEP shop &amp; Make It Happen challenge</div>
           </div>
         </div>
 
-        <div class="header-right">
-          <!-- Mode pills: Home / SEP / MIH (JS will sync these with scenes) -->
-          <div class="header-toggle-wrap">
-            <button
-              type="button"
-              class="header-mode-pill active"
-              data-scene-target="home"
-            >
-              Home
-            </button>
-            <button
-              type="button"
-              class="header-mode-pill"
-              data-scene-target="sep"
-            >
-              SEP
-            </button>
-            <button
-              type="button"
-              class="header-mode-pill"
-              data-scene-target="mih"
-            >
-              Make It Happen
-            </button>
-          </div>
-
-          <!-- Language select (translations wired later in JS) -->
-          <label class="sr-only" for="lang-select">
-            Language
-          </label>
-          <select id="lang-select" class="lang-select">
+        <div class="lang-select-wrapper">
+          <span class="lang-label">Language</span>
+          <select id="lang-select">
             <option value="en">English</option>
             <option value="da">Dansk</option>
             <option value="cs">Čeština</option>
@@ -800,932 +540,338 @@
       </div>
     </header>
 
-    <!-- ===========================
-         MAIN CONTENT WRAPPER
-         =========================== -->
-    <main class="app-inner">
-      <!--
-        HOME SCENE: always visible first.
-        We add class "scene scene--active" so it's visible even
-        before JavaScript runs.
-      -->
-      <section
-        id="scene-home"
-        class="scene scene--active"
-      >
-        <div class="home-layout">
-          <!-- Left hero: explanation -->
-          <article class="home-hero-card">
-            <header>
-              <div class="home-kicker">
-                Small projects, calm pace
-              </div>
-              <h1 class="home-title">
-                Start in one place.<br>
-                Choose clothes or movement.
-              </h1>
-            </header>
+    <main>
+      <div class="main-inner">
 
-            <p class="home-body">
-              SEP is a tiny clothing brand built around the idea of
-              <span style="font-style:italic;">Se&nbsp;Proairesis</span> –
-              “your choice”. Make It Happen is a simple leaderboard for runs,
-              walks and rides. Both live on this page. No ads, no tracking,
-              no pressure.
+        <!-- =========================
+             START PAGE
+             ========================= -->
+        <section id="scene-start" class="scene active">
+          <div class="start-hero">
+            <p class="tag">Choose where to go</p>
+            <h1 class="start-title">One page. Two projects.</h1>
+            <p class="start-subtitle">
+              SEP is the clothing brand. Make It Happen is the running challenge.  
+              Pick one below; you can always come back here using the Exit button.
             </p>
+          </div>
 
-            <div class="home-pill-row">
-              <div class="home-pill">Copenhagen&nbsp;·&nbsp;Denmark</div>
-              <div class="home-pill">Teen-run&nbsp;project</div>
-              <div class="home-pill">No creepy data selling</div>
-            </div>
-
-            <div class="home-footer-row">
-              <button
-                type="button"
-                class="home-primary-btn"
-                data-scene-target="sep"
-              >
-                Enter SEP shop
-                <span class="chevron">→</span>
-              </button>
-
-              <button
-                type="button"
-                class="home-secondary-btn"
-                data-scene-target="mih"
-              >
-                Open Make It Happen
-                <span class="chevron">→</span>
-              </button>
-            </div>
-
-            <p class="home-body" style="font-size:12px;color:#6b7280;margin-top:6px;">
-              Tip: you can switch between Home, SEP and Make It Happen using
-              the pills in the top right. The language selector changes text
-              for the whole site.
-            </p>
-          </article>
-
-          <!-- Right column: two project cards -->
-          <aside class="home-projects-column">
+          <div class="grid">
             <!-- SEP card -->
-            <section
-              class="project-card"
-              data-scene-target="sep"
-            >
-              <div class="project-tag-row">
-                <div class="project-tag">
-                  SEP · Clothing
+            <article class="card start-card-sep">
+              <div class="start-card-header">
+                <div>
+                  <p class="start-card-kicker">Clothing brand</p>
+                  <h2 class="start-card-title">SEP · Se Proairesis</h2>
                 </div>
-                <div class="project-tag-right">
-                  Denmark only · MobilePay
-                </div>
+                <span class="pill">Soft tees · Copenhagen</span>
               </div>
 
-              <h2 class="project-title">
-                SEP – Se Proairesis
-              </h2>
-
-              <p class="project-body">
-                A white T-shirt, a black hoodie and black trousers. Soft,
-                simple pieces, hand pressed in Copenhagen. No big drops,
-                no fake hype; just calm clothes made to be worn a lot.
+              <p class="card-body">
+                Minimal, Nordic-inspired pieces pressed in Copenhagen.  
+                Clean fits, soft fabric and a focus on quality over hype.
               </p>
 
-              <div class="project-meta-row">
-                <div class="project-meta-left">
-                  <span>Sizes XS–XL</span>
-                  <span class="dot"></span>
-                  <span>Free shipping in Copenhagen</span>
-                </div>
-                <div class="project-meta-right">
-                  <span>Enter shop</span>
-                  <span class="chevron">→</span>
-                </div>
-              </div>
-            </section>
-
-            <!-- Make It Happen card -->
-            <section
-              class="project-card"
-              data-scene-target="mih"
-            >
-              <div class="project-tag-row">
-                <div class="project-tag" style="border-color:#16a34a;color:#bbf7d0;">
-                  Make It Happen
-                </div>
-                <div class="project-tag-right">
-                  Runs · Walks · Rides
-                </div>
-              </div>
-
-              <h2 class="project-title">
-                Make It Happen – simple health challenge
-              </h2>
-
-              <p class="project-body">
-                Log your distance and time, see your name climb a gentle
-                leaderboard, and watch your stats grow. No apps to install,
-                no subscriptions; just a browser and your legs.
-              </p>
-
-              <div class="project-meta-row">
-                <div class="project-meta-left">
-                  <span>Leagues for different levels</span>
-                  <span class="dot"></span>
-                  <span>Runs on Firebase</span>
-                </div>
-                <div class="project-meta-right" style="color:#a7f3d0;">
-                  <span>View leaderboard</span>
-                  <span class="chevron">→</span>
-                </div>
-              </div>
-            </section>
-          </aside>
-        </div>
-      </section>
-
-      <!-- ===========================
-           SEP SECTION (shell, more in Part 2)
-           =========================== -->
-      <section
-        id="scene-sep"
-        class="scene"
-      >
-        <div class="sep-layout">
-          <!-- SEP hero band -->
-          <section class="sep-hero">
-            <div class="sep-hero-copy">
-              <div class="sep-hero-kicker">
-                SEP · Se Proairesis
-              </div>
-
-              <h2 class="sep-hero-title">
-                Minimalist clothing made slowly, on purpose.
-              </h2>
-
-              <p class="sep-hero-body">
-                SEP keeps things small on purpose: one white T-shirt,
-                one black hoodie, one pair of black trousers. All pieces
-                are pressed by hand in Copenhagen in tiny batches.
-                No seasons. No endless collections. Just your choice.
-              </p>
-
-              <div class="sep-hero-actions">
+              <div class="stack-horizontal" style="margin-top:10px;">
                 <button
+                  class="btn btn-primary"
                   type="button"
-                  class="sep-primary-btn"
-                  data-sep-scroll-target="products"
+                  onclick="switchScene('sep')"
                 >
-                  Shop the three pieces
-                  <span class="chevron">→</span>
+                  Enter SEP shop
                 </button>
-
                 <button
+                  class="btn btn-outline btn-small"
                   type="button"
-                  class="sep-secondary-btn"
-                  data-sep-scroll-target="about"
+                  onclick="switchScene('sep')"
                 >
-                  Read the story
-                  <span class="chevron">→</span>
+                  View About SEP
                 </button>
               </div>
+            </article>
 
-              <p class="sep-hero-meta">
-                Delivery within Denmark only. Free shipping in Copenhagen,
-                +45&nbsp;kr for the rest of Denmark. Orders are handled
-                manually over MobilePay and Instagram.
+            <!-- MIH card -->
+            <article class="card start-card-mih">
+              <div class="start-card-header">
+                <div>
+                  <p class="start-card-kicker">Running challenge</p>
+                  <h2 class="start-card-title">Make It Happen</h2>
+                </div>
+                <span class="pill">Log your runs</span>
+              </div>
+
+              <p class="card-body">
+                A simple health challenge: walk, run or cycle, log your
+                distance and time, and climb the shared leaderboard with your friends.
               </p>
-            </div>
 
-            <div class="sep-hero-visual" aria-hidden="true">
-              <div class="sep-tee">
-                <div class="sep-tee-neck"></div>
-                <div class="sep-tee-sleeve left"></div>
-                <div class="sep-tee-sleeve right"></div>
-                <div class="sep-tee-label"></div>
-              </div>
-              <div class="sep-hero-pill">
-                White tee · 180&nbsp;kr
-              </div>
-            </div>
-          </section>
-
-          <!--
-            The actual SEP products grid, cart and "About SEP" content
-            will be defined in Part 2 and Part 3. We leave this container
-            ready so nothing breaks visually if JS fails.
-          -->
-          <section id="sep-products-shell">
-            <!-- Placeholder that will still look okay before full markup -->
-            <p style="margin-top:14px;font-size:13px;color:#9ca3af;">
-              Scroll down for products, ordering instructions and the
-              story behind SEP. If you only see this line, Part 2 of the
-              code has not been pasted yet.
-            </p>
-          </section>
-        </div>
-      </section>
-
-      <!--
-        MIH scenes, SEP cart, About SEP, stats, Firebase logic and
-        translations will be added in Parts 2–5.
-      -->
-      <!-- ===========================
-           PART 2 · SEP SHOP + ABOUT
-           =========================== -->
-
-      <!-- Extra styles for SEP shop (allowed inside body) -->
-      <style>
-        .sep-products {
-          margin-top: 18px;
-          display: grid;
-          grid-template-columns: minmax(0, 1.4fr);
-          gap: 18px;
-        }
-
-        @media (min-width: 960px) {
-          .sep-products {
-            grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.9fr);
-            align-items: flex-start;
-          }
-        }
-
-        .sep-products-grid {
-          display: grid;
-          grid-template-columns: minmax(0, 1fr);
-          gap: 14px;
-        }
-
-        @media (min-width: 720px) {
-          .sep-products-grid {
-            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-          }
-        }
-
-        .sep-product-card {
-          border-radius: var(--radius-card);
-          border: 1px solid var(--border-soft);
-          background: var(--bg-card-soft);
-          padding: 14px 14px 14px;
-          box-shadow: var(--shadow-subtle);
-          display: flex;
-          flex-direction: column;
-          gap: 10px;
-        }
-
-        @media (min-width: 768px) {
-          .sep-product-card {
-            padding: 16px 16px 16px;
-          }
-        }
-
-        .sep-product-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          gap: 8px;
-        }
-
-        .sep-product-name {
-          font-size: 15px;
-          font-weight: 600;
-          color: #f9fafb;
-        }
-
-        .sep-product-price {
-          font-size: 14px;
-          font-weight: 500;
-          color: #e5e7eb;
-        }
-
-        .sep-product-tagline {
-          font-size: 12px;
-          color: #9ca3af;
-        }
-
-        .sep-product-meta-row {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 6px;
-          font-size: 11px;
-          color: #9ca3af;
-        }
-
-        .sep-product-pill {
-          padding: 2px 8px;
-          border-radius: 999px;
-          border: 1px solid rgba(75, 85, 99, 0.9);
-          text-transform: uppercase;
-          letter-spacing: 0.14em;
-          font-size: 9px;
-        }
-
-        .sep-product-body {
-          font-size: 12px;
-          color: #9ca3af;
-        }
-
-        .sep-product-detail-list {
-          margin-top: 6px;
-          padding-left: 16px;
-          font-size: 11px;
-          color: #9ca3af;
-        }
-
-        .sep-product-detail-list li {
-          margin-bottom: 2px;
-        }
-
-        .sep-product-footer {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-top: 6px;
-          gap: 8px;
-        }
-
-        .sep-product-qty-wrap {
-          display: flex;
-          align-items: center;
-          gap: 4px;
-          font-size: 11px;
-          color: #9ca3af;
-        }
-
-        .sep-product-qty-input {
-          width: 50px;
-          padding: 3px 6px;
-          border-radius: 999px;
-          border: 1px solid rgba(75, 85, 99, 0.9);
-          background: #020617;
-          color: #e5e7eb;
-          font-size: 11px;
-          text-align: center;
-          outline: none;
-        }
-
-        .sep-product-qty-input:focus-visible {
-          box-shadow: 0 0 0 1px var(--accent-focus);
-        }
-
-        .sep-product-add-btn {
-          border-radius: 999px;
-          padding: 6px 12px;
-          border: none;
-          cursor: pointer;
-          font-size: 12px;
-          font-weight: 500;
-          background: #f9fafb;
-          color: #020617;
-          display: inline-flex;
-          align-items: center;
-          gap: 4px;
-          box-shadow: 0 10px 26px rgba(0, 0, 0, 0.9);
-          transition: transform var(--transition-fast), box-shadow var(--transition-fast);
-        }
-
-        .sep-product-add-btn:hover {
-          transform: translateY(-1px);
-          box-shadow: 0 16px 32px rgba(0, 0, 0, 0.95);
-        }
-
-        .sep-product-note {
-          font-size: 10px;
-          color: #6b7280;
-          margin-top: 2px;
-        }
-
-        /* Order / cart panel */
-
-        .sep-order-card {
-          border-radius: var(--radius-card);
-          border: 1px solid var(--border-soft);
-          background: var(--bg-elevated);
-          padding: 14px 14px 14px;
-          box-shadow: var(--shadow-soft);
-          display: flex;
-          flex-direction: column;
-          gap: 10px;
-        }
-
-        @media (min-width: 768px) {
-          .sep-order-card {
-            padding: 16px 16px 16px;
-          }
-        }
-
-        .sep-order-title {
-          font-size: 15px;
-          font-weight: 600;
-          color: #f9fafb;
-        }
-
-        .sep-order-caption {
-          font-size: 12px;
-          color: #9ca3af;
-        }
-
-        .sep-cart-empty {
-          font-size: 12px;
-          color: #6b7280;
-          padding: 8px 10px;
-          border-radius: 10px;
-          border: 1px dashed rgba(55, 65, 81, 0.9);
-          background: rgba(15, 23, 42, 0.7);
-        }
-
-        .sep-cart-list {
-          list-style: none;
-          margin-top: 4px;
-          padding: 0;
-          display: flex;
-          flex-direction: column;
-          gap: 6px;
-          max-height: 220px;
-          overflow-y: auto;
-        }
-
-        .sep-cart-item {
-          display: flex;
-          justify-content: space-between;
-          gap: 8px;
-          align-items: flex-start;
-          padding: 6px 8px;
-          border-radius: 10px;
-          background: #020617;
-          border: 1px solid rgba(55, 65, 81, 0.9);
-          font-size: 11px;
-        }
-
-        .sep-cart-item-main {
-          display: flex;
-          flex-direction: column;
-          gap: 2px;
-        }
-
-        .sep-cart-item-name {
-          color: #e5e7eb;
-          font-weight: 500;
-        }
-
-        .sep-cart-item-meta {
-          color: #9ca3af;
-        }
-
-        .sep-cart-item-price {
-          font-weight: 500;
-          color: #f9fafb;
-          white-space: nowrap;
-        }
-
-        .sep-cart-remove-btn {
-          border-radius: 999px;
-          border: none;
-          background: rgba(15, 23, 42, 0.9);
-          color: #fbbf24;
-          cursor: pointer;
-          font-size: 11px;
-          padding: 2px 7px;
-        }
-
-        .sep-cart-footer {
-          margin-top: 6px;
-          border-top: 1px solid rgba(31, 41, 55, 0.95);
-          padding-top: 8px;
-          display: flex;
-          flex-direction: column;
-          gap: 8px;
-        }
-
-        .sep-cart-total-row {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          font-size: 13px;
-          color: #e5e7eb;
-        }
-
-        .sep-cart-total-row span:last-child {
-          font-weight: 600;
-        }
-
-        .sep-cart-copy-btn {
-          border-radius: 999px;
-          padding: 7px 12px;
-          border: none;
-          cursor: pointer;
-          font-size: 12px;
-          font-weight: 500;
-          background: #f9fafb;
-          color: #020617;
-          display: inline-flex;
-          align-items: center;
-          gap: 6px;
-          box-shadow: 0 14px 30px rgba(0, 0, 0, 0.95);
-          transition: transform var(--transition-fast), box-shadow var(--transition-fast);
-        }
-
-        .sep-cart-copy-btn:hover {
-          transform: translateY(-1px);
-          box-shadow: 0 18px 38px rgba(0, 0, 0, 1);
-        }
-
-        .sep-cart-note {
-          font-size: 11px;
-          color: #9ca3af;
-        }
-
-        .sep-cart-note strong {
-          color: #e5e7eb;
-          font-weight: 500;
-        }
-
-        .sep-cart-small {
-          font-size: 11px;
-          color: #6b7280;
-        }
-
-        /* About SEP */
-
-        .sep-about {
-          margin-top: 22px;
-          border-radius: var(--radius-card);
-          border: 1px solid var(--border-soft);
-          background: #050708;
-          padding: 16px 16px 18px;
-          box-shadow: var(--shadow-subtle);
-          display: flex;
-          flex-direction: column;
-          gap: 8px;
-        }
-
-        @media (min-width: 768px) {
-          .sep-about {
-            padding: 18px 20px 20px;
-          }
-        }
-
-        .sep-about-kicker {
-          font-size: 11px;
-          letter-spacing: 0.26em;
-          text-transform: uppercase;
-          color: #6b7280;
-        }
-
-        .sep-about-title {
-          font-size: 16px;
-          font-weight: 600;
-          color: #f9fafb;
-        }
-
-        .sep-about-body {
-          font-size: 13px;
-          color: #9ca3af;
-          max-width: 760px;
-        }
-
-        .sep-about-body p + p {
-          margin-top: 6px;
-        }
-
-        .sep-about-list {
-          margin-top: 8px;
-          padding-left: 18px;
-          font-size: 12px;
-          color: #9ca3af;
-        }
-
-        .sep-about-list li {
-          margin-bottom: 4px;
-        }
-
-        .sep-about-meta {
-          margin-top: 10px;
-          font-size: 11px;
-          color: #6b7280;
-        }
-
-        .sep-about-meta span {
-          color: #e5e7eb;
-        }
-
-        .sep-link {
-          color: #bfdbfe;
-          text-decoration: underline;
-          text-decoration-color: rgba(191, 219, 254, 0.5);
-        }
-
-        .sep-link:hover {
-          text-decoration-color: rgba(191, 219, 254, 1);
-        }
-      </style>
-
-      <!-- SEP products + order area -->
-      <section
-        id="sep-products"
-        class="sep-products"
-      >
-        <!-- LEFT: products grid -->
-        <div class="sep-products-grid">
-          <!-- White tee -->
-          <article
-            class="sep-product-card"
-            data-product-id="tee-white"
-            data-product-name="White SEP T-shirt"
-            data-product-price="180"
-          >
-            <header class="sep-product-header">
-              <h3 class="sep-product-name">
-                White SEP T-shirt
-              </h3>
-              <div class="sep-product-price">
-                180&nbsp;kr
-              </div>
-            </header>
-
-            <p class="sep-product-tagline">
-              Heavyweight white T-shirt, soft from day one and still smooth after washing.
-            </p>
-
-            <div class="sep-product-meta-row">
-              <span class="sep-product-pill">XS–XL</span>
-              <span class="sep-product-pill">Unisex fit</span>
-              <span class="sep-product-pill">Cotton</span>
-            </div>
-
-            <div class="sep-product-body">
-              Built to feel like a “new favourite tee” for longer than just the first weekend.
-            </div>
-
-            <ul class="sep-product-detail-list">
-              <li>Thick cotton with a smooth finish.</li>
-              <li>Relaxed fit; size down if you like it tighter.</li>
-              <li>Printed SEP mark on the chest, pressed by hand in Copenhagen.</li>
-            </ul>
-
-            <footer class="sep-product-footer">
-              <div class="sep-product-qty-wrap">
-                <span>Qty</span>
-                <input
-                  class="sep-product-qty-input"
-                  type="number"
-                  min="1"
-                  max="9"
-                  value="1"
-                  inputmode="numeric"
-                  aria-label="Quantity for white SEP T-shirt"
+              <div class="stack-horizontal" style="margin-top:10px;">
+                <button
+                  class="btn btn-primary"
+                  type="button"
+                  onclick="switchScene('mih')"
                 >
-              </div>
-
-              <button
-                type="button"
-                class="sep-product-add-btn"
-              >
-                Add to order
-                <span>+</span>
-              </button>
-            </footer>
-
-            <p class="sep-product-note">
-              Available in XS, S, M, L, XL. You can tell us sizes in the final MobilePay message.
-            </p>
-          </article>
-
-          <!-- Black hoodie -->
-          <article
-            class="sep-product-card"
-            data-product-id="hoodie-black"
-            data-product-name="Black SEP hoodie"
-            data-product-price="320"
-          >
-            <header class="sep-product-header">
-              <h3 class="sep-product-name">
-                Black SEP hoodie
-              </h3>
-              <div class="sep-product-price">
-                320&nbsp;kr
-              </div>
-            </header>
-
-            <p class="sep-product-tagline">
-              Mid-weight black hoodie that feels broken-in without looking worn out.
-            </p>
-
-            <div class="sep-product-meta-row">
-              <span class="sep-product-pill">XS–XL</span>
-              <span class="sep-product-pill">Unisex fit</span>
-              <span class="sep-product-pill">Brushed inside</span>
-            </div>
-
-            <div class="sep-product-body">
-              Clean front, small SEP mark; made to sit quietly in your wardrobe and still be the thing you grab first.
-            </div>
-
-            <ul class="sep-product-detail-list">
-              <li>Soft brushed interior; warm but not too thick.</li>
-              <li>Minimalist print, no loud graphics.</li>
-              <li>Ribbed cuffs and hem that hold their shape.</li>
-            </ul>
-
-            <footer class="sep-product-footer">
-              <div class="sep-product-qty-wrap">
-                <span>Qty</span>
-                <input
-                  class="sep-product-qty-input"
-                  type="number"
-                  min="1"
-                  max="9"
-                  value="1"
-                  inputmode="numeric"
-                  aria-label="Quantity for black SEP hoodie"
+                  Enter Make It Happen
+                </button>
+                <button
+                  class="btn btn-outline btn-small"
+                  type="button"
+                  onclick="switchScene('mih')"
                 >
+                  View leaderboard &amp; stats
+                </button>
               </div>
-
-              <button
-                type="button"
-                class="sep-product-add-btn"
-              >
-                Add to order
-                <span>+</span>
-              </button>
-            </footer>
-
-            <p class="sep-product-note">
-              Sits slightly oversized. If you’re between sizes, pick the smaller one.
-            </p>
-          </article>
-
-          <!-- Black trousers -->
-          <article
-            class="sep-product-card"
-            data-product-id="trousers-black"
-            data-product-name="Black SEP trousers"
-            data-product-price="280"
-          >
-            <header class="sep-product-header">
-              <h3 class="sep-product-name">
-                Black SEP trousers
-              </h3>
-              <div class="sep-product-price">
-                280&nbsp;kr
-              </div>
-            </header>
-
-            <p class="sep-product-tagline">
-              Straight-leg black trousers: soft enough for everyday, clean enough for going out.
-            </p>
-
-            <div class="sep-product-meta-row">
-              <span class="sep-product-pill">XS–XL</span>
-              <span class="sep-product-pill">Elastic waist</span>
-              <span class="sep-product-pill">Unisex</span>
-            </div>
-
-            <div class="sep-product-body">
-              Designed to sit somewhere between joggers and tailored pants. No logos on the legs; just a small internal label.
-            </div>
-
-            <ul class="sep-product-detail-list">
-              <li>Soft fabric that doesn’t go rough after a couple of washes.</li>
-              <li>Elastic waist with drawstring for a relaxed, adjustable fit.</li>
-              <li>Two side pockets and one subtle back pocket.</li>
-            </ul>
-
-            <footer class="sep-product-footer">
-              <div class="sep-product-qty-wrap">
-                <span>Qty</span>
-                <input
-                  class="sep-product-qty-input"
-                  type="number"
-                  min="1"
-                  max="9"
-                  value="1"
-                  inputmode="numeric"
-                  aria-label="Quantity for black SEP trousers"
-                >
-              </div>
-
-              <button
-                type="button"
-                class="sep-product-add-btn"
-              >
-                Add to order
-                <span>+</span>
-              </button>
-            </footer>
-
-            <p class="sep-product-note">
-              Works with the white tee or hoodie; made to feel like part of the same small system.
-            </p>
-          </article>
-        </div>
-
-        <!-- RIGHT: order / summary panel -->
-        <aside
-          id="sep-order"
-          class="sep-order-card"
-        >
-          <h3 class="sep-order-title">
-            Your SEP order
-          </h3>
-
-          <p class="sep-order-caption">
-            Add the pieces you want and we’ll generate a short message
-            you can paste into MobilePay or Instagram DM. Nothing is paid
-            until we confirm your order.
-          </p>
-
-          <div
-            id="sep-cart-empty"
-            class="sep-cart-empty"
-          >
-            No items yet. Choose a product on the left and hit “Add to order”.
+            </article>
           </div>
+        </section>
 
-          <ul
-            id="sep-cart-items"
-            class="sep-cart-list"
-          >
-            <!-- Filled by JavaScript in a later part -->
-          </ul>
+        <!-- =========================
+             SEP SECTION
+             ========================= -->
+        <section id="scene-sep" class="scene">
+          <div class="sep-shell">
+            <!-- Left: hero/about -->
+            <article class="card" style="background:radial-gradient(circle at top left, rgba(249,250,251,0.12), transparent 55%), var(--bg-surface);">
+              <p class="tag">SEP · Se&nbsp;Proairesis</p>
+              <h2 class="sep-hero-title">Your choice, worn daily.</h2>
+              <p class="sep-hero-sub">
+                SEP is a small clothing project from Copenhagen.  
+                Fewer pieces, better fabric, and a soft hand-feel that’s built to last.
+              </p>
 
-          <div class="sep-cart-footer">
-            <div class="sep-cart-total-row">
-              <span>Total (estimate)</span>
-              <span id="sep-cart-total">0&nbsp;kr</span>
-            </div>
+              <div class="sep-meta-row">
+                <span class="sep-meta-pill">Pressed in Copenhagen</span>
+                <span class="sep-meta-pill">XS – XL</span>
+                <span class="sep-meta-pill">Local delivery</span>
+              </div>
 
-            <button
-              type="button"
-              id="sep-cart-copy"
-              class="sep-cart-copy-btn"
-            >
-              Copy order text
-              <span>📋</span>
-            </button>
+              <p class="muted" style="margin-top:10px;">
+                This section will become your full SEP site: hero, product details,
+                MobilePay flow and About SEP text. The layout stays simple; we’ll
+                extend it in the next parts.
+              </p>
 
-            <p class="sep-cart-note">
-              When you tap <strong>Copy order text</strong>, you’ll get a small
-              message with your items, sizes and total. Paste that into
-              MobilePay or an Instagram message so we can confirm everything.
-            </p>
+              <div class="sep-exit-row">
+                <button
+                  type="button"
+                  class="btn-ghost"
+                  onclick="switchScene('start')"
+                >
+                  Exit to start
+                </button>
+              </div>
+            </article>
 
-            <p class="sep-cart-small">
-              Payments are handled manually to keep things small and simple.
-              If anything is out of stock, we’ll reply with options instead of
-              just taking your money.
-            </p>
+            <!-- Right: shop preview -->
+            <article class="card">
+              <h3 class="card-title">Shop</h3>
+              <p class="card-body">
+                Quick preview of the main SEP products.  
+                Real cart + MobilePay logic comes later; this is just the layout shell.
+              </p>
+
+              <div class="sep-shop-grid">
+                <div class="sep-product-card">
+                  <div class="sep-product-name">White SEP T-shirt</div>
+                  <div class="sep-product-meta">
+                    <span>Soft, mid-weight cotton</span>
+                    <span class="sep-product-price">180 DKK</span>
+                  </div>
+                  <button class="btn btn-outline btn-small" type="button">
+                    Add to cart
+                  </button>
+                </div>
+
+                <div class="sep-product-card">
+                  <div class="sep-product-name">Black SEP hoodie</div>
+                  <div class="sep-product-meta">
+                    <span>Heavy fleece, relaxed fit</span>
+                    <span class="sep-product-price">420 DKK</span>
+                  </div>
+                  <button class="btn btn-outline btn-small" type="button">
+                    Add to cart
+                  </button>
+                </div>
+
+                <div class="sep-product-card">
+                  <div class="sep-product-name">Black SEP trousers</div>
+                  <div class="sep-product-meta">
+                    <span>Straight leg, soft inside</span>
+                    <span class="sep-product-price">360 DKK</span>
+                  </div>
+                  <button class="btn btn-outline btn-small" type="button">
+                    Add to cart
+                  </button>
+                </div>
+
+                <div class="sep-product-card">
+                  <div class="sep-product-name">Bundle · Hoodie + tee</div>
+                  <div class="sep-product-meta">
+                    <span>Better value set</span>
+                    <span class="sep-product-price">560 DKK</span>
+                  </div>
+                  <button class="btn btn-outline btn-small" type="button">
+                    Add to cart
+                  </button>
+                </div>
+              </div>
+            </article>
           </div>
-        </aside>
-      </section>
+        </section>
 
-      <!-- ABOUT SEP -->
-      <section
-        id="sep-about"
-        class="sep-about"
-      >
-        <div class="sep-about-kicker">
-          About SEP
-        </div>
+        <!-- =========================
+             MAKE IT HAPPEN SECTION
+             (layout shell; full logic in later parts)
+             ========================= -->
+        <section id="scene-mih" class="scene">
+          <div class="mih-shell">
+            <!-- Left: intro + nav -->
+            <article class="card">
+              <p class="mih-kicker">Running challenge</p>
+              <h2 class="mih-title">Make It Happen</h2>
+              <p class="mih-subtitle">
+                Log your distance and time, see your total, and climb the leaderboard
+                with friends. We’ll plug in the full leaderboard, stats and Firebase
+                logic in the next parts.
+              </p>
 
-        <h3 class="sep-about-title">
-          A tiny brand built around one simple idea: your choice.
-        </h3>
+              <div class="mih-nav-row">
+                <button
+                  type="button"
+                  class="mih-nav-btn active"
+                  data-mih-view="welcome"
+                >
+                  Welcome
+                </button>
+                <button
+                  type="button"
+                  class="mih-nav-btn"
+                  data-mih-view="leaderboard"
+                >
+                  Leaderboard
+                </button>
+                <button
+                  type="button"
+                  class="mih-nav-btn"
+                  data-mih-view="stats"
+                >
+                  Stats
+                </button>
+                <button
+                  type="button"
+                  class="mih-nav-btn"
+                  data-mih-view="entry"
+                >
+                  Add activity
+                </button>
+                <button
+                  type="button"
+                  class="mih-nav-btn"
+                  data-mih-view="login"
+                >
+                  Login
+                </button>
+              </div>
 
-        <div class="sep-about-body">
-          <p>
-            SEP stands for <span style="font-style:italic;">Se&nbsp;Proairesis</span>,
-            a Greek phrase that roughly means “the things that are up to you”.
-            You can’t control school, friends, weather or algorithms, but you
-            can control what you put on your body and how you show up.
-          </p>
+              <div class="mih-placeholder-box" id="mih-placeholder">
+                This is the Make It Happen layout shell.  
+                Part 2 and 3 will drop in the real views (login, leaderboard,
+                stats, entry form) and connect them to Firebase.
+              </div>
 
-          <p>
-            Instead of doing huge drops or chasing trends, SEP sticks to a
-            few pieces and tries to get them right. The focus is on softness,
-            durability and calm design. No giant logos. No fake “limited”
-            hype. Just clothes you actually want to wear every day.
-          </p>
+              <div class="mih-exit-row">
+                <button
+                  type="button"
+                  class="btn-ghost"
+                  onclick="switchScene('start')"
+                >
+                  Exit to start
+                </button>
+              </div>
+            </article>
 
-          <p>
-            Everything is pressed by hand in Copenhagen in very small runs.
-            That means stock is limited, but it also means there is time to
-            care about each order and make sure it arrives properly packed.
-          </p>
-        </div>
+            <!-- Right: small explanation card -->
+            <article class="card" style="border-style:dashed;">
+              <h3 class="card-title">How it will work</h3>
+              <p class="card-body">
+                • Create a simple account with a name and password  
+                • Log distance in kilometres and time in minutes  
+                • The site stores everything in Firebase Firestore  
+                • Leaderboard orders everyone by total distance and time
+              </p>
+              <p class="muted" style="margin-top:10px;">
+                All of that logic sits in the next parts of the file.  
+                Here we just set the layout and the Exit button.
+              </p>
+            </article>
+          </div>
+        </section>
 
-        <ul class="sep-about-list">
-          <li>Delivery inside Denmark only right now.</li>
-          <li>Free delivery in Copenhagen; 45&nbsp;kr to the rest of Denmark.</li>
-          <li>Orders confirmed via MobilePay and Instagram DMs.</li>
-          <li>Sizes run from XS to XL across all three pieces.</li>
-        </ul>
+      </div>
+    </main>
 
-        <div class="sep-about-meta">
-          Typical order flow:
-          <span>add items → copy text → send via MobilePay or Instagram → wait for confirmation.</span>
-          If anything feels unclear, just send a message and we can sort it out like normal people.
-        </div>
-      </section>
+    <footer>
+      SEP &amp; Make It Happen · Single-page build · Exit buttons return you to the start page.
+    </footer>
+  </div>
+
+  <script>
+    // Simple scene switching between Start / SEP / MIH
+    function switchScene(target) {
+      const scenes = document.querySelectorAll(".scene");
+      scenes.forEach(sc => sc.classList.remove("active"));
+
+      const id = target === "sep" ? "scene-sep"
+              : target === "mih" ? "scene-mih"
+              : "scene-start";
+
+      const el = document.getElementById(id);
+      if (el) el.classList.add("active");
+
+      // reset MIH nav highlight when leaving MIH
+      if (target !== "mih") {
+        document.querySelectorAll(".mih-nav-btn").forEach(btn => {
+          btn.classList.remove("active");
+        });
+        const first = document.querySelector(".mih-nav-btn[data-mih-view='welcome']");
+        if (first) first.classList.add("active");
+        const placeholder = document.getElementById("mih-placeholder");
+        if (placeholder) {
+          placeholder.textContent =
+            "This is the Make It Happen layout shell.  Part 2 and 3 will drop in the real views (login, leaderboard, stats, entry form) and connect them to Firebase.";
+        }
+      }
+    }
+
+    // Tiny placeholder for MIH nav buttons
+    document.addEventListener("click", function (e) {
+      const btn = e.target.closest(".mih-nav-btn");
+      if (!btn) return;
+
+      document.querySelectorAll(".mih-nav-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+
+      const view = btn.getAttribute("data-mih-view");
+      const placeholder = document.getElementById("mih-placeholder");
+      if (!placeholder) return;
+
+      if (view === "welcome") {
+        placeholder.textContent =
+          "Welcome view: we’ll describe the challenge here and add a quick explainer of how to log runs.";
+      } else if (view === "leaderboard") {
+        placeholder.textContent =
+          "Leaderboard view: in the next parts this will render the full table of players, sorted by distance and time.";
+      } else if (view === "stats") {
+        placeholder.textContent =
+          "Stats view: per-player stats such as runs, total distance and improvement will live here.";
+      } else if (view === "entry") {
+        placeholder.textContent =
+          "Entry view: a form for logging distance (km) and time (minutes). Submits to Firebase.";
+      } else if (view === "login") {
+        placeholder.textContent =
+          "Login view: create an account with name + password, or sign back in. We’ll add the real fields shortly.";
+      }
+    });
+  </script>
+</body>
+</html>
