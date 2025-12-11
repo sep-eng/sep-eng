@@ -2,1929 +2,1730 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Make It Happen & SEP</title>
+  <title>SEP · Make It Happen</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
+  <!-- Favicon placeholders (you can change the URLs later) -->
+  <link rel="icon" type="image/png" href="sep-icon.png">
+  <link rel="apple-touch-icon" href="sep-icon.png">
+
   <!-- Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet"
+  >
+
+  <!-- Firebase compat (used later, script near bottom) -->
+  <script src="https://www.gstatic.com/firebasejs/11.0.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore-compat.js"></script>
 
   <style>
-    body {
+    /* ================================
+       GLOBAL RESET + ROOT VARIABLES
+       ================================ */
+
+    * {
+      box-sizing: border-box;
       margin: 0;
-      font-family: Inter, sans-serif;
-      background: #000000;
-      color: #f7f7f7;
+      padding: 0;
     }
 
-    header {
+    :root {
+      /* Core palette: dark, calm, SEP-focused */
+      --bg-main: #000000;
+      --bg-alt: #050505;
+      --bg-card: #111111;
+      --bg-card-soft: #141414;
+      --bg-elevated: #181818;
+
+      --border-soft: #262626;
+      --border-subtle: #303030;
+
+      --text-primary: #f9fafb;
+      --text-muted: #9ca3af;
+      --text-soft: #6b7280;
+
+      --accent-sep: #ffffff;
+      --accent-mih: #22c55e;
+      --accent-focus: #38bdf8;
+
+      --danger: #ef4444;
+
+      --radius-card: 16px;
+      --radius-pill: 999px;
+
+      --shadow-soft: 0 18px 40px rgba(0, 0, 0, 0.55);
+      --shadow-subtle: 0 10px 28px rgba(0, 0, 0, 0.45);
+
+      --transition-fast: 0.18s ease-out;
+      --transition-med: 0.22s ease-out;
+    }
+
+    /* ================================
+       BASE ELEMENTS
+       ================================ */
+
+    html,
+    body {
+      height: 100%;
+      width: 100%;
+    }
+
+    body {
+      font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      background: radial-gradient(circle at top, #111111 0, #000000 55%, #020617 100%);
+      color: var(--text-primary);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    button {
+      font-family: inherit;
+    }
+
+    /* Utility classes */
+
+    .hidden {
+      display: none !important;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    /* ================================
+       LAYOUT: PAGE SHELL
+       ================================ */
+
+    .app-shell {
+      min-height: 100vh;
       display: flex;
-      justify-content: space-between;
-      padding: 12px 16px;
-      background: #111111;
-      border-bottom: 1px solid #333333;
+      flex-direction: column;
+      background: radial-gradient(circle at top, #111827 0, #020617 45%, #000000 100%);
+    }
+
+    .app-inner {
+      flex: 1;
+      width: 100%;
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 16px 16px 40px;
+    }
+
+    @media (min-width: 768px) {
+      .app-inner {
+        padding: 20px 24px 56px;
+      }
+    }
+
+    /* ================================
+       HEADER
+       ================================ */
+
+    .app-header {
       position: sticky;
       top: 0;
-      z-index: 10;
+      z-index: 30;
+      backdrop-filter: blur(16px);
+      background: linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 0.92),
+        rgba(0, 0, 0, 0.86),
+        transparent
+      );
+      border-bottom: 1px solid rgba(31, 41, 55, 0.9);
     }
 
-    header nav {
+    .app-header-inner {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 10px 16px 10px;
       display: flex;
-      flex-wrap: wrap;
-      gap: 4px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
     }
 
-    header nav button {
-      background: none;
-      border: none;
-      padding: 8px 12px;
-      font-size: 14px;
-      cursor: pointer;
-      color: #f7f7f7;
+    @media (min-width: 768px) {
+      .app-header-inner {
+        padding: 10px 24px 12px;
+      }
+    }
+
+    .brand-lockup {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-mark {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      border: 1px solid rgba(148, 163, 184, 0.45);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at top, #f9fafb 0, #d1d5db 45%, #020617 100%);
+      box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.8);
+    }
+
+    .brand-mark span {
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: #020617;
+    }
+
+    .brand-text {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+    }
+
+    .brand-title {
+      font-size: 13px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #e5e7eb;
+    }
+
+    .brand-subtitle {
+      font-size: 11px;
+      color: #9ca3af;
+    }
+
+    /* Header right cluster */
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .header-toggle-wrap {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 2px;
       border-radius: 999px;
+      background: rgba(15, 23, 42, 0.88);
+      border: 1px solid rgba(55, 65, 81, 0.9);
     }
 
-    header nav button.active {
-      font-weight: 600;
-      background: #f7f7f7;
-      color: #000;
+    .header-mode-pill {
+      border-radius: 999px;
+      padding: 4px 10px;
+      font-size: 11px;
+      border: none;
+      cursor: pointer;
+      color: #9ca3af;
+      background: transparent;
+      transition: background var(--transition-fast), color var(--transition-fast);
     }
+
+    .header-mode-pill.active {
+      background: radial-gradient(circle at top left, #ffffff 0, #d1d5db 50%, #111827 100%);
+      color: #020617;
+      font-weight: 600;
+    }
+
+    .lang-select {
+      padding: 4px 8px;
+      font-size: 11px;
+      border-radius: 999px;
+      border: 1px solid rgba(75, 85, 99, 0.9);
+      background: rgba(15, 23, 42, 0.96);
+      color: #e5e7eb;
+      outline: none;
+    }
+
+    .lang-select:focus-visible {
+      box-shadow: 0 0 0 1px var(--accent-focus);
+    }
+
+    /* ================================
+       SCENES
+       ================================ */
+
+    /*
+      We use .scene for all main panels (home, sep, mih).
+      .scene is display:none by default.
+      .scene--active is display:block.
+      The initial HTML marks the Home scene as .scene scene--active
+      so it shows even before JavaScript runs.
+    */
 
     .scene {
       display: none;
-      max-width: 900px;
-      margin: auto;
-      padding: 20px;
+      padding-top: 16px;
     }
-    .scene.active {
+
+    .scene--active {
       display: block;
     }
 
-    h1 {
-      color: #f7f7f7;
+    @media (min-width: 768px) {
+      .scene {
+        padding-top: 24px;
+      }
+    }
+
+    /* ================================
+       HOME SCENE: SPLASH
+       ================================ */
+
+    .home-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr);
+      gap: 18px;
+    }
+
+    @media (min-width: 900px) {
+      .home-layout {
+        grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.75fr);
+        align-items: stretch;
+      }
+    }
+
+    .home-hero-card {
+      border-radius: var(--radius-card);
+      border: 1px solid var(--border-soft);
+      background: radial-gradient(circle at top left, #020617 0, #020617 30%, #000000 100%);
+      box-shadow: var(--shadow-soft);
+      padding: 20px 18px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    @media (min-width: 768px) {
+      .home-hero-card {
+        padding: 26px 24px 26px;
+      }
+    }
+
+    .home-kicker {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.28em;
+      color: #6b7280;
+    }
+
+    .home-title {
       font-size: 26px;
-      margin-bottom: 10px;
-    }
-
-    h2 {
-      color: #f7f7f7;
-      font-size: 20px;
-      margin-top: 20px;
-      margin-bottom: 8px;
-    }
-
-    .btn {
-      background: #f7f7f7;
-      color: #000;
-      border: none;
-      padding: 10px 16px;
-      border-radius: 999px;
-      cursor: pointer;
+      line-height: 1.25;
       font-weight: 600;
-      margin: 8px 0;
+      color: #f9fafb;
+    }
+
+    @media (min-width: 768px) {
+      .home-title {
+        font-size: 30px;
+      }
+    }
+
+    .home-body {
       font-size: 14px;
+      color: var(--text-muted);
+      max-width: 560px;
     }
 
-    .btn-small {
-      padding: 6px 10px;
-      font-size: 13px;
+    .home-pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 4px;
+      margin-bottom: 6px;
     }
 
-    .danger {
-      background: #ff0026;
-      color: #fff;
-    }
-
-    .input {
-      width: 100%;
-      padding: 10px;
-      margin: 6px 0 14px;
-      border: 1px solid #555;
-      border-radius: 6px;
-      font-size: 16px;
-      background: #111;
-      color: #f7f7f7;
-      box-sizing: border-box;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 14px;
-      background: #111111;
-    }
-
-    th, td {
-      padding: 8px;
-      border-bottom: 1px solid #333;
-      text-align: left;
-      color: #f7f7f7;
-      font-size: 14px;
-    }
-
-    .badge-league {
+    .home-pill {
       padding: 3px 8px;
-      border-radius: 6px;
-      font-size: 12px;
-      color: white;
-      display: inline-block;
-    }
-    .amateurs { background: #6c757d; }
-    .intermediates { background: #007bff; }
-    .pros { background: #28a745; }
-    .legends { background: #ffb300; }
-    .pending { background: #888888; }
-
-    .card-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 16px;
-      margin-top: 16px;
-    }
-    .card {
-      flex: 1 1 260px;
-      background: #111111;
-      border-radius: 10px;
-      padding: 16px;
-      border: 1px solid #333;
-    }
-    .card h2 {
-      margin-top: 0;
-    }
-
-    /* SEP shop styling */
-    .sep-hero {
-      margin-bottom: 20px;
-    }
-    .sep-products {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 16px;
-      margin-top: 12px;
-    }
-    .sep-product {
-      flex: 1 1 260px;
-      background: #111111;
-      border-radius: 10px;
-      padding: 16px;
-      border: 1px solid #333;
-    }
-    .sep-product-title {
-      font-weight: 600;
-      margin-bottom: 4px;
-    }
-    .sep-product-price {
-      font-size: 14px;
-      color: #bbbbbb;
-      margin-bottom: 8px;
-    }
-    .sep-product-note {
-      font-size: 13px;
-      color: #999999;
-    }
-
-    .sep-pill {
-      display: inline-block;
-      padding: 4px 10px;
       border-radius: 999px;
-      border: 1px solid #444;
-      font-size: 12px;
-      color: #bbbbbb;
-      margin-right: 6px;
+      border: 1px solid rgba(75, 85, 99, 0.9);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: #9ca3af;
+    }
+
+    .home-footer-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
       margin-top: 6px;
     }
 
-    @media (max-width: 600px) {
-      header {
-        flex-direction: column;
-        gap: 8px;
-        align-items: flex-start;
-      }
-      header nav {
-        flex-wrap: wrap;
+    .home-primary-btn {
+      border-radius: 999px;
+      padding: 8px 16px;
+      font-size: 13px;
+      font-weight: 500;
+      border: none;
+      cursor: pointer;
+      background: #ffffff;
+      color: #020617;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.75);
+      transition: transform var(--transition-fast), box-shadow var(--transition-fast),
+                  background var(--transition-fast), color var(--transition-fast);
+    }
+
+    .home-primary-btn span.chevron {
+      font-size: 14px;
+      transform: translateY(1px);
+    }
+
+    .home-primary-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 16px 36px rgba(15, 23, 42, 0.9);
+    }
+
+    .home-secondary-btn {
+      border-radius: 999px;
+      padding: 7px 13px;
+      font-size: 12px;
+      border: 1px solid rgba(75, 85, 99, 0.95);
+      cursor: pointer;
+      background: transparent;
+      color: #e5e7eb;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background var(--transition-fast), border-color var(--transition-fast),
+                  color var(--transition-fast), transform var(--transition-fast);
+    }
+
+    .home-secondary-btn:hover {
+      background: rgba(17, 24, 39, 0.9);
+      transform: translateY(-1px);
+    }
+
+    /* Right column: project cards */
+
+    .home-projects-column {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    @media (min-width: 1200px) {
+      .home-projects-column {
+        gap: 12px;
       }
     }
+
+    .project-card {
+      border-radius: var(--radius-card);
+      border: 1px solid var(--border-soft);
+      background: linear-gradient(
+        135deg,
+        rgba(15, 23, 42, 0.98),
+        rgba(10, 10, 10, 1)
+      );
+      box-shadow: var(--shadow-subtle);
+      padding: 14px 14px 16px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      transition: border-color var(--transition-med), transform var(--transition-med),
+                  box-shadow var(--transition-med), background var(--transition-med);
+    }
+
+    @media (min-width: 768px) {
+      .project-card {
+        padding: 16px 16px 18px;
+      }
+    }
+
+    .project-card:hover {
+      transform: translateY(-3px);
+      border-color: rgba(148, 163, 184, 0.9);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.9);
+    }
+
+    .project-tag-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .project-tag {
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(75, 85, 99, 0.75);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: #9ca3af;
+    }
+
+    .project-tag-right {
+      font-size: 10px;
+      color: #6b7280;
+    }
+
+    .project-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #f9fafb;
+    }
+
+    .project-body {
+      font-size: 13px;
+      color: #9ca3af;
+    }
+
+    .project-meta-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      color: #6b7280;
+      margin-top: 3px;
+    }
+
+    .project-meta-left {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .dot {
+      width: 3px;
+      height: 3px;
+      border-radius: 999px;
+      background: #4b5563;
+    }
+
+    .project-meta-right {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      color: #9ca3af;
+    }
+
+    .project-meta-right span.chevron {
+      font-size: 13px;
+      transform: translateY(1px);
+    }
+
+    /* ================================
+       SEP SECTION (shell only here)
+       ================================ */
+
+    .sep-layout {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    @media (min-width: 960px) {
+      .sep-layout {
+        gap: 28px;
+      }
+    }
+
+    .sep-hero {
+      border-radius: var(--radius-card);
+      border: 1px solid var(--border-soft);
+      background: radial-gradient(circle at top left, #020617 0, #020617 40%, #000000 100%);
+      box-shadow: var(--shadow-soft);
+      padding: 22px 18px 20px;
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr);
+      gap: 18px;
+    }
+
+    @media (min-width: 900px) {
+      .sep-hero {
+        padding: 26px 24px 22px;
+        grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+        align-items: center;
+      }
+    }
+
+    .sep-hero-copy {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .sep-hero-kicker {
+      font-size: 11px;
+      letter-spacing: 0.26em;
+      text-transform: uppercase;
+      color: #9ca3af;
+    }
+
+    .sep-hero-title {
+      font-size: 24px;
+      line-height: 1.2;
+      font-weight: 600;
+      color: #f9fafb;
+    }
+
+    @media (min-width: 768px) {
+      .sep-hero-title {
+        font-size: 28px;
+      }
+    }
+
+    .sep-hero-body {
+      font-size: 14px;
+      color: var(--text-muted);
+      max-width: 520px;
+    }
+
+    .sep-hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .sep-primary-btn {
+      border-radius: 999px;
+      padding: 8px 16px;
+      border: none;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      background: #f9fafb;
+      color: #020617;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.9);
+      transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+    }
+
+    .sep-primary-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 18px 40px rgba(15, 23, 42, 0.95);
+    }
+
+    .sep-secondary-btn {
+      border-radius: 999px;
+      padding: 7px 13px;
+      border: 1px solid rgba(75, 85, 99, 0.9);
+      cursor: pointer;
+      font-size: 12px;
+      background: transparent;
+      color: #e5e7eb;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background var(--transition-fast), border-color var(--transition-fast),
+                  transform var(--transition-fast);
+    }
+
+    .sep-secondary-btn:hover {
+      background: rgba(15, 23, 42, 0.95);
+      border-color: rgba(148, 163, 184, 0.9);
+      transform: translateY(-1px);
+    }
+
+    .sep-hero-meta {
+      font-size: 11px;
+      color: #6b7280;
+      margin-top: 6px;
+    }
+
+    .sep-hero-visual {
+      border-radius: 18px;
+      border: 1px solid rgba(55, 65, 81, 0.9);
+      background:
+        radial-gradient(circle at top, #f9fafb 0, #cbd5f5 30%, #020617 100%);
+      min-height: 180px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.75);
+    }
+
+    @media (min-width: 900px) {
+      .sep-hero-visual {
+        min-height: 220px;
+      }
+    }
+
+    /* simple "floating tee" placeholder */
+    .sep-tee {
+      width: 140px;
+      height: 120px;
+      border-radius: 30px;
+      border: 2px solid rgba(15, 23, 42, 0.9);
+      background: linear-gradient(to bottom, #ffffff 0, #f3f4f6 42%, #e5e7eb 100%);
+      position: absolute;
+      left: 50%;
+      top: 52%;
+      transform: translate(-50%, -50%);
+      box-shadow: 0 18px 40px rgba(15, 23, 42, 0.85);
+    }
+
+    .sep-tee-neck {
+      position: absolute;
+      top: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 52px;
+      height: 26px;
+      border-radius: 999px;
+      border: 2px solid rgba(15, 23, 42, 0.9);
+      background: #ffffff;
+    }
+
+    .sep-tee-sleeve {
+      position: absolute;
+      top: 32px;
+      width: 38px;
+      height: 30px;
+      border-radius: 18px;
+      border: 2px solid rgba(15, 23, 42, 0.9);
+      background: linear-gradient(to bottom, #ffffff 0, #f3f4f6 100%);
+    }
+
+    .sep-tee-sleeve.left {
+      left: -22px;
+    }
+
+    .sep-tee-sleeve.right {
+      right: -22px;
+    }
+
+    .sep-tee-label {
+      position: absolute;
+      bottom: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 62px;
+      height: 16px;
+      border-radius: 999px;
+      background: #020617;
+    }
+
+    .sep-hero-pill {
+      position: absolute;
+      bottom: 16px;
+      right: 18px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(148, 163, 184, 0.9);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: #e5e7eb;
+    }
+
+    /* Products grid + order flow will be defined in Part 2 */
+
   </style>
 </head>
 
 <body>
-
-<header>
-  <nav>
-    <button onclick="showScene('welcome')" data-i18n="nav.welcome"></button>
-    <button onclick="showScene('sep-shop')" data-i18n="nav.sepshop"></button>
-    <button onclick="showScene('sep-about')" data-i18n="nav.sepabout"></button>
-    <button onclick="showScene('leaderboard')" data-i18n="nav.leaderboard"></button>
-    <button onclick="showScene('stats')" data-i18n="nav.stats"></button>
-    <button onclick="showScene('about')" data-i18n="nav.about"></button>
-    <button id="nav-login-btn" onclick="showScene('login')" data-i18n="nav.login"></button>
-  </nav>
-
-  <div style="display:flex; gap:8px; align-items:center;">
-    <select id="lang-select">
-      <option value="en">English</option>
-      <option value="da">Dansk</option>
-      <option value="cs">Česky</option>
-    </select>
-
-    <div id="user-controls"></div>
-  </div>
-</header>
-
-<!-- GLOBAL WELCOME SCENE (choose SEP / MIH) -->
-<section id="scene-welcome" class="scene active">
-  <h1 data-i18n="welcome.title"></h1>
-  <p data-i18n="welcome.subtitle"></p>
-
-  <div class="card-row">
-    <!-- Make It Happen card -->
-    <div class="card">
-      <h2 data-i18n="welcome.mihTitle"></h2>
-      <p data-i18n="welcome.mihText"></p>
-      <div id="welcome-mih-cta">
-        <button class="btn" onclick="showScene('login')" data-i18n="welcome.cta"></button>
-      </div>
-    </div>
-
-    <!-- SEP shop card -->
-    <div class="card">
-      <h2 data-i18n="welcome.sepTitle"></h2>
-      <p data-i18n="welcome.sepText"></p>
-      <button class="btn" onclick="showScene('sep-shop')" data-i18n="welcome.sepcta"></button>
-    </div>
-  </div>
-</section>
-
-<!-- SEP SHOP SCENE -->
-<section id="scene-sep-shop" class="scene">
-  <div class="sep-hero">
-    <h1 data-i18n="sep.shopTitle"></h1>
-    <p data-i18n="sep.shopIntro"></p>
-    <p>
-      <span class="sep-pill">Copenhagen</span>
-      <span class="sep-pill" data-i18n="sep.pillSmallRuns"></span>
-      <span class="sep-pill" data-i18n="sep.pillNoHype"></span>
-    </p>
-    <button class="btn" onclick="showScene('sep-about')" data-i18n="sep.aboutButton"></button>
-  </div>
-
-  <h2 data-i18n="sep.productsHeading"></h2>
-
-  <div class="sep-products">
-    <div class="sep-product">
-      <div class="sep-product-title" data-i18n="sep.product1Name"></div>
-      <div class="sep-product-price" data-i18n="sep.productPrice"></div>
-      <p class="sep-product-note" data-i18n="sep.product1Desc"></p>
-    </div>
-    <div class="sep-product">
-      <div class="sep-product-title" data-i18n="sep.product2Name"></div>
-      <div class="sep-product-price" data-i18n="sep.productPrice"></div>
-      <p class="sep-product-note" data-i18n="sep.product2Desc"></p>
-    </div>
-    <div class="sep-product">
-      <div class="sep-product-title" data-i18n="sep.product3Name"></div>
-      <div class="sep-product-price" data-i18n="sep.productPrice"></div>
-      <p class="sep-product-note" data-i18n="sep.product3Desc"></p>
-    </div>
-  </div>
-
-  <h2 data-i18n="sep.orderHeading"></h2>
-  <p data-i18n="sep.orderText1"></p>
-  <p data-i18n="sep.orderText2"></p>
-</section>
-
-<!-- ABOUT SEP SCENE -->
-<section id="scene-sep-about" class="scene">
-  <h1 data-i18n="sep.aboutTitle"></h1>
-  <p data-i18n="sep.about1"></p>
-  <p data-i18n="sep.about2"></p>
-  <p data-i18n="sep.about3"></p>
-  <p data-i18n="sep.about4"></p>
-  <button class="btn" onclick="showScene('sep-shop')" data-i18n="sep.backToShop"></button>
-</section>
-
-<!-- LOGIN SCENE (MIH) -->
-<section id="scene-login" class="scene">
-  <h1 data-i18n="login.title"></h1>
-  <p data-i18n="login.description"></p>
-
-  <form id="login-form">
-    <label data-i18n="login.name"></label>
-    <input id="login-name" class="input" type="text">
-
-    <label data-i18n="login.password"></label>
-    <input id="login-password" class="input" type="password">
-
-    <button class="btn" data-i18n="login.submit"></button>
-  </form>
-
-  <button id="view-code-btn" class="btn btn-small" type="button" style="margin-top:4px;" data-i18n="login.viewPasswordButton"></button>
-  <p id="saved-code-display" style="display:none; margin-top:6px;"></p>
-
-  <p data-i18n="login.note"></p>
-</section>
-
-<!-- LEADERBOARD SCENE -->
-<section id="scene-leaderboard" class="scene">
-  <h1 data-i18n="leaderboard.title"></h1>
-
-  <label data-i18n="leaderboard.filter"></label>
-  <select id="league-filter" class="input" style="max-width:260px;">
-    <option value="all" data-i18n="leaderboard.all"></option>
-    <option value="pending" data-i18n="league.pending"></option>
-    <option value="amateurs" data-i18n="league.amateurs"></option>
-    <option value="intermediates" data-i18n="league.intermediates"></option>
-    <option value="pros" data-i18n="league.pros"></option>
-    <option value="legends" data-i18n="league.legends"></option>
-  </select>
-
-  <table>
-    <thead>
-      <tr>
-        <th data-i18n="lb.rank"></th>
-        <th data-i18n="lb.name"></th>
-        <th data-i18n="lb.league"></th>
-        <th data-i18n="lb.distance"></th>
-        <th data-i18n="lb.time"></th>
-      </tr>
-    </thead>
-    <tbody id="leaderboard-body"></tbody>
-  </table>
-
-  <p id="no-entries" data-i18n="leaderboard.none"></p>
-
-  <!-- Pending view -->
-  <h2 data-i18n="pending.title"></h2>
-  <p data-i18n="pending.subtitle"></p>
-
-  <table>
-    <thead>
-      <tr>
-        <th data-i18n="pending.rank"></th>
-        <th data-i18n="pending.name"></th>
-        <th data-i18n="pending.joinMonth"></th>
-      </tr>
-    </thead>
-    <tbody id="pending-body"></tbody>
-  </table>
-
-  <p id="no-pending" data-i18n="pending.none"></p>
-</section>
-
-<!-- STATS SCENE -->
-<section id="scene-stats" class="scene">
-  <h1 data-i18n="stats.title"></h1>
-
-  <table>
-    <thead>
-      <tr>
-        <th data-i18n="lb.name"></th>
-        <th data-i18n="lb.league"></th>
-        <th data-i18n="stats.runs"></th>
-        <th data-i18n="stats.totaldistance"></th>
-        <th data-i18n="stats.totaltime"></th>
-        <th data-i18n="stats.avgdistance"></th>
-        <th data-i18n="stats.bestdistance"></th>
-        <th data-i18n="stats.improvement"></th>
-      </tr>
-    </thead>
-    <tbody id="stats-body"></tbody>
-  </table>
-
-  <p id="no-stats" data-i18n="stats.none"></p>
-</section>
-
-<!-- ABOUT MIH SCENE -->
-<section id="scene-about" class="scene">
-  <h1 data-i18n="about.title"></h1>
-  <p data-i18n="about.text1"></p>
-  <p data-i18n="about.text2"></p>
-  <p data-i18n="about.text3"></p>
-</section>
-
-<!-- ENTRY FORM + MY ACTIVITIES -->
-<section id="scene-entry" class="scene">
-  <h1 data-i18n="entry.title"></h1>
-
-  <form id="entry-form">
-    <label data-i18n="entry.distance"></label>
-    <input id="distance" type="number" step="0.01" class="input">
-
-    <label data-i18n="entry.time"></label>
-    <input id="time" type="number" step="0.01" class="input">
-
-    <button class="btn" data-i18n="entry.submit"></button>
-  </form>
-
-  <h2 data-i18n="entry.my"></h2>
-  <table>
-    <thead>
-      <tr>
-        <th data-i18n="entry.date"></th>
-        <th data-i18n="entry.distance"></th>
-        <th data-i18n="entry.time"></th>
-        <th data-i18n="entry.actions"></th>
-      </tr>
-    </thead>
-    <tbody id="my-activities-body"></tbody>
-  </table>
-
-  <p id="no-my-activities" data-i18n="entry.none"></p>
-</section>
-
-<!-- PROFILE SCENE -->
-<section id="profile-card" class="scene" style="display:none;">
-  <h1 id="profile-title"></h1>
-  <p id="profile-summary"></p>
-
-  <table>
-    <tr><th data-i18n="profile.runs"></th><td id="profile-runs"></td></tr>
-    <tr><th data-i18n="profile.totaldistance"></th><td id="profile-total-distance"></td></tr>
-    <tr><th data-i18n="profile.totaltime"></th><td id="profile-total-time"></td></tr>
-    <tr><th data-i18n="profile.avgdistance"></th><td id="profile-avg-distance"></td></tr>
-    <tr><th data-i18n="profile.avgpace"></th><td id="profile-avg-pace"></td></tr>
-    <tr><th data-i18n="profile.longest"></th><td id="profile-longest"></td></tr>
-    <tr><th data-i18n="profile.best10k"></th><td id="profile-10k"></td></tr>
-    <tr><th data-i18n="profile.best5k"></th><td id="profile-5k"></td></tr>
-  </table>
-</section>
-
-<!-- Firebase scripts -->
-<script src="https://www.gstatic.com/firebasejs/11.0.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore-compat.js"></script>
-
-<script>
-  // ==========================
-  //  CONFIG
-  // ==========================
-
-  const firebaseConfig = {
-    // TODO: replace with your SEP/MIH Firebase project config:
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_AUTH_DOMAIN",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_BUCKET",
-    messagingSenderId: "YOUR_SENDER_ID",
-    appId: "YOUR_APP_ID"
-  };
-
-  const LS_CURRENT_USER_KEY = "mih_current_user_id";
-  const LS_LANG_KEY = "mih_lang";
-  const LS_PASSWORD_KEY = "mih_saved_password";
-
-  const LEAGUES = ["amateurs", "intermediates", "pros", "legends"];
-  const MIN_RUNS_FOR_PLACEMENT = 3;
-
-  let db = null;
-  let users = [];
-  let entries = [];
-  let currentUser = null;
-  let currentLang = "en";
-  let autoRunning = false;
-
-  // ==========================
-  //  TRANSLATIONS
-  // ==========================
-
-  const translations = {
-    en: {
-      // nav
-      "nav.welcome": "Home",
-      "nav.sepshop": "SEP shop",
-      "nav.sepabout": "About SEP",
-      "nav.leaderboard": "Leaderboard",
-      "nav.stats": "Stats",
-      "nav.about": "About MIH",
-      "nav.login": "Login",
-
-      // global welcome
-      "welcome.title": "Two simple projects. One calm place.",
-      "welcome.subtitle": "Choose between a small running challenge and a small clothing brand. Both are simple, quiet and built to be kind.",
-      "welcome.mihTitle": "Make It Happen",
-      "welcome.mihText": "Log your runs, walks or rides. See where you land in your league over time.",
-      "welcome.cta": "Log in or create account",
-      "welcome.sepTitle": "SEP – Se Proairesis",
-      "welcome.sepText": "Minimal clothing made in Copenhagen. A white T shirt, black hoodie and black trousers.",
-      "welcome.sepcta": "Go to SEP shop",
-
-      // SEP text
-      "sep.shopTitle": "SEP shop",
-      "sep.shopIntro": "SEP is a small clothing brand. A few calm pieces you can wear almost every day.",
-      "sep.pillSmallRuns": "Small print runs",
-      "sep.pillNoHype": "No hype drops",
-      "sep.aboutButton": "About SEP",
-      "sep.productsHeading": "Pieces you can start with",
-      "sep.product1Name": "White T shirt",
-      "sep.product2Name": "Black hoodie",
-      "sep.product3Name": "Black trousers",
-      "sep.productPrice": "180 kr. per piece",
-      "sep.product1Desc": "Soft white T shirt, hand pressed in Copenhagen. Works with almost anything.",
-      "sep.product2Desc": "Black hoodie with a clean front. Warm, simple and easy to wear.",
-      "sep.product3Desc": "Straight black trousers with a calm fit. Made to feel like a favourite pair.",
-      "sep.orderHeading": "How to order",
-      "sep.orderText1": "Right now orders are handled manually. Choose what you want and send a message with size and shipping details.",
-      "sep.orderText2": "Payment is via MobilePay in Denmark. You get a simple confirmation and a realistic delivery time.",
-      "sep.aboutTitle": "About SEP",
-      "sep.about1": "SEP stands for Se Proairesis. Roughly translated it means “Your Choice”. The brand is built around that idea.",
-      "sep.about2": "It is about choosing a few pieces that feel good and last, instead of chasing endless new things.",
-      "sep.about3": "Each print run is small and hand pressed in Copenhagen. There are no big collections and no exhausting drops.",
-      "sep.about4": "You buy something when you actually want it. No tracking, no ads a week later, no pressure.",
-      "sep.backToShop": "Back to SEP shop",
-
-      // login
-      "login.title": "Log in to Make It Happen",
-      "login.description": "Create a simple account so the site knows who you are and only you can manage your activities.",
-      "login.name": "Name",
-      "login.password": "Password",
-      "login.submit": "Log in / Create account",
-      "login.note": "Your account is stored in Firebase, not just on your device. If it is not used for a long time it may be cleaned up.",
-      "login.viewPasswordButton": "View saved login password",
-      "login.savedPassword": "Saved login password on this device: {password}",
-      "login.noSavedPassword": "No login password has been saved on this device yet.",
-
-      // leagues
-      "league.amateurs": "Amateurs",
-      "league.intermediates": "Intermediates",
-      "league.pros": "Pros",
-      "league.legends": "Legends",
-      "league.pending": "Pending",
-
-      // leaderboard
-      "leaderboard.title": "Leaderboard",
-      "leaderboard.filter": "Filter by league:",
-      "leaderboard.all": "All leagues",
-      "leaderboard.none": "No activities yet. Be the first to log something.",
-      "lb.rank": "#",
-      "lb.name": "Name",
-      "lb.league": "League",
-      "lb.distance": "Total distance (km)",
-      "lb.time": "Total time (min)",
-
-      // pending
-      "pending.title": "Pending joiners",
-      "pending.subtitle": "New sign-ups who will be placed into leagues after they have logged enough activity.",
-      "pending.rank": "#",
-      "pending.name": "Name",
-      "pending.joinMonth": "Join month",
-      "pending.none": "No pending joiners right now.",
-
-      // stats
-      "stats.title": "Player stats and league moves",
-      "stats.runs": "Runs",
-      "stats.totaldistance": "Total distance (km)",
-      "stats.totaltime": "Total time (min)",
-      "stats.avgdistance": "Average distance (km)",
-      "stats.bestdistance": "Longest distance (km)",
-      "stats.improvement": "Improvement",
-      "stats.none": "Stats will appear once people start logging activities.",
-
-      // about MIH
-      "about.title": "About Make It Happen",
-      "about.text1": "Make It Happen is a simple, fair health challenge. The goal is not elite sport, but a clear, friendly way to move more and see progress over time.",
-      "about.text2": "You can walk, run or cycle and log your distance and time. The system looks at both how far you go and how long you spend moving, so dedication also matters, not just speed.",
-      "about.text3": "New players sign up first and settle into leagues over time as they log more activities.",
-
-      // entry
-      "entry.title": "Log a new activity",
-      "entry.distance": "Distance (km)",
-      "entry.time": "Time (minutes)",
-      "entry.submit": "Save my activity",
-      "entry.my": "My activities",
-      "entry.date": "Date",
-      "entry.actions": "Actions",
-      "entry.none": "You have no activities yet for this account.",
-
-      // profile
-      "profile.runs": "Runs",
-      "profile.totaldistance": "Total distance",
-      "profile.totaltime": "Total time",
-      "profile.avgdistance": "Average distance",
-      "profile.avgpace": "Average pace",
-      "profile.longest": "Longest activity",
-      "profile.best10k": "Fastest ~10 km",
-      "profile.best5k": "Fastest ~5 km",
-
-      // user header
-      "user.notLoggedIn": "Not logged in",
-      "user.loginButton": "Login",
-      "user.loggedInAs": "Logged in as {name}",
-      "user.leagueLabel": "League: {league}",
-      "user.addActivity": "Add activity",
-      "user.deleteAccount": "Delete account",
-
-      // alerts
-      "alert.loginMissing": "Please enter both name and password.",
-      "alert.firebase": "Firebase is not configured yet. Please add your Firebase config in the script.",
-      "alert.mustLogin": "Please log in before adding activities.",
-      "alert.activityInvalid": "Please fill in distance and time correctly with positive values.",
-      "alert.noPlayers": "No players yet.",
-      "alert.notEnoughPlayers": "You need at least 8 players for promotions and relegations.",
-      "alert.promotionsDone": "Promotions and relegations applied: {up} up, {down} down.",
-      "alert.noActivitiesToPlace": "No activities yet, nothing to place.",
-      "alert.noPending": "No pending joiners ready to place.",
-      "alert.placeSummary": "Placed {placed} new joiner(s) into leagues. {skipped}",
-      "alert.placeSkipped": "{count} left pending (not enough data yet or for balance).",
-      "alert.deleteActivityConfirm": "Delete this activity?",
-      "alert.deleteAccountConfirm": "This will delete your account and all your activities. Are you sure?",
-      "alert.alreadyLoggedIn": "You are already logged in. Delete your account if you want to start over.",
-      "alert.passwordWrong": "Wrong password for this name."
-    },
-
-    da: {
-      "nav.welcome": "Forside",
-      "nav.sepshop": "SEP shop",
-      "nav.sepabout": "Om SEP",
-      "nav.leaderboard": "Rangliste",
-      "nav.stats": "Statistik",
-      "nav.about": "Om MIH",
-      "nav.login": "Log ind",
-
-      "welcome.title": "To enkle projekter. Ét roligt sted.",
-      "welcome.subtitle": "Vælg mellem en lille løbeudfordring og et lille tøjbrand. Begge er enkle, stille og venlige.",
-      "welcome.mihTitle": "Make It Happen",
-      "welcome.mihText": "Registrér dine løb, gåture eller cykelture. Se hvor du lander i din liga over tid.",
-      "welcome.cta": "Log ind eller opret konto",
-      "welcome.sepTitle": "SEP – Se Proairesis",
-      "welcome.sepText": "Minimalistisk tøj lavet i København. En hvid T-shirt, sort hoodie og sorte bukser.",
-      "welcome.sepcta": "Gå til SEP shop",
-
-      "sep.shopTitle": "SEP shop",
-      "sep.shopIntro": "SEP er et lille tøjbrand. Få rolige styles du kan bruge næsten hver dag.",
-      "sep.pillSmallRuns": "Små oplag",
-      "sep.pillNoHype": "Ingen hype drops",
-      "sep.aboutButton": "Om SEP",
-      "sep.productsHeading": "De første styles",
-      "sep.product1Name": "Hvid T-shirt",
-      "sep.product2Name": "Sort hoodie",
-      "sep.product3Name": "Sorte bukser",
-      "sep.productPrice": "180 kr. pr. del",
-      "sep.product1Desc": "Blød hvid T-shirt, håndtrykt i København. Passer til næsten alt.",
-      "sep.product2Desc": "Sort hoodie med roligt udtryk. Varm, enkel og nem at bruge.",
-      "sep.product3Desc": "Sorte bukser med afslappet pasform. Lavet til at føles som et yndlingspar.",
-      "sep.orderHeading": "Sådan bestiller du",
-      "sep.orderText1": "Lige nu håndteres bestillinger manuelt. Vælg hvad du vil have, og send en besked med størrelse og leveringsdetaljer.",
-      "sep.orderText2": "Betaling sker via MobilePay i Danmark. Du får en enkel bekræftelse og et realistisk leveringstidspunkt.",
-      "sep.aboutTitle": "Om SEP",
-      "sep.about1": "SEP står for Se Proairesis. Groft oversat betyder det “Dit valg”. Brandet er bygget op omkring den idé.",
-      "sep.about2": "Det handler om at vælge få ting, der føles gode og holder, i stedet for at jagte endeløse nyheder.",
-      "sep.about3": "Hvert oplag er lille og håndtrykt i København. Ingen store kollektioner og ingen udmattende drops.",
-      "sep.about4": "Du køber noget, når du faktisk har lyst. Ingen tracking, ingen reklamer en uge efter, intet pres.",
-      "sep.backToShop": "Tilbage til SEP shop",
-
-      "login.title": "Log ind på Make It Happen",
-      "login.description": "Lav en enkel konto, så siden ved hvem du er, og kun du kan styre dine aktiviteter.",
-      "login.name": "Navn",
-      "login.password": "Adgangskode",
-      "login.submit": "Log ind / Opret konto",
-      "login.note": "Din konto ligger i Firebase, ikke kun på din egen enhed. Hvis den ikke bruges i lang tid, kan den blive ryddet op.",
-      "login.viewPasswordButton": "Vis gemt adgangskode",
-      "login.savedPassword": "Gemt adgangskode på denne enhed: {password}",
-      "login.noSavedPassword": "Der er endnu ingen adgangskode gemt på denne enhed.",
-
-      "league.amateurs": "Amatører",
-      "league.intermediates": "Øvede",
-      "league.pros": "Prof",
-      "league.legends": "Legender",
-      "league.pending": "Afventer",
-
-      "leaderboard.title": "Rangliste",
-      "leaderboard.filter": "Filtrér efter liga:",
-      "leaderboard.all": "Alle ligaer",
-      "leaderboard.none": "Ingen aktiviteter endnu. Vær den første til at logge noget.",
-      "lb.rank": "#",
-      "lb.name": "Navn",
-      "lb.league": "Liga",
-      "lb.distance": "Samlet distance (km)",
-      "lb.time": "Samlet tid (min)",
-
-      "pending.title": "Afventende deltagere",
-      "pending.subtitle": "Nye tilmeldinger, som placeres i ligaer, når de har logget nok aktivitet.",
-      "pending.rank": "#",
-      "pending.name": "Navn",
-      "pending.joinMonth": "Tilmeldingsmåned",
-      "pending.none": "Ingen afventende deltagere lige nu.",
-
-      "stats.title": "Spillerstatistik og ligaflytninger",
-      "stats.runs": "Ture",
-      "stats.totaldistance": "Samlet distance (km)",
-      "stats.totaltime": "Samlet tid (min)",
-      "stats.avgdistance": "Gennemsnitlig distance (km)",
-      "stats.bestdistance": "Længste tur (km)",
-      "stats.improvement": "Forbedring",
-      "stats.none": "Statistik vises, når deltagerne begynder at logge aktiviteter.",
-
-      "about.title": "Om Make It Happen",
-      "about.text1": "Make It Happen er en enkel og fair sundhedsudfordring. Målet er ikke elitesport, men en klar og venlig måde at bevæge sig mere og se sin udvikling over tid.",
-      "about.text2": "Du kan gå, løbe eller cykle og registrere distance og tid. Systemet ser både på hvor langt du kommer, og hvor længe du er i bevægelse – dedikation tæller også, ikke kun fart.",
-      "about.text3": "Nye spillere tilmelder sig først og finder gradvist deres plads i ligaerne, efterhånden som de logger flere aktiviteter.",
-
-      "entry.title": "Registrér en ny aktivitet",
-      "entry.distance": "Distance (km)",
-      "entry.time": "Tid (minutter)",
-      "entry.submit": "Gem min aktivitet",
-      "entry.my": "Mine aktiviteter",
-      "entry.date": "Dato",
-      "entry.actions": "Handlinger",
-      "entry.none": "Du har ingen aktiviteter endnu på denne konto.",
-
-      "profile.runs": "Ture",
-      "profile.totaldistance": "Samlet distance",
-      "profile.totaltime": "Samlet tid",
-      "profile.avgdistance": "Gennemsnitlig distance",
-      "profile.avgpace": "Gennemsnitstempo",
-      "profile.longest": "Længste aktivitet",
-      "profile.best10k": "Hurtigste ~10 km",
-      "profile.best5k": "Hurtigste ~5 km",
-
-      "user.notLoggedIn": "Ikke logget ind",
-      "user.loginButton": "Log ind",
-      "user.loggedInAs": "Logget ind som {name}",
-      "user.leagueLabel": "Liga: {league}",
-      "user.addActivity": "Tilføj aktivitet",
-      "user.deleteAccount": "Slet konto",
-
-      "alert.loginMissing": "Indtast både navn og adgangskode.",
-      "alert.firebase": "Firebase er ikke sat korrekt op. Tilføj din Firebase-konfiguration i scriptet.",
-      "alert.mustLogin": "Log ind, før du tilføjer aktiviteter.",
-      "alert.activityInvalid": "Udfyld distance og tid korrekt med positive værdier.",
-      "alert.noPlayers": "Ingen spillere endnu.",
-      "alert.notEnoughPlayers": "Du skal bruge mindst 8 spillere til oprykning og nedrykning.",
-      "alert.promotionsDone": "Oprykning og nedrykning udført: {up} op, {down} ned.",
-      "alert.noActivitiesToPlace": "Ingen aktiviteter endnu, intet at placere.",
-      "alert.noPending": "Ingen afventende deltagere klar til placering.",
-      "alert.placeSummary": "Placerede {placed} ny(e) deltager(e) i ligaer. {skipped}",
-      "alert.placeSkipped": "{count} blev efterladt som Afventer (mangler data eller for balance).",
-      "alert.deleteActivityConfirm": "Slet denne aktivitet?",
-      "alert.deleteAccountConfirm": "Dette sletter din konto og alle dine aktiviteter. Er du sikker?",
-      "alert.alreadyLoggedIn": "Du er allerede logget ind. Slet din konto, hvis du vil starte forfra.",
-      "alert.passwordWrong": "Forkert adgangskode til dette navn."
-    },
-
-    cs: {
-      "nav.welcome": "Domů",
-      "nav.sepshop": "SEP shop",
-      "nav.sepabout": "O SEP",
-      "nav.leaderboard": "Žebříček",
-      "nav.stats": "Statistiky",
-      "nav.about": "O MIH",
-      "nav.login": "Přihlášení",
-
-      "welcome.title": "Dva jednoduché projekty. Jedno klidné místo.",
-      "welcome.subtitle": "Vyber si mezi běžečnou výzvou a malou značkou oblečení. Obě jsou jednoduché a bez zbytečného hluku.",
-      "welcome.mihTitle": "Make It Happen",
-      "welcome.mihText": "Zapisuj běhy, chůzi nebo jízdy na kole a sleduj, jak se posouváš v lize.",
-      "welcome.cta": "Přihlásit se nebo vytvořit účet",
-      "welcome.sepTitle": "SEP – Se Proairesis",
-      "welcome.sepText": "Minimalistické oblečení z Kodaně. Bílý tričko, černá mikina a černé kalhoty.",
-      "welcome.sepcta": "Přejít do SEP shopu",
-
-      "sep.shopTitle": "SEP shop",
-      "sep.shopIntro": "SEP je malá značka oblečení. Několik klidných kousků, které můžeš nosit skoro každý den.",
-      "sep.pillSmallRuns": "Malé série",
-      "sep.pillNoHype": "Žádné hype dropy",
-      "sep.aboutButton": "O SEP",
-      "sep.productsHeading": "První kousky",
-      "sep.product1Name": "Bílé tričko",
-      "sep.product2Name": "Černá mikina",
-      "sep.product3Name": "Černé kalhoty",
-      "sep.productPrice": "180 DKK za kus",
-      "sep.product1Desc": "Měkké bílé tričko, ručně potištěné v Kodani. Hodí se téměř ke všemu.",
-      "sep.product2Desc": "Černá mikina s čistým výrazem. Teplá, jednoduchá a pohodlná.",
-      "sep.product3Desc": "Černé kalhoty s uvolněným střihem. Mají působit jako oblíbený pár.",
-      "sep.orderHeading": "Jak objednat",
-      "sep.orderText1": "Objednávky se teď řeší ručně. Vyber si, co chceš, a pošli zprávu s velikostí a doručovací adresou.",
-      "sep.orderText2": "Platba je přes MobilePay v Dánsku. Dostaneš jednoduché potvrzení a realistický termín doručení.",
-      "sep.aboutTitle": "O značce SEP",
-      "sep.about1": "SEP znamená Se Proairesis. Volně přeloženo „Tvoje volba“. Značka stojí na tomto principu.",
-      "sep.about2": "Jde o to mít pár kousků, které jsou příjemné a dlouho vydrží, místo nekonečného honění trendů.",
-      "sep.about3": "Každá série je malá a ručně potištěná v Kodani. Žádné velké kolekce, žádné únavné dropy.",
-      "sep.about4": "Kupuješ jen tehdy, když opravdu chceš. Žádné sledování, žádné reklamy týden poté, žádný tlak.",
-      "sep.backToShop": "Zpět do SEP shopu",
-
-      "login.title": "Přihlášení do Make It Happen",
-      "login.description": "Vytvoř si jednoduchý účet, aby stránka věděla, kdo jsi, a jen ty jsi mohl(a) upravovat své aktivity.",
-      "login.name": "Jméno",
-      "login.password": "Heslo",
-      "login.submit": "Přihlásit / Vytvořit účet",
-      "login.note": "Tvůj účet je uložen ve Firebase, ne jen v zařízení. Pokud ho dlouho nepoužíváš, může být smazán.",
-      "login.viewPasswordButton": "Zobrazit uložené heslo",
-      "login.savedPassword": "Uložené heslo na tomto zařízení: {password}",
-      "login.noSavedPassword": "Na tomto zařízení zatím není uložené žádné heslo.",
-
-      "league.amateurs": "Amatéři",
-      "league.intermediates": "Středně pokročilí",
-      "league.pros": "Profíci",
-      "league.legends": "Legendární",
-      "league.pending": "Čeká",
-
-      "leaderboard.title": "Žebříček",
-      "leaderboard.filter": "Filtrovat podle ligy:",
-      "leaderboard.all": "Všechny ligy",
-      "leaderboard.none": "Zatím žádné aktivity. Buď první, kdo něco zapíše.",
-      "lb.rank": "#",
-      "lb.name": "Jméno",
-      "lb.league": "Liga",
-      "lb.distance": "Celková vzdálenost (km)",
-      "lb.time": "Celkový čas (min)",
-
-      "pending.title": "Čekající hráči",
-      "pending.subtitle": "Noví účastníci, kteří budou zařazeni do lig, jakmile budou mít dost aktivit.",
-      "pending.rank": "#",
-      "pending.name": "Jméno",
-      "pending.joinMonth": "Měsíc připojení",
-      "pending.none": "Momentálně žádní čekající hráči.",
-
-      "stats.title": "Statistiky hráčů a přesuny v ligách",
-      "stats.runs": "Běhy",
-      "stats.totaldistance": "Celková vzdálenost (km)",
-      "stats.totaltime": "Celkový čas (min)",
-      "stats.avgdistance": "Průměrná vzdálenost (km)",
-      "stats.bestdistance": "Nejdelší běh (km)",
-      "stats.improvement": "Zlepšení",
-      "stats.none": "Statistiky se objeví, jakmile hráči začnou zapisovat aktivity.",
-
-      "about.title": "O Make It Happen",
-      "about.text1": "Make It Happen je jednoduchá a férová výzva zaměřená na zdraví. Cílem není vrcholový sport, ale jasná a přátelská cesta, jak se víc hýbat a vidět svůj posun.",
-      "about.text2": "Můžeš chodit, běhat nebo jezdit na kole a zapisovat vzdálenost a čas. Systém sleduje jak, daleko jdeš, tak i jak dlouho jsi v pohybu – důležitá je i vytrvalost, ne jen rychlost.",
-      "about.text3": "Noví hráči se nejdřív zaregistrují a postupně nacházejí své místo v ligách podle toho, jak zapisují další aktivity.",
-
-      "entry.title": "Zapsat novou aktivitu",
-      "entry.distance": "Vzdálenost (km)",
-      "entry.time": "Čas (minuty)",
-      "entry.submit": "Uložit aktivitu",
-      "entry.my": "Moje aktivity",
-      "entry.date": "Datum",
-      "entry.actions": "Akce",
-      "entry.none": "Pro tento účet zatím nemáš žádné aktivity.",
-
-      "profile.runs": "Běhy",
-      "profile.totaldistance": "Celková vzdálenost",
-      "profile.totaltime": "Celkový čas",
-      "profile.avgdistance": "Průměrná vzdálenost",
-      "profile.avgpace": "Průměrné tempo",
-      "profile.longest": "Nejdelší aktivita",
-      "profile.best10k": "Nejrychlejší ~10 km",
-      "profile.best5k": "Nejrychlejší ~5 km",
-
-      "user.notLoggedIn": "Nepřihlášen",
-      "user.loginButton": "Přihlásit se",
-      "user.loggedInAs": "Přihlášen jako {name}",
-      "user.leagueLabel": "Liga: {league}",
-      "user.addActivity": "Přidat aktivitu",
-      "user.deleteAccount": "Smazat účet",
-
-      "alert.loginMissing": "Zadej prosím jméno i heslo.",
-      "alert.firebase": "Firebase ještě není nastavený. Přidej svou konfiguraci Firebase do skriptu.",
-      "alert.mustLogin": "Před přidáním aktivit se prosím přihlas.",
-      "alert.activityInvalid": "Vyplň vzdálenost a čas správně a jako kladná čísla.",
-      "alert.noPlayers": "Zatím žádní hráči.",
-      "alert.notEnoughPlayers": "Na přesuny mezi ligami je potřeba aspoň 8 hráčů.",
-      "alert.promotionsDone": "Přesuny v ligách provedeny: {up} nahoru, {down} dolů.",
-      "alert.noActivitiesToPlace": "Zatím žádné aktivity, není co přesouvat.",
-      "alert.noPending": "Žádní čekající hráči připravení k zařazení.",
-      "alert.placeSummary": "Do lig bylo zařazeno {placed} nových hráčů. {skipped}",
-      "alert.placeSkipped": "{count} ponecháno jako čekající (málo dat nebo kvůli rovnováze).",
-      "alert.deleteActivityConfirm": "Smazat tuto aktivitu?",
-      "alert.deleteAccountConfirm": "Tímto smažeš svůj účet i všechny aktivity. Pokračovat?",
-      "alert.alreadyLoggedIn": "Už jsi přihlášený/á. Pokud chceš začít znovu, nejdřív smaž účet.",
-      "alert.passwordWrong": "Špatné heslo pro toto jméno."
-    }
-  };
-
-  function t(key, vars) {
-    const dict = translations[currentLang] || translations.en;
-    let str = dict[key] || translations.en[key] || key;
-    if (vars) {
-      Object.keys(vars).forEach(k => {
-        str = str.replace(`{${k}}`, vars[k]);
-      });
-    }
-    return str;
-  }
-
-  function applyTranslations() {
-    document.querySelectorAll("[data-i18n]").forEach(el => {
-      const key = el.getAttribute("data-i18n");
-      el.textContent = t(key);
-    });
-    renderHeaderUser();
-    renderLeaderboard();
-    renderStats();
-    renderMyActivities();
-    renderPendingList();
-  }
-
-  function initLanguage() {
-    const select = document.getElementById("lang-select");
-    const saved = localStorage.getItem(LS_LANG_KEY) || "en";
-
-    currentLang = saved;
-
-    if (select) {
-      select.value = saved;
-      select.addEventListener("change", () => {
-        currentLang = select.value;
-        localStorage.setItem(LS_LANG_KEY, currentLang);
-        applyTranslations();
-      });
-    }
-
-    applyTranslations();
-  }
-
-  // ==========================
-  //  BASIC HELPERS
-  // ==========================
-
-  function currentMonthKey(ts) {
-    const d = ts ? new Date(ts) : new Date();
-    const y = d.getFullYear();
-    const m = d.getMonth() + 1;
-    return `${y}-${String(m).padStart(2, "0")}`;
-  }
-
-  function formatDate(ts) {
-    const d = new Date(ts);
-    if (isNaN(d.getTime())) return "";
-    return d.toLocaleDateString();
-  }
-
-  function formatMinutesPretty(minutes) {
-    if (!isFinite(minutes) || minutes <= 0) return "0:00";
-    const totalSeconds = Math.round(minutes * 60);
-    const m = Math.floor(totalSeconds / 60);
-    const s = totalSeconds % 60;
-    return `${m}:${s.toString().padStart(2, "0")}`;
-  }
-
-  function leagueIndex(league) {
-    return LEAGUES.indexOf(league);
-  }
-
-  function formatImprovement(value) {
-    if (!isFinite(value) || value === 0) return "0%";
-    const rounded = Math.round(value);
-    return (rounded > 0 ? "+" : "") + rounded + "%";
-  }
-
-  function getLeagueCounts() {
-    const counts = { amateurs: 0, intermediates: 0, pros: 0, legends: 0 };
-    users.forEach(u => {
-      if (counts[u.league] !== undefined) counts[u.league]++;
-    });
-    return counts;
-  }
-
-  function canMoveLeague(user, targetLeague) {
-    if (!LEAGUES.includes(targetLeague)) return false;
-    const counts = getLeagueCounts();
-    const from = LEAGUES.includes(user.league) ? user.league : null;
-
-    if (from && counts[from] !== undefined) {
-      counts[from] = Math.max(0, counts[from] - 1);
-    }
-    counts[targetLeague] = (counts[targetLeague] || 0) + 1;
-
-    const values = Object.values(counts);
-    const max = Math.max(...values);
-    const min = Math.min(...values);
-    return max - min <= 2;
-  }
-
-  // ==========================
-  //  NAVIGATION
-  // ==========================
-
-  function showScene(name) {
-    const scenes = document.querySelectorAll(".scene");
-    scenes.forEach(scene => {
-      scene.classList.remove("active");
-      scene.style.display = "none";
-    });
-
-    const el =
-      document.getElementById("scene-" + name) ||
-      document.getElementById(name);
-
-    if (el) {
-      el.classList.add("active");
-      el.style.display = "block";
-    }
-
-    const navButtons = document.querySelectorAll("header nav button");
-    navButtons.forEach(btn => btn.classList.remove("active"));
-    navButtons.forEach(btn => {
-      const onclick = btn.getAttribute("onclick") || "";
-      if (onclick.includes("'" + name + "'")) {
-        btn.classList.add("active");
-      }
-    });
-  }
-
-  function updateNavLoginVisibility() {
-    const btn = document.getElementById("nav-login-btn");
-    if (!btn) return;
-    if (currentUser) {
-      btn.style.display = "none";
-    } else {
-      btn.style.display = "inline-block";
-    }
-  }
-
-  // ==========================
-  //  FIREBASE INIT
-  // ==========================
-
-  function initFirebase() {
-    if (!firebaseConfig || !firebaseConfig.apiKey || firebaseConfig.apiKey === "YOUR_API_KEY") {
-      console.warn("Firebase not configured");
-      alert(t("alert.firebase"));
-      return;
-    }
-    try {
-      firebase.initializeApp(firebaseConfig);
-      db = firebase.firestore();
-    } catch (e) {
-      console.error("Firebase init error:", e);
-      alert(t("alert.firebase"));
-    }
-  }
-
-  // ==========================
-  //  DATA LOADING
-  // ==========================
-
-  async function loadAllData() {
-    if (!db) return;
-    const [usersSnap, actsSnap] = await Promise.all([
-      db.collection("users").get(),
-      db.collection("activities").get()
-    ]);
-
-    users = usersSnap.docs.map(doc => {
-      const data = doc.data();
-      if (!data.league) data.league = "pending";
-      if (!data.joinMonth) data.joinMonth = currentMonthKey(data.createdAt || Date.now());
-      return { id: doc.id, ...data };
-    });
-
-    entries = actsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
-    renderLeaderboard();
-    renderStats();
-    renderMyActivities();
-    renderPendingList();
-
-    if (!autoRunning) {
-      autoMonthlyUpdates();
-    }
-  }
-
-  function restoreCurrentUser() {
-    const storedId = localStorage.getItem(LS_CURRENT_USER_KEY);
-    if (!storedId) {
-      currentUser = null;
-      renderHeaderUser();
-      updateEntryFormLockState();
-      updateNavLoginVisibility();
-      return;
-    }
-    const found = users.find(u => u.id === storedId);
-    if (found) {
-      currentUser = found;
-    } else {
-      localStorage.removeItem(LS_CURRENT_USER_KEY);
-      currentUser = null;
-    }
-    renderHeaderUser();
-    updateEntryFormLockState();
-    updateNavLoginVisibility();
-  }
-
-  // ==========================
-  //  PLAYER STATS
-  // ==========================
-
-  function getPlayerStats() {
-    const byUser = {};
-
-    entries.forEach(e => {
-      const user = users.find(u => u.id === e.userId);
-      if (!user) return;
-      const key = user.id;
-      if (!byUser[key]) {
-        byUser[key] = {
-          userId: user.id,
-          name: user.name,
-          league: user.league || "pending",
-          runs: 0,
-          totalDistance: 0,
-          totalTime: 0,
-          bestDistance: 0,
-          firstEntry: null
-        };
-      }
-      const stats = byUser[key];
-
-      if (!stats.firstEntry || e.timestamp < stats.firstEntry.timestamp) {
-        stats.firstEntry = {
-          distanceKm: e.distanceKm,
-          timeMinutes: e.timeMinutes,
-          timestamp: e.timestamp
-        };
-      }
-
-      stats.runs++;
-      stats.totalDistance += e.distanceKm;
-      stats.totalTime += e.timeMinutes;
-      if (e.distanceKm > stats.bestDistance) stats.bestDistance = e.distanceKm;
-    });
-
-    let players = Object.values(byUser);
-
-    players.forEach(p => {
-      p.avgDistance = p.runs > 0 ? p.totalDistance / p.runs : 0;
-      p.speed = p.totalTime > 0 ? p.totalDistance / p.totalTime : 0;
-      let improvement = 0;
-      if (
-        p.firstEntry &&
-        p.firstEntry.distanceKm > 0 &&
-        p.firstEntry.timeMinutes > 0 &&
-        p.totalDistance > 0 &&
-        p.totalTime > 0
-      ) {
-        const baselinePace = p.firstEntry.timeMinutes / p.firstEntry.distanceKm;
-        const avgPace = p.totalTime / p.totalDistance;
-        if (baselinePace > 0) {
-          improvement = ((baselinePace - avgPace) / baselinePace) * 100;
-        }
-      }
-      p.improvement = improvement;
-    });
-
-    players.sort((a, b) => {
-      if (b.totalDistance !== a.totalDistance) {
-        return b.totalDistance - a.totalDistance;
-      }
-      if (b.totalTime !== a.totalTime) {
-        return b.totalTime - a.totalTime;
-      }
-      return b.speed - a.speed;
-    });
-
-    players = players.map((p, index) => ({ ...p, rank: index + 1 }));
-    return players;
-  }
-
-  // ==========================
-  //  MONTHLY: AUTO UPDATES (after 12th)
-  // ==========================
-
-  async function autoMonthlyUpdates() {
-    if (!db) return;
-    autoRunning = true;
-    try {
-      const today = new Date();
-      const monthKey = currentMonthKey(today);
-      const day = today.getDate();
-
-      // Run on or after the 12th of the month
-      if (day < 12) {
-        autoRunning = false;
-        return;
-      }
-
-      const metaRef = db.collection("meta").doc("global_state");
-      const snap = await metaRef.get();
-      const data = snap.exists ? snap.data() : {};
-
-      if (data.lastPromotionMonth === monthKey) {
-        autoRunning = false;
-        return;
-      }
-
-      await placeNewJoiners(true);
-      await applyPromotions(true);
-
-      await metaRef.set({ lastPromotionMonth: monthKey }, { merge: true });
-    } catch (e) {
-      console.error("Auto monthly updates error:", e);
-    } finally {
-      autoRunning = false;
-    }
-  }
-
-  // ==========================
-  //  MONTHLY: PLACE NEW JOINERS
-  // ==========================
-
-  async function placeNewJoiners(auto = false) {
-    if (!db) return;
-
-    const players = getPlayerStats();
-    if (!players.length) {
-      if (!auto) alert(t("alert.noActivitiesToPlace"));
-      return;
-    }
-
-    const nowKey = currentMonthKey();
-    const rankMap = {};
-    players.forEach(p => { rankMap[p.userId] = p; });
-
-    const candidates = users.filter(u =>
-      u.league === "pending" &&
-      u.joinMonth &&
-      u.joinMonth < nowKey
-    );
-
-    if (!candidates.length) {
-      if (!auto) alert(t("alert.noPending"));
-      return;
-    }
-
-    const batch = db.batch();
-    let placed = 0;
-    let skipped = 0;
-
-    function preferredLeaguesForTarget(target) {
-      if (target === "legends") return ["legends", "pros"];
-      if (target === "pros") return ["pros", "intermediates", "legends"];
-      if (target === "intermediates") return ["intermediates", "amateurs", "pros"];
-      if (target === "amateurs") return ["amateurs", "intermediates"];
-      return ["amateurs"];
-    }
-
-    candidates.forEach(user => {
-      const stats = rankMap[user.id];
-      if (!stats || stats.runs < MIN_RUNS_FOR_PLACEMENT) {
-        skipped++;
-        return;
-      }
-
-      const N = players.length;
-      const q = stats.rank / N;
-      let targetLeague = "amateurs";
-      if (q <= 0.25) targetLeague = "legends";
-      else if (q <= 0.5) targetLeague = "pros";
-      else if (q <= 0.75) targetLeague = "intermediates";
-      else targetLeague = "amateurs";
-
-      const prefs = preferredLeaguesForTarget(targetLeague);
-      let finalLeague = null;
-
-      for (const lg of prefs) {
-        if (canMoveLeague(user, lg)) {
-          finalLeague = lg;
-          break;
-        }
-      }
-
-      if (!finalLeague) {
-        skipped++;
-        return;
-      }
-
-      user.league = finalLeague;
-      const userRef = db.collection("users").doc(user.id);
-      batch.update(userRef, { league: finalLeague });
-      placed++;
-    });
-
-    if (!placed) {
-      if (!auto) {
-        alert("No new joiners could be placed yet. They may need more activities or the leagues are already very balanced.");
-      }
-      return;
-    }
-
-    await batch.commit();
-    await loadAllData();
-    restoreCurrentUser();
-
-    if (!auto) {
-      let skippedText = "";
-      if (skipped > 0) {
-        skippedText = t("alert.placeSkipped", { count: skipped });
-      }
-      alert(t("alert.placeSummary", { placed, skipped: skippedText }));
-    }
-  }
-
-  // ==========================
-  //  MONTHLY: PROMOTIONS
-  // ==========================
-
-  async function applyPromotions(auto = false) {
-    if (!db) return;
-
-    const players = getPlayerStats();
-    const total = players.length;
-    if (total === 0) {
-      if (!auto) alert(t("alert.noPlayers"));
-      return;
-    }
-
-    let moves = 0;
-    if (total >= 32) moves = 3;
-    else if (total >= 16) moves = 2;
-    else if (total >= 8) moves = 1;
-    else moves = 0;
-
-    if (moves === 0) {
-      if (!auto) alert(t("alert.notEnoughPlayers"));
-      return;
-    }
-
-    const batch = db.batch();
-
-    let promoted = 0;
-    for (let i = 0; i < players.length && promoted < moves; i++) {
-      const p = players[i];
-      if (!LEAGUES.includes(p.league)) continue;
-      const idx = leagueIndex(p.league);
-      if (idx < 0 || idx >= LEAGUES.length - 1) continue;
-      const userRef = db.collection("users").doc(p.userId);
-      batch.update(userRef, { league: LEAGUES[idx + 1] });
-      promoted++;
-    }
-
-    let relegated = 0;
-    for (let i = players.length - 1; i >= 0 && relegated < moves; i--) {
-      const p = players[i];
-      if (!LEAGUES.includes(p.league)) continue;
-      const idx = leagueIndex(p.league);
-      if (idx <= 0) continue;
-      const userRef = db.collection("users").doc(p.userId);
-      batch.update(userRef, { league: LEAGUES[idx - 1] });
-      relegated++;
-    }
-
-    await batch.commit();
-    await loadAllData();
-    restoreCurrentUser();
-    if (!auto) {
-      alert(t("alert.promotionsDone", { up: moves, down: moves }));
-    }
-  }
-
-  // ==========================
-  //  PROFILE VIEW
-  // ==========================
-
-  function showProfile(userId) {
-    const card = document.getElementById("profile-card");
-    const title = document.getElementById("profile-title");
-    const summary = document.getElementById("profile-summary");
-
-    const runsCell = document.getElementById("profile-runs");
-    const totalDistCell = document.getElementById("profile-total-distance");
-    const totalTimeCell = document.getElementById("profile-total-time");
-    const avgDistCell = document.getElementById("profile-avg-distance");
-    const avgPaceCell = document.getElementById("profile-avg-pace");
-    const longestCell = document.getElementById("profile-longest");
-    const best10kCell = document.getElementById("profile-10k");
-    const best5kCell = document.getElementById("profile-5k");
-
-    const user = users.find(u => u.id === userId);
-    if (!user) return;
-
-    const myEntries = entries
-      .filter(e => e.userId === userId)
-      .slice()
-      .sort((a, b) => a.timestamp - b.timestamp);
-
-    if (!myEntries.length) {
-      title.textContent = `Profile: ${user.name}`;
-      summary.textContent = "No activities logged yet.";
-      runsCell.textContent = "0";
-      totalDistCell.textContent = "0 km";
-      totalTimeCell.textContent = "0";
-      avgDistCell.textContent = "–";
-      avgPaceCell.textContent = "–";
-      longestCell.textContent = "–";
-      best10kCell.textContent = "–";
-      best5kCell.textContent = "–";
-      showScene("profile-card");
-      return;
-    }
-
-    let runs = myEntries.length;
-    let totalDistance = 0;
-    let totalTime = 0;
-    let longest = 0;
-    let best10kMinutes = Infinity;
-    let best5kMinutes = Infinity;
-
-    myEntries.forEach(e => {
-      totalDistance += e.distanceKm;
-      totalTime += e.timeMinutes;
-      if (e.distanceKm > longest) longest = e.distanceKm;
-
-      if (e.distanceKm > 0 && e.timeMinutes > 0) {
-        const paceMinutesPerKm = e.timeMinutes / e.distanceKm;
-
-        if (e.distanceKm >= 9.5) {
-          const tenKMinutes = paceMinutesPerKm * 10;
-          if (tenKMinutes < best10kMinutes) best10kMinutes = tenKMinutes;
-        }
-
-        if (e.distanceKm >= 4.5) {
-          const fiveKMinutes = paceMinutesPerKm * 5;
-          if (fiveKMinutes < best5kMinutes) best5kMinutes = fiveKMinutes;
-        }
-      }
-    });
-
-    const avgDistance = totalDistance / runs;
-    const avgPaceMinutesPerKm =
-      totalDistance > 0 && totalTime > 0 ? totalTime / totalDistance : 0;
-
-    function formatPace(minPerKm) {
-      if (!isFinite(minPerKm) || minPerKm <= 0) return "–";
-      const totalSeconds = Math.round(minPerKm * 60);
-      const m = Math.floor(totalSeconds / 60);
-      const s = totalSeconds % 60;
-      return `${m}:${s.toString().padStart(2, "0")} min/km`;
-    }
-
-    title.textContent = `Profile: ${user.name}`;
-    const leagueLabel = LEAGUES.includes(user.league)
-      ? t("league." + user.league)
-      : t("league.pending");
-
-    summary.textContent = `${t("user.leagueLabel", { league: leagueLabel })}, ${t("stats.runs")}: ${runs}`;
-
-    runsCell.textContent = runs.toString();
-    totalDistCell.textContent = `${totalDistance.toFixed(2)} km`;
-    totalTimeCell.textContent = formatMinutesPretty(totalTime);
-    avgDistCell.textContent = `${avgDistance.toFixed(2)} km`;
-    avgPaceCell.textContent = formatPace(avgPaceMinutesPerKm);
-    longestCell.textContent = `${longest.toFixed(2)} km`;
-    best10kCell.textContent =
-      isFinite(best10kMinutes) && best10kMinutes > 0
-        ? formatMinutesPretty(best10kMinutes)
-        : "–";
-    best5kCell.textContent =
-      isFinite(best5kMinutes) && best5kMinutes > 0
-        ? formatMinutesPretty(best5kMinutes)
-        : "–";
-
-    showScene("profile-card");
-  }
-
-  function attachProfileLinks() {
-    document.querySelectorAll(".link-name").forEach(btn => {
-      const userId = btn.getAttribute("data-user-id");
-      btn.onclick = () => showProfile(userId);
-    });
-  }
-
-  // ==========================
-  //  RENDER FUNCTIONS
-  // ==========================
-
-  function renderHeaderUser() {
-    const container = document.getElementById("user-controls");
-    if (!container) return;
-    container.innerHTML = "";
-
-    if (!currentUser) {
-      const span = document.createElement("span");
-      span.textContent = t("user.notLoggedIn");
-      container.appendChild(span);
-
-      const btn = document.createElement("button");
-      btn.className = "btn btn-small";
-      btn.textContent = t("user.loginButton");
-      btn.onclick = () => showScene("login");
-      container.appendChild(btn);
-
-      updateNavLoginVisibility();
-    } else {
-      const name = currentUser.name;
-      const leagueKey = LEAGUES.includes(currentUser.league)
-        ? "league." + currentUser.league
-        : "league.pending";
-      const leagueLabel = t(leagueKey);
-
-      const info = document.createElement("span");
-      info.textContent = `${t("user.loggedInAs", { name })} · ${t("user.leagueLabel", { league: leagueLabel })}`;
-      container.appendChild(info);
-
-      const addBtn = document.createElement("button");
-      addBtn.className = "btn btn-small";
-      addBtn.style.marginLeft = "8px";
-      addBtn.textContent = t("user.addActivity");
-      addBtn.onclick = () => showScene("entry");
-      container.appendChild(addBtn);
-
-      const deleteBtn = document.createElement("button");
-      deleteBtn.className = "btn btn-small danger";
-      deleteBtn.style.marginLeft = "4px";
-      deleteBtn.textContent = t("user.deleteAccount");
-      deleteBtn.onclick = deleteAccount;
-      container.appendChild(deleteBtn);
-
-      updateNavLoginVisibility();
-    }
-
-    // Welcome page: hide MIH login button when logged in
-    const mihCta = document.getElementById("welcome-mih-cta");
-    if (mihCta) {
-      mihCta.style.display = currentUser ? "none" : "block";
-    }
-  }
-
-  function renderLeaderboard() {
-    const tbody = document.getElementById("leaderboard-body");
-    const empty = document.getElementById("no-entries");
-    if (!tbody) return;
-    tbody.innerHTML = "";
-
-    const players = getPlayerStats();
-    const filterSel = document.getElementById("league-filter");
-    const filter = filterSel ? filterSel.value : "all";
-
-    let filtered = players;
-    if (filter !== "all") {
-      filtered = players.filter(p => p.league === filter);
-    }
-
-    if (!filtered.length) {
-      if (empty) empty.style.display = "block";
-      return;
-    }
-    if (empty) empty.style.display = "none";
-
-    filtered.forEach(player => {
-      const tr = document.createElement("tr");
-
-      let rankSymbol = player.rank;
-      if (player.rank === 1) rankSymbol = "🥇";
-      else if (player.rank === 2) rankSymbol = "🥈";
-      else if (player.rank === 3) rankSymbol = "🥉";
-
-      const leagueClass = LEAGUES.includes(player.league)
-        ? player.league
-        : "pending";
-      const leagueLabel = LEAGUES.includes(player.league)
-        ? t("league." + player.league)
-        : t("league.pending");
-
-      tr.innerHTML = `
-        <td>${rankSymbol}</td>
-        <td>
-          <button type="button" class="link-name" data-user-id="${player.userId}" style="background:none;border:none;color:#4ea1ff;cursor:pointer;text-decoration:underline;">
-            ${player.name}
-          </button>
-        </td>
-        <td><span class="badge-league ${leagueClass}">${leagueLabel}</span></td>
-        <td>${player.totalDistance.toFixed(2)}</td>
-        <td>${player.totalTime.toFixed(1)}</td>
-      `;
-      tbody.appendChild(tr);
-    });
-
-    attachProfileLinks();
-  }
-
-  function renderStats() {
-    const tbody = document.getElementById("stats-body");
-    const empty = document.getElementById("no-stats");
-    if (!tbody) return;
-    tbody.innerHTML = "";
-
-    if (!entries.length) {
-      if (empty) empty.style.display = "block";
-      return;
-    }
-    if (empty) empty.style.display = "none";
-
-    const players = getPlayerStats();
-
-    players.forEach(stats => {
-      const leagueClass = LEAGUES.includes(stats.league)
-        ? stats.league
-        : "pending";
-      const leagueLabel = LEAGUES.includes(stats.league)
-        ? t("league." + stats.league)
-        : t("league.pending");
-
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>
-          <button type="button" class="link-name" data-user-id="${stats.userId}" style="background:none;border:none;color:#4ea1ff;cursor:pointer;text-decoration:underline;">
-            ${stats.name}
-          </button>
-        </td>
-        <td><span class="badge-league ${leagueClass}">${leagueLabel}</span></td>
-        <td>${stats.runs}</td>
-        <td>${stats.totalDistance.toFixed(2)}</td>
-        <td>${stats.totalTime.toFixed(1)}</td>
-        <td>${stats.avgDistance.toFixed(2)}</td>
-        <td>${stats.bestDistance.toFixed(2)}</td>
-        <td>${formatImprovement(stats.improvement)}</td>
-      `;
-      tbody.appendChild(tr);
-    });
-
-    attachProfileLinks();
-  }
-
-  function renderPendingList() {
-    const tbody = document.getElementById("pending-body");
-    const empty = document.getElementById("no-pending");
-    if (!tbody) return;
-    tbody.innerHTML = "";
-
-    const pending = users
-      .filter(u => u.league === "pending")
-      .slice()
-      .sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
-
-    if (!pending.length) {
-      if (empty) empty.style.display = "block";
-      return;
-    }
-    if (empty) empty.style.display = "none";
-
-    pending.forEach((u, index) => {
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>${index + 1}</td>
-        <td>${u.name}</td>
-        <td>${u.joinMonth || ""}</td>
-      `;
-      tbody.appendChild(tr);
-    });
-  }
-
-  function renderMyActivities() {
-    const tbody = document.getElementById("my-activities-body");
-    const empty = document.getElementById("no-my-activities");
-    if (!tbody) return;
-    tbody.innerHTML = "";
-
-    if (!currentUser) {
-      if (empty) {
-        empty.style.display = "block";
-        empty.textContent = t("user.notLoggedIn");
-      }
-      return;
-    }
-
-    const myEntries = entries.filter(e => e.userId === currentUser.id);
-
-    if (!myEntries.length) {
-      if (empty) {
-        empty.style.display = "block";
-        empty.textContent = t("entry.none");
-      }
-      return;
-    }
-    if (empty) empty.style.display = "none";
-
-    myEntries
-      .slice()
-      .sort((a, b) => b.timestamp - a.timestamp)
-      .forEach(e => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${formatDate(e.timestamp)}</td>
-          <td>${e.distanceKm.toFixed(2)}</td>
-          <td>${e.timeMinutes.toFixed(1)}</td>
-          <td>
-            <button class="btn btn-small danger" style="padding:4px 8px;font-size:12px;" onclick="deleteActivity('${e.id}')">
-              ✕
+  <div class="app-shell">
+    <!-- ===========================
+         HEADER
+         =========================== -->
+    <header class="app-header">
+      <div class="app-header-inner">
+        <div class="brand-lockup">
+          <div class="brand-mark">
+            <span>SP</span>
+          </div>
+          <div class="brand-text">
+            <div class="brand-title">
+              SEP · Make It Happen
+            </div>
+            <div class="brand-subtitle">
+              A tiny clothing brand and a simple running challenge.
+            </div>
+          </div>
+        </div>
+
+        <div class="header-right">
+          <!-- Mode pills: Home / SEP / MIH (JS will sync these with scenes) -->
+          <div class="header-toggle-wrap">
+            <button
+              type="button"
+              class="header-mode-pill active"
+              data-scene-target="home"
+            >
+              Home
             </button>
-          </td>
-        `;
-        tbody.appendChild(tr);
-      });
-  }
+            <button
+              type="button"
+              class="header-mode-pill"
+              data-scene-target="sep"
+            >
+              SEP
+            </button>
+            <button
+              type="button"
+              class="header-mode-pill"
+              data-scene-target="mih"
+            >
+              Make It Happen
+            </button>
+          </div>
 
-  function updateEntryFormLockState() {
-    const distanceInput = document.getElementById("distance");
-    const timeInput = document.getElementById("time");
-    const form = document.getElementById("entry-form");
-    if (!form) return;
-    const submit = form.querySelector("button[type='submit']");
-    const locked = !currentUser;
+          <!-- Language select (translations wired later in JS) -->
+          <label class="sr-only" for="lang-select">
+            Language
+          </label>
+          <select id="lang-select" class="lang-select">
+            <option value="en">English</option>
+            <option value="da">Dansk</option>
+            <option value="cs">Čeština</option>
+          </select>
+        </div>
+      </div>
+    </header>
 
-    if (distanceInput) distanceInput.disabled = locked;
-    if (timeInput) timeInput.disabled = locked;
-    if (submit) submit.disabled = locked;
-  }
+    <!-- ===========================
+         MAIN CONTENT WRAPPER
+         =========================== -->
+    <main class="app-inner">
+      <!--
+        HOME SCENE: always visible first.
+        We add class "scene scene--active" so it's visible even
+        before JavaScript runs.
+      -->
+      <section
+        id="scene-home"
+        class="scene scene--active"
+      >
+        <div class="home-layout">
+          <!-- Left hero: explanation -->
+          <article class="home-hero-card">
+            <header>
+              <div class="home-kicker">
+                Small projects, calm pace
+              </div>
+              <h1 class="home-title">
+                Start in one place.<br>
+                Choose clothes or movement.
+              </h1>
+            </header>
 
-  // ==========================
-  //  ACTIVITY DELETION
-  // ==========================
+            <p class="home-body">
+              SEP is a tiny clothing brand built around the idea of
+              <span style="font-style:italic;">Se&nbsp;Proairesis</span> –
+              “your choice”. Make It Happen is a simple leaderboard for runs,
+              walks and rides. Both live on this page. No ads, no tracking,
+              no pressure.
+            </p>
 
-  async function deleteActivity(id) {
-    if (!currentUser) {
-      alert(t("alert.mustLogin"));
-      return;
-    }
-    const entry = entries.find(e => e.id === id);
-    if (!entry) return;
-    if (entry.userId !== currentUser.id) {
-      alert("You can only delete your own activities.");
-      return;
-    }
-    if (!confirm(t("alert.deleteActivityConfirm"))) return;
+            <div class="home-pill-row">
+              <div class="home-pill">Copenhagen&nbsp;·&nbsp;Denmark</div>
+              <div class="home-pill">Teen-run&nbsp;project</div>
+              <div class="home-pill">No creepy data selling</div>
+            </div>
 
-    await db.collection("activities").doc(id).delete();
-    await loadAllData();
-    restoreCurrentUser();
-  }
+            <div class="home-footer-row">
+              <button
+                type="button"
+                class="home-primary-btn"
+                data-scene-target="sep"
+              >
+                Enter SEP shop
+                <span class="chevron">→</span>
+              </button>
 
-  // ==========================
-  //  AUTH
-  // ==========================
+              <button
+                type="button"
+                class="home-secondary-btn"
+                data-scene-target="mih"
+              >
+                Open Make It Happen
+                <span class="chevron">→</span>
+              </button>
+            </div>
 
-  async function login(name, password) {
-    if (!db) {
-      alert(t("alert.firebase"));
-      return;
-    }
-    if (currentUser) {
-      alert(t("alert.alreadyLoggedIn"));
-      return;
-    }
+            <p class="home-body" style="font-size:12px;color:#6b7280;margin-top:6px;">
+              Tip: you can switch between Home, SEP and Make It Happen using
+              the pills in the top right. The language selector changes text
+              for the whole site.
+            </p>
+          </article>
 
-    const trimmedName = (name || "").trim();
-    if (!trimmedName || !password) {
-      alert(t("alert.loginMissing"));
-      return;
-    }
+          <!-- Right column: two project cards -->
+          <aside class="home-projects-column">
+            <!-- SEP card -->
+            <section
+              class="project-card"
+              data-scene-target="sep"
+            >
+              <div class="project-tag-row">
+                <div class="project-tag">
+                  SEP · Clothing
+                </div>
+                <div class="project-tag-right">
+                  Denmark only · MobilePay
+                </div>
+              </div>
 
-    const existingSnap = await db
-      .collection("users")
-      .where("name", "==", trimmedName)
-      .limit(1)
-      .get();
+              <h2 class="project-title">
+                SEP – Se Proairesis
+              </h2>
 
-    let userDoc = null;
-    if (existingSnap.empty) {
-      const joinMonth = currentMonthKey();
-      const newUser = {
-        name: trimmedName,
-        password,
-        league: "pending",
-        createdAt: Date.now(),
-        joinMonth
-      };
-      const docRef = await db.collection("users").add(newUser);
-      userDoc = { id: docRef.id, ...newUser };
-    } else {
-      const doc = existingSnap.docs[0];
-      const data = doc.data();
-      if (data.password !== password) {
-        alert(t("alert.passwordWrong"));
-        return;
-      }
-      if (!data.league) data.league = "pending";
-      if (!data.joinMonth) data.joinMonth = currentMonthKey(data.createdAt || Date.now());
-      userDoc = { id: doc.id, ...data };
-    }
+              <p class="project-body">
+                A white T-shirt, a black hoodie and black trousers. Soft,
+                simple pieces, hand pressed in Copenhagen. No big drops,
+                no fake hype; just calm clothes made to be worn a lot.
+              </p>
 
-    currentUser = userDoc;
-    localStorage.setItem(LS_CURRENT_USER_KEY, currentUser.id);
-    localStorage.setItem(LS_PASSWORD_KEY, password);
+              <div class="project-meta-row">
+                <div class="project-meta-left">
+                  <span>Sizes XS–XL</span>
+                  <span class="dot"></span>
+                  <span>Free shipping in Copenhagen</span>
+                </div>
+                <div class="project-meta-right">
+                  <span>Enter shop</span>
+                  <span class="chevron">→</span>
+                </div>
+              </div>
+            </section>
 
-    await loadAllData();
-    restoreCurrentUser();
-    updateEntryFormLockState();
-    showScene("leaderboard");
-  }
+            <!-- Make It Happen card -->
+            <section
+              class="project-card"
+              data-scene-target="mih"
+            >
+              <div class="project-tag-row">
+                <div class="project-tag" style="border-color:#16a34a;color:#bbf7d0;">
+                  Make It Happen
+                </div>
+                <div class="project-tag-right">
+                  Runs · Walks · Rides
+                </div>
+              </div>
 
-  async function deleteAccount() {
-    if (!currentUser) return;
-    if (!confirm(t("alert.deleteAccountConfirm"))) return;
+              <h2 class="project-title">
+                Make It Happen – simple health challenge
+              </h2>
 
-    const userId = currentUser.id;
+              <p class="project-body">
+                Log your distance and time, see your name climb a gentle
+                leaderboard, and watch your stats grow. No apps to install,
+                no subscriptions; just a browser and your legs.
+              </p>
 
-    const actsSnap = await db
-      .collection("activities")
-      .where("userId", "==", userId)
-      .get();
-    const batch = db.batch();
-    actsSnap.forEach(doc => batch.delete(doc.ref));
-    batch.delete(db.collection("users").doc(userId));
-    await batch.commit();
+              <div class="project-meta-row">
+                <div class="project-meta-left">
+                  <span>Leagues for different levels</span>
+                  <span class="dot"></span>
+                  <span>Runs on Firebase</span>
+                </div>
+                <div class="project-meta-right" style="color:#a7f3d0;">
+                  <span>View leaderboard</span>
+                  <span class="chevron">→</span>
+                </div>
+              </div>
+            </section>
+          </aside>
+        </div>
+      </section>
 
-    currentUser = null;
-    localStorage.removeItem(LS_CURRENT_USER_KEY);
-    localStorage.removeItem(LS_PASSWORD_KEY);
+      <!-- ===========================
+           SEP SECTION (shell, more in Part 2)
+           =========================== -->
+      <section
+        id="scene-sep"
+        class="scene"
+      >
+        <div class="sep-layout">
+          <!-- SEP hero band -->
+          <section class="sep-hero">
+            <div class="sep-hero-copy">
+              <div class="sep-hero-kicker">
+                SEP · Se Proairesis
+              </div>
 
-    await loadAllData();
-    renderHeaderUser();
-    updateEntryFormLockState();
-    renderMyActivities();
-    showScene("welcome");
-  }
+              <h2 class="sep-hero-title">
+                Minimalist clothing made slowly, on purpose.
+              </h2>
 
-  // ==========================
-  //  VIEW SAVED PASSWORD BUTTON
-  // ==========================
+              <p class="sep-hero-body">
+                SEP keeps things small on purpose: one white T-shirt,
+                one black hoodie, one pair of black trousers. All pieces
+                are pressed by hand in Copenhagen in tiny batches.
+                No seasons. No endless collections. Just your choice.
+              </p>
 
-  function setupViewCodeButton() {
-    const btn = document.getElementById("view-code-btn");
-    const display = document.getElementById("saved-code-display");
-    if (!btn || !display) return;
-    btn.addEventListener("click", () => {
-      const saved = localStorage.getItem(LS_PASSWORD_KEY);
-      if (saved) {
-        display.textContent = t("login.savedPassword", { password: saved });
-      } else {
-        display.textContent = t("login.noSavedPassword");
-      }
-      display.style.display = "block";
-    });
-  }
+              <div class="sep-hero-actions">
+                <button
+                  type="button"
+                  class="sep-primary-btn"
+                  data-sep-scroll-target="products"
+                >
+                  Shop the three pieces
+                  <span class="chevron">→</span>
+                </button>
 
-  // ==========================
-  //  FORMS
-  // ==========================
+                <button
+                  type="button"
+                  class="sep-secondary-btn"
+                  data-sep-scroll-target="about"
+                >
+                  Read the story
+                  <span class="chevron">→</span>
+                </button>
+              </div>
 
-  function setupForms() {
-    const loginForm = document.getElementById("login-form");
-    if (loginForm) {
-      loginForm.addEventListener("submit", function (e) {
-        e.preventDefault();
-        const name = document.getElementById("login-name").value;
-        const password = document.getElementById("login-password").value;
-        login(name, password);
-      });
-    }
+              <p class="sep-hero-meta">
+                Delivery within Denmark only. Free shipping in Copenhagen,
+                +45&nbsp;kr for the rest of Denmark. Orders are handled
+                manually over MobilePay and Instagram.
+              </p>
+            </div>
 
-    const entryForm = document.getElementById("entry-form");
-    if (entryForm) {
-      entryForm.addEventListener("submit", async function (e) {
-        e.preventDefault();
-        if (!currentUser) {
-          alert(t("alert.mustLogin"));
-          showScene("login");
-          return;
+            <div class="sep-hero-visual" aria-hidden="true">
+              <div class="sep-tee">
+                <div class="sep-tee-neck"></div>
+                <div class="sep-tee-sleeve left"></div>
+                <div class="sep-tee-sleeve right"></div>
+                <div class="sep-tee-label"></div>
+              </div>
+              <div class="sep-hero-pill">
+                White tee · 180&nbsp;kr
+              </div>
+            </div>
+          </section>
+
+          <!--
+            The actual SEP products grid, cart and "About SEP" content
+            will be defined in Part 2 and Part 3. We leave this container
+            ready so nothing breaks visually if JS fails.
+          -->
+          <section id="sep-products-shell">
+            <!-- Placeholder that will still look okay before full markup -->
+            <p style="margin-top:14px;font-size:13px;color:#9ca3af;">
+              Scroll down for products, ordering instructions and the
+              story behind SEP. If you only see this line, Part 2 of the
+              code has not been pasted yet.
+            </p>
+          </section>
+        </div>
+      </section>
+
+      <!--
+        MIH scenes, SEP cart, About SEP, stats, Firebase logic and
+        translations will be added in Parts 2–5.
+      -->
+      <!-- ===========================
+           PART 2 · SEP SHOP + ABOUT
+           =========================== -->
+
+      <!-- Extra styles for SEP shop (allowed inside body) -->
+      <style>
+        .sep-products {
+          margin-top: 18px;
+          display: grid;
+          grid-template-columns: minmax(0, 1.4fr);
+          gap: 18px;
         }
 
-        const distance = parseFloat(document.getElementById("distance").value);
-        const time = parseFloat(document.getElementById("time").value);
-
-        if (isNaN(distance) || isNaN(time) || distance <= 0 || time <= 0) {
-          alert(t("alert.activityInvalid"));
-          return;
+        @media (min-width: 960px) {
+          .sep-products {
+            grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.9fr);
+            align-items: flex-start;
+          }
         }
 
-        await db.collection("activities").add({
-          userId: currentUser.id,
-          distanceKm: distance,
-          timeMinutes: time,
-          timestamp: Date.now()
-        });
+        .sep-products-grid {
+          display: grid;
+          grid-template-columns: minmax(0, 1fr);
+          gap: 14px;
+        }
 
-        await loadAllData();
-        restoreCurrentUser();
-        entryForm.reset();
-        showScene("leaderboard");
-      });
-    }
+        @media (min-width: 720px) {
+          .sep-products-grid {
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+          }
+        }
 
-    const leagueFilter = document.getElementById("league-filter");
-    if (leagueFilter) {
-      leagueFilter.addEventListener("change", renderLeaderboard);
-    }
-  }
+        .sep-product-card {
+          border-radius: var(--radius-card);
+          border: 1px solid var(--border-soft);
+          background: var(--bg-card-soft);
+          padding: 14px 14px 14px;
+          box-shadow: var(--shadow-subtle);
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+        }
 
-  // ==========================
-  //  INIT
-  // ==========================
+        @media (min-width: 768px) {
+          .sep-product-card {
+            padding: 16px 16px 16px;
+          }
+        }
 
-  async function init() {
-    initLanguage();
-    initFirebase();
-    setupForms();
-    setupViewCodeButton();
+        .sep-product-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 8px;
+        }
 
-    if (!db) {
-      // Firebase not configured; still show static UI
-      renderHeaderUser();
-      showScene("welcome");
-      return;
-    }
+        .sep-product-name {
+          font-size: 15px;
+          font-weight: 600;
+          color: #f9fafb;
+        }
 
-    await loadAllData();
-    restoreCurrentUser();
-    updateEntryFormLockState();
-    updateNavLoginVisibility();
+        .sep-product-price {
+          font-size: 14px;
+          font-weight: 500;
+          color: #e5e7eb;
+        }
 
-    if (currentUser) {
-      showScene("leaderboard");
-    } else {
-      showScene("welcome");
-    }
-  }
+        .sep-product-tagline {
+          font-size: 12px;
+          color: #9ca3af;
+        }
 
-  document.addEventListener("DOMContentLoaded", init);
-</script>
-</body>
-</html>
+        .sep-product-meta-row {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 6px;
+          font-size: 11px;
+          color: #9ca3af;
+        }
+
+        .sep-product-pill {
+          padding: 2px 8px;
+          border-radius: 999px;
+          border: 1px solid rgba(75, 85, 99, 0.9);
+          text-transform: uppercase;
+          letter-spacing: 0.14em;
+          font-size: 9px;
+        }
+
+        .sep-product-body {
+          font-size: 12px;
+          color: #9ca3af;
+        }
+
+        .sep-product-detail-list {
+          margin-top: 6px;
+          padding-left: 16px;
+          font-size: 11px;
+          color: #9ca3af;
+        }
+
+        .sep-product-detail-list li {
+          margin-bottom: 2px;
+        }
+
+        .sep-product-footer {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-top: 6px;
+          gap: 8px;
+        }
+
+        .sep-product-qty-wrap {
+          display: flex;
+          align-items: center;
+          gap: 4px;
+          font-size: 11px;
+          color: #9ca3af;
+        }
+
+        .sep-product-qty-input {
+          width: 50px;
+          padding: 3px 6px;
+          border-radius: 999px;
+          border: 1px solid rgba(75, 85, 99, 0.9);
+          background: #020617;
+          color: #e5e7eb;
+          font-size: 11px;
+          text-align: center;
+          outline: none;
+        }
+
+        .sep-product-qty-input:focus-visible {
+          box-shadow: 0 0 0 1px var(--accent-focus);
+        }
+
+        .sep-product-add-btn {
+          border-radius: 999px;
+          padding: 6px 12px;
+          border: none;
+          cursor: pointer;
+          font-size: 12px;
+          font-weight: 500;
+          background: #f9fafb;
+          color: #020617;
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+          box-shadow: 0 10px 26px rgba(0, 0, 0, 0.9);
+          transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+        }
+
+        .sep-product-add-btn:hover {
+          transform: translateY(-1px);
+          box-shadow: 0 16px 32px rgba(0, 0, 0, 0.95);
+        }
+
+        .sep-product-note {
+          font-size: 10px;
+          color: #6b7280;
+          margin-top: 2px;
+        }
+
+        /* Order / cart panel */
+
+        .sep-order-card {
+          border-radius: var(--radius-card);
+          border: 1px solid var(--border-soft);
+          background: var(--bg-elevated);
+          padding: 14px 14px 14px;
+          box-shadow: var(--shadow-soft);
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+        }
+
+        @media (min-width: 768px) {
+          .sep-order-card {
+            padding: 16px 16px 16px;
+          }
+        }
+
+        .sep-order-title {
+          font-size: 15px;
+          font-weight: 600;
+          color: #f9fafb;
+        }
+
+        .sep-order-caption {
+          font-size: 12px;
+          color: #9ca3af;
+        }
+
+        .sep-cart-empty {
+          font-size: 12px;
+          color: #6b7280;
+          padding: 8px 10px;
+          border-radius: 10px;
+          border: 1px dashed rgba(55, 65, 81, 0.9);
+          background: rgba(15, 23, 42, 0.7);
+        }
+
+        .sep-cart-list {
+          list-style: none;
+          margin-top: 4px;
+          padding: 0;
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+          max-height: 220px;
+          overflow-y: auto;
+        }
+
+        .sep-cart-item {
+          display: flex;
+          justify-content: space-between;
+          gap: 8px;
+          align-items: flex-start;
+          padding: 6px 8px;
+          border-radius: 10px;
+          background: #020617;
+          border: 1px solid rgba(55, 65, 81, 0.9);
+          font-size: 11px;
+        }
+
+        .sep-cart-item-main {
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+        }
+
+        .sep-cart-item-name {
+          color: #e5e7eb;
+          font-weight: 500;
+        }
+
+        .sep-cart-item-meta {
+          color: #9ca3af;
+        }
+
+        .sep-cart-item-price {
+          font-weight: 500;
+          color: #f9fafb;
+          white-space: nowrap;
+        }
+
+        .sep-cart-remove-btn {
+          border-radius: 999px;
+          border: none;
+          background: rgba(15, 23, 42, 0.9);
+          color: #fbbf24;
+          cursor: pointer;
+          font-size: 11px;
+          padding: 2px 7px;
+        }
+
+        .sep-cart-footer {
+          margin-top: 6px;
+          border-top: 1px solid rgba(31, 41, 55, 0.95);
+          padding-top: 8px;
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+        }
+
+        .sep-cart-total-row {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          font-size: 13px;
+          color: #e5e7eb;
+        }
+
+        .sep-cart-total-row span:last-child {
+          font-weight: 600;
+        }
+
+        .sep-cart-copy-btn {
+          border-radius: 999px;
+          padding: 7px 12px;
+          border: none;
+          cursor: pointer;
+          font-size: 12px;
+          font-weight: 500;
+          background: #f9fafb;
+          color: #020617;
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          box-shadow: 0 14px 30px rgba(0, 0, 0, 0.95);
+          transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+        }
+
+        .sep-cart-copy-btn:hover {
+          transform: translateY(-1px);
+          box-shadow: 0 18px 38px rgba(0, 0, 0, 1);
+        }
+
+        .sep-cart-note {
+          font-size: 11px;
+          color: #9ca3af;
+        }
+
+        .sep-cart-note strong {
+          color: #e5e7eb;
+          font-weight: 500;
+        }
+
+        .sep-cart-small {
+          font-size: 11px;
+          color: #6b7280;
+        }
+
+        /* About SEP */
+
+        .sep-about {
+          margin-top: 22px;
+          border-radius: var(--radius-card);
+          border: 1px solid var(--border-soft);
+          background: #050708;
+          padding: 16px 16px 18px;
+          box-shadow: var(--shadow-subtle);
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+        }
+
+        @media (min-width: 768px) {
+          .sep-about {
+            padding: 18px 20px 20px;
+          }
+        }
+
+        .sep-about-kicker {
+          font-size: 11px;
+          letter-spacing: 0.26em;
+          text-transform: uppercase;
+          color: #6b7280;
+        }
+
+        .sep-about-title {
+          font-size: 16px;
+          font-weight: 600;
+          color: #f9fafb;
+        }
+
+        .sep-about-body {
+          font-size: 13px;
+          color: #9ca3af;
+          max-width: 760px;
+        }
+
+        .sep-about-body p + p {
+          margin-top: 6px;
+        }
+
+        .sep-about-list {
+          margin-top: 8px;
+          padding-left: 18px;
+          font-size: 12px;
+          color: #9ca3af;
+        }
+
+        .sep-about-list li {
+          margin-bottom: 4px;
+        }
+
+        .sep-about-meta {
+          margin-top: 10px;
+          font-size: 11px;
+          color: #6b7280;
+        }
+
+        .sep-about-meta span {
+          color: #e5e7eb;
+        }
+
+        .sep-link {
+          color: #bfdbfe;
+          text-decoration: underline;
+          text-decoration-color: rgba(191, 219, 254, 0.5);
+        }
+
+        .sep-link:hover {
+          text-decoration-color: rgba(191, 219, 254, 1);
+        }
+      </style>
+
+      <!-- SEP products + order area -->
+      <section
+        id="sep-products"
+        class="sep-products"
+      >
+        <!-- LEFT: products grid -->
+        <div class="sep-products-grid">
+          <!-- White tee -->
+          <article
+            class="sep-product-card"
+            data-product-id="tee-white"
+            data-product-name="White SEP T-shirt"
+            data-product-price="180"
+          >
+            <header class="sep-product-header">
+              <h3 class="sep-product-name">
+                White SEP T-shirt
+              </h3>
+              <div class="sep-product-price">
+                180&nbsp;kr
+              </div>
+            </header>
+
+            <p class="sep-product-tagline">
+              Heavyweight white T-shirt, soft from day one and still smooth after washing.
+            </p>
+
+            <div class="sep-product-meta-row">
+              <span class="sep-product-pill">XS–XL</span>
+              <span class="sep-product-pill">Unisex fit</span>
+              <span class="sep-product-pill">Cotton</span>
+            </div>
+
+            <div class="sep-product-body">
+              Built to feel like a “new favourite tee” for longer than just the first weekend.
+            </div>
+
+            <ul class="sep-product-detail-list">
+              <li>Thick cotton with a smooth finish.</li>
+              <li>Relaxed fit; size down if you like it tighter.</li>
+              <li>Printed SEP mark on the chest, pressed by hand in Copenhagen.</li>
+            </ul>
+
+            <footer class="sep-product-footer">
+              <div class="sep-product-qty-wrap">
+                <span>Qty</span>
+                <input
+                  class="sep-product-qty-input"
+                  type="number"
+                  min="1"
+                  max="9"
+                  value="1"
+                  inputmode="numeric"
+                  aria-label="Quantity for white SEP T-shirt"
+                >
+              </div>
+
+              <button
+                type="button"
+                class="sep-product-add-btn"
+              >
+                Add to order
+                <span>+</span>
+              </button>
+            </footer>
+
+            <p class="sep-product-note">
+              Available in XS, S, M, L, XL. You can tell us sizes in the final MobilePay message.
+            </p>
+          </article>
+
+          <!-- Black hoodie -->
+          <article
+            class="sep-product-card"
+            data-product-id="hoodie-black"
+            data-product-name="Black SEP hoodie"
+            data-product-price="320"
+          >
+            <header class="sep-product-header">
+              <h3 class="sep-product-name">
+                Black SEP hoodie
+              </h3>
+              <div class="sep-product-price">
+                320&nbsp;kr
+              </div>
+            </header>
+
+            <p class="sep-product-tagline">
+              Mid-weight black hoodie that feels broken-in without looking worn out.
+            </p>
+
+            <div class="sep-product-meta-row">
+              <span class="sep-product-pill">XS–XL</span>
+              <span class="sep-product-pill">Unisex fit</span>
+              <span class="sep-product-pill">Brushed inside</span>
+            </div>
+
+            <div class="sep-product-body">
+              Clean front, small SEP mark; made to sit quietly in your wardrobe and still be the thing you grab first.
+            </div>
+
+            <ul class="sep-product-detail-list">
+              <li>Soft brushed interior; warm but not too thick.</li>
+              <li>Minimalist print, no loud graphics.</li>
+              <li>Ribbed cuffs and hem that hold their shape.</li>
+            </ul>
+
+            <footer class="sep-product-footer">
+              <div class="sep-product-qty-wrap">
+                <span>Qty</span>
+                <input
+                  class="sep-product-qty-input"
+                  type="number"
+                  min="1"
+                  max="9"
+                  value="1"
+                  inputmode="numeric"
+                  aria-label="Quantity for black SEP hoodie"
+                >
+              </div>
+
+              <button
+                type="button"
+                class="sep-product-add-btn"
+              >
+                Add to order
+                <span>+</span>
+              </button>
+            </footer>
+
+            <p class="sep-product-note">
+              Sits slightly oversized. If you’re between sizes, pick the smaller one.
+            </p>
+          </article>
+
+          <!-- Black trousers -->
+          <article
+            class="sep-product-card"
+            data-product-id="trousers-black"
+            data-product-name="Black SEP trousers"
+            data-product-price="280"
+          >
+            <header class="sep-product-header">
+              <h3 class="sep-product-name">
+                Black SEP trousers
+              </h3>
+              <div class="sep-product-price">
+                280&nbsp;kr
+              </div>
+            </header>
+
+            <p class="sep-product-tagline">
+              Straight-leg black trousers: soft enough for everyday, clean enough for going out.
+            </p>
+
+            <div class="sep-product-meta-row">
+              <span class="sep-product-pill">XS–XL</span>
+              <span class="sep-product-pill">Elastic waist</span>
+              <span class="sep-product-pill">Unisex</span>
+            </div>
+
+            <div class="sep-product-body">
+              Designed to sit somewhere between joggers and tailored pants. No logos on the legs; just a small internal label.
+            </div>
+
+            <ul class="sep-product-detail-list">
+              <li>Soft fabric that doesn’t go rough after a couple of washes.</li>
+              <li>Elastic waist with drawstring for a relaxed, adjustable fit.</li>
+              <li>Two side pockets and one subtle back pocket.</li>
+            </ul>
+
+            <footer class="sep-product-footer">
+              <div class="sep-product-qty-wrap">
+                <span>Qty</span>
+                <input
+                  class="sep-product-qty-input"
+                  type="number"
+                  min="1"
+                  max="9"
+                  value="1"
+                  inputmode="numeric"
+                  aria-label="Quantity for black SEP trousers"
+                >
+              </div>
+
+              <button
+                type="button"
+                class="sep-product-add-btn"
+              >
+                Add to order
+                <span>+</span>
+              </button>
+            </footer>
+
+            <p class="sep-product-note">
+              Works with the white tee or hoodie; made to feel like part of the same small system.
+            </p>
+          </article>
+        </div>
+
+        <!-- RIGHT: order / summary panel -->
+        <aside
+          id="sep-order"
+          class="sep-order-card"
+        >
+          <h3 class="sep-order-title">
+            Your SEP order
+          </h3>
+
+          <p class="sep-order-caption">
+            Add the pieces you want and we’ll generate a short message
+            you can paste into MobilePay or Instagram DM. Nothing is paid
+            until we confirm your order.
+          </p>
+
+          <div
+            id="sep-cart-empty"
+            class="sep-cart-empty"
+          >
+            No items yet. Choose a product on the left and hit “Add to order”.
+          </div>
+
+          <ul
+            id="sep-cart-items"
+            class="sep-cart-list"
+          >
+            <!-- Filled by JavaScript in a later part -->
+          </ul>
+
+          <div class="sep-cart-footer">
+            <div class="sep-cart-total-row">
+              <span>Total (estimate)</span>
+              <span id="sep-cart-total">0&nbsp;kr</span>
+            </div>
+
+            <button
+              type="button"
+              id="sep-cart-copy"
+              class="sep-cart-copy-btn"
+            >
+              Copy order text
+              <span>📋</span>
+            </button>
+
+            <p class="sep-cart-note">
+              When you tap <strong>Copy order text</strong>, you’ll get a small
+              message with your items, sizes and total. Paste that into
+              MobilePay or an Instagram message so we can confirm everything.
+            </p>
+
+            <p class="sep-cart-small">
+              Payments are handled manually to keep things small and simple.
+              If anything is out of stock, we’ll reply with options instead of
+              just taking your money.
+            </p>
+          </div>
+        </aside>
+      </section>
+
+      <!-- ABOUT SEP -->
+      <section
+        id="sep-about"
+        class="sep-about"
+      >
+        <div class="sep-about-kicker">
+          About SEP
+        </div>
+
+        <h3 class="sep-about-title">
+          A tiny brand built around one simple idea: your choice.
+        </h3>
+
+        <div class="sep-about-body">
+          <p>
+            SEP stands for <span style="font-style:italic;">Se&nbsp;Proairesis</span>,
+            a Greek phrase that roughly means “the things that are up to you”.
+            You can’t control school, friends, weather or algorithms, but you
+            can control what you put on your body and how you show up.
+          </p>
+
+          <p>
+            Instead of doing huge drops or chasing trends, SEP sticks to a
+            few pieces and tries to get them right. The focus is on softness,
+            durability and calm design. No giant logos. No fake “limited”
+            hype. Just clothes you actually want to wear every day.
+          </p>
+
+          <p>
+            Everything is pressed by hand in Copenhagen in very small runs.
+            That means stock is limited, but it also means there is time to
+            care about each order and make sure it arrives properly packed.
+          </p>
+        </div>
+
+        <ul class="sep-about-list">
+          <li>Delivery inside Denmark only right now.</li>
+          <li>Free delivery in Copenhagen; 45&nbsp;kr to the rest of Denmark.</li>
+          <li>Orders confirmed via MobilePay and Instagram DMs.</li>
+          <li>Sizes run from XS to XL across all three pieces.</li>
+        </ul>
+
+        <div class="sep-about-meta">
+          Typical order flow:
+          <span>add items → copy text → send via MobilePay or Instagram → wait for confirmation.</span>
+          If anything feels unclear, just send a message and we can sort it out like normal people.
+        </div>
+      </section>
