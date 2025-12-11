@@ -148,7 +148,15 @@
 <section id="scene-welcome" class="scene active">
   <h1 data-i18n="welcome.title"></h1>
   <p data-i18n="welcome.subtitle"></p>
-  <button class="btn" onclick="showScene('login')" data-i18n="welcome.cta"></button>
+
+  <!-- This button is only shown after login -->
+  <button
+    id="welcome-enter-btn"
+    class="btn"
+    style="display:none; margin-top:20px;"
+    onclick="showScene('leaderboard')"
+    data-i18n="welcome.cta"
+  ></button>
 </section>
 
 <!-- LOGIN SCENE -->
@@ -1597,11 +1605,11 @@
     localStorage.setItem(LS_PASSWORD_KEY, password);
 
     await loadAllData();
-    restoreCurrentUser();
-    updateEntryFormLockState();
-    updateNavLoginVisibility();
-    showScene("leaderboard");
-  }
+restoreCurrentUser();
+document.getElementById("welcome-enter-btn").style.display = "inline-block";
+updateEntryFormLockState();
+updateNavLoginVisibility();
+showScene("leaderboard");
 
   async function deleteAccount() {
     if (!currentUser) return;
