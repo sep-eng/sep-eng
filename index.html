@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SEP & Make It Happen</title>
+  <title>SEP</title>
   <meta name="description" content="SEP clothing and Make It Happen health challenge." />
   <link rel="icon" href="https://upload.wikimedia.org/wikipedia/commons/3/3f/Black_square.jpg">
 
@@ -20,19 +20,16 @@
   <script src="https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore-compat.js"></script>
 
   <style>
-  body{
-    margin:0;
-    font-family:'Inter',sans-serif;
-    background:linear-gradient(to bottom,#000,#fff);
-    color:#111;
-    scroll-behavior:smooth;
-  }
+    body{
+      margin:0;
+      font-family:'Inter',sans-serif;
+      background:linear-gradient(to bottom,#000,#fff);
+      color:#111;
+      scroll-behavior:smooth;
+    }
 
-  /* Make .hidden work instantly (before Tailwind loads) */
-  .hidden { display: none !important; }
-
-  button,a{transition:all .25s ease;}
-  button:hover,a:hover{transform:translateY(-2px);}
+    /* Make .hidden work instantly (before Tailwind loads) */
+    .hidden { display: none !important; }
 
     button,a{transition:all .25s ease;}
     button:hover,a:hover{transform:translateY(-2px);}
@@ -95,9 +92,10 @@
       color:#f5f5f5;
     }
     #welcome-screen p{
-      max-width:520px;
+      max-width:560px;
       color:#e6e6e6;
       margin-bottom:2rem;
+      line-height:1.5;
     }
     #welcome-screen .welcome-btn{
       background:#fff;
@@ -336,7 +334,7 @@
 <!-- GLOBAL WELCOME SCREEN -->
 <section id="welcome-screen">
   <h1 id="welcomeTitle">SEP</h1>
-  <p id="welcomeSubtitle">Your Choice. Either shop (SEP shop) or move (Make It Happen). That simple.</p>
+  <p id="welcomeSubtitle">Your Choice. Either shop (SEP shop), or move (Make It Happen). That simple.</p>
   <div>
     <button class="welcome-btn" id="welcomeSepBtn" type="button">SEP shop</button>
     <button class="welcome-btn welcome-secondary" id="welcomeMihBtn" type="button">Make It Happen</button>
@@ -396,12 +394,8 @@
   <!-- MAIN SCENE (shop) -->
   <div id="sep-scene-main">
     <header class="py-20 text-center fade-section">
-      <h1 id="heroTitle" class="theme-text text-5xl font-bold mb-4 text-white">
-        Clothes chosen for you.
-      </h1>
-      <p id="heroSubtitle" class="theme-text text-lg mb-8 text-white">
-        Your choice.
-      </p>
+      <h1 id="heroTitle" class="theme-text text-5xl font-bold mb-4 text-white">Clothes chosen for you.</h1>
+      <p id="heroSubtitle" class="theme-text text-lg mb-8 text-white">Clothes worthy of just wearing.</p>
       <div class="flex justify-center gap-4">
         <a id="btnShopNow" href="#products" class="bg-white text-black px-6 py-3 rounded-full font-medium">Shop Now</a>
         <button id="viewCartBtn" class="border border-white text-white px-6 py-3 rounded-full font-medium relative" type="button">
@@ -419,27 +413,27 @@
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
         <div class="product-card bg-white/10 p-6 rounded-xl shadow-md text-center backdrop-blur">
-          <img src="https://picsum.photos/1024/1024" class="w-full h-64 object-cover rounded mb-4" alt="White T-shirt">
-          <h3 id="product1Name" class="text-xl font-bold mb-2">SEP White T-shirt</h3>
-          <p class="mb-2">180 DKK</p>
-          <select class="theme-text border rounded px-3 py-2 mb-2 bg-transparent">
+          <img src="https://picsum.photos/1024/1024?random=11" class="w-full h-64 object-cover rounded mb-4" alt="White T-shirt">
+          <h3 id="product1Name" class="text-xl font-bold mb-2 text-white">SEP White T-shirt</h3>
+          <p class="mb-2 text-white">180 DKK</p>
+          <select class="theme-text border rounded px-3 py-2 mb-2 bg-transparent text-white">
             <option>XS</option><option>S</option><option>M</option><option>L</option><option>XL</option>
           </select>
           <div class="flex justify-center gap-2">
-            <input type="number" min="1" value="1" class="theme-text border rounded w-16 text-center bg-transparent quantity-selector">
+            <input type="number" min="1" value="1" class="theme-text border rounded w-16 text-center bg-transparent quantity-selector text-white">
             <button class="add-to-cart bg-white text-black px-4 py-2 rounded" data-i18n-btn="addToCart" type="button">Add</button>
           </div>
         </div>
 
         <div class="product-card bg-white/10 p-6 rounded-xl shadow-md text-center backdrop-blur">
-          <img src="https://picsum.photos/1024/1024" class="w-full h-64 object-cover rounded mb-4" alt="Black Hoodie">
-          <h3 id="product2Name" class="text-xl font-bold mb-2">SEP Sweater</h3>
-          <p class="mb-2">180 DKK</p>
-          <select class="theme-text border rounded px-3 py-2 mb-2 bg-transparent">
+          <img src="https://picsum.photos/1024/1024?random=22" class="w-full h-64 object-cover rounded mb-4" alt="Sweater">
+          <h3 id="product2Name" class="text-xl font-bold mb-2 text-white">SEP Sweater</h3>
+          <p class="mb-2 text-white">180 DKK</p>
+          <select class="theme-text border rounded px-3 py-2 mb-2 bg-transparent text-white">
             <option>XS</option><option>S</option><option>M</option><option>L</option><option>XL</option>
           </select>
           <div class="flex justify-center gap-2">
-            <input type="number" min="1" value="1" class="theme-text border rounded w-16 text-center bg-transparent quantity-selector">
+            <input type="number" min="1" value="1" class="theme-text border rounded w-16 text-center bg-transparent quantity-selector text-white">
             <button class="add-to-cart bg-white text-black px-4 py-2 rounded" data-i18n-btn="addToCart" type="button">Add</button>
           </div>
         </div>
@@ -447,33 +441,32 @@
     </section>
 
     <section class="py-20 text-center fade-section">
-      <h2 id="howToOrderTitle" class="text-3xl font-bold mb-10">How to Order</h2>
+      <h2 id="howToOrderTitle" class="text-3xl font-bold mb-10 text-black">How to Order</h2>
       <div class="grid grid-cols-1 md:grid-cols-5 gap-6 max-w-6xl mx-auto text-sm md:text-base">
-        <div class="bg-white/10 rounded-xl p-6 backdrop-blur">
+        <div class="bg-white/10 rounded-xl p-6 backdrop-blur text-black">
           <h3 id="step1Title" class="font-bold text-lg mb-2">1. Choose</h3>
           <p id="howStep1">Select your favourite SEP piece - T-shirt or Sweater - then pick your size and quantity.</p>
         </div>
-        <div class="bg-white/10 rounded-xl p-6 backdrop-blur">
+        <div class="bg-white/10 rounded-xl p-6 backdrop-blur text-black">
           <h3 id="step2Title" class="font-bold text-lg mb-2">2. Add to Cart</h3>
           <p id="howStep2">Click “Add” to add your chosen items to your cart. When ready, click “View Cart” to review your order.</p>
         </div>
-        <div class="bg-white/10 rounded-xl p-6 backdrop-blur">
+        <div class="bg-white/10 rounded-xl p-6 backdrop-blur text-black">
           <h3 id="step3Title" class="font-bold text-lg mb-2">3. Copy Order Message</h3>
           <p id="howStep3">Inside your cart, press “Copy Order Message”. This copies your full order, including shipping, automatically.</p>
         </div>
-        <div class="bg-white/10 rounded-xl p-6 backdrop-blur">
+        <div class="bg-white/10 rounded-xl p-6 backdrop-blur text-black">
           <h3 id="step4Title" class="font-bold text-lg mb-2">4. Pay with MobilePay</h3>
-          <p id="howStep4">Send the total amount (incl. +45 DKK shipping, free in copenhagen.) to <b>5894BZ</b> using MobilePay.<br><span class="text-xs italic">“Open MobilePay” works only on mobile devices.</span></p>
+          <p id="howStep4">Send the total amount (incl. +45 DKK shipping, free in Copenhagen.) to <b>5894BZ</b> using MobilePay.<br><span class="text-xs italic">“Open MobilePay” works only on mobile devices.</span></p>
         </div>
-        <div class="bg-white/10 rounded-xl p-6 backdrop-blur">
+        <div class="bg-white/10 rounded-xl p-6 backdrop-blur text-black">
           <h3 id="step5Title" class="font-bold text-lg mb-2">5. Send us your order</h3>
-          <p id="howStep5">DM your copied message to <b>@seproairesis</b> (Instagram) or <b>@se
-            proairesis</b> (TikTok).<br>We currently deliver only within Denmark.</p>
+          <p id="howStep5">DM your copied message to <b>@seproairesis</b> (Instagram) or <b>@seproairesis</b> (TikTok).<br>We currently deliver only within Denmark.</p>
         </div>
       </div>
     </section>
 
-    <footer class="text-center py-10 fade-section">
+    <footer class="text-center py-10 fade-section text-black">
       <p id="footerText">
         © 2025 SEP - Se Proairesis • MobilePay 5894BZ • +45 DKK Shipping • Made in Copenhagen. Only delivered across Denmark.
       </p>
@@ -486,13 +479,14 @@
 
   <!-- ABOUT SCENE -->
   <section id="sep-scene-about" class="py-20 px-6 hidden">
-    <div class="max-w-3xl mx-auto text-center">
+    <div class="max-w-3xl mx-auto text-center text-white">
       <h2 id="aboutTitle" class="theme-text text-3xl font-bold mb-4">About SEP</h2>
       <p id="aboutBody1" class="theme-text mb-4">
         SEP stands for Se Proairesis - your choice in ancient greek. Each piece is pressed by hand in Copenhagen in small batches.
       </p>
       <p id="aboutBody2" class="theme-text mb-4">
-        We make batches with small choice but good quality - rather focusing on quality than choice. That doesn't mean we wont do big batches though. We can't buy thousands of peices yet (we are still a small brand staring up)      </p>
+        We make batches with small choice but good quality - rather focusing on quality than choice. That doesn't mean we wont do big batches though. We can't buy thousands of peices yet (we are still a small brand staring up)
+      </p>
       <p id="aboutBody3" class="theme-text mb-8">
         One t-shirt, one sweater; all built to be the first thing you reach for when you open your wardrobe. I'm still a 13-year-old which means I cant have apple pay yet. So there's only mobile pay so far.
       </p>
@@ -740,21 +734,19 @@
 
 <script>
 /* =========================================================
-   GLOBAL LANGUAGE + WELCOME / ROUTER
-   - “welcome disappears after you enter sep or mih”:
-     we remove it from the DOM once you choose.
+   GLOBAL LANGUAGE + ROUTER (NO RELOADS, NO FLASH)
 ========================================================= */
 
 const LS_GLOBAL_LANG = "global_lang_v1";
 let GLOBAL_LANG = localStorage.getItem(LS_GLOBAL_LANG) || "en";
-let WELCOME_REMOVED = false;
 
 const GLOBAL_TRANSLATIONS = {
   en: {
-    welcomeTitle: "Choose your path",
-    welcomeSubtitle: "Shop SEP; or join the Make It Happen challenge and move more together.",
-    welcomeSepBtn: "Enter SEP shop",
-    welcomeMihBtn: "Enter Make It Happen",
+    welcomeTitle: "SEP",
+    welcomeSubtitle: "Your Choice. Either shop (SEP shop), or move (Make It Happen). That simple.",
+    welcomeSepBtn: "SEP shop",
+    welcomeMihBtn: "Make It Happen",
+
     sepLangLabel: "Language",
     sepInfoLabel: "Info",
     sepExitLabel: "Exit",
@@ -802,7 +794,7 @@ const GLOBAL_TRANSLATIONS = {
     mihLbColPace: "Avg pace",
 
     mihProfilesTitle: "Profiles",
-    mihProfilesSubtitle: "Tap a player to view their stats.",
+    mihProfilesSubtitle: "Tap a player's name to view their stats.",
     mihProfilesColName: "Name",
     mihProfilesColKm: "Total km",
     mihProfilesColMin: "Total min",
@@ -831,7 +823,7 @@ const GLOBAL_TRANSLATIONS = {
     mihHistColPace: "Pace",
 
     mihAboutTitle: "About the challenge",
-    mihAboutBody: "Make It Happen is about consistency. Not perfection. Log your movement, no matter how small. Every kilometre counts.",
+    mihAboutBody: "Make It Happen is about consistency. Not perfection. Log your movement, no matter how small. Every metre counts. We find that a league with competition motivates people to move more.",
 
     toastSaved: "Saved",
     errLoginMissing: "Please enter both name and password.",
@@ -843,10 +835,11 @@ const GLOBAL_TRANSLATIONS = {
     noPlayers: "No players yet."
   },
   da: {
-    welcomeTitle: "Vælg din vej",
-    welcomeSubtitle: "Shop SEP, eller join Make It Happen og bevæg dig sammen med andre.",
-    welcomeSepBtn: "Gå ind i SEP shop",
-    welcomeMihBtn: "Gå ind i Make It Happen",
+    welcomeTitle: "SEP",
+    welcomeSubtitle: "Dit valg. Enten shop (SEP shop), eller bevæg dig (Make It Happen). Så enkelt.",
+    welcomeSepBtn: "SEP shop",
+    welcomeMihBtn: "Make It Happen",
+
     sepLangLabel: "Sprog",
     sepInfoLabel: "Info",
     sepExitLabel: "Exit",
@@ -865,7 +858,7 @@ const GLOBAL_TRANSLATIONS = {
     mihExitBtn: "Exit",
 
     mihLoginTitle: "Velkommen tilbage",
-    mihLoginSubtitle: "Indtast dit navn og din adgangskode.",
+    mihLoginSubtitle: "Indtast dit brugernavn og din adgangskode.",
     mihUsernamePh: "Dit navn",
     mihPasswordPh: "Adgangskode",
     mihEnterBtn: "Gå ind",
@@ -894,7 +887,7 @@ const GLOBAL_TRANSLATIONS = {
     mihLbColPace: "Gns. tempo",
 
     mihProfilesTitle: "Profiler",
-    mihProfilesSubtitle: "Tryk på en spiller for at se stats.",
+    mihProfilesSubtitle: "Tryk på en spillers navn for at se deres stats.",
     mihProfilesColName: "Navn",
     mihProfilesColKm: "Total km",
     mihProfilesColMin: "Total min",
@@ -923,7 +916,7 @@ const GLOBAL_TRANSLATIONS = {
     mihHistColPace: "Tempo",
 
     mihAboutTitle: "Om challenge",
-    mihAboutBody: "Make It Happen handler om kontinuitet. Ikke perfektion. Log din bevægelse, uanset hvor lidt. Hver kilometer tæller.",
+    mihAboutBody: "Make It Happen handler om kontinuitet. Ikke perfektion. Log din bevægelse, uanset hvor lidt. Hver meter tæller. Vi oplever, at en liga med konkurrence motiverer folk til at bevæge sig mere.",
 
     toastSaved: "Gemt",
     errLoginMissing: "Indtast både navn og adgangskode.",
@@ -935,13 +928,14 @@ const GLOBAL_TRANSLATIONS = {
     noPlayers: "Ingen spillere endnu."
   },
   cs: {
-    welcomeTitle: "Vyber si cestu",
-    welcomeSubtitle: "Nakup SEP, nebo se přidej k Make It Happen a hýbej se spolu s ostatními.",
-    welcomeSepBtn: "Vstoupit do SEP shopu",
-    welcomeMihBtn: "Vstoupit do Make It Happen",
+    welcomeTitle: "SEP",
+    welcomeSubtitle: "Tvoje volba. Buď nakupuj (SEP shop), nebo se hýbej (Make It Happen). Tak jednoduché.",
+    welcomeSepBtn: "SEP shop",
+    welcomeMihBtn: "Make It Happen",
+
     sepLangLabel: "Jazyk",
     sepInfoLabel: "Info",
-    sepExitLabel: "Exit",
+    sepExitLabel: "Ukončit",
     sepExitBtn: "Zpět do hlavního menu",
     sepExitBtn2: "Zpět do hlavního menu",
 
@@ -957,7 +951,7 @@ const GLOBAL_TRANSLATIONS = {
     mihExitBtn: "Exit",
 
     mihLoginTitle: "Vítej zpět",
-    mihLoginSubtitle: "Zadej jméno a heslo.",
+    mihLoginSubtitle: "Zadej své uživatelské jméno a heslo.",
     mihUsernamePh: "Tvoje jméno",
     mihPasswordPh: "Heslo",
     mihEnterBtn: "Vstoupit",
@@ -966,8 +960,8 @@ const GLOBAL_TRANSLATIONS = {
     mihSavedShow: "Uložené heslo na tomto zařízení: {password}",
 
     mihHomeTitle: "Tvůj dashboard",
-    mihHomeSubtitle: "Loguj aktivitu. Každý kilometr se počítá.",
-    mihAddTitle: "Zaloguj novou aktivitu",
+    mihHomeSubtitle: "Zapisuj aktivitu. Každý kilometr se počítá.",
+    mihAddTitle: "Zapiš novou aktivitu",
     mihDistancePh: "Kilometry (např. 3.5)",
     mihMinutesPh: "Čas v minutách (např. 28)",
     mihSubmit: "Odeslat",
@@ -986,7 +980,7 @@ const GLOBAL_TRANSLATIONS = {
     mihLbColPace: "Prům. tempo",
 
     mihProfilesTitle: "Profily",
-    mihProfilesSubtitle: "Klikni na hráče pro zobrazení statistik.",
+    mihProfilesSubtitle: "Klikni na jméno hráče a uvidíš jeho statistiky.",
     mihProfilesColName: "Jméno",
     mihProfilesColKm: "Celkem km",
     mihProfilesColMin: "Celkem min",
@@ -1015,7 +1009,7 @@ const GLOBAL_TRANSLATIONS = {
     mihHistColPace: "Tempo",
 
     mihAboutTitle: "O výzvě",
-    mihAboutBody: "Make It Happen je o konzistenci. Ne o perfektnosti. Loguj pohyb, i když je malý. Každý kilometr se počítá.",
+    mihAboutBody: "Make It Happen je o konzistenci. Ne o perfektnosti. Zapisuj pohyb, i když je malý. Každý metr se počítá. Zjistili jsme, že liga s trochou soutěživosti motivuje lidi hýbat se víc.",
 
     toastSaved: "Uloženo",
     errLoginMissing: "Zadej jméno i heslo.",
@@ -1037,46 +1031,19 @@ function GT(key, vars){
   return str;
 }
 
-function setGlobalLang(lang){
-  GLOBAL_LANG = lang;
-  localStorage.setItem(LS_GLOBAL_LANG, GLOBAL_LANG);
-  applyGlobalTranslations();
-  // also sync SEP language buttons
-  document.querySelectorAll('.lang-btn').forEach(btn => {
-    if (btn.getAttribute('data-lang') === GLOBAL_LANG) btn.click();
-  });
-  // sync MIH language buttons
-  document.querySelectorAll('.mih-lang-btn').forEach(btn => {
-    btn.classList.toggle('active', btn.getAttribute('data-lang') === GLOBAL_LANG);
-  });
-  // sync welcome language buttons
-  document.querySelectorAll('.welcome-lang-btn').forEach(btn => {
-    btn.classList.toggle('active', btn.getAttribute('data-lang') === GLOBAL_LANG);
-  });
-}
-
 function applyGlobalTranslations(){
   // Welcome
-  const wTitle = document.getElementById('welcomeTitle');
-  const wSub = document.getElementById('welcomeSubtitle');
-  const wSep = document.getElementById('welcomeSepBtn');
-  const wMih = document.getElementById('welcomeMihBtn');
-  if (wTitle) wTitle.textContent = GT('welcomeTitle');
-  if (wSub) wSub.textContent = GT('welcomeSubtitle');
-  if (wSep) wSep.textContent = GT('welcomeSepBtn');
-  if (wMih) wMih.textContent = GT('welcomeMihBtn');
+  document.getElementById('welcomeTitle') && (document.getElementById('welcomeTitle').textContent = GT('welcomeTitle'));
+  document.getElementById('welcomeSubtitle') && (document.getElementById('welcomeSubtitle').textContent = GT('welcomeSubtitle'));
+  document.getElementById('welcomeSepBtn') && (document.getElementById('welcomeSepBtn').textContent = GT('welcomeSepBtn'));
+  document.getElementById('welcomeMihBtn') && (document.getElementById('welcomeMihBtn').textContent = GT('welcomeMihBtn'));
 
-  // SEP menu misc
-  const sepLangLabel = document.getElementById('sepLangLabel');
-  const sepInfoLabel = document.getElementById('sepInfoLabel');
-  const sepExitLabel = document.getElementById('sepExitLabel');
-  const sepExitBtn = document.getElementById('sepExitBtn');
-  const sepExitBtn2 = document.getElementById('sepExitBtn2');
-  if (sepLangLabel) sepLangLabel.textContent = GT('sepLangLabel');
-  if (sepInfoLabel) sepInfoLabel.textContent = GT('sepInfoLabel');
-  if (sepExitLabel) sepExitLabel.textContent = GT('sepExitLabel');
-  if (sepExitBtn) sepExitBtn.textContent = GT('sepExitBtn');
-  if (sepExitBtn2) sepExitBtn2.textContent = GT('sepExitBtn2');
+  // SEP menu labels
+  document.getElementById('sepLangLabel') && (document.getElementById('sepLangLabel').textContent = GT('sepLangLabel'));
+  document.getElementById('sepInfoLabel') && (document.getElementById('sepInfoLabel').textContent = GT('sepInfoLabel'));
+  document.getElementById('sepExitLabel') && (document.getElementById('sepExitLabel').textContent = GT('sepExitLabel'));
+  document.getElementById('sepExitBtn') && (document.getElementById('sepExitBtn').textContent = GT('sepExitBtn'));
+  document.getElementById('sepExitBtn2') && (document.getElementById('sepExitBtn2').textContent = GT('sepExitBtn2'));
 
   // MIH menu + scenes
   const ids = [
@@ -1089,8 +1056,7 @@ function applyGlobalTranslations(){
   ids.forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
-    const key = id;
-    if (GLOBAL_TRANSLATIONS.en[key]) el.textContent = GT(key);
+    if (GLOBAL_TRANSLATIONS.en[id]) el.textContent = GT(id);
   });
 
   const mihAboutBody = document.getElementById('mihAboutBody');
@@ -1130,45 +1096,57 @@ function applyGlobalTranslations(){
   });
 }
 
-function removeWelcomeForever(){
-  if (WELCOME_REMOVED) return;
-  const welcome = document.getElementById('welcome-screen');
-  if (welcome) welcome.remove();
-  WELCOME_REMOVED = true;
+function setGlobalLang(lang){
+  GLOBAL_LANG = lang || "en";
+  localStorage.setItem(LS_GLOBAL_LANG, GLOBAL_LANG);
+
+  // welcome buttons active state
+  document.querySelectorAll('.welcome-lang-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.getAttribute('data-lang') === GLOBAL_LANG);
+  });
+
+  // MIH buttons active state
+  document.querySelectorAll('.mih-lang-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.getAttribute('data-lang') === GLOBAL_LANG);
+  });
+
+  // Sync SEP buttons + apply translations
+  if (window.__SEP_SET_LANG) window.__SEP_SET_LANG(GLOBAL_LANG);
+
+  applyGlobalTranslations();
 }
 
-function showApp(app) {
-  const sepApp  = document.getElementById('sep-app');
-  const mihApp  = document.getElementById('mih-app');
+/* Router */
+function showApp(app){
   const welcome = document.getElementById('welcome-screen');
+  const sepApp = document.getElementById('sep-app');
+  const mihApp = document.getElementById('mih-app');
 
-  if (app === 'sep') {
-    if (welcome) welcome.classList.add('hidden');
-    mihApp.classList.add('hidden');
-    sepApp.classList.remove('hidden');
+  if (app === 'sep'){
+    welcome && welcome.classList.add('hidden');
+    mihApp && mihApp.classList.add('hidden');
+    sepApp && sepApp.classList.remove('hidden');
     window.scrollTo({ top: 0, behavior: 'auto' });
-  } else if (app === 'mih') {
-    if (welcome) welcome.classList.add('hidden');
-    sepApp.classList.add('hidden');
-    mihApp.classList.remove('hidden');
+    return;
+  }
+  if (app === 'mih'){
+    welcome && welcome.classList.add('hidden');
+    sepApp && sepApp.classList.add('hidden');
+    mihApp && mihApp.classList.remove('hidden');
     window.scrollTo({ top: 0, behavior: 'auto' });
-  } else {
-  // show welcome without reloading
-  sepApp.classList.add('hidden');
-  mihApp.classList.add('hidden');
-  if (welcome) welcome.classList.remove('hidden');
+    return;
+  }
+
+  // welcome
+  sepApp && sepApp.classList.add('hidden');
+  mihApp && mihApp.classList.add('hidden');
+  welcome && welcome.classList.remove('hidden');
   window.scrollTo({ top: 0, behavior: 'auto' });
 }
-}
 
-function openSep(){
-  showApp('sep');
-  removeWelcomeForever();
-}
-function openMih(){
-  showApp('mih');
-  removeWelcomeForever();
-}
+function openSep(){ showApp('sep'); }
+function openMih(){ showApp('mih'); }
+function backToMainMenu(){ showApp('welcome'); }
 </script>
 
 <script>
@@ -1179,41 +1157,49 @@ function openMih(){
   const sepTranslations = {
     en: {
       menuTitle: "SEP Menu",
-      navAboutSep: "About SEP",
-      heroTitle: "Minimalist clothing, made with intention.",
-      heroSubtitle: "Soft, clean, and hand-pressed in Copenhagen.",
+      navAboutSep: 'About "SEP"',
+
+      heroTitle: "Clothes chosen for you.",
+      heroSubtitle: "Clothes worthy of just wearing.",
       btnShopNow: "Shop Now",
       btnViewCart: "View Cart",
+
       addToCart: "Add",
-      productsTitle: "Three products. One choice.",
-      productsSubtitle: "Soft, durable, and timeless.",
+
+      productsTitle: "Two products. Three choices.",
+      productsSubtitle: "Our soft collection:",
+
       product1Name: "SEP White T-shirt",
-      product2Name: "SEP Black Hoodie",
-      product3Name: "SEP Black Trousers",
+      product2Name: "SEP Sweater",
+
       aboutTitle: "About SEP",
-      aboutBody1: "SEP stands for Se Proairesis - your choice. Each piece is pressed by hand in Copenhagen in small batches.",
-      aboutBody2: "The goal is not hype. It is to make a small number of things that feel good on your skin, last a long time, and stay in your rotation.",
-      aboutBody3: "One tee, one hoodie, one pair of trousers; all built to be the first thing you reach for when you open your wardrobe.",
+      aboutBody1: "SEP stands for Se Proairesis - your choice in ancient greek. Each piece is pressed by hand in Copenhagen in small batches.",
+      aboutBody2: "We make batches with small choice but good quality - rather focusing on quality than choice. That doesn't mean we wont do big batches though. We can't buy thousands of peices yet (we are still a small brand staring up)",
+      aboutBody3: "One t-shirt, one sweater; all built to be the first thing you reach for when you open your wardrobe. I'm still a 13-year-old which means I cant have apple pay yet. So there's only mobile pay so far.",
       aboutBackBtn: "Back to shop",
+
       howToOrderTitle: "How to Order",
       step1Title: "1. Choose",
       step2Title: "2. Add to Cart",
       step3Title: "3. Copy Order Message",
       step4Title: "4. Pay with MobilePay",
       step5Title: "5. Send us your order",
-      howStep1: "Select your favourite SEP piece - T-shirt, Hoodie, or Trousers - then pick your size and quantity.",
+
+      howStep1: "Select your favourite SEP piece - T-shirt or Sweater - then pick your size and quantity.",
       howStep2: "Click “Add” to add your chosen items to your cart. When ready, click “View Cart” to review your order.",
       howStep3: "Inside your cart, press “Copy Order Message”. This copies your full order, including shipping, automatically.",
-      howStep4: "Send the total amount (incl. +45 DKK shipping) to 5894BZ using MobilePay.\n“Open MobilePay” works only on mobile devices.",
-      howStep5: "DM your copied message to @seproairesis (Instagram) or @se.proairesis (TikTok).\nWe currently deliver within Denmark.",
-      footerText: "© 2025 SEP - Se Proairesis • MobilePay 5894BZ • +45 DKK Shipping • Made in Copenhagen. Delivered across Denmark.",
+      howStep4: "Send the total amount (incl. +45 DKK shipping, free in Copenhagen.) to 5894BZ using MobilePay.\n“Open MobilePay” works only on mobile devices.",
+      howStep5: "DM your copied message to @seproairesis (Instagram) or @seproairesis (TikTok).\nWe currently deliver only within Denmark.",
+
+      footerText: "© 2025 SEP - Se Proairesis • MobilePay 5894BZ • +45 DKK Shipping • Made in Copenhagen. Only delivered across Denmark.",
+
       cartTitle: "Your Cart",
       cartSubtotalLabel: "Subtotal:",
       cartShippingLabel: "Shipping:",
       cartShippingValue: "+45 DKK",
       cartTotalLabel: "Total:",
       cartMobilePayButton: "Open MobilePay",
-      cartMobilePayNote: "Open MobilePay button is only a valid link on mobile.",
+      cartMobilePayNote: "*Open MobilePay button is only valid on mobile*",
       cartCopyOrder: "Copy Order Message",
       cartEmpty: "Cart is empty",
       labelSizeQty: "Size: {size} | Qty: {qty}",
@@ -1229,41 +1215,49 @@ function openMih(){
     },
     da: {
       menuTitle: "SEP menu",
-      navAboutSep: "Om SEP",
-      heroTitle: "Minimalistisk tøj, lavet med omtanke.",
-      heroSubtitle: "Blødt, rent og håndpresset i København.",
+      navAboutSep: 'Om "SEP"',
+
+      heroTitle: "Tøj valgt til dig.",
+      heroSubtitle: "Tøj, der er bare værd at have på.",
       btnShopNow: "Shop nu",
       btnViewCart: "Se kurv",
+
       addToCart: "Læg i kurv",
-      productsTitle: "Tre produkter. Ét valg.",
-      productsSubtitle: "Blødt, holdbart og tidløst.",
-      product1Name: "SEP Hvid T-shirt",
-      product2Name: "SEP Sort Hoodie",
-      product3Name: "SEP Sorte Bukser",
+
+      productsTitle: "To produkter. Tre valg.",
+      productsSubtitle: "Vores bløde kollektion:",
+
+      product1Name: "SEP hvid T-shirt",
+      product2Name: "SEP sweater",
+
       aboutTitle: "Om SEP",
-      aboutBody1: "SEP står for Se Proairesis - dit valg. Hver style bliver håndpresset i København i små batches.",
-      aboutBody2: "Målet er ikke hype. Det er at lave få ting, der føles godt på huden, holder længe og bliver i din rotation.",
-      aboutBody3: "En T-shirt, en hoodie, et par bukser; alt sammen lavet til at være det første, du rækker ud efter i garderoben.",
+      aboutBody1: "SEP står for Se Proairesis – dit valg på oldgræsk. Hvert stykke presses i hånden i København i små batches.",
+      aboutBody2: "Vi laver batches med få valg, men god kvalitet – vi fokuserer på kvalitet frem for udvalg. Vi er stadig et lille brand i opstart, så vi kan ikke købe tusindvis endnu.",
+      aboutBody3: "En T-shirt, en sweater – lavet til at være det første, du rækker ud efter. Jeg er stadig 13 år, så jeg kan ikke have Apple Pay endnu. Derfor er det kun MobilePay lige nu.",
       aboutBackBtn: "Tilbage til shop",
+
       howToOrderTitle: "Sådan bestiller du",
       step1Title: "1. Vælg",
       step2Title: "2. Læg i kurv",
       step3Title: "3. Kopiér ordrebesked",
       step4Title: "4. Betal med MobilePay",
       step5Title: "5. Send din ordre",
-      howStep1: "Vælg dit favorit-SEP - T-shirt, hoodie eller bukser - og vælg størrelse og antal.",
-      howStep2: "Tryk “Læg i kurv” for at lægge dine varer i kurven. Når du er klar, trykker du “Se kurv” for at tjekke din ordre.",
-      howStep3: "Inde i kurven trykker du “Kopiér ordrebesked”. Det kopierer hele din ordre automatisk, inkl. fragt.",
-      howStep4: "Send det samlede beløb (inkl. +45 DKK fragt) til 5894BZ via MobilePay.\n“Åbn MobilePay” virker kun på mobilenheder.",
-      howStep5: "Send din kopierede besked som DM til @seproairesis (Instagram) eller @se.proairesis (TikTok).\nVi leverer i Danmark.",
-      footerText: "© 2025 SEP - Se Proairesis • MobilePay 5894BZ • +45 DKK fragt • Lavet i København. Leveret i Danmark.",
+
+      howStep1: "Vælg din foretrukne SEP-del – T-shirt eller sweater – og vælg størrelse og antal.",
+      howStep2: "Tryk “Læg i kurv” for at tilføje dine varer. Når du er klar, tryk “Se kurv” for at tjekke din ordre.",
+      howStep3: "I kurven trykker du “Kopiér ordrebesked”. Det kopierer hele din ordre automatisk, inkl. fragt.",
+      howStep4: "Send det samlede beløb (inkl. +45 DKK fragt, gratis i København) til 5894BZ via MobilePay.\n“Åbn MobilePay” virker kun på mobilenheder.",
+      howStep5: "Send din besked som DM til @seproairesis (Instagram) eller @seproairesis (TikTok).\nVi leverer kun i Danmark.",
+
+      footerText: "© 2025 SEP - Se Proairesis • MobilePay 5894BZ • +45 DKK fragt • Lavet i København. Leveres kun i Danmark.",
+
       cartTitle: "Din kurv",
       cartSubtotalLabel: "Subtotal:",
       cartShippingLabel: "Fragt:",
       cartShippingValue: "+45 DKK",
       cartTotalLabel: "Total:",
       cartMobilePayButton: "Åbn MobilePay",
-      cartMobilePayNote: "Knap til MobilePay virker kun som link på mobil.",
+      cartMobilePayNote: "*MobilePay-knappen virker kun som link på mobil*",
       cartCopyOrder: "Kopiér ordrebesked",
       cartEmpty: "Kurven er tom",
       labelSizeQty: "Størrelse: {size} | Antal: {qty}",
@@ -1278,52 +1272,60 @@ function openMih(){
       orderItem: "{qty}× {name} (Størrelse: {size})"
     },
     cs: {
-      menuTitle: "Nabídka SEP",
-      navAboutSep: "O značce SEP",
-      heroTitle: "Minimalistické oblečení dělané s úmyslem.",
-      heroSubtitle: "Měkké, čisté a ručně lisované v Kodani.",
+      menuTitle: "Menu SEP",
+      navAboutSep: 'O „SEP“',
+
+      heroTitle: "Oblečení vybrané pro tebe.",
+      heroSubtitle: "Oblečení, které prostě stojí za nošení",
       btnShopNow: "Nakoupit",
-      btnViewCart: "Zobrazit košík",
+      btnViewCart: "Košík",
+
       addToCart: "Přidat",
-      productsTitle: "Tři produkty. Jedna volba.",
-      productsSubtitle: "Měkké, odolné a nadčasové.",
+
+      productsTitle: "Dva produkty. Tři volby.",
+      productsSubtitle: "Naše měkká kolekce:",
+
       product1Name: "SEP bílé tričko",
-      product2Name: "SEP černá mikina",
-      product3Name: "SEP černé kalhoty",
-      aboutTitle: "O značce SEP",
-      aboutBody1: "SEP znamená Se Proairesis - tvoje volba. Každý kousek je ručně lisovaný v Kodani v malých sériích.",
-      aboutBody2: "Cílem není hype. Jde o to dělat pár věcí, které jsou příjemné na těle, dlouho vydrží a pořád po nich saháš.",
-      aboutBody3: "Jedno tričko, jedna mikina, jedny kalhoty; všechno tak, aby to byl první kousek, po kterém sáhneš ve skříni.",
+      product2Name: "SEP mikina",
+
+      aboutTitle: "O SEP",
+      aboutBody1: "SEP znamená Se Proairesis – tvoje volba ve staré řečtině. Každý kus je ručně lisovaný v Kodani v malých sériích.",
+      aboutBody2: "Děláme série s malým výběrem, ale dobrou kvalitou – soustředíme se na kvalitu, ne na množství. Jsme stále malá značka na začátku, takže zatím nemůžeme kupovat tisíce kusů.",
+      aboutBody3: "Jedno tričko, jedna mikina – věci, po kterých sáhneš jako první. Je mi 13, takže zatím nemám Apple Pay. Proto je teď jen MobilePay.",
       aboutBackBtn: "Zpět do shopu",
+
       howToOrderTitle: "Jak objednat",
       step1Title: "1. Vyber",
       step2Title: "2. Přidej do košíku",
-      step3Title: "3. Zkopíruj zprávu s objednávkou",
+      step3Title: "3. Zkopíruj zprávu",
       step4Title: "4. Zaplať přes MobilePay",
-      step5Title: "5. Pošli nám objednávku",
-      howStep1: "Vyber si svůj oblíbený SEP kousek - tričko, mikinu nebo kalhoty - a zvol velikost a množství.",
-      howStep2: "Klikni na “Přidat”, aby se věci přidaly do košíku. Až budeš připravený, klikni na “Zobrazit košík” a zkontroluj objednávku.",
-      howStep3: "V košíku stiskni “Zkopírovat zprávu s objednávkou”. Tím se automaticky zkopíruje celá objednávka včetně dopravy.",
-      howStep4: "Pošli celkovou částku (včetně +45 DKK poštovného) na 5894BZ přes MobilePay.\n“Open MobilePay” funguje jen v mobilu.",
-      howStep5: "Pošli zkopírovanou zprávu do DM na @seproairesis (Instagram) nebo @se.proairesis (TikTok).\nAktuálně doručujeme v Dánsku.",
-      footerText: "© 2025 SEP - Se Proairesis • MobilePay 5894BZ • +45 DKK poštovné • Vyrobeno v Kodani. Doručujeme v Dánsku.",
+      step5Title: "5. Pošli objednávku",
+
+      howStep1: "Vyber si svůj oblíbený SEP kus – tričko nebo mikinu – a zvol velikost a množství.",
+      howStep2: "Klikni na “Přidat” a položky se vloží do košíku. Až budeš připravený, otevři košík.",
+      howStep3: "V košíku stiskni “Kopírovat zprávu”. Tím se automaticky zkopíruje celá objednávka včetně dopravy.",
+      howStep4: "Pošli celkovou částku (včetně +45 DKK dopravy, zdarma v Kodani) na 5894BZ přes MobilePay.\n“Otevřít MobilePay” funguje jen na mobilu.",
+      howStep5: "Pošli zprávu přes DM na @seproairesis (Instagram) nebo @seproairesis (TikTok).\nDoručujeme pouze v Dánsku.",
+
+      footerText: "© 2025 SEP – Se Proairesis • MobilePay 5894BZ • +45 DKK doprava • Vyrobeno v Kodani. Pouze doručeno pouze v dánsku.",
+
       cartTitle: "Košík",
       cartSubtotalLabel: "Mezisoučet:",
-      cartShippingLabel: "Poštovné:",
+      cartShippingLabel: "Doprava:",
       cartShippingValue: "+45 DKK",
       cartTotalLabel: "Celkem:",
       cartMobilePayButton: "Otevřít MobilePay",
-      cartMobilePayNote: "Tlačítko MobilePay funguje jako odkaz pouze na mobilu.",
-      cartCopyOrder: "Zkopírovat zprávu s objednávkou",
+      cartMobilePayNote: "*Tlačítko MobilePay funguje jako odkaz pouze na mobilu*",
+      cartCopyOrder: "Zkopírovat zprávu",
       cartEmpty: "Košík je prázdný",
       labelSizeQty: "Velikost: {size} | Počet: {qty}",
       btnRemove: "Odebrat",
-      popupAdded: "Přidáno",
+      popupAdded: "Přidáno do košíku",
       popupOrderCopied: "Zkopírováno!",
       mobilePayThanks: "Díky, že podporuješ SEP!",
       orderIntro: "Ahoj SEP, tady je moje objednávka:",
       orderSubtotalLabel: "Mezisoučet:",
-      orderShippingLabel: "Poštovné:",
+      orderShippingLabel: "Doprava:",
       orderTotalLabel: "Celkem:",
       orderItem: "{qty}× {name} (Velikost: {size})"
     }
@@ -1366,7 +1368,6 @@ function openMih(){
 
     setText('product1Name', t.product1Name);
     setText('product2Name', t.product2Name);
-    setText('product3Name', t.product3Name);
 
     setText('aboutTitle', t.aboutTitle);
     setText('aboutBody1', t.aboutBody1);
@@ -1566,7 +1567,7 @@ function openMih(){
     });
   });
 
-  // Open/close cart (and make overlay clickable only when visible)
+  // Open/close cart (burger hides while cart open)
   function openCart(){
     if (!cartSidebar || !cartOverlay) return;
     cartSidebar.classList.remove('translate-x-full');
@@ -1574,6 +1575,7 @@ function openMih(){
     cartOverlay.classList.remove('pointer-none');
     cartOverlay.classList.add('pointer-auto');
     closeMenu();
+    if (menuToggle) menuToggle.classList.add('hidden');
   }
   function closeCart(){
     if (!cartSidebar || !cartOverlay) return;
@@ -1581,6 +1583,7 @@ function openMih(){
     cartOverlay.classList.add('hidden');
     cartOverlay.classList.remove('pointer-auto');
     cartOverlay.classList.add('pointer-none');
+    if (menuToggle) menuToggle.classList.remove('hidden');
   }
 
   document.getElementById('viewCartBtn')?.addEventListener('click', openCart);
@@ -1591,7 +1594,11 @@ function openMih(){
   const mobilePayNum = '5894BZ';
 
   document.getElementById('openMobilePay')?.addEventListener('click', () => {
-    window.location.href = 'mobilepay://transfer?phone=' + mobilePayNum.replace(/\D/g, '');
+    // if you later replace 5894BZ with a phone number, this will work as a deep link:
+    const digits = String(mobilePayNum).replace(/\D/g,'');
+    if (digits){
+      window.location.href = 'mobilepay://transfer?phone=' + digits;
+    }
     alert(sepTr('mobilePayThanks'));
   });
 
@@ -1624,10 +1631,9 @@ function openMih(){
     }
   });
 
-  // Exit buttons: per your request “welcome disappears once you enter”
-  // so Exit will just reload the page (fresh start).
-  document.getElementById('sepExitBtn')?.addEventListener('click', () => location.reload());
-  document.getElementById('sepExitBtn2')?.addEventListener('click', () => location.reload());
+  // Exit buttons now return to welcome (NO reload, NO flash)
+  document.getElementById('sepExitBtn')?.addEventListener('click', () => { closeCart(); closeMenu(); backToMainMenu(); });
+  document.getElementById('sepExitBtn2')?.addEventListener('click', () => { closeCart(); closeMenu(); backToMainMenu(); });
 
   // Init
   sepApplyLanguage();
@@ -1641,11 +1647,6 @@ function openMih(){
 <script>
 /* =========================================================
    MAKE IT HAPPEN (FIRESTORE) — PASSWORD LOGIN + TIME + PROFILES
-   - One league: The League of Choice
-   - Activities save with km + minutes
-   - Stats fixed
-   - Profiles added
-   - Translations applied to everything via GT()
 ========================================================= */
 (function(){
   // Firebase config (yours)
@@ -1741,7 +1742,6 @@ function openMih(){
     btn.addEventListener('click', () => {
       const lang = btn.getAttribute('data-lang');
       setGlobalLang(lang);
-      applyGlobalTranslations();
       // keep SEP in sync too
       if (window.__SEP_SET_LANG) window.__SEP_SET_LANG(lang);
     });
@@ -1754,16 +1754,17 @@ function openMih(){
     if (!pill || !mini || !logoutBtn) return;
 
     if (currentUser){
-      pill.textContent = GT('mihMenuUserMini') ? GT('mihMenuUserMini') : (`Logged in as ${currentUser}`);
-      pill.textContent = (GLOBAL_LANG === 'da') ? (`Logget ind som ${currentUser}`) :
-                         (GLOBAL_LANG === 'cs') ? (`Přihlášen jako ${currentUser}`) :
-                         (`Logged in as ${currentUser}`);
+      pill.textContent =
+        (GLOBAL_LANG === 'da') ? (`Logget ind som ${currentUser}`) :
+        (GLOBAL_LANG === 'cs') ? (`Přihlášen jako ${currentUser}`) :
+        (`Logged in as ${currentUser}`);
       mini.textContent = pill.textContent;
       logoutBtn.style.display = "block";
     } else {
-      pill.textContent = (GLOBAL_LANG === 'da') ? "Ikke logget ind" :
-                         (GLOBAL_LANG === 'cs') ? "Nepřihlášen" :
-                         "Not logged in";
+      pill.textContent =
+        (GLOBAL_LANG === 'da') ? "Ikke logget ind" :
+        (GLOBAL_LANG === 'cs') ? "Nepřihlášen" :
+        "Not logged in";
       mini.textContent = pill.textContent;
       logoutBtn.style.display = "none";
     }
@@ -1808,7 +1809,6 @@ function openMih(){
       return { created: false, wrongPass: true };
     }
 
-    // keep league label consistent
     if (data.league !== "The League of Choice"){
       await ref.set({ league: "The League of Choice" }, { merge:true });
     }
@@ -1866,7 +1866,6 @@ function openMih(){
 
     const ts = Date.now();
 
-    // 1) add entry
     await db.collection(COL_ENTRIES).add({
       username: currentUser,
       km,
@@ -1874,7 +1873,6 @@ function openMih(){
       ts
     });
 
-    // 2) update user totals atomically
     const uref = db.collection(COL_USERS).doc(currentUser);
     await db.runTransaction(async (tx) => {
       const snap = await tx.get(uref);
@@ -2031,7 +2029,6 @@ function openMih(){
     const panel = document.getElementById('mihProfilePanel');
     if (!panel) return;
 
-    // user doc
     const userSnap = await db.collection(COL_USERS).doc(username).get();
     const u = userSnap.exists ? (userSnap.data() || {}) : { name: username, totalKm:0, totalMin:0, entries:0 };
 
@@ -2042,7 +2039,6 @@ function openMih(){
     document.getElementById('mihProfileRuns').textContent = Number(u.entries || 0).toString();
     document.getElementById('mihProfileAvgPace').textContent = paceFrom(Number(u.totalKm||0), Number(u.totalMin||0));
 
-    // history
     const tbody = document.getElementById('mih-profile-history');
     tbody.innerHTML = "";
 
@@ -2126,7 +2122,6 @@ function openMih(){
     ]);
   }
 
-  // View saved password
   function viewSavedPassword(){
     const box = document.getElementById('mih-saved-pass-display');
     if (!box) return;
@@ -2135,83 +2130,45 @@ function openMih(){
     box.textContent = saved ? GT('mihSavedShow', { password: saved }) : GT('mihSavedNone');
   }
 
-  // Wire buttons
   document.getElementById('mih-login-btn')?.addEventListener('click', login);
   document.getElementById('mih-add-activity')?.addEventListener('click', addActivity);
   document.getElementById('mihLogoutBtn')?.addEventListener('click', logout);
-  document.getElementById('mihExitBtn')?.addEventListener('click', () => location.reload());
+  document.getElementById('mihExitBtn')?.addEventListener('click', () => { closeProfile(); backToMainMenu(); });
   document.getElementById('mih-view-saved-pass')?.addEventListener('click', viewSavedPassword);
   document.getElementById('mihProfileClose')?.addEventListener('click', closeProfile);
 
-  // Enter key support
-  document.getElementById('mih-username')?.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') login();
-  });
-  document.getElementById('mih-password')?.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') login();
-  });
-  document.getElementById('mih-minutes')?.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') addActivity();
-  });
-  document.getElementById('mih-distance')?.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') addActivity();
-  });
+  document.getElementById('mih-username')?.addEventListener('keydown', (e) => { if (e.key === 'Enter') login(); });
+  document.getElementById('mih-password')?.addEventListener('keydown', (e) => { if (e.key === 'Enter') login(); });
+  document.getElementById('mih-minutes')?.addEventListener('keydown', (e) => { if (e.key === 'Enter') addActivity(); });
+  document.getElementById('mih-distance')?.addEventListener('keydown', (e) => { if (e.key === 'Enter') addActivity(); });
 
-  // Init
   document.addEventListener('DOMContentLoaded', async () => {
-    // Welcome buttons
     document.getElementById('welcomeSepBtn')?.addEventListener('click', openSep);
     document.getElementById('welcomeMihBtn')?.addEventListener('click', openMih);
 
-    // Welcome language buttons
     document.querySelectorAll('.welcome-lang-btn').forEach(btn => {
       btn.addEventListener('click', () => setGlobalLang(btn.getAttribute('data-lang')));
     });
 
-    // Apply global translations now
     applyGlobalTranslations();
-    setGlobalLang(GLOBAL_LANG); // also updates active states
+    setGlobalLang(GLOBAL_LANG);
 
-    // Init firebase + data
     await initFirebase();
     setUserPills();
     updateMihMenuLoginVisibility();
 
-    // If user exists, stay logged in and hide login menu item
+    // Start on welcome ALWAYS (no flash)
+    showApp('welcome');
+
+    // If user exists, MIH stays logged in once entered (but we still start on welcome)
     if (currentUser){
-      mihShowScene('mih-home');
       await refreshAll();
     } else {
-      mihShowScene('mih-login');
       await refreshAll();
     }
   });
 
 })();
-</script>
-
-<script>
-/* =========================================================
-   START STATE
-   - Start on welcome every time
-========================================================= */
-document.addEventListener('DOMContentLoaded', () => {
-  applyGlobalTranslations();
-
-  // Make sure apps are hidden
-  document.getElementById('sep-app')?.classList.add('hidden');
-  document.getElementById('mih-app')?.classList.add('hidden');
-
-  // Make sure welcome is visible
-  document.getElementById('welcome-screen')?.classList.remove('hidden');
-
-  // Set active lang buttons on welcome
-  document.querySelectorAll('.welcome-lang-btn').forEach(btn => {
-    btn.classList.toggle('active', btn.getAttribute('data-lang') === GLOBAL_LANG);
-  });
-
-  window.scrollTo({ top: 0, behavior: 'auto' });
-});
 </script>
 
 </body>
