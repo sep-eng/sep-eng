@@ -399,7 +399,7 @@
         <a id="btnShopNow" href="#products" class="bg-white text-black px-6 py-3 rounded-full font-medium">Shop Now</a>
         <button id="viewCartBtn" class="border border-white text-white px-6 py-3 rounded-full font-medium relative" type="button">
           <span id="btnViewCart">View Cart</span>
-          <span id="cartCounter" class="absolute -top-2 -right-2 bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hidden">0</span>
+          <span id="cartCounter" class="absolute -top-2 -right-2 bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-content:center text-xs hidden">0</span>
         </button>
       </div>
     </header>
@@ -1646,6 +1646,7 @@ function backToMainMenu(){ showApp('welcome'); }
 <script>
 /* =========================================================
    MAKE IT HAPPEN (FIRESTORE) — PASSWORD LOGIN + TIME + PROFILES
+   (ONLY FIX: removed the duplicated/broken login code that caused a JS syntax error)
 ========================================================= */
 (function(){
   // Firebase config (yours)
@@ -1816,62 +1817,45 @@ function backToMainMenu(){ showApp('welcome'); }
   }
 
   async function login(){
-  try {
-    if (!db) {
-      alert("Database not ready yet. Wait 1–2 seconds and try again.");
-      return;
-    }
-
-    const name = safeName(document.getElementById('mih-username')?.value || "");
-    const password = (document.getElementById('mih-password')?.value || "").trim();
-
-    if (!name || !password){
-      alert(GT('errLoginMissing'));
-      return;
-    }
-
-    const res = await ensureUserDoc(name, password);
-    if (res.wrongPass){
-      alert(GT('errWrongPass'));
-      return;
-    }
-
-    currentUser = name;
-    localStorage.setItem(LS_USER, currentUser);
-    localStorage.setItem(LS_PASS, password);
-
-    setUserPills();
-    updateMihMenuLoginVisibility();
-
     try {
-      await refreshAll();
+      if (!db) {
+        alert("Database not ready yet. Wait 1–2 seconds and try again.");
+        return;
+      }
+
+      const name = safeName(document.getElementById('mih-username')?.value || "");
+      const password = (document.getElementById('mih-password')?.value || "").trim();
+
+      if (!name || !password){
+        alert(GT('errLoginMissing'));
+        return;
+      }
+
+      const res = await ensureUserDoc(name, password);
+      if (res.wrongPass){
+        alert(GT('errWrongPass'));
+        return;
+      }
+
+      currentUser = name;
+      localStorage.setItem(LS_USER, currentUser);
+      localStorage.setItem(LS_PASS, password);
+
+      setUserPills();
+      updateMihMenuLoginVisibility();
+
+      try {
+        await refreshAll();
+      } catch (e) {
+        console.error("refreshAll failed after login:", e);
+        alert("Logged in, but loading data failed. Check Console for Firestore index/rules errors.");
+      }
+
+      mihShowScene('mih-home');
     } catch (e) {
-      console.error("refreshAll failed after login:", e);
-      alert("Logged in, but loading data failed. Check Console for Firestore index/rules errors.");
+      console.error("Login failed:", e);
+      alert("Login failed. Open Console to see the error.");
     }
-
-    mihShowScene('mih-home');
-  } catch (e) {
-    console.error("Login failed:", e);
-    alert("Login failed. Open Console to see the error.");
-  }
-}
-
-    const res = await ensureUserDoc(name, password);
-    if (res.wrongPass){
-      alert(GT('errWrongPass'));
-      return;
-    }
-
-    currentUser = name;
-    localStorage.setItem(LS_USER, currentUser);
-    localStorage.setItem(LS_PASS, password);
-
-    setUserPills();
-    updateMihMenuLoginVisibility();
-    await refreshAll();
-
-    mihShowScene('mih-home');
   }
 
   async function logout(){
@@ -2140,27 +2124,27 @@ function backToMainMenu(){ showApp('welcome'); }
   }
 
   async function refreshAll(){
-  if (!db) return;
+    if (!db) return;
 
-  setUserPills();
-  updateMihMenuLoginVisibility();
+    setUserPills();
+    updateMihMenuLoginVisibility();
 
-  const tasks = [
-    loadRecent(),
-    loadLeaderboard(),
-    loadProfilesList(),
-    loadStats(),
-    loadHistory()
-  ];
+    const tasks = [
+      loadRecent(),
+      loadLeaderboard(),
+      loadProfilesList(),
+      loadStats(),
+      loadHistory()
+    ];
 
-  const results = await Promise.allSettled(tasks);
+    const results = await Promise.allSettled(tasks);
 
-  const rejected = results.filter(r => r.status === "rejected");
-  if (rejected.length) {
-    console.error("One or more MIH loads failed:", rejected.map(r => r.reason));
-    throw rejected[0].reason;
+    const rejected = results.filter(r => r.status === "rejected");
+    if (rejected.length) {
+      console.error("One or more MIH loads failed:", rejected.map(r => r.reason));
+      throw rejected[0].reason;
+    }
   }
-}
 
   function viewSavedPassword(){
     const box = document.getElementById('mih-saved-pass-display');
@@ -2200,12 +2184,8 @@ function backToMainMenu(){ showApp('welcome'); }
     // Start on welcome ALWAYS (no flash)
     showApp('welcome');
 
-    // If user exists, MIH stays logged in once entered (but we still start on welcome)
-    if (currentUser){
-      await refreshAll();
-    } else {
-      await refreshAll();
-    }
+    // Refresh regardless (handles empty state)
+    await refreshAll();
   });
 
 })();
