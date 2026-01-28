@@ -1816,7 +1816,11 @@ function backToMainMenu(){ showApp('welcome'); }
   }
 
   async function login(){
-    if (!db) return;
+  try {
+    if (!db) {
+      alert("Database not ready yet. Wait 1–2 seconds and try again.");
+      return;
+    }
 
     const name = safeName(document.getElementById('mih-username')?.value || "");
     const password = (document.getElementById('mih-password')?.value || "").trim();
@@ -1825,6 +1829,33 @@ function backToMainMenu(){ showApp('welcome'); }
       alert(GT('errLoginMissing'));
       return;
     }
+
+    const res = await ensureUserDoc(name, password);
+    if (res.wrongPass){
+      alert(GT('errWrongPass'));
+      return;
+    }
+
+    currentUser = name;
+    localStorage.setItem(LS_USER, currentUser);
+    localStorage.setItem(LS_PASS, password);
+
+    setUserPills();
+    updateMihMenuLoginVisibility();
+
+    try {
+      await refreshAll();
+    } catch (e) {
+      console.error("refreshAll failed after login:", e);
+      alert("Logged in, but loading data failed. Check Console for Firestore index/rules errors.");
+    }
+
+    mihShowScene('mih-home');
+  } catch (e) {
+    console.error("Login failed:", e);
+    alert("Login failed. Open Console to see the error.");
+  }
+}
 
     const res = await ensureUserDoc(name, password);
     if (res.wrongPass){
@@ -2109,17 +2140,27 @@ function backToMainMenu(){ showApp('welcome'); }
   }
 
   async function refreshAll(){
-    if (!db) return;
-    setUserPills();
-    updateMihMenuLoginVisibility();
-    await Promise.all([
-      loadRecent(),
-      loadLeaderboard(),
-      loadProfilesList(),
-      loadStats(),
-      loadHistory()
-    ]);
+  if (!db) return;
+
+  setUserPills();
+  updateMihMenuLoginVisibility();
+
+  const tasks = [
+    loadRecent(),
+    loadLeaderboard(),
+    loadProfilesList(),
+    loadStats(),
+    loadHistory()
+  ];
+
+  const results = await Promise.allSettled(tasks);
+
+  const rejected = results.filter(r => r.status === "rejected");
+  if (rejected.length) {
+    console.error("One or more MIH loads failed:", rejected.map(r => r.reason));
+    throw rejected[0].reason;
   }
+}
 
   function viewSavedPassword(){
     const box = document.getElementById('mih-saved-pass-display');
