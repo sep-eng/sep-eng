@@ -18,6 +18,7 @@
   <!-- Firebase (MIH) -->
   <script src="https://www.gstatic.com/firebasejs/11.0.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.0.0/firebase-auth-compat.js"></script>
 
   <style>
     body{
@@ -1777,14 +1778,19 @@ function backToMainMenu(){ showApp('welcome'); }
   }
 
   async function initFirebase(){
-    try {
-      if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-      db = firebase.firestore();
-    } catch(e){
-      console.error(e);
-      alert(GT('errFirebase'));
-    }
+  try {
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    db = firebase.firestore();
+
+    // ✅ required for long-term Firestore permissions
+    await firebase.auth().signInAnonymously();
+
+  } catch(e){
+    console.error(e);
+    alert(GT('errFirebase'));
   }
+}
+
 
   async function ensureUserDoc(name, password){
     const ref = db.collection(COL_USERS).doc(name);
