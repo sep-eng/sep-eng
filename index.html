@@ -586,12 +586,12 @@
 
       <button class="mih-menu-btn danger" type="button" id="mihLogoutBtn" style="display:none;">Log out</button>
 
-      <button class="mih-menu-btn danger" type="button" id="mihDeleteAccountBtn" style="display:none; background:#7f1d1d; border-color:rgba(239,68,68,.35);">
+      <button class="mih-menu-btn danger" type="button" id="mihDeleteAccountBtn"
+        style="display:none; background:#7f1d1d; border-color:rgba(239,68,68,.35);">
         Delete account
       </button>
 
       <button class="mih-menu-btn" type="button" id="mihExitBtn" style="border-color:rgba(239,68,68,.35);">Exit</button>
-
     </div>
   </aside>
 
@@ -740,29 +740,11 @@
 
 <script>
 /* =========================================================
-   GLOBAL LANGUAGE + ROUTER + MIH STATE (RELOAD TO SAME SCENE)
+   GLOBAL LANGUAGE + ROUTER (NO RELOADS, NO FLASH)
 ========================================================= */
 
 const LS_GLOBAL_LANG = "global_lang_v1";
 let GLOBAL_LANG = localStorage.getItem(LS_GLOBAL_LANG) || "en";
-
-/* Persist "which app" and "which MIH scene" */
-const LS_APP  = "last_app_v1";
-const LS_MIHS = "mih_last_scene_v1";
-
-function rememberState(){
-  const activeMih = document.querySelector('#mih-app .scene.active')?.id || "mih-login";
-  localStorage.setItem(LS_MIHS, activeMih);
-
-  const mihVisible = !document.getElementById('mih-app')?.classList.contains('hidden');
-  const sepVisible = !document.getElementById('sep-app')?.classList.contains('hidden');
-  localStorage.setItem(LS_APP, mihVisible ? "mih" : (sepVisible ? "sep" : "welcome"));
-}
-
-function hardRefreshKeepState(){
-  rememberState();
-  location.reload();
-}
 
 const GLOBAL_TRANSLATIONS = {
   en: {
@@ -856,7 +838,15 @@ const GLOBAL_TRANSLATIONS = {
     errMustLogin: "Please log in first.",
     errActivityInvalid: "Please enter valid km and minutes.",
     noEntries: "No entries yet.",
-    noPlayers: "No players yet."
+    noPlayers: "No players yet.",
+
+    // Delete account
+    delConfirmTitle: "Delete account",
+    delConfirmBody: "This will permanently delete your profile and ALL your entries. This cannot be undone.\n\nType DELETE to confirm:",
+    delCancelled: "Cancelled",
+    delWrongWord: "You must type DELETE to confirm.",
+    delWorking: "Deleting…",
+    delDone: "Account deleted"
   },
   da: {
     welcomeTitle: "SEP",
@@ -949,7 +939,14 @@ const GLOBAL_TRANSLATIONS = {
     errMustLogin: "Log ind først.",
     errActivityInvalid: "Indtast gyldige km og minutter.",
     noEntries: "Ingen entries endnu.",
-    noPlayers: "Ingen spillere endnu."
+    noPlayers: "Ingen spillere endnu.",
+
+    delConfirmTitle: "Slet konto",
+    delConfirmBody: "Dette sletter din profil og ALLE dine entries permanent. Det kan ikke fortrydes.\n\nSkriv DELETE for at bekræfte:",
+    delCancelled: "Annulleret",
+    delWrongWord: "Du skal skrive DELETE for at bekræfte.",
+    delWorking: "Sletter…",
+    delDone: "Konto slettet"
   },
   cs: {
     welcomeTitle: "SEP",
@@ -1042,7 +1039,14 @@ const GLOBAL_TRANSLATIONS = {
     errMustLogin: "Nejdřív se přihlas.",
     errActivityInvalid: "Zadej platné km i minuty.",
     noEntries: "Zatím žádné záznamy.",
-    noPlayers: "Zatím žádní hráči."
+    noPlayers: "Zatím žádní hráči.",
+
+    delConfirmTitle: "Smazat účet",
+    delConfirmBody: "Tohle trvale smaže tvůj profil a VŠECHNY tvoje záznamy. Nejde to vrátit zpět.\n\nNapiš DELETE pro potvrzení:",
+    delCancelled: "Zrušeno",
+    delWrongWord: "Pro potvrzení musíš napsat DELETE.",
+    delWorking: "Mažu…",
+    delDone: "Účet smazán"
   }
 };
 
@@ -1069,15 +1073,22 @@ function applyGlobalTranslations(){
   document.getElementById('sepExitBtn') && (document.getElementById('sepExitBtn').textContent = GT('sepExitBtn'));
   document.getElementById('sepExitBtn2') && (document.getElementById('sepExitBtn2').textContent = GT('sepExitBtn2'));
 
-  // MIH menu + scenes
-  const ids = [
+  // MIH ids that map 1:1
+  const headIds = [
     'mihMenuTitle','mihMenuLoginBtn','mihMenuHomeBtn','mihMenuLeaderboardBtn','mihMenuProfilesBtn','mihMenuStatsBtn','mihMenuAboutBtn',
     'mihLangLabel','mihLogoutBtn','mihExitBtn',
     'mihLoginTitle','mihLoginSubtitle','mihHomeTitle','mihHomeSubtitle','mihAddTitle','mihRecentTitle',
     'mihLbTitle','mihLbSubtitle','mihProfilesTitle','mihProfilesSubtitle','mihStatsTitle','mihStatsHistoryTitle',
-    'mihAboutTitle'
+    'mihAboutTitle',
+    'mihRecentColDate','mihRecentColKm','mihRecentColMin','mihRecentColPace',
+    'mihLbColRank','mihLbColName','mihLbColKm','mihLbColMin','mihLbColPace',
+    'mihProfilesColName','mihProfilesColKm','mihProfilesColMin','mihProfilesColRuns',
+    'mihProfileRowKmLabel','mihProfileRowMinLabel','mihProfileRowRunsLabel','mihProfileRowAvgPaceLabel',
+    'mihProfileHistoryTitle','mihProfileHistDate','mihProfileHistKm','mihProfileHistMin','mihProfileHistPace',
+    'mihStatsTotalKmLabel','mihStatsTotalMinLabel','mihStatsEntriesLabel','mihStatsAvgKmLabel','mihStatsAvgPaceLabel',
+    'mihHistColDate','mihHistColKm','mihHistColMin','mihHistColPace'
   ];
-  ids.forEach(id => {
+  headIds.forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
     if (GLOBAL_TRANSLATIONS.en[id]) el.textContent = GT(id);
@@ -1086,7 +1097,7 @@ function applyGlobalTranslations(){
   const mihAboutBody = document.getElementById('mihAboutBody');
   if (mihAboutBody) mihAboutBody.textContent = GT('mihAboutBody');
 
-  // MIH placeholders + buttons
+  // Placeholders/buttons
   const u = document.getElementById('mih-username');
   const p = document.getElementById('mih-password');
   const d = document.getElementById('mih-distance');
@@ -1102,45 +1113,21 @@ function applyGlobalTranslations(){
   if (enter) enter.textContent = GT('mihEnterBtn');
   if (submit) submit.textContent = GT('mihSubmit');
   if (viewSaved) viewSaved.textContent = GT('mihViewSaved');
-
-  // MIH table headers
-  const headIds = [
-    'mihRecentColDate','mihRecentColKm','mihRecentColMin','mihRecentColPace',
-    'mihLbColRank','mihLbColName','mihLbColKm','mihLbColMin','mihLbColPace',
-    'mihProfilesColName','mihProfilesColKm','mihProfilesColMin','mihProfilesColRuns',
-    'mihProfileRowKmLabel','mihProfileRowMinLabel','mihProfileRowRunsLabel','mihProfileRowAvgPaceLabel',
-    'mihProfileHistoryTitle','mihProfileHistDate','mihProfileHistKm','mihProfileHistMin','mihProfileHistPace',
-    'mihStatsTotalKmLabel','mihStatsTotalMinLabel','mihStatsEntriesLabel','mihStatsAvgKmLabel','mihStatsAvgPaceLabel',
-    'mihHistColDate','mihHistColKm','mihHistColMin','mihHistColPace'
-  ];
-  headIds.forEach(id => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    if (GLOBAL_TRANSLATIONS.en[id]) el.textContent = GT(id);
-  });
 }
 
 function setGlobalLang(lang){
   GLOBAL_LANG = lang || "en";
   localStorage.setItem(LS_GLOBAL_LANG, GLOBAL_LANG);
 
-  // welcome buttons active state
   document.querySelectorAll('.welcome-lang-btn').forEach(btn => {
     btn.classList.toggle('active', btn.getAttribute('data-lang') === GLOBAL_LANG);
   });
-
-  // MIH buttons active state
   document.querySelectorAll('.mih-lang-btn').forEach(btn => {
     btn.classList.toggle('active', btn.getAttribute('data-lang') === GLOBAL_LANG);
   });
 
-  // Sync SEP buttons + apply translations
   if (window.__SEP_SET_LANG) window.__SEP_SET_LANG(GLOBAL_LANG);
-
   applyGlobalTranslations();
-
-  // ✅ update MIH pills instantly (no refresh needed)
-  if (window.__MIH_UPDATE_PILLS) window.__MIH_UPDATE_PILLS();
 }
 
 /* Router */
@@ -1150,7 +1137,6 @@ function showApp(app){
   const mihApp = document.getElementById('mih-app');
 
   if (app === 'sep'){
-    localStorage.setItem(LS_APP, "sep");
     welcome && welcome.classList.add('hidden');
     mihApp && mihApp.classList.add('hidden');
     sepApp && sepApp.classList.remove('hidden');
@@ -1158,7 +1144,6 @@ function showApp(app){
     return;
   }
   if (app === 'mih'){
-    localStorage.setItem(LS_APP, "mih");
     welcome && welcome.classList.add('hidden');
     sepApp && sepApp.classList.add('hidden');
     mihApp && mihApp.classList.remove('hidden');
@@ -1166,8 +1151,6 @@ function showApp(app){
     return;
   }
 
-  // welcome
-  localStorage.setItem(LS_APP, "welcome");
   sepApp && sepApp.classList.add('hidden');
   mihApp && mihApp.classList.add('hidden');
   welcome && welcome.classList.remove('hidden');
@@ -1188,41 +1171,32 @@ function backToMainMenu(){ showApp('welcome'); }
     en: {
       menuTitle: "SEP Menu",
       navAboutSep: 'About "SEP"',
-
       heroTitle: "Clothes chosen for you.",
       heroSubtitle: "Clothes worthy of just wearing.",
       btnShopNow: "Shop Now",
       btnViewCart: "View Cart",
-
       addToCart: "Add",
-
       productsTitle: "Two products. Three choices.",
       productsSubtitle: "Our soft collection:",
-
       product1Name: "SEP White T-shirt",
       product2Name: "SEP Sweater",
-
       aboutTitle: "About SEP",
       aboutBody1: "SEP stands for Se Proairesis - your choice in ancient greek. Each piece is pressed by hand in Copenhagen in small batches.",
       aboutBody2: "We make batches with small choice but good quality - rather focusing on quality than choice. That doesn't mean we wont do big batches though. We can't buy thousands of peices yet (we are still a small brand staring up)",
       aboutBody3: "One t-shirt, one sweater; all built to be the first thing you reach for when you open your wardrobe. I'm still a 13-year-old which means I cant have apple pay yet. So there's only mobile pay so far.",
       aboutBackBtn: "Back to shop",
-
       howToOrderTitle: "How to Order",
       step1Title: "1. Choose",
       step2Title: "2. Add to Cart",
       step3Title: "3. Copy Order Message",
       step4Title: "4. Pay with MobilePay",
       step5Title: "5. Send us your order",
-
       howStep1: "Select your favourite SEP piece - T-shirt or Sweater - then pick your size and quantity.",
       howStep2: "Click “Add” to add your chosen items to your cart. When ready, click “View Cart” to review your order.",
       howStep3: "Inside your cart, press “Copy Order Message”. This copies your full order, including shipping, automatically.",
       howStep4: "Send the total amount (incl. +45 DKK shipping, free in Copenhagen.) to 5894BZ using MobilePay.\n“Open MobilePay” works only on mobile devices.",
       howStep5: "DM your copied message to @seproairesis (Instagram) or @seproairesis (TikTok).\nWe currently deliver only within Denmark.",
-
       footerText: "© 2025 SEP - Se Proairesis • MobilePay 5894BZ • +45 DKK Shipping • Made in Copenhagen. Only delivered across Denmark.",
-
       cartTitle: "Your Cart",
       cartSubtotalLabel: "Subtotal:",
       cartShippingLabel: "Shipping:",
@@ -1246,41 +1220,32 @@ function backToMainMenu(){ showApp('welcome'); }
     da: {
       menuTitle: "SEP menu",
       navAboutSep: 'Om "SEP"',
-
       heroTitle: "Tøj valgt til dig.",
       heroSubtitle: "Tøj, der er bare værd at have på.",
       btnShopNow: "Shop nu",
       btnViewCart: "Se kurv",
-
       addToCart: "Læg i kurv",
-
       productsTitle: "To produkter. Tre valg.",
       productsSubtitle: "Vores bløde kollektion:",
-
       product1Name: "SEP hvid T-shirt",
       product2Name: "SEP sweater",
-
       aboutTitle: "Om SEP",
       aboutBody1: "SEP står for Se Proairesis – dit valg på oldgræsk. Hvert stykke presses i hånden i København i små batches.",
       aboutBody2: "Vi laver batches med få valg, men god kvalitet – vi fokuserer på kvalitet frem for udvalg. Vi er stadig et lille brand i opstart, så vi kan ikke købe tusindvis endnu.",
       aboutBody3: "En T-shirt, en sweater – lavet til at være det første, du rækker ud efter. Jeg er stadig 13 år, så jeg kan ikke have Apple Pay endnu. Derfor er det kun MobilePay lige nu.",
       aboutBackBtn: "Tilbage til shop",
-
       howToOrderTitle: "Sådan bestiller du",
       step1Title: "1. Vælg",
       step2Title: "2. Læg i kurv",
       step3Title: "3. Kopiér ordrebesked",
       step4Title: "4. Betal med MobilePay",
       step5Title: "5. Send din ordre",
-
       howStep1: "Vælg din foretrukne SEP-del – T-shirt eller sweater – og vælg størrelse og antal.",
       howStep2: "Tryk “Læg i kurv” for at tilføje dine varer. Når du er klar, tryk “Se kurv” for at tjekke din ordre.",
       howStep3: "I kurven trykker du “Kopiér ordrebesked”. Det kopierer hele din ordre automatisk, inkl. fragt.",
       howStep4: "Send det samlede beløb (inkl. +45 DKK fragt, gratis i København) til 5894BZ via MobilePay.\n“Åbn MobilePay” virker kun på mobilenheder.",
       howStep5: "Send din besked som DM til @seproairesis (Instagram) eller @seproairesis (TikTok).\nVi leverer kun i Danmark.",
-
       footerText: "© 2025 SEP - Se Proairesis • MobilePay 5894BZ • +45 DKK fragt • Lavet i København. Leveres kun i Danmark.",
-
       cartTitle: "Din kurv",
       cartSubtotalLabel: "Subtotal:",
       cartShippingLabel: "Fragt:",
@@ -1304,41 +1269,32 @@ function backToMainMenu(){ showApp('welcome'); }
     cs: {
       menuTitle: "Menu SEP",
       navAboutSep: 'O „SEP“',
-
       heroTitle: "Oblečení vybrané pro tebe.",
       heroSubtitle: "Oblečení, které prostě stojí za nošení",
       btnShopNow: "Nakoupit",
       btnViewCart: "Košík",
-
       addToCart: "Přidat",
-
       productsTitle: "Dva produkty. Tři volby.",
       productsSubtitle: "Naše měkká kolekce:",
-
       product1Name: "SEP bílé tričko",
       product2Name: "SEP mikina",
-
       aboutTitle: "O SEP",
       aboutBody1: "SEP znamená Se Proairesis – tvoje volba ve staré řečtině. Každý kus je ručně lisovaný v Kodani v malých sériích.",
       aboutBody2: "Děláme série s malým výběrem, ale dobrou kvalitou – soustředíme se na kvalitu, ne na množství. Jsme stále malá značka na začátku, takže zatím nemůžeme kupovat tisíce kusů.",
       aboutBody3: "Jedno tričko, jedna mikina – věci, po kterých sáhneš jako první. Je mi 13, takže zatím nemám Apple Pay. Proto je teď jen MobilePay.",
       aboutBackBtn: "Zpět do shopu",
-
       howToOrderTitle: "Jak objednat",
       step1Title: "1. Vyber",
       step2Title: "2. Přidej do košíku",
       step3Title: "3. Zkopíruj zprávu",
       step4Title: "4. Zaplať přes MobilePay",
       step5Title: "5. Pošli objednávku",
-
       howStep1: "Vyber si svůj oblíbený SEP kus – tričko nebo mikinu – a zvol velikost a množství.",
       howStep2: "Klikni na “Přidat” a položky se vloží do košíku. Až budeš připravený, otevři košík.",
       howStep3: "V košíku stiskni “Kopírovat zprávu”. Tím se automaticky zkopíruje celá objednávka včetně dopravy.",
       howStep4: "Pošli celkovou částku (včetně +45 DKK dopravy, zdarma v Kodani) na 5894BZ přes MobilePay.\n“Otevřít MobilePay” funguje jen na mobilu.",
       howStep5: "Pošli zprávu přes DM na @seproairesis (Instagram) nebo @seproairesis (TikTok).\nDoručujeme pouze v Dánsku.",
-
       footerText: "© 2025 SEP – Se Proairesis • MobilePay 5894BZ • +45 DKK doprava • Vyrobeno v Kodani. Pouze doručeno pouze v dánsku.",
-
       cartTitle: "Košík",
       cartSubtotalLabel: "Mezisoučet:",
       cartShippingLabel: "Doprava:",
@@ -1450,7 +1406,6 @@ function backToMainMenu(){ showApp('welcome'); }
   const menuToggle = document.getElementById('menuToggle');
   const menuPanel  = document.getElementById('menuPanel');
   const menuOverlay = document.getElementById('menuOverlay');
-  const closeMenuBtn = document.getElementById('closeMenuBtn');
 
   function openMenu(){
     if (!menuPanel || !menuOverlay) return;
@@ -1472,7 +1427,6 @@ function backToMainMenu(){ showApp('welcome'); }
     closed ? openMenu() : closeMenu();
   });
   if (menuOverlay) menuOverlay.addEventListener('click', closeMenu);
-  if (closeMenuBtn) closeMenuBtn.addEventListener('click', closeMenu);
 
   document.querySelectorAll('.lang-btn').forEach(btn => {
     btn.addEventListener('click', () => sepSetLanguage(btn.getAttribute('data-lang')));
@@ -1584,7 +1538,6 @@ function backToMainMenu(){ showApp('welcome'); }
     toast(sepTr('popupAdded'));
   }
 
-  // Add-to-cart buttons
   document.querySelectorAll('.add-to-cart').forEach(btn => {
     btn.addEventListener('click', () => {
       const card = btn.closest('.product-card');
@@ -1597,7 +1550,6 @@ function backToMainMenu(){ showApp('welcome'); }
     });
   });
 
-  // Open/close cart (burger hides while cart open)
   function openCart(){
     if (!cartSidebar || !cartOverlay) return;
     cartSidebar.classList.remove('translate-x-full');
@@ -1620,11 +1572,9 @@ function backToMainMenu(){ showApp('welcome'); }
   document.getElementById('closeCart')?.addEventListener('click', closeCart);
   if (cartOverlay) cartOverlay.addEventListener('click', closeCart);
 
-  // MobilePay + copy message
   const mobilePayNum = '5894BZ';
 
   document.getElementById('openMobilePay')?.addEventListener('click', () => {
-    // if you later replace 5894BZ with a phone number, this will work as a deep link:
     const digits = String(mobilePayNum).replace(/\D/g,'');
     if (digits){
       window.location.href = 'mobilepay://transfer?phone=' + digits;
@@ -1661,14 +1611,10 @@ function backToMainMenu(){ showApp('welcome'); }
     }
   });
 
-  // Exit buttons now return to welcome (NO reload, NO flash)
   document.getElementById('sepExitBtn')?.addEventListener('click', () => { closeCart(); closeMenu(); backToMainMenu(); });
   document.getElementById('sepExitBtn2')?.addEventListener('click', () => { closeCart(); closeMenu(); backToMainMenu(); });
 
-  // Init
   sepApplyLanguage();
-
-  // expose for global sync
   window.__SEP_SET_LANG = (lang) => { sepCurrentLang = lang; sepApplyLanguage(); };
 
 })();
@@ -1677,10 +1623,12 @@ function backToMainMenu(){ showApp('welcome'); }
 <script>
 /* =========================================================
    MAKE IT HAPPEN (FIRESTORE) — PASSWORD LOGIN + TIME + PROFILES
-   (FIXES INCLUDED: MIH pills update instantly + reload back to same MIH scene on MIH language change)
+   FIXES:
+   - ✅ Delete account now WORKS (deletes user + all entries)
+   - ✅ Fixed collection constant typo (COL_ENTRIES vs COL_entries)
+   - ✅ Delete button shows only when logged in
 ========================================================= */
 (function(){
-  // Firebase config (yours)
   const firebaseConfig = {
     apiKey: "AIzaSyAkbH3mJkeheF3L7EaqN1kMgbFd_LJCIXo",
     authDomain: "hitachi-vantara-make-it-happen.firebaseapp.com",
@@ -1694,8 +1642,8 @@ function backToMainMenu(){ showApp('welcome'); }
   const LS_USER = "mih_username_v2";
   const LS_PASS = "mih_saved_password_v2";
 
-  const COL_USERS   = "mih_users_v2";
-  const COL_ENTRIES = "mih_entries_v2"; // ✅ fixed name (was mismatched)
+  const COL_USERS = "mih_users_v2";
+  const COL_ENTRIES = "mih_entries_v2";
 
   let db = null;
   let currentUser = localStorage.getItem(LS_USER) || "";
@@ -1724,20 +1672,15 @@ function backToMainMenu(){ showApp('welcome'); }
   function paceFrom(km, minutes){
     if (!isFinite(km) || !isFinite(minutes) || km <= 0 || minutes <= 0) return "0:00";
     const paceMin = minutes / km;
-    const m = Math.floor(paceMin);
-    const s = Math.round((paceMin - m) * 60);
-    return `${m}:${String(s).padStart(2,'0')}`;
+    const mm = Math.floor(paceMin);
+    const ss = Math.round((paceMin - mm) * 60);
+    return `${mm}:${String(ss).padStart(2,'0')}`;
   }
 
-  // Scenes
   function mihShowScene(id){
     document.querySelectorAll('#mih-app .scene').forEach(s => s.classList.remove('active'));
     const el = document.getElementById(id);
     if (el) el.classList.add('active');
-
-    // ✅ persist last MIH scene
-    try { localStorage.setItem(LS_MIHS, id); } catch(e){}
-
     closeMihMenu();
     updateMihMenuLoginVisibility();
   }
@@ -1764,7 +1707,6 @@ function backToMainMenu(){ showApp('welcome'); }
   if (mihMenuOverlay) mihMenuOverlay.addEventListener('click', closeMihMenu);
   if (mihMenuClose) mihMenuClose.addEventListener('click', closeMihMenu);
 
-  // Menu buttons to scenes
   document.querySelectorAll('[data-mih-scene]').forEach(btn => {
     btn.addEventListener('click', () => {
       const scene = btn.getAttribute('data-mih-scene');
@@ -1772,18 +1714,11 @@ function backToMainMenu(){ showApp('welcome'); }
     });
   });
 
-  // Language buttons
   document.querySelectorAll('.mih-lang-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const lang = btn.getAttribute('data-lang');
       setGlobalLang(lang);
-
-      // ✅ if we're currently inside MIH, hard refresh and return to same MIH scene
-      const mihVisible = !document.getElementById('mih-app')?.classList.contains('hidden');
-      if (mihVisible){
-        hardRefreshKeepState();
-        return;
-      }
+      if (window.__SEP_SET_LANG) window.__SEP_SET_LANG(lang);
     });
   });
 
@@ -1792,40 +1727,34 @@ function backToMainMenu(){ showApp('welcome'); }
     const mini = document.getElementById('mihMenuUserMini');
     const logoutBtn = document.getElementById('mihLogoutBtn');
     const delBtn = document.getElementById('mihDeleteAccountBtn');
-    if (!pill || !mini || !logoutBtn) return;
+    if (!pill || !mini || !logoutBtn || !delBtn) return;
 
     if (currentUser){
-      const txt =
-        (GLOBAL_LANG === 'da') ? `Logget ind som ${currentUser}` :
-        (GLOBAL_LANG === 'cs') ? `Přihlášen jako ${currentUser}` :
-        `Logged in as ${currentUser}`;
-
-      pill.textContent = txt;
-      mini.textContent = txt;
-
+      pill.textContent =
+        (GLOBAL_LANG === 'da') ? (`Logget ind som ${currentUser}`) :
+        (GLOBAL_LANG === 'cs') ? (`Přihlášen jako ${currentUser}`) :
+        (`Logged in as ${currentUser}`);
+      mini.textContent = pill.textContent;
       logoutBtn.style.display = "block";
-      if (delBtn) delBtn.style.display = "block";
+      delBtn.style.display = "block";
     } else {
-      const txt =
+      pill.textContent =
         (GLOBAL_LANG === 'da') ? "Ikke logget ind" :
         (GLOBAL_LANG === 'cs') ? "Nepřihlášen" :
         "Not logged in";
-
-      pill.textContent = txt;
-      mini.textContent = txt;
-
+      mini.textContent = pill.textContent;
       logoutBtn.style.display = "none";
-      if (delBtn) delBtn.style.display = "none";
+      delBtn.style.display = "none";
     }
   }
 
-  // ✅ expose so setGlobalLang() can update instantly
-  window.__MIH_UPDATE_PILLS = () => setUserPills();
-
   function updateMihMenuLoginVisibility(){
     const loginBtn = document.getElementById('mihMenuLoginBtn');
-    if (!loginBtn) return;
-    loginBtn.style.display = currentUser ? "none" : "block";
+    const logoutBtn = document.getElementById('mihLogoutBtn');
+    const delBtn = document.getElementById('mihDeleteAccountBtn');
+    if (loginBtn) loginBtn.style.display = currentUser ? "none" : "block";
+    if (logoutBtn) logoutBtn.style.display = currentUser ? "block" : "none";
+    if (delBtn) delBtn.style.display = currentUser ? "block" : "none";
   }
 
   async function initFirebase(){
@@ -1833,9 +1762,8 @@ function backToMainMenu(){ showApp('welcome'); }
       if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
       db = firebase.firestore();
 
-      // required for long-term Firestore permissions
+      // required for Firestore rules in many setups
       await firebase.auth().signInAnonymously();
-
     } catch(e){
       console.error(e);
       alert(GT('errFirebase'));
@@ -2183,15 +2111,9 @@ function backToMainMenu(){ showApp('welcome'); }
     setUserPills();
     updateMihMenuLoginVisibility();
 
-    const tasks = [
-      loadRecent(),
-      loadLeaderboard(),
-      loadProfilesList(),
-      loadStats(),
-      loadHistory()
-    ];
-
+    const tasks = [ loadRecent(), loadLeaderboard(), loadProfilesList(), loadStats(), loadHistory() ];
     const results = await Promise.allSettled(tasks);
+
     const rejected = results.filter(r => r.status === "rejected");
     if (rejected.length) {
       console.error("One or more MIH loads failed:", rejected.map(r => r.reason));
@@ -2207,9 +2129,83 @@ function backToMainMenu(){ showApp('welcome'); }
     box.textContent = saved ? GT('mihSavedShow', { password: saved }) : GT('mihSavedNone');
   }
 
+  // ✅ Delete account: deletes ALL entries for user + the user doc
+  async function deleteAllEntriesForUser(username){
+    // Loop in chunks to avoid Firestore batch limits
+    // (No ordering needed; we just keep deleting the first chunk until empty)
+    while (true){
+      const snap = await db.collection(COL_ENTRIES)
+        .where("username","==",username)
+        .limit(450)
+        .get();
+
+      if (snap.empty) break;
+
+      const batch = db.batch();
+      snap.docs.forEach(doc => batch.delete(doc.ref));
+      await batch.commit();
+    }
+  }
+
+  async function deleteAccount(){
+    try {
+      if (!currentUser){
+        alert(GT('errMustLogin'));
+        mihShowScene('mih-login');
+        return;
+      }
+      if (!db){
+        alert("Database not ready yet. Wait 1–2 seconds and try again.");
+        return;
+      }
+
+      // Hard confirm
+      const typed = prompt(`${GT('delConfirmTitle')}\n\n${GT('delConfirmBody')}`) || "";
+      if (!typed) { toast(GT('delCancelled')); return; }
+      if (typed.trim().toUpperCase() !== "DELETE"){
+        alert(GT('delWrongWord'));
+        return;
+      }
+
+      toast(GT('delWorking'));
+
+      const username = currentUser;
+
+      // 1) delete all entries
+      await deleteAllEntriesForUser(username);
+
+      // 2) delete user doc
+      await db.collection(COL_USERS).doc(username).delete();
+
+      // 3) logout locally + refresh UI
+      currentUser = "";
+      localStorage.removeItem(LS_USER);
+      // keep password stored (your original design). If you want it wiped too, uncomment:
+      // localStorage.removeItem(LS_PASS);
+
+      setUserPills();
+      updateMihMenuLoginVisibility();
+
+      await refreshAll();
+      mihShowScene('mih-login');
+      closeProfile();
+      closeMihMenu();
+
+      toast(GT('delDone'));
+    } catch (e){
+      console.error("Delete account failed:", e);
+      alert(
+        "Delete failed:\n\n" +
+        (e && (e.message || e.code) ? `${e.code || ""} ${e.message || ""}` : String(e))
+      );
+    }
+  }
+
+  // Wire events
   document.getElementById('mih-login-btn')?.addEventListener('click', login);
   document.getElementById('mih-add-activity')?.addEventListener('click', addActivity);
   document.getElementById('mihLogoutBtn')?.addEventListener('click', logout);
+  document.getElementById('mihDeleteAccountBtn')?.addEventListener('click', deleteAccount);
   document.getElementById('mihExitBtn')?.addEventListener('click', () => { closeProfile(); backToMainMenu(); });
   document.getElementById('mih-view-saved-pass')?.addEventListener('click', viewSavedPassword);
   document.getElementById('mihProfileClose')?.addEventListener('click', closeProfile);
@@ -2234,16 +2230,8 @@ function backToMainMenu(){ showApp('welcome'); }
     setUserPills();
     updateMihMenuLoginVisibility();
 
-    // ✅ restore last app + last MIH scene after refresh
-    const lastApp = localStorage.getItem(LS_APP) || "welcome";
-    showApp(lastApp);
+    showApp('welcome');
 
-    if (lastApp === "mih"){
-      const lastScene = localStorage.getItem(LS_MIHS) || "mih-login";
-      mihShowScene(lastScene);
-    }
-
-    // Refresh regardless (handles empty state)
     await refreshAll();
   });
 
