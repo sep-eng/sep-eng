@@ -586,11 +586,11 @@
 
       <button class="mih-menu-btn danger" type="button" id="mihLogoutBtn" style="display:none;">Log out</button>
 
-<button class="mih-menu-btn danger" type="button" id="mihDeleteAccountBtn" style="display:none; background:#7f1d1d; border-color:rgba(239,68,68,.35);">
-  Delete account
-</button>
+      <button class="mih-menu-btn danger" type="button" id="mihDeleteAccountBtn" style="display:none; background:#7f1d1d; border-color:rgba(239,68,68,.35);">
+        Delete account
+      </button>
 
-<button class="mih-menu-btn" type="button" id="mihExitBtn" style="border-color:rgba(239,68,68,.35);">Exit</button>
+      <button class="mih-menu-btn" type="button" id="mihExitBtn" style="border-color:rgba(239,68,68,.35);">Exit</button>
 
     </div>
   </aside>
@@ -740,11 +740,29 @@
 
 <script>
 /* =========================================================
-   GLOBAL LANGUAGE + ROUTER (NO RELOADS, NO FLASH)
+   GLOBAL LANGUAGE + ROUTER + MIH STATE (RELOAD TO SAME SCENE)
 ========================================================= */
 
 const LS_GLOBAL_LANG = "global_lang_v1";
 let GLOBAL_LANG = localStorage.getItem(LS_GLOBAL_LANG) || "en";
+
+/* Persist "which app" and "which MIH scene" */
+const LS_APP  = "last_app_v1";
+const LS_MIHS = "mih_last_scene_v1";
+
+function rememberState(){
+  const activeMih = document.querySelector('#mih-app .scene.active')?.id || "mih-login";
+  localStorage.setItem(LS_MIHS, activeMih);
+
+  const mihVisible = !document.getElementById('mih-app')?.classList.contains('hidden');
+  const sepVisible = !document.getElementById('sep-app')?.classList.contains('hidden');
+  localStorage.setItem(LS_APP, mihVisible ? "mih" : (sepVisible ? "sep" : "welcome"));
+}
+
+function hardRefreshKeepState(){
+  rememberState();
+  location.reload();
+}
 
 const GLOBAL_TRANSLATIONS = {
   en: {
@@ -1120,6 +1138,9 @@ function setGlobalLang(lang){
   if (window.__SEP_SET_LANG) window.__SEP_SET_LANG(GLOBAL_LANG);
 
   applyGlobalTranslations();
+
+  // ✅ update MIH pills instantly (no refresh needed)
+  if (window.__MIH_UPDATE_PILLS) window.__MIH_UPDATE_PILLS();
 }
 
 /* Router */
@@ -1129,6 +1150,7 @@ function showApp(app){
   const mihApp = document.getElementById('mih-app');
 
   if (app === 'sep'){
+    localStorage.setItem(LS_APP, "sep");
     welcome && welcome.classList.add('hidden');
     mihApp && mihApp.classList.add('hidden');
     sepApp && sepApp.classList.remove('hidden');
@@ -1136,6 +1158,7 @@ function showApp(app){
     return;
   }
   if (app === 'mih'){
+    localStorage.setItem(LS_APP, "mih");
     welcome && welcome.classList.add('hidden');
     sepApp && sepApp.classList.add('hidden');
     mihApp && mihApp.classList.remove('hidden');
@@ -1144,6 +1167,7 @@ function showApp(app){
   }
 
   // welcome
+  localStorage.setItem(LS_APP, "welcome");
   sepApp && sepApp.classList.add('hidden');
   mihApp && mihApp.classList.add('hidden');
   welcome && welcome.classList.remove('hidden');
@@ -1653,7 +1677,7 @@ function backToMainMenu(){ showApp('welcome'); }
 <script>
 /* =========================================================
    MAKE IT HAPPEN (FIRESTORE) — PASSWORD LOGIN + TIME + PROFILES
-   (ONLY FIX: removed the duplicated/broken login code that caused a JS syntax error)
+   (FIXES INCLUDED: MIH pills update instantly + reload back to same MIH scene on MIH language change)
 ========================================================= */
 (function(){
   // Firebase config (yours)
@@ -1670,8 +1694,8 @@ function backToMainMenu(){ showApp('welcome'); }
   const LS_USER = "mih_username_v2";
   const LS_PASS = "mih_saved_password_v2";
 
-  const COL_USERS = "mih_users_v2";
-  const COL_entries = "mih_entries_v2";
+  const COL_USERS   = "mih_users_v2";
+  const COL_ENTRIES = "mih_entries_v2"; // ✅ fixed name (was mismatched)
 
   let db = null;
   let currentUser = localStorage.getItem(LS_USER) || "";
@@ -1710,6 +1734,10 @@ function backToMainMenu(){ showApp('welcome'); }
     document.querySelectorAll('#mih-app .scene').forEach(s => s.classList.remove('active'));
     const el = document.getElementById(id);
     if (el) el.classList.add('active');
+
+    // ✅ persist last MIH scene
+    try { localStorage.setItem(LS_MIHS, id); } catch(e){}
+
     closeMihMenu();
     updateMihMenuLoginVisibility();
   }
@@ -1749,8 +1777,13 @@ function backToMainMenu(){ showApp('welcome'); }
     btn.addEventListener('click', () => {
       const lang = btn.getAttribute('data-lang');
       setGlobalLang(lang);
-      // keep SEP in sync too
-      if (window.__SEP_SET_LANG) window.__SEP_SET_LANG(lang);
+
+      // ✅ if we're currently inside MIH, hard refresh and return to same MIH scene
+      const mihVisible = !document.getElementById('mih-app')?.classList.contains('hidden');
+      if (mihVisible){
+        hardRefreshKeepState();
+        return;
+      }
     });
   });
 
@@ -1758,24 +1791,36 @@ function backToMainMenu(){ showApp('welcome'); }
     const pill = document.getElementById('mih-user-pill');
     const mini = document.getElementById('mihMenuUserMini');
     const logoutBtn = document.getElementById('mihLogoutBtn');
+    const delBtn = document.getElementById('mihDeleteAccountBtn');
     if (!pill || !mini || !logoutBtn) return;
 
     if (currentUser){
-      pill.textContent =
-        (GLOBAL_LANG === 'da') ? (`Logget ind som ${currentUser}`) :
-        (GLOBAL_LANG === 'cs') ? (`Přihlášen jako ${currentUser}`) :
-        (`Logged in as ${currentUser}`);
-      mini.textContent = pill.textContent;
+      const txt =
+        (GLOBAL_LANG === 'da') ? `Logget ind som ${currentUser}` :
+        (GLOBAL_LANG === 'cs') ? `Přihlášen jako ${currentUser}` :
+        `Logged in as ${currentUser}`;
+
+      pill.textContent = txt;
+      mini.textContent = txt;
+
       logoutBtn.style.display = "block";
+      if (delBtn) delBtn.style.display = "block";
     } else {
-      pill.textContent =
+      const txt =
         (GLOBAL_LANG === 'da') ? "Ikke logget ind" :
         (GLOBAL_LANG === 'cs') ? "Nepřihlášen" :
         "Not logged in";
-      mini.textContent = pill.textContent;
+
+      pill.textContent = txt;
+      mini.textContent = txt;
+
       logoutBtn.style.display = "none";
+      if (delBtn) delBtn.style.display = "none";
     }
   }
+
+  // ✅ expose so setGlobalLang() can update instantly
+  window.__MIH_UPDATE_PILLS = () => setUserPills();
 
   function updateMihMenuLoginVisibility(){
     const loginBtn = document.getElementById('mihMenuLoginBtn');
@@ -1784,19 +1829,18 @@ function backToMainMenu(){ showApp('welcome'); }
   }
 
   async function initFirebase(){
-  try {
-    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-    db = firebase.firestore();
+    try {
+      if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+      db = firebase.firestore();
 
-    // ✅ required for long-term Firestore permissions
-    await firebase.auth().signInAnonymously();
+      // required for long-term Firestore permissions
+      await firebase.auth().signInAnonymously();
 
-  } catch(e){
-    console.error(e);
-    alert(GT('errFirebase'));
+    } catch(e){
+      console.error(e);
+      alert(GT('errFirebase'));
+    }
   }
-}
-
 
   async function ensureUserDoc(name, password){
     const ref = db.collection(COL_USERS).doc(name);
@@ -1829,44 +1873,44 @@ function backToMainMenu(){ showApp('welcome'); }
   }
 
   async function login(){
-  try {
-    if (!db) {
-      alert("Database not ready yet. Wait 1–2 seconds and try again.");
-      return;
+    try {
+      if (!db) {
+        alert("Database not ready yet. Wait 1–2 seconds and try again.");
+        return;
+      }
+
+      const name = safeName(document.getElementById('mih-username')?.value || "");
+      const password = (document.getElementById('mih-password')?.value || "").trim();
+
+      if (!name || !password){
+        alert(GT('errLoginMissing'));
+        return;
+      }
+
+      const res = await ensureUserDoc(name, password);
+      if (res.wrongPass){
+        alert(GT('errWrongPass'));
+        return;
+      }
+
+      currentUser = name;
+      localStorage.setItem(LS_USER, currentUser);
+      localStorage.setItem(LS_PASS, password);
+
+      setUserPills();
+      updateMihMenuLoginVisibility();
+
+      await refreshAll();
+      mihShowScene('mih-home');
+
+    } catch (e) {
+      console.error("Login failed:", e);
+      alert(
+        "Login failed:\n\n" +
+        (e && (e.message || e.code) ? `${e.code || ""} ${e.message || ""}` : String(e))
+      );
     }
-
-    const name = safeName(document.getElementById('mih-username')?.value || "");
-    const password = (document.getElementById('mih-password')?.value || "").trim();
-
-    if (!name || !password){
-      alert(GT('errLoginMissing'));
-      return;
-    }
-
-    const res = await ensureUserDoc(name, password);
-    if (res.wrongPass){
-      alert(GT('errWrongPass'));
-      return;
-    }
-
-    currentUser = name;
-    localStorage.setItem(LS_USER, currentUser);
-    localStorage.setItem(LS_PASS, password);
-
-    setUserPills();
-    updateMihMenuLoginVisibility();
-
-    await refreshAll();
-    mihShowScene('mih-home');
-
-  } catch (e) {
-    console.error("Login failed:", e);
-    alert(
-      "Login failed:\n\n" +
-      (e && (e.message || e.code) ? `${e.code || ""} ${e.message || ""}` : String(e))
-    );
   }
-}
 
   async function logout(){
     currentUser = "";
@@ -1890,7 +1934,7 @@ function backToMainMenu(){ showApp('welcome'); }
 
     const ts = Date.now();
 
-    await db.collection(COL_entries).add({
+    await db.collection(COL_ENTRIES).add({
       username: currentUser,
       km,
       minutes,
@@ -2148,7 +2192,6 @@ function backToMainMenu(){ showApp('welcome'); }
     ];
 
     const results = await Promise.allSettled(tasks);
-
     const rejected = results.filter(r => r.status === "rejected");
     if (rejected.length) {
       console.error("One or more MIH loads failed:", rejected.map(r => r.reason));
@@ -2191,8 +2234,14 @@ function backToMainMenu(){ showApp('welcome'); }
     setUserPills();
     updateMihMenuLoginVisibility();
 
-    // Start on welcome ALWAYS (no flash)
-    showApp('welcome');
+    // ✅ restore last app + last MIH scene after refresh
+    const lastApp = localStorage.getItem(LS_APP) || "welcome";
+    showApp(lastApp);
+
+    if (lastApp === "mih"){
+      const lastScene = localStorage.getItem(LS_MIHS) || "mih-login";
+      mihShowScene(lastScene);
+    }
 
     // Refresh regardless (handles empty state)
     await refreshAll();
