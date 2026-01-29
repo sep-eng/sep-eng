@@ -18,6 +18,7 @@
   <!-- Firebase (MIH) -->
   <script src="https://www.gstatic.com/firebasejs/11.0.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.0.0/firebase-auth-compat.js"></script>
 
   <style>
     body{
@@ -27,7 +28,10 @@
       color:#111;
       scroll-behavior:smooth;
     }
+
+    /* Make .hidden work instantly (before Tailwind loads) */
     .hidden { display: none !important; }
+
     button,a{transition:all .25s ease;}
     button:hover,a:hover{transform:translateY(-2px);}
 
@@ -36,15 +40,14 @@
       background:#16a34a;color:#fff;padding:10px 16px;border-radius:8px;
       opacity:0;transition:opacity .3s;z-index:1000;
       pointer-events:none;
-      max-width:320px;
-      font-size:14px;
-      line-height:1.35;
     }
     .popup.show{opacity:1;}
-    .popup.bad{background:#b91c1c;}
 
     .fade-section{opacity:0;transform:translateY(30px);}
+
     #cartSidebar{color:#000;}
+
+    /* Utility: prevent invisible layers stealing clicks */
     .pointer-none{pointer-events:none !important;}
     .pointer-auto{pointer-events:auto !important;}
 
@@ -67,6 +70,9 @@
       height:2px;
       background:#fff;
       margin:2px 0;
+    }
+    #menuPanel {
+      transition:transform .3s ease;
     }
 
     /* Global welcome screen */
@@ -361,7 +367,7 @@
   <div id="menuPanel" class="fixed top-0 right-0 h-full w-64 bg-black/90 text-white transform translate-x-full z-40 flex flex-col">
     <div class="p-5 border-b border-white/10 flex justify-between items-center">
       <span id="menuTitle" class="text-sm tracking-wide">SEP Menu</span>
-      <button id="menuCloseBtn" class="text-white/80 hover:text-white" type="button" aria-label="Close">✕</button>
+      <button id="menuClose" type="button" class="px-3 py-1 rounded-full bg-white/10 border border-white/20 text-xs">✕</button>
     </div>
     <div class="p-5 space-y-4 text-sm">
       <div>
@@ -397,7 +403,7 @@
         <a id="btnShopNow" href="#products" class="bg-white text-black px-6 py-3 rounded-full font-medium">Shop Now</a>
         <button id="viewCartBtn" class="border border-white text-white px-6 py-3 rounded-full font-medium relative" type="button">
           <span id="btnViewCart">View Cart</span>
-          <span id="cartCounter" class="absolute -top-2 -right-2 bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-content-center text-xs hidden">0</span>
+          <span id="cartCounter" class="absolute -top-2 -right-2 bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hidden">0</span>
         </button>
       </div>
     </header>
@@ -412,26 +418,26 @@
         <div class="product-card bg-white/10 p-6 rounded-xl shadow-md text-center backdrop-blur">
           <img src="https://picsum.photos/1024/1024?random=11" class="w-full h-64 object-cover rounded mb-4" alt="White T-shirt">
           <h3 id="product1Name" class="text-xl font-bold mb-2 text-white">SEP White T-shirt</h3>
-          <p class="mb-2 text-white">180 DKK</p>
-          <select class="theme-text border rounded px-3 py-2 mb-2 bg-transparent text-white">
+          <p class="mb-2 text-white" data-price="180">180 DKK</p>
+          <select class="theme-text border rounded px-3 py-2 mb-2 bg-transparent text-white size-selector">
             <option>XS</option><option>S</option><option>M</option><option>L</option><option>XL</option>
           </select>
           <div class="flex justify-center gap-2">
             <input type="number" min="1" value="1" class="theme-text border rounded w-16 text-center bg-transparent quantity-selector text-white">
-            <button class="add-to-cart bg-white text-black px-4 py-2 rounded" data-i18n-btn="addToCart" type="button">Add</button>
+            <button class="add-to-cart bg-white text-black px-4 py-2 rounded" data-name="SEP White T-shirt" data-price="180" type="button" data-i18n-btn="addToCart">Add</button>
           </div>
         </div>
 
         <div class="product-card bg-white/10 p-6 rounded-xl shadow-md text-center backdrop-blur">
           <img src="https://picsum.photos/1024/1024?random=22" class="w-full h-64 object-cover rounded mb-4" alt="Sweater">
           <h3 id="product2Name" class="text-xl font-bold mb-2 text-white">SEP Sweater</h3>
-          <p class="mb-2 text-white">180 DKK</p>
-          <select class="theme-text border rounded px-3 py-2 mb-2 bg-transparent text-white">
+          <p class="mb-2 text-white" data-price="180">180 DKK</p>
+          <select class="theme-text border rounded px-3 py-2 mb-2 bg-transparent text-white size-selector">
             <option>XS</option><option>S</option><option>M</option><option>L</option><option>XL</option>
           </select>
           <div class="flex justify-center gap-2">
             <input type="number" min="1" value="1" class="theme-text border rounded w-16 text-center bg-transparent quantity-selector text-white">
-            <button class="add-to-cart bg-white text-black px-4 py-2 rounded" data-i18n-btn="addToCart" type="button">Add</button>
+            <button class="add-to-cart bg-white text-black px-4 py-2 rounded" data-name="SEP Sweater" data-price="180" type="button" data-i18n-btn="addToCart">Add</button>
           </div>
         </div>
       </div>
@@ -588,6 +594,7 @@
       </button>
 
       <button class="mih-menu-btn" type="button" id="mihExitBtn" style="border-color:rgba(239,68,68,.35);">Exit</button>
+
     </div>
   </aside>
 
@@ -736,26 +743,13 @@
 
 <script>
 /* =========================================================
-   TOAST
-========================================================= */
-function toast(msg, bad=false){
-  const el = document.getElementById("toast");
-  if(!el) return;
-  el.textContent = msg;
-  el.classList.toggle("bad", !!bad);
-  el.classList.add("show");
-  clearTimeout(window.__toastTimer);
-  window.__toastTimer = setTimeout(()=> el.classList.remove("show"), 2200);
-}
-</script>
-
-<script>
-/* =========================================================
    GLOBAL LANGUAGE + ROUTER (PERSIST APP + SCENES)
 ========================================================= */
+
 const LS_GLOBAL_LANG = "global_lang_v1";
 let GLOBAL_LANG = localStorage.getItem(LS_GLOBAL_LANG) || "en";
 
+// Persist app + scenes
 const LS_ROUTE = "app_route_v1";
 function loadRoute(){
   try { return JSON.parse(localStorage.getItem(LS_ROUTE) || "{}"); }
@@ -766,9 +760,6 @@ function saveRoute(patch){
   const next = Object.assign({}, cur, patch);
   localStorage.setItem(LS_ROUTE, JSON.stringify(next));
 }
-function dispatchLangChanged(){
-  document.dispatchEvent(new CustomEvent("globalLangChanged", { detail: { lang: GLOBAL_LANG } }));
-}
 
 const GLOBAL_TRANSLATIONS = {
   en: {
@@ -776,13 +767,11 @@ const GLOBAL_TRANSLATIONS = {
     welcomeSubtitle: "Your Choice. Either shop (SEP shop), or move (Make It Happen). That simple.",
     welcomeSepBtn: "SEP shop",
     welcomeMihBtn: "Make It Happen",
-
     sepLangLabel: "Language",
     sepInfoLabel: "Info",
     sepExitLabel: "Exit",
     sepExitBtn: "Back to main menu",
     sepExitBtn2: "Exit to main menu",
-
     mihMenuTitle: "MENU",
     mihMenuLoginBtn: "Login",
     mihMenuHomeBtn: "Home",
@@ -793,7 +782,6 @@ const GLOBAL_TRANSLATIONS = {
     mihLangLabel: "Language",
     mihLogoutBtn: "Log out",
     mihExitBtn: "Exit",
-
     mihLoginTitle: "Welcome back",
     mihLoginSubtitle: "Enter your username and password.",
     mihUsernamePh: "Your name",
@@ -802,7 +790,6 @@ const GLOBAL_TRANSLATIONS = {
     mihViewSaved: "View saved login password",
     mihSavedNone: "No login password has been saved on this device yet.",
     mihSavedShow: "Saved login password on this device: {password}",
-
     mihHomeTitle: "Your Dashboard",
     mihHomeSubtitle: "Log your activity. Every kilometre counts.",
     mihAddTitle: "Log a new activity",
@@ -814,7 +801,6 @@ const GLOBAL_TRANSLATIONS = {
     mihRecentColKm: "Distance (km)",
     mihRecentColMin: "Time (min)",
     mihRecentColPace: "Pace",
-
     mihLbTitle: "Leaderboard",
     mihLbSubtitle: "The League of Choice. Totals, all-time.",
     mihLbColRank: "#",
@@ -822,7 +808,6 @@ const GLOBAL_TRANSLATIONS = {
     mihLbColKm: "Total km",
     mihLbColMin: "Total min",
     mihLbColPace: "Avg pace",
-
     mihProfilesTitle: "Profiles",
     mihProfilesSubtitle: "Tap a player's name to view their stats.",
     mihProfilesColName: "Name",
@@ -839,7 +824,6 @@ const GLOBAL_TRANSLATIONS = {
     mihProfileHistKm: "Km",
     mihProfileHistMin: "Min",
     mihProfileHistPace: "Pace",
-
     mihStatsTitle: "Your Stats",
     mihStatsTotalKmLabel: "Total km:",
     mihStatsTotalMinLabel: "Total minutes:",
@@ -851,30 +835,29 @@ const GLOBAL_TRANSLATIONS = {
     mihHistColKm: "Distance (km)",
     mihHistColMin: "Time (min)",
     mihHistColPace: "Pace",
-
     mihAboutTitle: "About the challenge",
     mihAboutBody: "Make It Happen is about consistency. Not perfection. Log your movement, no matter how small. Every metre counts. We find that a league with competition motivates people to move more.",
-
+    toastSaved: "Saved",
     errLoginMissing: "Please enter both name and password.",
     errWrongPass: "Wrong password for this name.",
-    errDeleted: "This account is deleted (deactivated).",
+    errFirebase: "Firebase failed to initialise. Check your config + internet connection.",
     errMustLogin: "Please log in first.",
     errActivityInvalid: "Please enter valid km and minutes.",
     noEntries: "No entries yet.",
-    noPlayers: "No players yet."
+    noPlayers: "No players yet.",
+    confirmDelete: "Are you sure? This will remove you from leaderboard (entries stay, but hidden).",
+    deletedOk: "Account deleted (hidden)."
   },
   da: {
     welcomeTitle: "SEP",
     welcomeSubtitle: "Dit valg. Enten shop (SEP shop), eller bevæg dig (Make It Happen). Så enkelt.",
     welcomeSepBtn: "SEP shop",
     welcomeMihBtn: "Make It Happen",
-
     sepLangLabel: "Sprog",
     sepInfoLabel: "Info",
     sepExitLabel: "Exit",
     sepExitBtn: "Tilbage til hovedmenu",
     sepExitBtn2: "Til hovedmenu",
-
     mihMenuTitle: "MENU",
     mihMenuLoginBtn: "Login",
     mihMenuHomeBtn: "Hjem",
@@ -885,7 +868,6 @@ const GLOBAL_TRANSLATIONS = {
     mihLangLabel: "Sprog",
     mihLogoutBtn: "Log ud",
     mihExitBtn: "Exit",
-
     mihLoginTitle: "Velkommen tilbage",
     mihLoginSubtitle: "Indtast dit brugernavn og din adgangskode.",
     mihUsernamePh: "Dit navn",
@@ -894,7 +876,6 @@ const GLOBAL_TRANSLATIONS = {
     mihViewSaved: "Se gemt login-adgangskode",
     mihSavedNone: "Der er ikke gemt nogen login-adgangskode på denne enhed endnu.",
     mihSavedShow: "Gemt login-adgangskode på denne enhed: {password}",
-
     mihHomeTitle: "Dit dashboard",
     mihHomeSubtitle: "Log din aktivitet. Hver kilometer tæller.",
     mihAddTitle: "Log en ny aktivitet",
@@ -906,7 +887,6 @@ const GLOBAL_TRANSLATIONS = {
     mihRecentColKm: "Distance (km)",
     mihRecentColMin: "Tid (min)",
     mihRecentColPace: "Tempo",
-
     mihLbTitle: "Leaderboard",
     mihLbSubtitle: "The League of Choice. Samlet, all-time.",
     mihLbColRank: "#",
@@ -914,7 +894,6 @@ const GLOBAL_TRANSLATIONS = {
     mihLbColKm: "Km i alt",
     mihLbColMin: "Min i alt",
     mihLbColPace: "Gns. tempo",
-
     mihProfilesTitle: "Profiler",
     mihProfilesSubtitle: "Tryk på en spillers navn for at se deres stats.",
     mihProfilesColName: "Navn",
@@ -931,7 +910,6 @@ const GLOBAL_TRANSLATIONS = {
     mihProfileHistKm: "Km",
     mihProfileHistMin: "Min",
     mihProfileHistPace: "Tempo",
-
     mihStatsTitle: "Dine stats",
     mihStatsTotalKmLabel: "Km i alt:",
     mihStatsTotalMinLabel: "Minutter i alt:",
@@ -943,30 +921,29 @@ const GLOBAL_TRANSLATIONS = {
     mihHistColKm: "Distance (km)",
     mihHistColMin: "Tid (min)",
     mihHistColPace: "Tempo",
-
     mihAboutTitle: "Om challenge",
     mihAboutBody: "Make It Happen handler om kontinuitet. Ikke perfektion. Log din bevægelse, uanset hvor lidt. Hver meter tæller. Vi oplever, at en liga med konkurrence motiverer folk til at bevæge sig mere.",
-
+    toastSaved: "Gemt",
     errLoginMissing: "Indtast både navn og adgangskode.",
     errWrongPass: "Forkert adgangskode til dette navn.",
-    errDeleted: "Denne konto er slettet (deaktiveret).",
+    errFirebase: "Firebase kunne ikke starte. Tjek din config + internet.",
     errMustLogin: "Log ind først.",
     errActivityInvalid: "Indtast gyldige km og minutter.",
     noEntries: "Ingen entries endnu.",
-    noPlayers: "Ingen spillere endnu."
+    noPlayers: "Ingen spillere endnu.",
+    confirmDelete: "Er du sikker? Det fjerner dig fra leaderboard (entries bliver, men skjult).",
+    deletedOk: "Konto slettet (skjult)."
   },
   cs: {
     welcomeTitle: "SEP",
     welcomeSubtitle: "Tvoje volba. Buď nakupuj (SEP shop), nebo se hýbej (Make It Happen). Tak jednoduché.",
     welcomeSepBtn: "SEP shop",
     welcomeMihBtn: "Make It Happen",
-
     sepLangLabel: "Jazyk",
     sepInfoLabel: "Info",
     sepExitLabel: "Ukončit",
     sepExitBtn: "Zpět do hlavního menu",
     sepExitBtn2: "Zpět do hlavního menu",
-
     mihMenuTitle: "MENU",
     mihMenuLoginBtn: "Login",
     mihMenuHomeBtn: "Domů",
@@ -977,7 +954,6 @@ const GLOBAL_TRANSLATIONS = {
     mihLangLabel: "Jazyk",
     mihLogoutBtn: "Odhlásit",
     mihExitBtn: "Exit",
-
     mihLoginTitle: "Vítej zpět",
     mihLoginSubtitle: "Zadej své uživatelské jméno a heslo.",
     mihUsernamePh: "Tvoje jméno",
@@ -986,7 +962,6 @@ const GLOBAL_TRANSLATIONS = {
     mihViewSaved: "Zobrazit uložené heslo",
     mihSavedNone: "Na tomto zařízení zatím není uložené žádné heslo.",
     mihSavedShow: "Uložené heslo na tomto zařízení: {password}",
-
     mihHomeTitle: "Tvůj dashboard",
     mihHomeSubtitle: "Zapisuj aktivitu. Každý kilometr se počítá.",
     mihAddTitle: "Zapiš novou aktivitu",
@@ -998,7 +973,6 @@ const GLOBAL_TRANSLATIONS = {
     mihRecentColKm: "Vzdálenost (km)",
     mihRecentColMin: "Čas (min)",
     mihRecentColPace: "Tempo",
-
     mihLbTitle: "Leaderboard",
     mihLbSubtitle: "The League of Choice. Celkem, all-time.",
     mihLbColRank: "#",
@@ -1006,7 +980,6 @@ const GLOBAL_TRANSLATIONS = {
     mihLbColKm: "Celkem km",
     mihLbColMin: "Celkem min",
     mihLbColPace: "Prům. tempo",
-
     mihProfilesTitle: "Profily",
     mihProfilesSubtitle: "Klikni na jméno hráče a uvidíš jeho statistiky.",
     mihProfilesColName: "Jméno",
@@ -1023,7 +996,6 @@ const GLOBAL_TRANSLATIONS = {
     mihProfileHistKm: "Km",
     mihProfileHistMin: "Min",
     mihProfileHistPace: "Tempo",
-
     mihStatsTitle: "Tvoje statistiky",
     mihStatsTotalKmLabel: "Celkem km:",
     mihStatsTotalMinLabel: "Celkem minut:",
@@ -1035,17 +1007,18 @@ const GLOBAL_TRANSLATIONS = {
     mihHistColKm: "Vzdálenost (km)",
     mihHistColMin: "Čas (min)",
     mihHistColPace: "Tempo",
-
     mihAboutTitle: "O výzvě",
     mihAboutBody: "Make It Happen je o konzistenci. Ne o perfektnosti. Zapisuj pohyb, i když je malý. Každý metr se počítá. Zjistili jsme, že liga s trochou soutěživosti motivuje lidi hýbat se víc.",
-
+    toastSaved: "Uloženo",
     errLoginMissing: "Zadej jméno i heslo.",
     errWrongPass: "Špatné heslo pro toto jméno.",
-    errDeleted: "Tento účet je smazaný (deaktivovaný).",
+    errFirebase: "Firebase se nepodařilo spustit. Zkontroluj config + internet.",
     errMustLogin: "Nejdřív se přihlas.",
     errActivityInvalid: "Zadej platné km i minuty.",
     noEntries: "Zatím žádné záznamy.",
-    noPlayers: "Zatím žádní hráči."
+    noPlayers: "Zatím žádní hráči.",
+    confirmDelete: "Jsi si jistý? Odstraní tě to z leaderboardu (záznamy zůstanou, ale skryté).",
+    deletedOk: "Účet smazán (skrytý)."
   }
 };
 
@@ -1058,44 +1031,43 @@ function GT(key, vars){
   return str;
 }
 
+function toast(msg, good=true){
+  const el = document.getElementById('toast');
+  if (!el) return;
+  el.style.background = good ? "#16a34a" : "#ef4444";
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'), 1600);
+}
+
 function applyGlobalTranslations(){
-  const mapText = (id, key) => {
+  const map = [
+    ['welcomeTitle','welcomeTitle'], ['welcomeSubtitle','welcomeSubtitle'], ['welcomeSepBtn','welcomeSepBtn'], ['welcomeMihBtn','welcomeMihBtn'],
+    ['sepLangLabel','sepLangLabel'], ['sepInfoLabel','sepInfoLabel'], ['sepExitLabel','sepExitLabel'], ['sepExitBtn','sepExitBtn'], ['sepExitBtn2','sepExitBtn2'],
+    ['mihMenuTitle','mihMenuTitle'], ['mihMenuLoginBtn','mihMenuLoginBtn'], ['mihMenuHomeBtn','mihMenuHomeBtn'], ['mihMenuLeaderboardBtn','mihMenuLeaderboardBtn'],
+    ['mihMenuProfilesBtn','mihMenuProfilesBtn'], ['mihMenuStatsBtn','mihMenuStatsBtn'], ['mihMenuAboutBtn','mihMenuAboutBtn'], ['mihLangLabel','mihLangLabel'],
+    ['mihLogoutBtn','mihLogoutBtn'], ['mihExitBtn','mihExitBtn'], ['mihLoginTitle','mihLoginTitle'], ['mihLoginSubtitle','mihLoginSubtitle'],
+    ['mihHomeTitle','mihHomeTitle'], ['mihHomeSubtitle','mihHomeSubtitle'], ['mihAddTitle','mihAddTitle'], ['mihRecentTitle','mihRecentTitle'],
+    ['mihLbTitle','mihLbTitle'], ['mihLbSubtitle','mihLbSubtitle'], ['mihProfilesTitle','mihProfilesTitle'], ['mihProfilesSubtitle','mihProfilesSubtitle'],
+    ['mihStatsTitle','mihStatsTitle'], ['mihStatsHistoryTitle','mihStatsHistoryTitle'], ['mihAboutTitle','mihAboutTitle'],
+    ['mihRecentColDate','mihRecentColDate'], ['mihRecentColKm','mihRecentColKm'], ['mihRecentColMin','mihRecentColMin'], ['mihRecentColPace','mihRecentColPace'],
+    ['mihLbColRank','mihLbColRank'], ['mihLbColName','mihLbColName'], ['mihLbColKm','mihLbColKm'], ['mihLbColMin','mihLbColMin'], ['mihLbColPace','mihLbColPace'],
+    ['mihProfilesColName','mihProfilesColName'], ['mihProfilesColKm','mihProfilesColKm'], ['mihProfilesColMin','mihProfilesColMin'], ['mihProfilesColRuns','mihProfilesColRuns'],
+    ['mihProfileClose','mihProfileClose'], ['mihProfileRowKmLabel','mihProfileRowKmLabel'], ['mihProfileRowMinLabel','mihProfileRowMinLabel'],
+    ['mihProfileRowRunsLabel','mihProfileRowRunsLabel'], ['mihProfileRowAvgPaceLabel','mihProfileRowAvgPaceLabel'],
+    ['mihProfileHistoryTitle','mihProfileHistoryTitle'], ['mihProfileHistDate','mihProfileHistDate'], ['mihProfileHistKm','mihProfileHistKm'],
+    ['mihProfileHistMin','mihProfileHistMin'], ['mihProfileHistPace','mihProfileHistPace'],
+    ['mihStatsTotalKmLabel','mihStatsTotalKmLabel'], ['mihStatsTotalMinLabel','mihStatsTotalMinLabel'], ['mihStatsEntriesLabel','mihStatsEntriesLabel'],
+    ['mihStatsAvgKmLabel','mihStatsAvgKmLabel'], ['mihStatsAvgPaceLabel','mihStatsAvgPaceLabel'],
+    ['mihHistColDate','mihHistColDate'], ['mihHistColKm','mihHistColKm'], ['mihHistColMin','mihHistColMin'], ['mihHistColPace','mihHistColPace'],
+  ];
+  map.forEach(([id,key])=>{
     const el = document.getElementById(id);
     if (el) el.textContent = GT(key);
-  };
-
-  mapText("welcomeTitle","welcomeTitle");
-  mapText("welcomeSubtitle","welcomeSubtitle");
-  mapText("welcomeSepBtn","welcomeSepBtn");
-  mapText("welcomeMihBtn","welcomeMihBtn");
-
-  mapText("sepLangLabel","sepLangLabel");
-  mapText("sepInfoLabel","sepInfoLabel");
-  mapText("sepExitLabel","sepExitLabel");
-  mapText("sepExitBtn","sepExitBtn");
-  mapText("sepExitBtn2","sepExitBtn2");
-
-  [
-    "mihMenuTitle","mihMenuLoginBtn","mihMenuHomeBtn","mihMenuLeaderboardBtn","mihMenuProfilesBtn","mihMenuStatsBtn","mihMenuAboutBtn",
-    "mihLangLabel","mihLogoutBtn","mihExitBtn",
-    "mihLoginTitle","mihLoginSubtitle",
-    "mihHomeTitle","mihHomeSubtitle","mihAddTitle","mihRecentTitle",
-    "mihRecentColDate","mihRecentColKm","mihRecentColMin","mihRecentColPace",
-    "mihLbTitle","mihLbSubtitle","mihLbColRank","mihLbColName","mihLbColKm","mihLbColMin","mihLbColPace",
-    "mihProfilesTitle","mihProfilesSubtitle","mihProfilesColName","mihProfilesColKm","mihProfilesColMin","mihProfilesColRuns",
-    "mihProfileClose","mihProfileRowKmLabel","mihProfileRowMinLabel","mihProfileRowRunsLabel","mihProfileRowAvgPaceLabel",
-    "mihProfileHistoryTitle","mihProfileHistDate","mihProfileHistKm","mihProfileHistMin","mihProfileHistPace",
-    "mihStatsTitle","mihStatsHistoryTitle","mihHistColDate","mihHistColKm","mihHistColMin","mihHistColPace",
-    "mihStatsTotalKmLabel","mihStatsTotalMinLabel","mihStatsEntriesLabel","mihStatsAvgKmLabel","mihStatsAvgPaceLabel",
-    "mihAboutTitle"
-  ].forEach(id=>{
-    const el = document.getElementById(id);
-    if (!el) return;
-    if (GLOBAL_TRANSLATIONS.en[id]) el.textContent = GT(id);
   });
 
-  const about = document.getElementById("mihAboutBody");
-  if (about) about.textContent = GT("mihAboutBody");
+  const about = document.getElementById('mihAboutBody');
+  if (about) about.textContent = GT('mihAboutBody');
 
   const u = document.getElementById('mih-username');
   const p = document.getElementById('mih-password');
@@ -1124,10 +1096,12 @@ function setGlobalLang(lang){
   document.querySelectorAll('.mih-lang-btn').forEach(btn => {
     btn.classList.toggle('active', btn.getAttribute('data-lang') === GLOBAL_LANG);
   });
+  document.querySelectorAll('.lang-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.getAttribute('data-lang') === GLOBAL_LANG);
+  });
 
   if (window.__SEP_SET_LANG) window.__SEP_SET_LANG(GLOBAL_LANG);
   applyGlobalTranslations();
-  dispatchLangChanged();
 }
 
 /* Router */
@@ -1159,13 +1133,19 @@ function showApp(app){
   welcome && welcome.classList.remove('hidden');
   window.scrollTo({ top: 0, behavior: 'auto' });
 }
+function openSep(){ showApp('sep'); }
+function openMih(){ showApp('mih'); }
+function backToMainMenu(){ showApp('welcome'); }
 </script>
 
 <script>
 /* =========================================================
-   SEP LOGIC (Burger + Simple Cart)
+   SEP LOGIC (Translations + Burger + Cart)
 ========================================================= */
 (function () {
+  const LS_SEP_CART = "sep_cart_v1";
+  const SHIPPING_DKK = 45;
+
   const sepTranslations = {
     en: {
       menuTitle: "SEP Menu",
@@ -1276,32 +1256,32 @@ function showApp(app){
       product1Name: "SEP bílé tričko",
       product2Name: "SEP mikina",
       aboutTitle: "O SEP",
-      aboutBody1: "SEP znamená Se Proairesis – tvoje volba ve starořečtině. Každý kus je ručně lisovaný v Kodani v malých sériích.",
-      aboutBody2: "Děláme malé série s malým výběrem, ale dobrou kvalitou. Jsme pořád malá značka, takže zatím nekupujeme tisíce kusů.",
-      aboutBody3: "Jedno tričko, jedna mikina; udělané tak, aby to byla první věc, po které sáhneš. Je mi 13, takže zatím nemám Apple Pay. Zatím jen MobilePay.",
-      aboutBackBtn: "Zpět do obchodu",
+      aboutBody1: "SEP znamená Se Proairesis – tvoje volba ve staré řečtině. Každý kus je ručně lisovaný v Kodani v malých dávkách.",
+      aboutBody2: "Děláme malé série s malým výběrem, ale vysokou kvalitou. Jsme malé značky na startu, takže zatím nemůžeme kupovat tisíce kusů.",
+      aboutBody3: "Jedno tričko, jedna mikina; aby to byla první věc, po které sáhneš. Je mi 13, takže nemám Apple Pay. Zatím jen MobilePay.",
+      aboutBackBtn: "Zpět do shopu",
       howToOrderTitle: "Jak objednat",
       step1Title: "1. Vyber",
       step2Title: "2. Přidej do košíku",
       step3Title: "3. Zkopíruj zprávu",
-      step4Title: "4. Zaplať přes MobilePay",
+      step4Title: "4. Zaplať MobilePay",
       step5Title: "5. Pošli objednávku",
-      howStep1: "Vyber si kousek SEP – tričko nebo mikinu – pak velikost a množství.",
-      howStep2: "Klikni „Přidat“ a dej věci do košíku. Až budeš připravený, otevři košík a zkontroluj objednávku.",
-      howStep3: "V košíku klikni „Zkopírovat zprávu“. Zkopíruje to celou objednávku včetně dopravy.",
+      howStep1: "Vyber svůj SEP kus (tričko nebo mikinu), pak velikost a počet.",
+      howStep2: "Klikni „Přidat“ a dej věci do košíku. Až budeš připraven, otevři košík.",
+      howStep3: "V košíku klikni „Zkopírovat zprávu“. Zkopíruje se celá objednávka včetně dopravy.",
       howStep4: "Pošli celkovou částku (vč. +45 DKK dopravy, v Kodani zdarma) na 5894BZ přes MobilePay.\n„Otevřít MobilePay“ funguje jen na mobilu.",
       howStep5: "Pošli zkopírovanou zprávu do DM na @seproairesis (Instagram) nebo @seproairesis (TikTok).\nDoručujeme jen v Dánsku.",
-      footerText: "© 2025 SEP - Se Proairesis • MobilePay 5894BZ • +45 DKK doprava • Vyrobeno v Kodani. Doručení jen v Dánsku.",
+      footerText: "© 2025 SEP - Se Proairesis • MobilePay 5894BZ • +45 DKK doprava • Vyrobeno v Kodani. Jen Dánsko.",
       cartTitle: "Košík",
       cartSubtotalLabel: "Mezisoučet:",
       cartShippingLabel: "Doprava:",
       cartShippingValue: "+45 DKK",
       cartTotalLabel: "Celkem:",
       cartMobilePayButton: "Otevřít MobilePay",
-      cartMobilePayNote: "*Tlačítko MobilePay funguje jen jako odkaz na mobilu*",
+      cartMobilePayNote: "*Tlačítko funguje jen na mobilu*",
       cartCopyOrder: "Zkopírovat zprávu",
       cartEmpty: "Košík je prázdný",
-      labelSizeQty: "Velikost: {size} | Ks: {qty}",
+      labelSizeQty: "Velikost: {size} | Počet: {qty}",
       btnRemove: "Odebrat",
       popupAdded: "Přidáno do košíku",
       popupOrderCopied: "Zpráva zkopírována!",
@@ -1313,14 +1293,8 @@ function showApp(app){
     }
   };
 
-  const LS_SEP_LANG = "sep_lang_v1";
-  const LS_CART = "sep_cart_v1";
-
-  let SEP_LANG = localStorage.getItem(LS_SEP_LANG) || GLOBAL_LANG || "en";
-  let cart = [];
-
-  function S(key, vars){
-    const pack = sepTranslations[SEP_LANG] || sepTranslations.en;
+  function ST(key, vars){
+    const pack = sepTranslations[GLOBAL_LANG] || sepTranslations.en;
     let str = pack[key] || (sepTranslations.en[key] || key);
     if (vars){
       Object.keys(vars).forEach(k => { str = str.replace(`{${k}}`, vars[k]); });
@@ -1328,780 +1302,794 @@ function showApp(app){
     return str;
   }
 
-  function applySepLang(){
-    const setText = (id, key) => {
+  window.__SEP_SET_LANG = function(lang){
+    const map = [
+      ['menuTitle','menuTitle'],
+      ['menuAboutBtn','navAboutSep'],
+      ['heroTitle','heroTitle'],
+      ['heroSubtitle','heroSubtitle'],
+      ['btnShopNow','btnShopNow'],
+      ['btnViewCart','btnViewCart'],
+      ['productsTitle','productsTitle'],
+      ['productsSubtitle','productsSubtitle'],
+      ['product1Name','product1Name'],
+      ['product2Name','product2Name'],
+      ['aboutTitle','aboutTitle'],
+      ['aboutBody1','aboutBody1'],
+      ['aboutBody2','aboutBody2'],
+      ['aboutBody3','aboutBody3'],
+      ['aboutBackBtn','aboutBackBtn'],
+      ['howToOrderTitle','howToOrderTitle'],
+      ['step1Title','step1Title'],
+      ['step2Title','step2Title'],
+      ['step3Title','step3Title'],
+      ['step4Title','step4Title'],
+      ['step5Title','step5Title'],
+      ['howStep1','howStep1'],
+      ['howStep2','howStep2'],
+      ['howStep3','howStep3'],
+      ['howStep4','howStep4'],
+      ['howStep5','howStep5'],
+      ['footerText','footerText'],
+      ['cartTitle','cartTitle'],
+      ['cartSubtotalLabel','cartSubtotalLabel'],
+      ['cartShippingLabel','cartShippingLabel'],
+      ['cartShippingValue','cartShippingValue'],
+      ['cartTotalLabel','cartTotalLabel'],
+      ['cartMobilePayButton','cartMobilePayButton'],
+      ['cartMobilePayNote','cartMobilePayNote'],
+      ['cartCopyOrder','cartCopyOrder'],
+    ];
+    map.forEach(([id,key])=>{
       const el = document.getElementById(id);
-      if (el) el.textContent = S(key);
-    };
-    setText("menuTitle","menuTitle");
-    const aboutBtn = document.getElementById("menuAboutBtn");
-    if (aboutBtn) aboutBtn.textContent = S("navAboutSep");
-
-    setText("heroTitle","heroTitle");
-    setText("heroSubtitle","heroSubtitle");
-    setText("btnShopNow","btnShopNow");
-    setText("btnViewCart","btnViewCart");
-    setText("productsTitle","productsTitle");
-    setText("productsSubtitle","productsSubtitle");
-    setText("product1Name","product1Name");
-    setText("product2Name","product2Name");
-
-    setText("aboutTitle","aboutTitle");
-    setText("aboutBody1","aboutBody1");
-    setText("aboutBody2","aboutBody2");
-    setText("aboutBody3","aboutBody3");
-    setText("aboutBackBtn","aboutBackBtn");
-
-    setText("howToOrderTitle","howToOrderTitle");
-    setText("step1Title","step1Title");
-    setText("step2Title","step2Title");
-    setText("step3Title","step3Title");
-    setText("step4Title","step4Title");
-    setText("step5Title","step5Title");
-    setText("howStep1","howStep1");
-    setText("howStep2","howStep2");
-    setText("howStep3","howStep3");
-    setText("howStep4","howStep4");
-    setText("howStep5","howStep5");
-    setText("footerText","footerText");
-
-    setText("cartTitle","cartTitle");
-    setText("cartSubtotalLabel","cartSubtotalLabel");
-    setText("cartShippingLabel","cartShippingLabel");
-    setText("cartShippingValue","cartShippingValue");
-    setText("cartTotalLabel","cartTotalLabel");
-    setText("cartMobilePayButton","cartMobilePayButton");
-    setText("cartMobilePayNote","cartMobilePayNote");
-    setText("cartCopyOrder","cartCopyOrder");
-
-    document.querySelectorAll(".add-to-cart").forEach(btn=>{
-      btn.textContent = S("addToCart");
+      if (el) el.textContent = ST(key);
     });
-  }
 
-  function setSepLang(lang){
-    SEP_LANG = lang || "en";
-    localStorage.setItem(LS_SEP_LANG, SEP_LANG);
-    document.querySelectorAll('.lang-btn').forEach(btn => {
-      btn.classList.toggle('active', btn.getAttribute('data-lang') === SEP_LANG);
+    document.querySelectorAll('[data-i18n-btn="addToCart"]').forEach(btn=>{
+      btn.textContent = ST('addToCart');
     });
-    applySepLang();
-    renderCart();
-  }
-  window.__SEP_SET_LANG = (lang)=> setSepLang(lang);
+  };
 
   function loadCart(){
-    try { cart = JSON.parse(localStorage.getItem(LS_CART) || "[]"); }
-    catch { cart = []; }
+    try { return JSON.parse(localStorage.getItem(LS_SEP_CART) || "[]"); }
+    catch { return []; }
   }
-  function saveCart(){
-    localStorage.setItem(LS_CART, JSON.stringify(cart));
+  function saveCart(cart){
+    localStorage.setItem(LS_SEP_CART, JSON.stringify(cart || []));
   }
 
-  function money(n){ return `${Math.round(n)} DKK`; }
+  function cartSubtotal(cart){
+    return (cart || []).reduce((sum, it)=> sum + (Number(it.price)||0) * (Number(it.qty)||0), 0);
+  }
+
+  function updateCartBadge(){
+    const cart = loadCart();
+    const count = cart.reduce((s,it)=> s + (Number(it.qty)||0), 0);
+    const badge = document.getElementById('cartCounter');
+    if (!badge) return;
+    if (count > 0){
+      badge.textContent = String(count);
+      badge.classList.remove('hidden');
+    } else {
+      badge.classList.add('hidden');
+    }
+  }
 
   function renderCart(){
-    const cartItems = document.getElementById("cartItems");
-    const subtotalEl = document.getElementById("cartSubtotal");
-    const totalEl = document.getElementById("cartTotal");
-    const counter = document.getElementById("cartCounter");
-    if (!cartItems) return;
+    const cart = loadCart();
+    const itemsEl = document.getElementById('cartItems');
+    if (!itemsEl) return;
 
-    cartItems.innerHTML = "";
-    let subtotal = 0;
-    let totalQty = 0;
-
+    itemsEl.innerHTML = "";
     if (!cart.length){
-      cartItems.innerHTML = `<div class="text-gray-600">${S("cartEmpty")}</div>`;
+      itemsEl.innerHTML = `<div class="text-gray-500">${ST('cartEmpty')}</div>`;
     } else {
-      cart.forEach((item, idx)=>{
-        subtotal += item.price * item.qty;
-        totalQty += item.qty;
-
-        const row = document.createElement("div");
+      cart.forEach((it, idx)=>{
+        const row = document.createElement('div');
         row.className = "border border-gray-200 rounded-lg p-3";
-
         row.innerHTML = `
-          <div class="flex justify-between items-start gap-2">
+          <div class="flex justify-between gap-3">
             <div>
-              <div class="font-semibold">${item.name}</div>
-              <div class="text-xs text-gray-600">${S("labelSizeQty",{size:item.size, qty:item.qty})}</div>
-              <div class="text-sm mt-1">${money(item.price * item.qty)}</div>
+              <div class="font-semibold">${it.name}</div>
+              <div class="text-xs text-gray-600">${ST('labelSizeQty', { size: it.size, qty: it.qty })}</div>
+              <div class="text-xs text-gray-600">${it.price} DKK</div>
             </div>
-            <button class="text-sm underline text-gray-700" data-remove="${idx}" type="button">${S("btnRemove")}</button>
+            <button data-remove="${idx}" class="text-sm underline text-gray-700">${ST('btnRemove')}</button>
           </div>
         `;
-        cartItems.appendChild(row);
+        itemsEl.appendChild(row);
       });
     }
 
-    const shipping = 45;
-    const total = subtotal + shipping;
+    const sub = cartSubtotal(cart);
+    const total = sub + (sub > 0 ? SHIPPING_DKK : SHIPPING_DKK); // keep 45 even if empty (matches your UI)
+    const subEl = document.getElementById('cartSubtotal');
+    const totalEl = document.getElementById('cartTotal');
+    if (subEl) subEl.textContent = `${sub} DKK`;
+    if (totalEl) totalEl.textContent = `${total} DKK`;
 
-    if (subtotalEl) subtotalEl.textContent = money(subtotal);
-    if (totalEl) totalEl.textContent = money(total);
-
-    if (counter){
-      if (totalQty > 0){
-        counter.textContent = String(totalQty);
-        counter.classList.remove("hidden");
-      } else {
-        counter.classList.add("hidden");
-      }
-    }
-
-    cartItems.querySelectorAll("[data-remove]").forEach(btn=>{
-      btn.addEventListener("click", ()=>{
-        const i = Number(btn.getAttribute("data-remove"));
-        cart.splice(i,1);
-        saveCart();
+    itemsEl.querySelectorAll('button[data-remove]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const i = Number(btn.getAttribute('data-remove'));
+        const next = loadCart();
+        next.splice(i,1);
+        saveCart(next);
         renderCart();
+        updateCartBadge();
       });
     });
   }
 
   function openCart(){
-    document.getElementById("cartSidebar").classList.remove("translate-x-full");
-    document.getElementById("cartOverlay").classList.remove("hidden");
-    document.getElementById("cartOverlay").classList.remove("pointer-none");
-    document.getElementById("cartOverlay").classList.add("pointer-auto");
+    const sidebar = document.getElementById('cartSidebar');
+    const overlay = document.getElementById('cartOverlay');
+    if (sidebar) sidebar.classList.remove('translate-x-full');
+    if (overlay){
+      overlay.classList.remove('hidden');
+      overlay.classList.remove('pointer-none');
+      overlay.classList.add('pointer-auto');
+    }
+    renderCart();
   }
   function closeCart(){
-    document.getElementById("cartSidebar").classList.add("translate-x-full");
-    document.getElementById("cartOverlay").classList.add("hidden");
-    document.getElementById("cartOverlay").classList.add("pointer-none");
-    document.getElementById("cartOverlay").classList.remove("pointer-auto");
+    const sidebar = document.getElementById('cartSidebar');
+    const overlay = document.getElementById('cartOverlay');
+    if (sidebar) sidebar.classList.add('translate-x-full');
+    if (overlay){
+      overlay.classList.add('hidden');
+      overlay.classList.add('pointer-none');
+      overlay.classList.remove('pointer-auto');
+    }
+  }
+
+  function copyOrderMessage(){
+    const cart = loadCart();
+    const sub = cartSubtotal(cart);
+    const total = sub + SHIPPING_DKK;
+
+    const lines = [];
+    lines.push(ST('orderIntro'));
+    cart.forEach(it=>{
+      lines.push(ST('orderItem', { qty: it.qty, name: it.name, size: it.size }));
+    });
+    lines.push(`${ST('orderSubtotalLabel')} ${sub} DKK`);
+    lines.push(`${ST('orderShippingLabel')} ${SHIPPING_DKK} DKK`);
+    lines.push(`${ST('orderTotalLabel')} ${total} DKK`);
+    lines.push(`MobilePay box: 5894BZ`);
+
+    const msg = lines.join("\n");
+    navigator.clipboard.writeText(msg).then(()=>{
+      toast(ST('popupOrderCopied'), true);
+    }).catch(()=>{
+      // fallback
+      const ta = document.createElement('textarea');
+      ta.value = msg;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      toast(ST('popupOrderCopied'), true);
+    });
+  }
+
+  function isMobile(){
+    return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent || "");
+  }
+
+  function openMobilePay(){
+    if (!isMobile()){
+      toast("Open MobilePay works on mobile.", false);
+      return;
+    }
+    // MobilePay deeplink varies by setup; keeping it simple:
+    copyOrderMessage();
+    alert("Copied your order message. Now open MobilePay and pay to box 5894BZ, then DM @seproairesis.");
   }
 
   function openSepAbout(){
-    document.getElementById("sep-scene-main").classList.add("hidden");
-    document.getElementById("sep-scene-about").classList.remove("hidden");
-    saveRoute({ sepScene: "about" });
-    window.scrollTo({ top: 0, behavior: "auto" });
+    document.getElementById('sep-scene-main')?.classList.add('hidden');
+    document.getElementById('sep-scene-about')?.classList.remove('hidden');
   }
-  function openSepMain(){
-    document.getElementById("sep-scene-about").classList.add("hidden");
-    document.getElementById("sep-scene-main").classList.remove("hidden");
-    saveRoute({ sepScene: "main" });
-    window.scrollTo({ top: 0, behavior: "auto" });
+  function backToShop(){
+    document.getElementById('sep-scene-about')?.classList.add('hidden');
+    document.getElementById('sep-scene-main')?.classList.remove('hidden');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
+  // SEP burger
   function openSepMenu(){
-    const panel = document.getElementById("menuPanel");
-    const overlay = document.getElementById("menuOverlay");
-    panel.classList.remove("translate-x-full");
-    overlay.classList.remove("hidden");
-    overlay.classList.remove("pointer-none");
-    overlay.classList.add("pointer-auto");
+    const panel = document.getElementById('menuPanel');
+    const overlay = document.getElementById('menuOverlay');
+    if (panel) panel.classList.remove('translate-x-full');
+    if (overlay){
+      overlay.classList.remove('hidden');
+      overlay.classList.remove('pointer-none');
+      overlay.classList.add('pointer-auto');
+    }
   }
   function closeSepMenu(){
-    const panel = document.getElementById("menuPanel");
-    const overlay = document.getElementById("menuOverlay");
-    panel.classList.add("translate-x-full");
-    overlay.classList.add("hidden");
-    overlay.classList.add("pointer-none");
-    overlay.classList.remove("pointer-auto");
+    const panel = document.getElementById('menuPanel');
+    const overlay = document.getElementById('menuOverlay');
+    if (panel) panel.classList.add('translate-x-full');
+    if (overlay){
+      overlay.classList.add('hidden');
+      overlay.classList.add('pointer-none');
+      overlay.classList.remove('pointer-auto');
+    }
   }
 
-  // Bind
-  document.getElementById("menuToggle").addEventListener("click", openSepMenu);
-  document.getElementById("menuCloseBtn").addEventListener("click", closeSepMenu);
-  document.getElementById("menuOverlay").addEventListener("click", closeSepMenu);
-  document.getElementById("menuAboutBtn").addEventListener("click", ()=>{ closeSepMenu(); openSepAbout(); });
-  document.getElementById("aboutBackBtn").addEventListener("click", openSepMain);
+  // Bind SEP handlers on DOM ready
+  document.addEventListener('DOMContentLoaded', ()=>{
+    // Add-to-cart
+    document.querySelectorAll('.add-to-cart').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const card = btn.closest('.product-card');
+        const size = card?.querySelector('.size-selector')?.value || "M";
+        const qty = Number(card?.querySelector('.quantity-selector')?.value || 1);
+        const name = btn.getAttribute('data-name') || "Item";
+        const price = Number(btn.getAttribute('data-price') || 0);
 
-  document.getElementById("sepExitBtn").addEventListener("click", ()=>{ closeSepMenu(); showApp("welcome"); });
-  document.getElementById("sepExitBtn2").addEventListener("click", ()=> showApp("welcome"));
+        const cart = loadCart();
+        cart.push({ name, price, size, qty: Math.max(1, qty) });
+        saveCart(cart);
 
-  document.getElementById("viewCartBtn").addEventListener("click", openCart);
-  document.getElementById("closeCart").addEventListener("click", closeCart);
-  document.getElementById("cartOverlay").addEventListener("click", closeCart);
-
-  document.getElementById("copyMobilePay").addEventListener("click", ()=>{
-    const shipping = 45;
-    const subtotal = cart.reduce((a,c)=>a+(c.price*c.qty),0);
-    const total = subtotal + shipping;
-
-    const lines = [];
-    lines.push(S("orderIntro"));
-    cart.forEach(item=>{
-      lines.push("- " + S("orderItem",{qty:item.qty, name:item.name, size:item.size}));
+        updateCartBadge();
+        toast((sepTranslations[GLOBAL_LANG]||sepTranslations.en).popupAdded || "Added", true);
+      });
     });
-    lines.push("");
-    lines.push(`${S("orderSubtotalLabel")} ${money(subtotal)}`);
-    lines.push(`${S("orderShippingLabel")} ${money(shipping)}`);
-    lines.push(`${S("orderTotalLabel")} ${money(total)}`);
 
-    navigator.clipboard.writeText(lines.join("\n")).then(()=>{
-      toast(S("popupOrderCopied"));
-    }).catch(()=>{
-      toast("Could not copy on this device.", true);
-    });
+    // Cart open/close
+    document.getElementById('viewCartBtn')?.addEventListener('click', openCart);
+    document.getElementById('closeCart')?.addEventListener('click', closeCart);
+    document.getElementById('cartOverlay')?.addEventListener('click', closeCart);
+    document.getElementById('copyMobilePay')?.addEventListener('click', copyOrderMessage);
+    document.getElementById('openMobilePay')?.addEventListener('click', openMobilePay);
+
+    // About
+    document.getElementById('menuAboutBtn')?.addEventListener('click', ()=>{ closeSepMenu(); openSepAbout(); });
+    document.getElementById('aboutBackBtn')?.addEventListener('click', backToShop);
+
+    // Exit
+    document.getElementById('sepExitBtn')?.addEventListener('click', ()=>{ closeSepMenu(); backToMainMenu(); });
+    document.getElementById('sepExitBtn2')?.addEventListener('click', backToMainMenu);
+
+    // SEP menu open/close
+    document.getElementById('menuToggle')?.addEventListener('click', openSepMenu);
+    document.getElementById('menuClose')?.addEventListener('click', closeSepMenu);
+    document.getElementById('menuOverlay')?.addEventListener('click', closeSepMenu);
+
+    updateCartBadge();
   });
-
-  document.getElementById("openMobilePay").addEventListener("click", ()=>{
-    toast("MobilePay opens only on mobile. Copy your order message first.");
-  });
-
-  document.querySelectorAll(".product-card").forEach((card, idx)=>{
-    const nameEl = card.querySelector("h3");
-    const priceEl = card.querySelector("p");
-    const sizeSel = card.querySelector("select");
-    const qtyInp = card.querySelector("input[type=number]");
-    const addBtn = card.querySelector(".add-to-cart");
-    const price = 180;
-
-    addBtn.addEventListener("click", ()=>{
-      const name = nameEl ? nameEl.textContent.trim() : (idx===0?"Item":"Item");
-      const size = sizeSel.value;
-      const qty = Math.max(1, Number(qtyInp.value||1));
-      cart.push({ name, size, qty, price });
-      saveCart();
-      renderCart();
-      toast(S("popupAdded"));
-    });
-  });
-
-  // Init
-  loadCart();
-  setSepLang(SEP_LANG);
-  renderCart();
-
 })();
 </script>
 
 <script>
 /* =========================================================
-   MIH LOGIC (Firebase + login + entries + leaderboard + delete)
+   MIH LOGIC (Firebase + Scenes + Leaderboard + Soft Delete)
 ========================================================= */
 
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyAkbH3mJkeheF3L7EaqN1kMgbFd_LJCIXo",
-  authDomain: "hitachi-vantara-make-it-happen.firebaseapp.com",
-  projectId: "hitachi-vantara-make-it-happen",
-  storageBucket: "hitachi-vantara-make-it-happen.firebasestorage.app",
-  messagingSenderId: "749690169824",
-  appId: "1:749690169824:web:21d6b8d2a5862847e4e385",
-  measurementId: "G-7WZ03E68MF"
+const LS_MIH_USER = "mih_username_v2";
+const LS_MIH_PASS = "mih_password_v2";
+let MIH = {
+  ready:false,
+  user:null,  // { name, password }
+  db:null
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
-
-let db = null;
-try {
-  firebase.initializeApp(firebaseConfig);
-  db = firebase.firestore();
-} catch (e) {
-  console.error(e);
-  toast("Firebase failed to initialise. Paste your firebaseConfig.", true);
+function mihSetPills(){
+  const pill = document.getElementById('mih-user-pill');
+  const mini = document.getElementById('mihMenuUserMini');
+  const name = MIH.user?.name ? MIH.user.name : "Not logged in";
+  if (pill) pill.textContent = name;
+  if (mini) mini.textContent = name;
 }
 
-// Collections
-const USERS_COL = "mih_users_v2";
-const ENTRIES_COL = "mih_entries_v2";
-
-// Local storage
-const LS_MIH_LOGIN = "mih_login_v2"; // {username,password}
-function getSavedLogin(){
-  try { return JSON.parse(localStorage.getItem(LS_MIH_LOGIN) || "null"); }
-  catch { return null; }
-}
-function setSavedLogin(obj){
-  if (!obj) localStorage.removeItem(LS_MIH_LOGIN);
-  else localStorage.setItem(LS_MIH_LOGIN, JSON.stringify(obj));
-}
-
-let MIH_USER = null; // {username,password}
-
-// Scenes
-function showMihScene(id){
-  document.querySelectorAll("#mih-app .scene").forEach(s=>s.classList.remove("active"));
+function mihShowScene(id){
+  document.querySelectorAll('#mih-app .scene').forEach(s=>s.classList.remove('active'));
   const el = document.getElementById(id);
-  if (el) el.classList.add("active");
+  if (el) el.classList.add('active');
   saveRoute({ mihScene: id });
 }
 
-function setMihHeaderUser(text){
-  const pill = document.getElementById("mih-user-pill");
-  const mini = document.getElementById("mihMenuUserMini");
-  if (pill) pill.textContent = text;
-  if (mini) mini.textContent = text;
+function mihOpenMenu(){
+  document.getElementById('mihMenuPanel')?.classList.add('open');
+  document.getElementById('mihMenuOverlay')?.classList.add('open');
+}
+function mihCloseMenu(){
+  document.getElementById('mihMenuPanel')?.classList.remove('open');
+  document.getElementById('mihMenuOverlay')?.classList.remove('open');
 }
 
-function openMihMenu(){
-  document.getElementById("mihMenuPanel").classList.add("open");
-  document.getElementById("mihMenuOverlay").classList.add("open");
-}
-function closeMihMenu(){
-  document.getElementById("mihMenuPanel").classList.remove("open");
-  document.getElementById("mihMenuOverlay").classList.remove("open");
-}
-
-function formatDate(ts){
-  try {
-    const d = new Date(ts);
-    return d.toLocaleDateString(undefined, { year:"numeric", month:"short", day:"numeric" });
-  } catch { return "—"; }
-}
 function paceStr(km, minutes){
-  const pace = minutes / km; // min per km
+  const m = Number(minutes)||0;
+  const k = Number(km)||0;
+  if (k <= 0 || m <= 0) return "0:00";
+  const pace = m / k; // minutes per km
   const mm = Math.floor(pace);
   const ss = Math.round((pace - mm) * 60);
-  return `${mm}:${String(ss).padStart(2,"0")}/km`;
+  return `${mm}:${String(ss).padStart(2,'0')}`;
+}
+function fmtDate(ts){
+  const d = new Date(Number(ts)||Date.now());
+  return d.toLocaleDateString();
 }
 
-async function getUserDoc(username){
-  const ref = db.collection(USERS_COL).doc(username);
-  const snap = await ref.get();
-  return { ref, snap };
+async function mihInitFirebase(){
+  try{
+    const firebaseConfig = {
+      apiKey: "AIzaSyAkbH3mJkeheF3L7EaqN1kMgbFd_LJCIXo",
+      authDomain: "hitachi-vantara-make-it-happen.firebaseapp.com",
+      projectId: "hitachi-vantara-make-it-happen",
+      storageBucket: "hitachi-vantara-make-it-happen.firebasestorage.app",
+      messagingSenderId: "749690169824",
+      appId: "1:749690169824:web:21d6b8d2a5862847e4e385",
+      measurementId: "G-7WZ03E68MF"
+    };
+
+    // Prevent double-init if the page reloads / hot refresh etc
+    if (!firebase.apps || !firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
+
+    MIH.db = firebase.firestore();
+
+    // Optional
+    try { await firebase.auth().signInAnonymously(); } catch(e){}
+
+    MIH.ready = true;
+  } catch (err) {
+    console.error(err);
+    toast(GT('errFirebase'), false);
+    MIH.ready = false;
+  }
 }
 
-async function login(username, password){
-  if (!db) { toast("Firebase not ready.", true); return; }
-  username = (username || "").trim();
-  password = (password || "").trim();
 
-  if (!username || !password){
-    toast(GT("errLoginMissing"), true);
+async function mihLoginOrCreate(username, password){
+  if (!MIH.ready) { toast(GT('errFirebase'), false); return; }
+  const name = (username || "").trim();
+  const pass = (password || "").trim();
+  if (!name || !pass) { toast(GT('errLoginMissing'), false); return; }
+
+  const userRef = MIH.db.collection('mih_users_v2').doc(name);
+  const snap = await userRef.get();
+
+  if (snap.exists){
+    const data = snap.data() || {};
+    if (data.status === "deleted"){
+      toast("This account is deleted.", false);
+      return;
+    }
+    if (data.password !== pass){
+      toast(GT('errWrongPass'), false);
+      return;
+    }
+    MIH.user = { name, password: pass };
+    localStorage.setItem(LS_MIH_USER, name);
+    localStorage.setItem(LS_MIH_PASS, pass);
+    mihSetPills();
+    mihUpdateMenuButtons();
+    await mihRefreshAll();
+    mihShowScene('mih-home');
     return;
   }
 
-  const { ref, snap } = await getUserDoc(username);
-
-  if (!snap.exists){
-    // Create new user
-    await ref.set({
-      name: username,
-      password: password,
-      createdAt: Date.now(),
-      deleted: false
-    });
-    MIH_USER = { username, password };
-    setSavedLogin(MIH_USER);
-    setMihHeaderUser(`Logged in: ${username}`);
-    toast("Account created.");
-    updateMihAuthUI();
-    await refreshAllForUser();
-    showMihScene("mih-home");
-    return;
-  }
-
-  const data = snap.data() || {};
-  if (data.deleted === true){
-    toast(GT("errDeleted"), true);
-    return;
-  }
-
-  if (data.password !== password){
-    toast(GT("errWrongPass"), true);
-    return;
-  }
-
-  MIH_USER = { username, password };
-  setSavedLogin(MIH_USER);
-  setMihHeaderUser(`Logged in: ${username}`);
-  toast("Logged in.");
-  updateMihAuthUI();
-  await refreshAllForUser();
-  showMihScene("mih-home");
-}
-
-function logout(){
-  MIH_USER = null;
-  setSavedLogin(null);
-  setMihHeaderUser("Not logged in");
-  updateMihAuthUI();
-  showMihScene("mih-login");
-}
-
-function updateMihAuthUI(){
-  const loggedIn = !!MIH_USER;
-  document.getElementById("mihLogoutBtn").style.display = loggedIn ? "block" : "none";
-  document.getElementById("mihDeleteAccountBtn").style.display = loggedIn ? "block" : "none";
-}
-
-async function addEntry(km, minutes){
-  if (!MIH_USER){
-    toast(GT("errMustLogin"), true);
-    return;
-  }
-  km = Number(km);
-  minutes = Number(minutes);
-
-  if (!(km > 0) || !(minutes > 0)){
-    toast(GT("errActivityInvalid"), true);
-    return;
-  }
-
-  await db.collection(ENTRIES_COL).add({
-    username: MIH_USER.username,
-    km,
-    minutes,
-    ts: Date.now()
+  // create new
+  await userRef.set({
+    name,
+    password: pass,
+    status: "active",
+    createdAt: Date.now(),
+    totalKm: 0,
+    totalMin: 0,
+    entries: 0
   });
 
-  toast("Saved.");
-  await refreshAllForUser();
+  MIH.user = { name, password: pass };
+  localStorage.setItem(LS_MIH_USER, name);
+  localStorage.setItem(LS_MIH_PASS, pass);
+  mihSetPills();
+  mihUpdateMenuButtons();
+  await mihRefreshAll();
+  mihShowScene('mih-home');
 }
 
-async function deactivateAccount(){
-  if (!MIH_USER) return;
+function mihLogout(){
+  MIH.user = null;
+  localStorage.removeItem(LS_MIH_USER);
+  localStorage.removeItem(LS_MIH_PASS);
+  mihSetPills();
+  mihUpdateMenuButtons();
+  mihShowScene('mih-login');
+}
 
-  const ok = confirm(
-    "This will remove you from the leaderboard (deactivate).\n\nIt does NOT delete old entries (history stays), but you will be hidden.\n\nContinue?"
-  );
+function mihUpdateMenuButtons(){
+  const loggedIn = !!MIH.user?.name;
+  const logoutBtn = document.getElementById('mihLogoutBtn');
+  const delBtn = document.getElementById('mihDeleteAccountBtn');
+  if (logoutBtn) logoutBtn.style.display = loggedIn ? "block" : "none";
+  if (delBtn) delBtn.style.display = loggedIn ? "block" : "none";
+}
+
+async function mihAddActivity(km, minutes){
+  if (!MIH.user?.name) { toast(GT('errMustLogin'), false); return; }
+  if (!MIH.ready) { toast(GT('errFirebase'), false); return; }
+
+  const k = Number(km);
+  const m = Number(minutes);
+  if (!(k > 0) || !(m > 0)) { toast(GT('errActivityInvalid'), false); return; }
+
+  const username = MIH.user.name;
+  const ts = Date.now();
+
+  const entryRef = MIH.db.collection('mih_entries_v2').doc(); // random ID
+  const userRef = MIH.db.collection('mih_users_v2').doc(username);
+
+  const batch = MIH.db.batch();
+  batch.set(entryRef, { username, km: k, minutes: m, ts });
+  batch.update(userRef, {
+    totalKm: firebase.firestore.FieldValue.increment(k),
+    totalMin: firebase.firestore.FieldValue.increment(m),
+    entries: firebase.firestore.FieldValue.increment(1)
+  });
+  await batch.commit();
+
+  toast(GT('toastSaved'), true);
+
+  document.getElementById('mih-distance').value = "";
+  document.getElementById('mih-minutes').value = "";
+
+  await mihRefreshAll();
+}
+
+async function mihLoadMyRecent(){
+  const tbody = document.getElementById('mih-recent');
+  if (!tbody) return;
+  tbody.innerHTML = "";
+
+  if (!MIH.user?.name) {
+    tbody.innerHTML = `<tr><td colspan="4" class="muted">${GT('errMustLogin')}</td></tr>`;
+    return;
+  }
+
+  const snap = await MIH.db.collection('mih_entries_v2')
+    .where('username','==',MIH.user.name)
+    .orderBy('ts','desc')
+    .limit(15)
+    .get();
+
+  if (snap.empty){
+    tbody.innerHTML = `<tr><td colspan="4" class="muted">${GT('noEntries')}</td></tr>`;
+    return;
+  }
+
+  snap.forEach(doc=>{
+    const d = doc.data();
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${fmtDate(d.ts)}</td>
+      <td>${Number(d.km).toFixed(2)}</td>
+      <td>${Number(d.minutes).toFixed(0)}</td>
+      <td>${paceStr(d.km, d.minutes)}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+async function mihLoadMyStatsAndHistory(){
+  const kmEl = document.getElementById('mih-total-km');
+  const minEl = document.getElementById('mih-total-min');
+  const entEl = document.getElementById('mih-total-entries');
+  const avgKmEl = document.getElementById('mih-average-km');
+  const avgPaceEl = document.getElementById('mih-average-pace');
+  const histBody = document.getElementById('mih-history-body');
+
+  if (histBody) histBody.innerHTML = "";
+
+  if (!MIH.user?.name) return;
+
+  const userSnap = await MIH.db.collection('mih_users_v2').doc(MIH.user.name).get();
+  const user = userSnap.exists ? (userSnap.data()||{}) : {};
+  const totalKm = Number(user.totalKm||0);
+  const totalMin = Number(user.totalMin||0);
+  const entries = Number(user.entries||0);
+
+  if (kmEl) kmEl.textContent = totalKm.toFixed(2);
+  if (minEl) minEl.textContent = totalMin.toFixed(0);
+  if (entEl) entEl.textContent = String(entries);
+  if (avgKmEl) avgKmEl.textContent = entries > 0 ? (totalKm/entries).toFixed(2) : "0";
+  if (avgPaceEl) avgPaceEl.textContent = totalKm > 0 ? paceStr(totalKm, totalMin) : "0:00";
+
+  const snap = await MIH.db.collection('mih_entries_v2')
+    .where('username','==',MIH.user.name)
+    .orderBy('ts','desc')
+    .limit(50)
+    .get();
+
+  if (histBody){
+    if (snap.empty){
+      histBody.innerHTML = `<tr><td colspan="4" class="muted">${GT('noEntries')}</td></tr>`;
+    } else {
+      snap.forEach(doc=>{
+        const d = doc.data();
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${fmtDate(d.ts)}</td>
+          <td>${Number(d.km).toFixed(2)}</td>
+          <td>${Number(d.minutes).toFixed(0)}</td>
+          <td>${paceStr(d.km, d.minutes)}</td>
+        `;
+        histBody.appendChild(tr);
+      });
+    }
+  }
+}
+
+async function mihLoadLeaderboard(){
+  const body = document.getElementById('mih-leaderboard-body');
+  if (!body) return;
+  body.innerHTML = "";
+
+  const snap = await MIH.db.collection('mih_users_v2').get();
+  let users = [];
+  snap.forEach(doc=>{
+    const u = doc.data() || {};
+    if (u.status === "deleted") return; // hidden
+    users.push({
+      name: doc.id,
+      totalKm: Number(u.totalKm||0),
+      totalMin: Number(u.totalMin||0),
+      entries: Number(u.entries||0)
+    });
+  });
+
+  if (!users.length){
+    body.innerHTML = `<tr><td colspan="5" class="muted">${GT('noPlayers')}</td></tr>`;
+    return;
+  }
+
+  users.sort((a,b)=> b.totalKm - a.totalKm);
+
+  users.forEach((u, idx)=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${idx+1}</td>
+      <td>${u.name}</td>
+      <td>${u.totalKm.toFixed(2)}</td>
+      <td>${u.totalMin.toFixed(0)}</td>
+      <td>${u.totalKm > 0 ? paceStr(u.totalKm, u.totalMin) : "0:00"}</td>
+    `;
+    body.appendChild(tr);
+  });
+}
+
+async function mihLoadProfiles(){
+  const body = document.getElementById('mih-profiles-body');
+  if (!body) return;
+  body.innerHTML = "";
+
+  const snap = await MIH.db.collection('mih_users_v2').get();
+  let users = [];
+  snap.forEach(doc=>{
+    const u = doc.data() || {};
+    if (u.status === "deleted") return; // hidden
+    users.push({
+      id: doc.id,
+      totalKm: Number(u.totalKm||0),
+      totalMin: Number(u.totalMin||0),
+      entries: Number(u.entries||0)
+    });
+  });
+
+  if (!users.length){
+    body.innerHTML = `<tr><td colspan="4" class="muted">${GT('noPlayers')}</td></tr>`;
+    return;
+  }
+
+  users.sort((a,b)=> b.totalKm - a.totalKm);
+
+  users.forEach(u=>{
+    const tr = document.createElement('tr');
+    tr.style.cursor = "pointer";
+    tr.innerHTML = `
+      <td><u>${u.id}</u></td>
+      <td>${u.totalKm.toFixed(2)}</td>
+      <td>${u.totalMin.toFixed(0)}</td>
+      <td>${u.entries}</td>
+    `;
+    tr.addEventListener('click', ()=> mihOpenProfile(u.id));
+    body.appendChild(tr);
+  });
+}
+
+async function mihOpenProfile(name){
+  const panel = document.getElementById('mihProfilePanel');
+  if (!panel) return;
+
+  const userSnap = await MIH.db.collection('mih_users_v2').doc(name).get();
+  if (!userSnap.exists) return;
+  const u = userSnap.data() || {};
+  if (u.status === "deleted") return;
+
+  document.getElementById('mihProfileName').textContent = name;
+  document.getElementById('mihProfileKm').textContent = Number(u.totalKm||0).toFixed(2);
+  document.getElementById('mihProfileMin').textContent = Number(u.totalMin||0).toFixed(0);
+  document.getElementById('mihProfileRuns').textContent = String(Number(u.entries||0));
+  document.getElementById('mihProfileAvgPace').textContent = (Number(u.totalKm||0) > 0) ? paceStr(u.totalKm, u.totalMin) : "0:00";
+
+  const hist = document.getElementById('mih-profile-history');
+  if (hist) hist.innerHTML = "";
+
+  const snap = await MIH.db.collection('mih_entries_v2')
+    .where('username','==',name)
+    .orderBy('ts','desc')
+    .limit(15)
+    .get();
+
+  if (hist){
+    if (snap.empty){
+      hist.innerHTML = `<tr><td colspan="4" class="muted">${GT('noEntries')}</td></tr>`;
+    } else {
+      snap.forEach(doc=>{
+        const d = doc.data();
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${fmtDate(d.ts)}</td>
+          <td>${Number(d.km).toFixed(2)}</td>
+          <td>${Number(d.minutes).toFixed(0)}</td>
+          <td>${paceStr(d.km, d.minutes)}</td>
+        `;
+        hist.appendChild(tr);
+      });
+    }
+  }
+
+  panel.classList.add('show');
+}
+
+function mihCloseProfile(){
+  document.getElementById('mihProfilePanel')?.classList.remove('show');
+}
+
+async function mihSoftDeleteAccount(){
+  if (!MIH.user?.name) return;
+
+  const ok = confirm(GT('confirmDelete'));
   if (!ok) return;
 
-  const { ref } = await getUserDoc(MIH_USER.username);
+  // This is a "soft delete" because Firestore rules can't password-check a real delete safely.
+  const ref = MIH.db.collection('mih_users_v2').doc(MIH.user.name);
 
-  // IMPORTANT: update must include the correct password field (rules require it)
+  // Must keep password the same (rules require password match).
   await ref.update({
-    name: MIH_USER.username,
-    password: MIH_USER.password,
-    deleted: true,
+    status: "deleted",
     deletedAt: Date.now()
   });
 
-  toast("Account deleted (deactivated).");
-  logout();
+  toast(GT('deletedOk'), true);
+  mihLogout();
+  await mihRefreshAll();
 }
 
-async function fetchAllUsers(){
-  const snap = await db.collection(USERS_COL).get();
-  const out = [];
-  snap.forEach(doc => {
-    const d = doc.data() || {};
-    out.push({
-      id: doc.id,
-      name: d.name || doc.id,
-      deleted: d.deleted === true
+async function mihRefreshAll(){
+  if (!MIH.ready) return;
+  // these are safe even if not logged in
+  await mihLoadLeaderboard();
+  await mihLoadProfiles();
+
+  // logged-in bits
+  if (MIH.user?.name){
+    await mihLoadMyRecent();
+    await mihLoadMyStatsAndHistory();
+  }
+}
+
+document.addEventListener('DOMContentLoaded', async ()=>{
+  // Welcome buttons
+  document.getElementById('welcomeSepBtn')?.addEventListener('click', openSep);
+  document.getElementById('welcomeMihBtn')?.addEventListener('click', openMih);
+
+  // Language buttons
+  document.querySelectorAll('.welcome-lang-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=> setGlobalLang(btn.getAttribute('data-lang')));
+  });
+  document.querySelectorAll('.lang-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=> setGlobalLang(btn.getAttribute('data-lang')));
+  });
+  document.querySelectorAll('.mih-lang-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=> setGlobalLang(btn.getAttribute('data-lang')));
+  });
+
+  // MIH menu buttons
+  document.getElementById('mihMenuToggle')?.addEventListener('click', mihOpenMenu);
+  document.getElementById('mihMenuClose')?.addEventListener('click', mihCloseMenu);
+  document.getElementById('mihMenuOverlay')?.addEventListener('click', mihCloseMenu);
+
+  document.getElementById('mihExitBtn')?.addEventListener('click', ()=>{ mihCloseMenu(); backToMainMenu(); });
+
+  // Scene nav from menu
+  document.querySelectorAll('[data-mih-scene]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const scene = btn.getAttribute('data-mih-scene');
+      mihCloseMenu();
+      mihShowScene(scene);
+
+      // refresh on view
+      if (scene === "mih-leaderboard") await mihLoadLeaderboard();
+      if (scene === "mih-profiles") await mihLoadProfiles();
+      if (scene === "mih-stats") await mihLoadMyStatsAndHistory();
+      if (scene === "mih-home") await mihLoadMyRecent();
     });
   });
-  return out;
-}
 
-async function fetchAllEntries(){
-  const snap = await db.collection(ENTRIES_COL).get();
-  const out = [];
-  snap.forEach(doc => {
-    const d = doc.data() || {};
-    out.push({
-      id: doc.id,
-      username: d.username,
-      km: Number(d.km || 0),
-      minutes: Number(d.minutes || 0),
-      ts: Number(d.ts || 0)
-    });
+  // Login / activity
+  document.getElementById('mih-login-btn')?.addEventListener('click', async ()=>{
+    const u = document.getElementById('mih-username')?.value || "";
+    const p = document.getElementById('mih-password')?.value || "";
+    await mihLoginOrCreate(u,p);
   });
-  return out;
-}
 
-function totalsByUser(entries){
-  const map = {};
-  for (const e of entries){
-    if (!e.username) continue;
-    if (!map[e.username]) map[e.username] = { km:0, minutes:0, runs:0, entries:[] };
-    map[e.username].km += e.km;
-    map[e.username].minutes += e.minutes;
-    map[e.username].runs += 1;
-    map[e.username].entries.push(e);
-  }
-  // sort each user's entries newest first
-  Object.keys(map).forEach(u => map[u].entries.sort((a,b)=>b.ts-a.ts));
-  return map;
-}
-
-async function renderLeaderboardAndProfiles(){
-  const [users, entries] = await Promise.all([fetchAllUsers(), fetchAllEntries()]);
-  const activeUsers = users.filter(u => !u.deleted);
-  const totals = totalsByUser(entries);
-
-  // Leaderboard rows: only active users
-  const rows = activeUsers.map(u=>{
-    const t = totals[u.name] || { km:0, minutes:0, runs:0, entries:[] };
-    const avgPace = (t.km > 0 && t.minutes > 0) ? paceStr(t.km, t.minutes) : "—";
-    return { name: u.name, km: t.km, minutes: t.minutes, runs: t.runs, avgPace };
-  }).sort((a,b)=> b.km - a.km);
-
-  const lbBody = document.getElementById("mih-leaderboard-body");
-  lbBody.innerHTML = "";
-  if (!rows.length){
-    lbBody.innerHTML = `<tr><td colspan="5" class="muted">${GT("noPlayers")}</td></tr>`;
-  } else {
-    rows.forEach((r, i)=>{
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>${i+1}</td>
-        <td>${r.name}</td>
-        <td>${r.km.toFixed(2)}</td>
-        <td>${Math.round(r.minutes)}</td>
-        <td>${r.avgPace}</td>
-      `;
-      lbBody.appendChild(tr);
-    });
-  }
-
-  // Profiles list
-  const pBody = document.getElementById("mih-profiles-body");
-  pBody.innerHTML = "";
-  if (!rows.length){
-    pBody.innerHTML = `<tr><td colspan="4" class="muted">${GT("noPlayers")}</td></tr>`;
-  } else {
-    rows.forEach((r)=>{
-      const tr = document.createElement("tr");
-      tr.style.cursor = "pointer";
-      tr.innerHTML = `
-        <td style="text-decoration:underline">${r.name}</td>
-        <td>${r.km.toFixed(2)}</td>
-        <td>${Math.round(r.minutes)}</td>
-        <td>${r.runs}</td>
-      `;
-      tr.addEventListener("click", ()=> openProfile(r.name, totals));
-      pBody.appendChild(tr);
-    });
-  }
-}
-
-function openProfile(username, totals){
-  const panel = document.getElementById("mihProfilePanel");
-  const t = totals[username] || { km:0, minutes:0, runs:0, entries:[] };
-
-  document.getElementById("mihProfileName").textContent = username;
-  document.getElementById("mihProfileKm").textContent = t.km.toFixed(2);
-  document.getElementById("mihProfileMin").textContent = String(Math.round(t.minutes));
-  document.getElementById("mihProfileRuns").textContent = String(t.runs);
-  document.getElementById("mihProfileAvgPace").textContent = (t.km>0 && t.minutes>0) ? paceStr(t.km, t.minutes) : "—";
-
-  const hist = document.getElementById("mih-profile-history");
-  hist.innerHTML = "";
-  const list = (t.entries || []).slice(0, 12);
-  if (!list.length){
-    hist.innerHTML = `<tr><td colspan="4" class="muted">${GT("noEntries")}</td></tr>`;
-  } else {
-    list.forEach(e=>{
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>${formatDate(e.ts)}</td>
-        <td>${e.km.toFixed(2)}</td>
-        <td>${Math.round(e.minutes)}</td>
-        <td>${paceStr(e.km, e.minutes)}</td>
-      `;
-      hist.appendChild(tr);
-    });
-  }
-
-  panel.classList.add("show");
-  panel.scrollIntoView({ behavior:"smooth", block:"start" });
-}
-
-async function renderUserRecentAndStats(){
-  if (!MIH_USER) return;
-
-  const entries = await fetchAllEntries();
-  const mine = entries.filter(e => e.username === MIH_USER.username).sort((a,b)=>b.ts-a.ts);
-
-  // Recent table (home)
-  const recentBody = document.getElementById("mih-recent");
-  recentBody.innerHTML = "";
-  const recent = mine.slice(0, 8);
-  if (!recent.length){
-    recentBody.innerHTML = `<tr><td colspan="4" class="muted">${GT("noEntries")}</td></tr>`;
-  } else {
-    recent.forEach(e=>{
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>${formatDate(e.ts)}</td>
-        <td>${e.km.toFixed(2)}</td>
-        <td>${Math.round(e.minutes)}</td>
-        <td>${paceStr(e.km, e.minutes)}</td>
-      `;
-      recentBody.appendChild(tr);
-    });
-  }
-
-  // Stats scene
-  const totalKm = mine.reduce((a,c)=>a+c.km,0);
-  const totalMin = mine.reduce((a,c)=>a+c.minutes,0);
-  const runs = mine.length;
-  const avgKm = runs ? (totalKm / runs) : 0;
-  const avgPace = (totalKm>0 && totalMin>0) ? paceStr(totalKm, totalMin) : "—";
-
-  document.getElementById("mih-total-km").textContent = totalKm.toFixed(2);
-  document.getElementById("mih-total-min").textContent = String(Math.round(totalMin));
-  document.getElementById("mih-total-entries").textContent = String(runs);
-  document.getElementById("mih-average-km").textContent = avgKm.toFixed(2);
-  document.getElementById("mih-average-pace").textContent = avgPace;
-
-  const histBody = document.getElementById("mih-history-body");
-  histBody.innerHTML = "";
-  const list = mine.slice(0, 30);
-  if (!list.length){
-    histBody.innerHTML = `<tr><td colspan="4" class="muted">${GT("noEntries")}</td></tr>`;
-  } else {
-    list.forEach(e=>{
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>${formatDate(e.ts)}</td>
-        <td>${e.km.toFixed(2)}</td>
-        <td>${Math.round(e.minutes)}</td>
-        <td>${paceStr(e.km, e.minutes)}</td>
-      `;
-      histBody.appendChild(tr);
-    });
-  }
-}
-
-async function refreshAllForUser(){
-  await Promise.all([
-    renderLeaderboardAndProfiles(),
-    renderUserRecentAndStats()
-  ]);
-}
-
-// Bind MIH menu + buttons
-document.getElementById("mihMenuToggle").addEventListener("click", openMihMenu);
-document.getElementById("mihMenuClose").addEventListener("click", closeMihMenu);
-document.getElementById("mihMenuOverlay").addEventListener("click", closeMihMenu);
-
-document.querySelectorAll("[data-mih-scene]").forEach(btn=>{
-  btn.addEventListener("click", async ()=>{
-    const scene = btn.getAttribute("data-mih-scene");
-    closeMihMenu();
-    showMihScene(scene);
-
-    // refresh when switching to data scenes
-    if (scene === "mih-leaderboard" || scene === "mih-profiles"){
-      await renderLeaderboardAndProfiles();
-    }
-    if (scene === "mih-home" || scene === "mih-stats"){
-      await renderUserRecentAndStats();
-    }
+  document.getElementById('mih-add-activity')?.addEventListener('click', async ()=>{
+    const km = document.getElementById('mih-distance')?.value;
+    const min = document.getElementById('mih-minutes')?.value;
+    await mihAddActivity(km, min);
   });
-});
 
-document.getElementById("mihExitBtn").addEventListener("click", ()=>{
-  closeMihMenu();
-  showApp("welcome");
-});
+  // View saved password
+  document.getElementById('mih-view-saved-pass')?.addEventListener('click', ()=>{
+    const box = document.getElementById('mih-saved-pass-display');
+    if (!box) return;
+    const p = localStorage.getItem(LS_MIH_PASS);
+    box.style.display = "block";
+    box.textContent = p ? GT('mihSavedShow', { password: p }) : GT('mihSavedNone');
+  });
 
-document.getElementById("mihLogoutBtn").addEventListener("click", ()=>{
-  closeMihMenu();
-  logout();
-});
+  // Logout / delete
+  document.getElementById('mihLogoutBtn')?.addEventListener('click', ()=>{ mihCloseMenu(); mihLogout(); });
+  document.getElementById('mihDeleteAccountBtn')?.addEventListener('click', async ()=>{ mihCloseMenu(); await mihSoftDeleteAccount(); });
 
-document.getElementById("mihDeleteAccountBtn").addEventListener("click", async ()=>{
-  closeMihMenu();
-  try {
-    await deactivateAccount();
-  } catch (e) {
-    console.error(e);
-    toast("Delete failed. Check Rules + that password is correct.", true);
-  }
-});
+  // Profile close
+  document.getElementById('mihProfileClose')?.addEventListener('click', mihCloseProfile);
 
-document.getElementById("mih-login-btn").addEventListener("click", async ()=>{
-  try {
-    await login(
-      document.getElementById("mih-username").value,
-      document.getElementById("mih-password").value
-    );
-  } catch (e) {
-    console.error(e);
-    toast("Login failed. Check Rules + Firebase config.", true);
-  }
-});
-
-document.getElementById("mih-add-activity").addEventListener("click", async ()=>{
-  try {
-    await addEntry(
-      document.getElementById("mih-distance").value,
-      document.getElementById("mih-minutes").value
-    );
-    document.getElementById("mih-distance").value = "";
-    document.getElementById("mih-minutes").value = "";
-  } catch (e) {
-    console.error(e);
-    toast("Could not save entry. Check Rules.", true);
-  }
-});
-
-document.getElementById("mihProfileClose").addEventListener("click", ()=>{
-  document.getElementById("mihProfilePanel").classList.remove("show");
-});
-
-// Saved password viewer
-document.getElementById("mih-view-saved-pass").addEventListener("click", ()=>{
-  const box = document.getElementById("mih-saved-pass-display");
-  const saved = getSavedLogin();
-  box.style.display = "block";
-  if (!saved || !saved.password){
-    box.textContent = GT("mihSavedNone");
-  } else {
-    box.textContent = GT("mihSavedShow", { password: saved.password });
-  }
-});
-
-// Language buttons
-document.querySelectorAll(".welcome-lang-btn").forEach(btn=>{
-  btn.addEventListener("click", ()=> setGlobalLang(btn.getAttribute("data-lang")));
-});
-document.querySelectorAll(".mih-lang-btn").forEach(btn=>{
-  btn.addEventListener("click", ()=> setGlobalLang(btn.getAttribute("data-lang")));
-});
-
-// Welcome buttons
-document.getElementById("welcomeSepBtn").addEventListener("click", ()=> showApp("sep"));
-document.getElementById("welcomeMihBtn").addEventListener("click", ()=> showApp("mih"));
-
-// Boot
-(function boot(){
+  // Init lang
   setGlobalLang(GLOBAL_LANG);
 
-  // restore route
+  // Init Firebase
+  await mihInitFirebase();
+
+  // Restore login
+  const savedUser = localStorage.getItem(LS_MIH_USER);
+  const savedPass = localStorage.getItem(LS_MIH_PASS);
+
+  if (savedUser && savedPass){
+    // Try silent login
+    try{
+      await mihLoginOrCreate(savedUser, savedPass);
+    }catch(e){
+      console.warn(e);
+      MIH.user = null;
+    }
+  }
+
+  mihSetPills();
+  mihUpdateMenuButtons();
+
+  // Restore route
   const r = loadRoute();
-  const app = r.app || "welcome";
-  showApp(app);
+  if (r.app === "sep") showApp("sep");
+  else if (r.app === "mih") showApp("mih");
+  else showApp("welcome");
 
-  // restore SEP scene
-  if (app === "sep"){
-    const sepScene = r.sepScene || "main";
-    if (sepScene === "about") {
-      document.getElementById("sep-scene-main").classList.add("hidden");
-      document.getElementById("sep-scene-about").classList.remove("hidden");
-    }
+  // Restore MIH scene if in MIH app
+  if (r.app === "mih" && r.mihScene){
+    mihShowScene(r.mihScene);
   }
 
-  // restore MIH scene
-  if (app === "mih"){
-    const saved = getSavedLogin();
-    if (saved && saved.username && saved.password){
-      MIH_USER = saved;
-      setMihHeaderUser(`Logged in: ${saved.username}`);
-      updateMihAuthUI();
-      refreshAllForUser();
-      const scene = r.mihScene || "mih-home";
-      showMihScene(scene);
-    } else {
-      setMihHeaderUser("Not logged in");
-      updateMihAuthUI();
-      showMihScene("mih-login");
-    }
-  } else {
-    // still initialise MIH data quietly
-    renderLeaderboardAndProfiles().catch(()=>{});
+  // Initial loads
+  if (MIH.ready){
+    await mihRefreshAll();
   }
-
-})();
+});
 </script>
 
 </body>
