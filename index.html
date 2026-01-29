@@ -888,20 +888,20 @@ const GLOBAL_TRANSLATIONS = {
     mihLbSubtitle: "The League of Choice. Samlet, all-time.",
     mihLbColRank: "#",
     mihLbColName: "Navn",
-    mihLbColKm: "Total km",
-    mihLbColMin: "Total min",
+    mihLbColKm: "Km i alt",
+    mihLbColMin: "Min i alt",
     mihLbColPace: "Gns. tempo",
 
     mihProfilesTitle: "Profiler",
     mihProfilesSubtitle: "Tryk på en spillers navn for at se deres stats.",
     mihProfilesColName: "Navn",
-    mihProfilesColKm: "Total km",
-    mihProfilesColMin: "Total min",
-    mihProfilesColRuns: "Entries",
+    mihProfilesColKm: "Km i alt",
+    mihProfilesColMin: "Min i alt",
+    mihProfilesColRuns: "Indgange",
     mihProfileClose: "Luk",
-    mihProfileRowKmLabel: "Total km",
-    mihProfileRowMinLabel: "Total min",
-    mihProfileRowRunsLabel: "Entries",
+    mihProfileRowKmLabel: "Km i alt",
+    mihProfileRowMinLabel: "Min i alt",
+    mihProfileRowRunsLabel: "Indgange",
     mihProfileRowAvgPaceLabel: "Gns. tempo",
     mihProfileHistoryTitle: "Seneste aktiviteter",
     mihProfileHistDate: "Dato",
@@ -910,9 +910,9 @@ const GLOBAL_TRANSLATIONS = {
     mihProfileHistPace: "Tempo",
 
     mihStatsTitle: "Dine stats",
-    mihStatsTotalKmLabel: "Total km:",
-    mihStatsTotalMinLabel: "Total minutter:",
-    mihStatsEntriesLabel: "Entries:",
+    mihStatsTotalKmLabel: "Km i alt:",
+    mihStatsTotalMinLabel: "Minutter i alt:",
+    mihStatsEntriesLabel: "Indgange:",
     mihStatsAvgKmLabel: "Gns. distance:",
     mihStatsAvgPaceLabel: "Gns. tempo:",
     mihStatsHistoryTitle: "Din historik",
@@ -1671,7 +1671,7 @@ function backToMainMenu(){ showApp('welcome'); }
   const LS_PASS = "mih_saved_password_v2";
 
   const COL_USERS = "mih_users_v2";
-  const COL_ENTRIES = "mih_entries_v2";
+  const COL_entries = "mih_entries_v2";
 
   let db = null;
   let currentUser = localStorage.getItem(LS_USER) || "";
@@ -1890,7 +1890,7 @@ function backToMainMenu(){ showApp('welcome'); }
 
     const ts = Date.now();
 
-    await db.collection(COL_ENTRIES).add({
+    await db.collection(COL_entries).add({
       username: currentUser,
       km,
       minutes,
