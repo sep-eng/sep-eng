@@ -1,1369 +1,947 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>MAKE IT HAPPEN – Hitachi Vantara Health</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <title>Receipt Run (Popup Only)</title>
   <style>
-    :root {
-      --bg: #050814;
-      --bg-alt: #0d1020;
-      --accent: #ff0044;
-      --accent-soft: #ff4f7f;
-      --text: #f5f5f5;
-      --muted: #9ea3b5;
-      --card: #14182a;
-      --border: #262b3e;
-      --radius: 14px;
+    :root { color-scheme: dark; }
+    html, body { margin:0; height:100%; background:#06070a; overflow:hidden; font-family: system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif; }
+    canvas { display:block; width:100vw; height:100vh; }
+
+    .hud{
+      position:fixed; inset:0; pointer-events:none;
+      display:flex; align-items:flex-start; justify-content:space-between;
+      padding:12px; gap:12px;
+      color:rgba(245,245,255,0.92);
+      text-shadow:0 2px 16px rgba(0,0,0,0.55);
+      font-size:14px;
     }
-
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: radial-gradient(circle at top, #151a33, #050814);
-      color: var(--text);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-
-    /* ========== HEADER ========== */
-
-    header {
-      padding: 10px 16px;
-      display: grid;
-      grid-template-columns: auto 1fr auto;
-      align-items: center;
-      column-gap: 16px;
-      row-gap: 6px;
-      border-bottom: 1px solid #1e2235;
-      background: rgba(5, 8, 20, 0.9);
+    .panel{
+      background:rgba(10,12,18,0.55);
+      border:1px solid rgba(255,255,255,0.10);
+      border-radius:14px;
+      padding:10px 12px;
       backdrop-filter: blur(10px);
-      position: sticky;
-      top: 0;
-      z-index: 10;
+      max-width: 820px;
+    }
+    .title{ font-weight:850; letter-spacing:0.4px; }
+    .muted{ opacity:0.78; }
+    .kbd{
+      display:inline-block; padding:1px 6px; border-radius:7px;
+      border:1px solid rgba(255,255,255,0.18);
+      background:rgba(255,255,255,0.06);
+      font-weight:750; font-size:12px; transform: translateY(-1px);
     }
 
-    .header-left {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      min-width: 0;
+    .controls{
+      position:fixed; left:12px; right:12px; bottom:12px;
+      display:flex; gap:10px; justify-content:space-between; flex-wrap:wrap;
+      pointer-events:auto;
+      user-select:none;
     }
-
-    .logo {
-      font-weight: 700;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      font-size: 0.9rem;
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      white-space: nowrap;
+    .btn{
+      flex:1 1 140px; min-width:140px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,0.14);
+      background:rgba(255,255,255,0.06);
+      color:rgba(245,245,255,0.92);
+      padding:12px 12px;
+      font-weight:800;
+      letter-spacing:0.2px;
+      box-shadow:0 14px 60px rgba(0,0,0,0.35);
+      backdrop-filter: blur(10px);
+      cursor:pointer;
     }
+    .btn:active{ transform: translateY(1px); }
+    .btn small{ display:block; opacity:0.75; font-weight:650; margin-top:2px; }
 
-    .logo span {
-      padding: 3px 8px;
-      border-radius: 999px;
-      background: linear-gradient(135deg, var(--accent), var(--accent-soft));
-      font-size: 0.65rem;
+    .overlay{
+      position:fixed; inset:0; display:none; align-items:center; justify-content:center;
+      padding:22px; background: rgba(0,0,0,0.35);
+      backdrop-filter: blur(10px);
+      pointer-events:auto;
     }
-
-    nav {
-      display: flex;
-      justify-content: center;
-      gap: 8px;
-      flex-wrap: nowrap;
-      overflow-x: auto;
-      padding: 2px 0;
+    .card{
+      width:min(780px, 92vw);
+      background: rgba(9,10,16,0.82);
+      border:1px solid rgba(255,255,255,0.12);
+      border-radius:18px;
+      padding:18px 18px 16px;
+      box-shadow:0 20px 90px rgba(0,0,0,0.55);
+      color: rgba(245,245,255,0.92);
     }
-
-    nav::-webkit-scrollbar {
-      height: 4px;
+    .card h1{ margin:0 0 10px; font-size:22px; }
+    .card p{ margin:0 0 10px; line-height:1.45; opacity:0.88; }
+    .row{ display:flex; flex-wrap:wrap; gap:10px; margin-top:12px; }
+    .pill{
+      display:inline-flex; align-items:center; gap:8px;
+      padding:8px 10px; border-radius:999px;
+      border:1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.06);
+      font-weight:750; font-size:13px; opacity:0.92;
     }
-
-    nav::-webkit-scrollbar-thumb {
-      background: rgba(255, 255, 255, 0.15);
-      border-radius: 999px;
-    }
-
-    nav button {
-      border-radius: 999px;
-      border: 1px solid transparent;
-      background: transparent;
-      color: var(--muted);
-      padding: 6px 10px;
-      font-size: 0.8rem;
-      cursor: pointer;
-      transition: 0.15s ease;
-      white-space: nowrap;
-    }
-
-    nav button:hover {
-      color: var(--text);
-      border-color: var(--accent-soft);
-      background: rgba(255, 255, 255, 0.03);
-    }
-
-    nav button.active {
-      color: #fff;
-      background: linear-gradient(135deg, var(--accent), var(--accent-soft));
-      border-color: transparent;
-    }
-
-    .user-controls {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 0.75rem;
-      color: var(--muted);
-      flex-wrap: wrap;
-      justify-content: flex-end;
-      min-width: 0;
-    }
-
-    .user-name {
-      max-width: 150px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .btn-small {
-      border-radius: 999px;
-      border: 1px solid var(--border);
-      background: transparent;
-      color: var(--muted);
-      padding: 4px 8px;
-      font-size: 0.7rem;
-      cursor: pointer;
-      transition: 0.15s ease;
-      white-space: nowrap;
-    }
-
-    .btn-small:hover {
-      color: var(--text);
-      border-color: var(--accent-soft);
-      background: rgba(255, 255, 255, 0.03);
-    }
-
-    .btn-small.danger:hover {
-      border-color: var(--accent);
-      color: #ffd3e0;
-    }
-
-    @media (max-width: 720px) {
-      header {
-        grid-template-columns: 1fr;
-        align-items: flex-start;
-      }
-
-      .header-left {
-        justify-content: space-between;
-        width: 100%;
-      }
-
-      nav {
-        justify-content: flex-start;
-      }
-
-      .user-controls {
-        justify-content: flex-start;
-      }
-    }
-
-    /* ========== MAIN LAYOUT ========== */
-
-    main {
-      flex: 1;
-      max-width: 980px;
-      width: 100%;
-      margin: 0 auto;
-      padding: 24px 16px 40px;
-    }
-
-    .scene {
-      display: none;
-      animation: fadeIn 0.25s ease;
-    }
-
-    .scene.active {
-      display: block;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(4px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .card {
-      background: radial-gradient(circle at top left, #1f2340, #111425);
-      border-radius: var(--radius);
-      padding: 24px 20px;
-      border: 1px solid var(--border);
-      box-shadow: 0 18px 45px rgba(0, 0, 0, 0.45);
-    }
-
-    .card + .card {
-      margin-top: 16px;
-    }
-
-    h1, h2, h3 {
-      margin: 0 0 8px;
-    }
-
-    h1 {
-      font-size: clamp(2rem, 4vw, 2.6rem);
-    }
-
-    h2 {
-      font-size: 1.3rem;
-    }
-
-    p {
-      margin: 4px 0 12px;
-      color: var(--muted);
-      font-size: 0.95rem;
-    }
-
-    .tagline {
-      font-size: 0.95rem;
-      color: var(--muted);
-    }
-
-    .hero-actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 14px;
-    }
-
-    .btn {
-      border-radius: 999px;
-      border: none;
-      padding: 10px 18px;
-      font-size: 0.9rem;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      transition: 0.15s ease;
-      white-space: nowrap;
-    }
-
-    .btn-primary {
-      background: linear-gradient(135deg, var(--accent), var(--accent-soft));
-      color: #fff;
-      box-shadow: 0 0 24px rgba(255, 0, 68, 0.4);
-    }
-
-    .btn-primary:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 0 28px rgba(255, 0, 68, 0.6);
-    }
-
-    .btn-outline {
-      background: transparent;
-      color: var(--muted);
-      border: 1px solid var(--border);
-    }
-
-    .btn-outline:hover {
-      color: var(--text);
-      border-color: var(--accent-soft);
-      background: rgba(255, 255, 255, 0.03);
-    }
-
-    .pill-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      margin: 10px 0 0;
-      font-size: 0.75rem;
-      color: var(--muted);
-    }
-
-    .pill {
-      padding: 4px 8px;
-      border-radius: 999px;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.06);
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
-      gap: 16px;
-      margin-top: 18px;
-    }
-
-    @media (max-width: 768px) {
-      .grid {
-        grid-template-columns: minmax(0, 1fr);
-      }
-    }
-
-    form {
-      display: grid;
-      gap: 10px;
-    }
-
-    label {
-      font-size: 0.8rem;
-      color: var(--muted);
-      display: block;
-      margin-bottom: 2px;
-    }
-
-    input {
-      width: 100%;
-      padding: 8px 9px;
-      border-radius: 999px;
-      border: 1px solid var(--border);
-      background: #080b18;
-      color: var(--text);
-      font-size: 0.85rem;
-      outline: none;
-      transition: 0.15s ease;
-    }
-
-    input:focus {
-      border-color: var(--accent-soft);
-      box-shadow: 0 0 0 1px rgba(255, 0, 68, 0.4);
-    }
-
-    .hint {
-      font-size: 0.75rem;
-      color: var(--muted);
-    }
-
-    .form-row {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 8px;
-    }
-
-    @media (max-width: 480px) {
-      .form-row {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 10px;
-      font-size: 0.85rem;
-    }
-
-    th, td {
-      padding: 7px 8px;
-      text-align: left;
-      border-bottom: 1px solid #23263a;
-      vertical-align: middle;
-    }
-
-    th {
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      color: var(--muted);
-    }
-
-    tbody tr:nth-child(even) {
-      background: rgba(255, 255, 255, 0.02);
-    }
-
-    tbody tr:first-child td {
-      border-top: 1px solid #23263a;
-    }
-
-    .rank-medal {
-      font-size: 0.9rem;
-    }
-
-    .badge-league {
-      font-size: 0.7rem;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      padding: 3px 6px;
-      border-radius: 999px;
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      color: var(--muted);
-    }
-
-    .badge-league.amateurs { border-color: #73d1ff; color: #a6dfff; }
-    .badge-league.intermediates { border-color: #7bffb7; color: #b9ffda; }
-    .badge-league.pros { border-color: #ffd26f; color: #ffe29a; }
-    .badge-league.legends { border-color: #ff8ec9; color: #ffc0e1; }
-
-    .top-row {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 6px;
-    }
-
-    .filter-row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 0.8rem;
-      color: var(--muted);
-    }
-
-    .filter-row select {
-      width: auto;
-      min-width: 130px;
-      padding: 6px 10px;
-      border-radius: 999px;
-      border: 1px solid var(--border);
-      background: #080b18;
-      color: var(--text);
-      font-size: 0.8rem;
-    }
-
-    .small {
-      font-size: 0.8rem;
-    }
-
-    .empty-state {
-      margin-top: 8px;
-      font-size: 0.85rem;
-      color: var(--muted);
-    }
-
-    .actions-cell button {
-      padding: 3px 6px;
-      font-size: 0.7rem;
-      border-radius: 999px;
-      border: 1px solid var(--border);
-      background: transparent;
-      color: var(--muted);
-      cursor: pointer;
-    }
-
-    .actions-cell button:hover {
-      border-color: var(--accent);
-      color: #ffd3e0;
-      background: rgba(255, 0, 68, 0.1);
-    }
-
-    footer {
-      text-align: center;
-      font-size: 0.7rem;
-      color: var(--muted);
-      padding: 6px 12px 14px;
-      opacity: 0.75;
-    }
+    .ok{ color: rgba(170,255,200,0.95); }
+    .warn{ color: rgba(255,220,140,0.95); }
+    .bad{ color: rgba(255,130,150,0.95); }
   </style>
 </head>
 <body>
-  <header>
-    <div class="header-left">
-      <div class="logo">
-        MAKE IT HAPPEN
-        <span>Hitachi Health</span>
-      </div>
-    </div>
-    <nav>
-      <button class="active" onclick="showScene('login')">Login</button>
-      <button onclick="requireLoginThenShow('welcome')">Welcome</button>
-      <button onclick="requireLoginThenShow('leaderboard')">Leaderboard</button>
-      <button onclick="requireLoginThenShow('stats')">Stats</button>
-      <button onclick="requireLoginThenShow('rules')">Rules &amp; Prizes</button>
-    </nav>
-    <div class="user-controls" id="user-controls">
-      <span id="user-status">Not logged in</span>
-    </div>
-  </header>
+<canvas id="c"></canvas>
 
-  <main>
-    <!-- Scene 0: Login -->
-    <section id="scene-login" class="scene active">
-      <div class="card">
-        <h1>Log in to make it happen</h1>
-        <p class="tagline">
-          Create a simple account so the site knows who you are and only you can manage your activities.
-        </p>
-        <form id="login-form" style="margin-top: 12px;">
-          <div>
-            <label for="login-name">Name</label>
-            <input id="login-name" type="text" placeholder="e.g. Daniel" required />
-          </div>
-          <div>
-            <label for="login-password">Password</label>
-            <input id="login-password" type="password" placeholder="Choose something simple" required />
-          </div>
-          <button type="submit" class="btn btn-primary" style="margin-top: 6px;">
-            Log in / Create account
-          </button>
-          <div class="hint" style="margin-top: 6px;">
-            If this is your first time with this name, we will create a new account and place you into a league.
-            Leagues are kept roughly the same size.
-          </div>
-        </form>
-        <p class="small" style="margin-top: 14px;">
-          Your login is saved on this browser. Accounts that have been logged out for more than 30 days are
-          automatically deleted, together with their activities.
-        </p>
-      </div>
-    </section>
+<div class="hud">
+  <div class="panel">
+    <div class="title">Receipt Run <span class="muted">· popup-only hints</span></div>
+    <div id="hud1" class="muted">Level 1 · Score: 0 · Streak: 0 · Mult: x1.0 · Lives: 6</div>
+    <div id="hud2" class="muted">Goal: 0/0 · Speed: 0.80 · On belt: 0 · Focus: none</div>
+  </div>
+  <div class="panel muted" style="text-align:right">
+    <div>Keys: <span class="kbd">S</span> Scan · <span class="kbd">I</span> ID · <span class="kbd">D</span> Discount · <span class="kbd">B</span> Bag · <span class="kbd">W</span> Weigh · <span class="kbd">R</span> Reject</div>
+    <div>Only the popup hint shows what to do (no constant task text).</div>
+  </div>
+</div>
 
-    <!-- Scene 1: Welcome -->
-    <section id="scene-welcome" class="scene">
-      <div class="card">
-        <h1>Move more. Compete. Make it happen.</h1>
-        <p class="tagline">
-          A simple challenge for Hitachi teams: run, walk or cycle, log your distance, and climb the leaderboard.
-        </p>
-        <div class="hero-actions">
-          <button class="btn btn-primary" onclick="requireLoginThenShow('leaderboard')">
-            Start logging my distance →
-          </button>
-          <button class="btn btn-outline" onclick="requireLoginThenShow('rules')">
-            How it works
-          </button>
-        </div>
-        <div class="pill-row">
-          <span class="pill">4 leagues: Amateurs, Intermediates, Pros, Legends</span>
-          <span class="pill">New people are placed where the leagues are lightest</span>
-          <span class="pill">Promotions & relegations keep things moving</span>
-        </div>
-      </div>
+<div class="controls">
+  <button class="btn" id="btnScan">SCAN <small>(S)</small></button>
+  <button class="btn" id="btnID">ID CHECK <small>(I)</small></button>
+  <button class="btn" id="btnDisc">DISCOUNT <small>(D)</small></button>
+  <button class="btn" id="btnBag">BAG <small>(B)</small></button>
+  <button class="btn" id="btnWeigh">WEIGH <small>(W)</small></button>
+  <button class="btn" id="btnReject">REJECT <small>(R)</small></button>
+</div>
 
-      <div class="card">
-        <h2>Why MAKE IT HAPPEN?</h2>
-        <p>
-          Small actions add up. When hundreds of people move a bit more each week, it helps everyone feel better:
-          more energy, clearer head, happier teams.
-        </p>
-        <p>
-          This site keeps things fun. Log your activity, see where you rank, and move through the leagues as
-          promotions and relegations are applied.
-        </p>
-      </div>
-    </section>
+<div class="overlay" id="overlay">
+  <div class="card" id="card"></div>
+</div>
 
-    <!-- Scene 2: Leaderboard -->
-    <section id="scene-leaderboard" class="scene">
-      <div class="card">
-        <div class="grid">
-          <div>
-            <h2>Add your latest activity</h2>
-            <p>
-              Log any run, walk or ride. Use kilometres and minutes so the leaderboard stays fair for everyone.
-            </p>
-            <form id="entry-form">
-              <div>
-                <label for="name">Your name</label>
-                <input id="name" type="text" disabled placeholder="Log in to set your name" />
-                <div class="hint">Name comes from your account. You cannot change it here.</div>
-              </div>
+<script>
+(() => {
+  // ---------- Canvas ----------
+  const canvas = document.getElementById('c');
+  const ctx = canvas.getContext('2d', { alpha: false });
+  function resize() {
+    const dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+    canvas.width = Math.floor(innerWidth * dpr);
+    canvas.height = Math.floor(innerHeight * dpr);
+    canvas.style.width = innerWidth + 'px';
+    canvas.style.height = innerHeight + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  addEventListener('resize', resize, { passive: true });
+  resize();
 
-              <div class="form-row">
-                <div>
-                  <label for="distance">Distance (km)</label>
-                  <input id="distance" type="number" step="0.1" min="0" placeholder="e.g. 5" required />
-                </div>
-                <div>
-                  <label for="time">Time (minutes)</label>
-                  <input id="time" type="number" step="0.1" min="0" placeholder="e.g. 28" required />
-                </div>
-              </div>
+  // ---------- UI ----------
+  const hud1 = document.getElementById('hud1');
+  const hud2 = document.getElementById('hud2');
+  const overlay = document.getElementById('overlay');
+  const card = document.getElementById('card');
 
-              <button type="submit" class="btn btn-primary" style="margin-top: 4px;">
-                Save my activity
-              </button>
-              <div class="hint">
-                Leagues have unlimited spaces. New accounts are spread across leagues so the numbers stay balanced.
-              </div>
-            </form>
-          </div>
+  // ---------- Helpers ----------
+  const rand = (a,b) => a + Math.random() * (b - a);
+  const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
 
-          <div>
-            <h3>How ranking works</h3>
-            <p class="small">
-              The leaderboard uses:
-            </p>
-            <ul class="small" style="padding-left: 18px; margin: 4px 0 10px;">
-              <li><strong>Distance first</strong> – more total kilometres puts you higher.</li>
-              <li><strong>Time second</strong> – if distance is the same, lower total time wins.</li>
-            </ul>
-            <p class="small">
-              Promotions & relegations are applied from these rankings. With 5 people, 1 moves up and 1 moves down.
-              With more people, up to 3 can move each way.
-            </p>
-          </div>
-        </div>
-      </div>
+  // ---------- Tasks ----------
+  const TASK = {
+    SCAN: 'SCAN',
+    ID: 'ID',
+    DISC: 'DISC',
+    BAG: 'BAG',
+    WEIGH: 'WEIGH',
+    REJECT: 'REJECT'
+  };
 
-      <div class="card">
-        <div class="top-row">
-          <h2>Live leaderboard</h2>
-          <div class="filter-row">
-            <span>League:</span>
-            <select id="league-filter" onchange="renderLeaderboard()">
-              <option value="all">All leagues</option>
-              <option value="amateurs">Amateurs</option>
-              <option value="intermediates">Intermediates</option>
-              <option value="pros">Pros</option>
-              <option value="legends">Legends</option>
-            </select>
-          </div>
-        </div>
+  const TYPES_ALL = [
+    { name:'Apple',       base:'produce',  color:'#9be27f' },
+    { name:'Milk',        base:'normal',   color:'#cfe8ff' },
+    { name:'Glass Jar',   base:'fragile',  color:'#a6d4ff' },
+    { name:'Wine',        base:'age',      color:'#ffb3c2' },
+    { name:'Energy',      base:'age',      color:'#ffd27a' },
+    { name:'Cereal',      base:'normal',   color:'#ffeaa8' },
+    { name:'Perfume',     base:'fragile',  color:'#d8b3ff' },
+    { name:'Mystery Box', base:'sus',      color:'#ff7b8f' }
+  ];
 
-        <table>
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Participant</th>
-              <th>League</th>
-              <th>Total distance</th>
-              <th>Total time</th>
-            </tr>
-          </thead>
-          <tbody id="leaderboard-body">
-            <!-- Filled by JS -->
-          </tbody>
-        </table>
-        <div id="no-entries" class="empty-state">
-          No activities yet. Be the first to log a run and grab the number one spot.
-        </div>
-      </div>
+  // ---------- Levels ----------
+  let level = 1;
+  let levelGoal = 0;
+  let levelCleared = 0;
 
-      <div class="card">
-        <h3>My activities</h3>
-        <p class="small">
-          Only the activities from the account you are logged in with are shown here. You can delete them if you make a
-          mistake.
-        </p>
-        <table>
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Distance</th>
-              <th>Time</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody id="my-activities-body">
-            <!-- Filled by JS -->
-          </tbody>
-        </table>
-        <div id="no-my-activities" class="empty-state">
-          No activities yet for this account.
-        </div>
-      </div>
-    </section>
+  function levelConfig(L) {
+    if (L === 1) {
+      return {
+        livesStart: 6,
+        beltSpeed: 165,
+        clueWindow: 2.35,
+        scanGateW: 86,
+        prepExtra: 105,
 
-    <!-- Scene 3: Stats -->
-    <section id="scene-stats" class="scene">
-      <div class="card">
-        <div class="top-row" style="margin-bottom: 8px;">
-          <h2>Player stats</h2>
-          <button class="btn-small" onclick="applyPromotions()">
-            Apply promotions now
-          </button>
-        </div>
-        <p>
-          Every line you log builds your personal stats. See who is most consistent and who has improved the most.
-          Promotions and relegations use these stats.
-        </p>
-        <table>
-          <thead>
-            <tr>
-              <th>Participant</th>
-              <th>League</th>
-              <th>Runs</th>
-              <th>Total distance</th>
-              <th>Average distance</th>
-              <th>Best distance</th>
-              <th>Improvement</th>
-            </tr>
-          </thead>
-          <tbody id="stats-body">
-            <!-- Filled by JS -->
-          </tbody>
-        </table>
-        <div id="no-stats" class="empty-state">
-          Stats will appear as soon as people start logging their activities.
-        </div>
-      </div>
-    </section>
+        spacingPx: 540,
+        maxOnBelt: 2,
 
-    <!-- Scene 4: Rules & Prizes -->
-    <section id="scene-rules" class="scene">
-      <div class="card">
-        <h2>Rules, leagues and prizes</h2>
-        <h3>Leagues & starting positions</h3>
-        <p class="small">
-          There are four leagues:
-        </p>
-        <ul class="small" style="padding-left: 18px;">
-          <li><strong>Amateurs</strong></li>
-          <li><strong>Intermediates</strong></li>
-          <li><strong>Pros</strong></li>
-          <li><strong>Legends</strong></li>
-        </ul>
-        <p class="small">
-          When a new account is created, we look at how many people are already in each league and place the new
-          person into one of the leagues with the fewest people, starting from the lowest league. That way, league
-          sizes stay very close together.
-        </p>
+        allowTasks: new Set([TASK.SCAN, TASK.WEIGH, TASK.BAG]),
+        suspiciousChance: 0.0,
+        discountTaskChance: 0.0,
+        rescanChance: 0.0,
 
-        <h3>Promotions & relegations</h3>
-        <ul class="small" style="padding-left: 18px;">
-          <li>Leagues have no hard limits. Many people can be in each league.</li>
-          <li>When you press “Apply promotions” on the Stats page, people move between leagues.</li>
-          <li>The number of people moved each way depends on how many players there are:
-            <ul style="padding-left: 18px; margin-top: 4px;">
-              <li>5–9 players → 1 promotion + 1 relegation</li>
-              <li>10–14 players → 2 promotions + 2 relegations</li>
-              <li>15+ players → max 3 promotions + 3 relegations</li>
-            </ul>
-          </li>
-          <li>Promotions come from the top of the ranking. Relegations come from the bottom.</li>
-        </ul>
-
-        <h3>Prizes</h3>
-        <ul class="small" style="padding-left: 18px;">
-          <li><strong>Monthly:</strong> The person at the top of the table at month-end wins a small prize.<br />
-            Example: sports shop voucher, extra day of remote work, or team shout-out.</li>
-          <li><strong>Yearly:</strong> The person with the strongest overall year wins a bigger prize.<br />
-            Example: running shoes, smartwatch, or wellness experience.</li>
-        </ul>
-
-        <p class="small">
-          Exact prize details can be decided by the local Hitachi team; the site simply makes it easy to see who is
-          on top and who is improving fastest.
-        </p>
-      </div>
-    </section>
-  </main>
-
-  <footer>
-    Prototype created for the Hitachi “Make It Happen” health challenge.
-  </footer>
-
-  <script>
-    // ========= CONSTANTS =========
-    const STORAGE_KEY_ENTRIES = "mih_entries_v4";
-    const STORAGE_KEY_USERS = "mih_users_v4";
-    const STORAGE_KEY_CURRENT_USER = "mih_current_user_v4";
-    const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
-    const LEAGUES = ["amateurs", "intermediates", "pros", "legends"];
-
-    // ========= STATE =========
-    let entries = [];
-    let users = [];
-    let currentUser = null;
-
-    // ========= UTILITIES =========
-    function generateId() {
-      return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
-    }
-
-    function saveEntries() {
-      localStorage.setItem(STORAGE_KEY_ENTRIES, JSON.stringify(entries));
-    }
-
-    function saveUsers() {
-      localStorage.setItem(STORAGE_KEY_USERS, JSON.stringify(users));
-    }
-
-    function loadEntries() {
-      const saved = localStorage.getItem(STORAGE_KEY_ENTRIES);
-      if (saved) {
-        try {
-          entries = JSON.parse(saved) || [];
-        } catch (e) {
-          entries = [];
-        }
-      } else {
-        entries = [];
-      }
-    }
-
-    function loadUsers() {
-      const saved = localStorage.getItem(STORAGE_KEY_USERS);
-      if (saved) {
-        try {
-          users = JSON.parse(saved) || [];
-        } catch (e) {
-          users = [];
-        }
-      } else {
-        users = [];
-      }
-      users.forEach((u) => {
-        if (!u.league || !LEAGUES.includes(u.league)) {
-          u.league = "amateurs";
-        }
-      });
-      saveUsers();
-    }
-
-    function getUserById(id) {
-      return users.find((u) => u.id === id) || null;
-    }
-
-    function getUserByName(name) {
-      return users.find((u) => u.name.toLowerCase() === name.toLowerCase()) || null;
-    }
-
-    function formatImprovement(value) {
-      if (!isFinite(value) || value === 0) return "0%";
-      const rounded = Math.round(value);
-      return (rounded > 0 ? "+" : "") + rounded + "%";
-    }
-
-    function formatDate(ts) {
-      const d = new Date(ts);
-      if (isNaN(d.getTime())) return "";
-      return d.toLocaleDateString(undefined, {
-        year: "numeric",
-        month: "short",
-        day: "numeric"
-      });
-    }
-
-    function leagueIndex(league) {
-      return LEAGUES.indexOf(league);
-    }
-
-    function assignStartingLeague() {
-      const counts = {
-        amateurs: 0,
-        intermediates: 0,
-        pros: 0,
-        legends: 0
+        softWrongAction: true,
+        types: ['Apple','Milk','Glass Jar','Cereal']
       };
-      users.forEach((u) => {
-        if (u.league && counts.hasOwnProperty(u.league)) {
-          counts[u.league]++;
-        }
-      });
-
-      const values = Object.values(counts);
-      const minCount = Math.min(...values);
-      const candidateLeagues = LEAGUES.filter((l) => counts[l] === minCount);
-      return candidateLeagues[0] || "amateurs";
     }
 
-    // ========= CLEANUP OLD ACCOUNTS =========
-    function cleanupOldAccounts() {
-      const now = Date.now();
-      const currentUserId = localStorage.getItem(STORAGE_KEY_CURRENT_USER);
+    if (L === 2) {
+      return {
+        livesStart: null,
+        beltSpeed: 195,
+        clueWindow: 1.95,
+        scanGateW: 78,
+        prepExtra: 92,
 
-      const keptUsers = [];
-      const removedUserIds = new Set();
+        spacingPx: 520,
+        maxOnBelt: 2,
 
-      users.forEach((user) => {
-        const isCurrent = currentUserId && user.id === currentUserId;
-        if (!user.lastLogoutAt || isCurrent) {
-          keptUsers.push(user);
-          return;
-        }
-        const delta = now - user.lastLogoutAt;
-        if (delta > THIRTY_DAYS_MS) {
-          removedUserIds.add(user.id);
-        } else {
-          keptUsers.push(user);
-        }
-      });
+        allowTasks: new Set([TASK.SCAN, TASK.WEIGH, TASK.BAG, TASK.ID, TASK.DISC]),
+        suspiciousChance: 0.0,
+        discountTaskChance: 0.18,
+        rescanChance: 0.02,
 
-      users = keptUsers;
-
-      if (removedUserIds.size > 0) {
-        entries = entries.filter((e) => !removedUserIds.has(e.userId));
-      }
-
-      saveUsers();
-      saveEntries();
+        softWrongAction: true,
+        types: ['Apple','Milk','Glass Jar','Cereal','Energy','Wine']
+      };
     }
 
-    // ========= NAVIGATION =========
-    function showScene(name) {
-      const scenes = document.querySelectorAll(".scene");
-      scenes.forEach((scene) => scene.classList.remove("active"));
+    if (L === 3) {
+      return {
+        livesStart: null,
+        beltSpeed: 225,
+        clueWindow: 1.65,
+        scanGateW: 70,
+        prepExtra: 84,
 
-      const target = document.getElementById("scene-" + name);
-      if (target) target.classList.add("active");
+        spacingPx: 500,
+        maxOnBelt: 3,
 
-      const navButtons = document.querySelectorAll("header nav button");
-      navButtons.forEach((btn) => btn.classList.remove("active"));
-      navButtons.forEach((btn) => {
-        if (
-          btn.getAttribute("onclick") === `showScene('${name}')` ||
-          btn.getAttribute("onclick") === `requireLoginThenShow('${name}')`
-        ) {
-          btn.classList.add("active");
-        }
-      });
+        allowTasks: new Set([TASK.SCAN, TASK.WEIGH, TASK.BAG, TASK.ID, TASK.DISC, TASK.REJECT]),
+        suspiciousChance: 0.05,
+        discountTaskChance: 0.22,
+        rescanChance: 0.03,
+
+        softWrongAction: false,
+        types: ['Apple','Milk','Glass Jar','Cereal','Energy','Wine','Perfume','Mystery Box']
+      };
     }
 
-    function requireLoginThenShow(name) {
-      if (!currentUser) {
-        alert("Please log in first.");
-        showScene("login");
+    const t = clamp((L - 4) / 16, 0, 1);
+    return {
+      livesStart: null,
+      beltSpeed: 240 + t * 220,
+      clueWindow: clamp(1.55 - t * 0.70, 0.70, 1.55),
+      scanGateW: clamp(68 - t * 16, 52, 68),
+      prepExtra: clamp(82 - t * 24, 48, 82),
+
+      spacingPx: clamp(490 - t * 130, 330, 490),
+      maxOnBelt: 3,
+
+      allowTasks: new Set([TASK.SCAN, TASK.WEIGH, TASK.BAG, TASK.ID, TASK.DISC, TASK.REJECT]),
+      suspiciousChance: 0.06 + t * 0.12,
+      discountTaskChance: 0.24 + t * 0.16,
+      rescanChance: 0.04 + t * 0.08,
+
+      softWrongAction: false,
+      types: ['Apple','Milk','Glass Jar','Cereal','Energy','Wine','Perfume','Mystery Box']
+    };
+  }
+
+  function computeGoal(L) {
+    if (L === 1) return 5;
+    if (L === 2) return 6;
+    if (L === 3) return 7;
+    return Math.min(16, 6 + Math.floor(L * 0.55));
+  }
+
+  // ---------- Game State ----------
+  let state = 'menu';
+  let tPrev = 0;
+
+  let score = 0;
+  let streak = 0;
+  let mult = 1.0;
+  let lives = 6;
+
+  let cfg = levelConfig(level);
+
+  const world = {
+    items: [],
+    time: 0,
+    spawnCooldown: 0
+  };
+
+  let idCounter = 1;
+
+  // ---------- Layout ----------
+  function layout() {
+    const w = innerWidth, h = innerHeight;
+    const beltY = Math.floor(h * 0.64);
+    const beltH = Math.max(120, Math.floor(h * 0.18));
+    const scannerX = Math.floor(w * 0.72);
+    const gateW = cfg.scanGateW;
+    const prepLeft = scannerX - 260 - cfg.prepExtra;
+    const prepRight = scannerX - 70 + cfg.prepExtra;
+    const clueX = Math.floor(w * 0.28);
+    return { w, h, beltY, beltH, scannerX, gateW, prepLeft, prepRight, clueX };
+  }
+
+  // ---------- Toast ----------
+  let toast = { t: 0, text: '', kind: 'muted' };
+  function flash(text, kind='muted') {
+    toast.t = 1.05;
+    toast.text = text;
+    toast.kind = kind;
+  }
+
+  // ---------- Items ----------
+  function getEnabledTypes() {
+    const allowedNames = new Set(cfg.types);
+    return TYPES_ALL.filter(t => allowedNames.has(t.name));
+  }
+
+  function pickTaskForType(typeBase) {
+    if (cfg.allowTasks.has(TASK.REJECT) && (typeBase === 'sus' ? (Math.random() < 0.85) : (Math.random() < cfg.suspiciousChance))) {
+      return TASK.REJECT;
+    }
+    if (typeBase === 'produce' && cfg.allowTasks.has(TASK.WEIGH)) return TASK.WEIGH;
+    if (typeBase === 'fragile' && cfg.allowTasks.has(TASK.BAG)) return TASK.BAG;
+    if (typeBase === 'age' && cfg.allowTasks.has(TASK.ID)) return TASK.ID;
+
+    if (cfg.allowTasks.has(TASK.DISC) && Math.random() < cfg.discountTaskChance) return TASK.DISC;
+    return TASK.SCAN;
+  }
+
+  function makeItem(spawnX) {
+    const catalog = getEnabledTypes();
+    const t = catalog[Math.floor(Math.random() * catalog.length)];
+
+    const task = pickTaskForType(t.base);
+    const isScanTask = (task === TASK.SCAN);
+
+    const needsRescan = isScanTask && (Math.random() < cfg.rescanChance);
+    const scanCount = needsRescan ? 2 : 1;
+
+    const clueTags = [];
+    clueTags.push(task === TASK.SCAN ? 'Scan' :
+                 task === TASK.WEIGH ? 'Weigh' :
+                 task === TASK.BAG ? 'Bag' :
+                 task === TASK.ID ? 'ID' :
+                 task === TASK.DISC ? 'Discount' : 'Reject');
+    if (needsRescan) clueTags.push('Rescan');
+
+    return {
+      id: idCounter++,
+      typeName: t.name,
+      base: t.base,
+      color: t.color,
+      x: spawnX,
+      laneBob: rand(-10, 10),
+      w: rand(86, 108),
+      h: rand(44, 56),
+
+      task,
+      scanCount,
+      scansDone: 0,
+
+      clueTags,
+      clueShown: false,
+      clueT: 0,
+
+      removed: false,
+      passedScanner: false,
+      wiggle: rand(0, Math.PI * 2)
+    };
+  }
+
+  function spawnItem() {
+    const spawnX = -240;
+    world.items.push(makeItem(spawnX));
+    world.spawnCooldown = cfg.spacingPx / cfg.beltSpeed;
+  }
+
+  function seedBelt() {
+    world.items.length = 0;
+    world.spawnCooldown = 0;
+
+    spawnItem();
+    if (cfg.maxOnBelt >= 2) {
+      const it = makeItem(-240 - cfg.spacingPx);
+      world.items.unshift(it);
+      world.spawnCooldown = cfg.spacingPx / cfg.beltSpeed;
+    }
+  }
+
+  // ---------- Focus ----------
+  function getFocusItem(L) {
+    const sx = L.scannerX;
+    let best = null;
+    let bestX = -Infinity;
+    for (const it of world.items) {
+      if (it.removed) continue;
+      if (it.x > sx + 24) continue;
+      if (it.x > bestX) { bestX = it.x; best = it; }
+    }
+    return best;
+  }
+
+  // ---------- Zones ----------
+  function inPrepZone(it, L) {
+    return it && it.x > L.prepLeft && it.x < L.prepRight;
+  }
+  function inScanGate(it, L) {
+    return it && Math.abs(it.x - L.scannerX) <= L.gateW;
+  }
+
+  // ---------- Score / punish ----------
+  function punish(msg) {
+    lives -= 1;
+    streak = 0;
+    mult = 1.0;
+    flash(msg, 'bad');
+    if (lives <= 0) gameOver();
+  }
+  function reward(points, msg) {
+    score += points;
+    streak += 1;
+    mult = clamp(1.0 + streak * 0.06, 1, 4.0);
+    flash(msg, 'ok');
+  }
+  function softMistake(msg) {
+    streak = 0;
+    mult = 1.0;
+    flash(msg, 'warn');
+  }
+
+  function onItemClearedSuccess() {
+    levelCleared += 1;
+    if (levelCleared >= levelGoal) levelUp();
+  }
+
+  // ---------- Actions ----------
+  function doTaskAction(action) {
+    if (state !== 'running') return;
+    const L = layout();
+    const it = getFocusItem(L);
+    if (!it) { flash('No item in focus', 'muted'); return; }
+
+    if (!cfg.allowTasks.has(action)) { flash('Not in this level', 'warn'); return; }
+
+    // Scanning non-scan tasks does nothing (and is not required)
+    if (action === TASK.SCAN && it.task !== TASK.SCAN) {
+      softMistake('No scan needed');
+      return;
+    }
+
+    // Zone checks
+    if (action === TASK.SCAN) {
+      if (!inScanGate(it, L)) { punish('Scan timing'); return; }
+    } else if (action === TASK.REJECT) {
+      const ok = inPrepZone(it, L) || inScanGate(it, L);
+      if (!ok) { punish('Wrong zone'); return; }
+    } else {
+      if (!inPrepZone(it, L)) { punish('Wrong zone'); return; }
+    }
+
+    // Correct task?
+    if (it.task !== action) {
+      if (cfg.softWrongAction) softMistake('Wrong action');
+      else punish('Wrong action');
+      return;
+    }
+
+    // Correct task handling
+    if (action === TASK.SCAN) {
+      it.scansDone += 1;
+      if (it.scansDone < it.scanCount) {
+        reward(Math.floor(18 * mult), 'Rescan!');
         return;
       }
-      showScene(name);
+      it.removed = true;
+      const base = 70 + (it.scanCount === 2 ? 25 : 0);
+      reward(Math.floor(base * mult), 'Scan ✔');
+      onItemClearedSuccess();
+      return;
     }
 
-    // ========= PLAYER STATS & LEAGUES =========
-    function getPlayerStats() {
-      const byUser = {};
+    it.removed = true;
+    const base =
+      action === TASK.WEIGH ? 75 :
+      action === TASK.BAG   ? 70 :
+      action === TASK.ID    ? 80 :
+      action === TASK.DISC  ? 65 :
+      action === TASK.REJECT? 90 : 70;
 
-      entries.forEach((e) => {
-        const user = getUserById(e.userId);
-        if (!user) return;
-        const key = user.id;
-        if (!byUser[key]) {
-          byUser[key] = {
-            userId: user.id,
-            name: user.name,
-            league: user.league || "amateurs",
-            runs: 0,
-            totalDistance: 0,
-            totalTime: 0,
-            bestDistance: 0,
-            baselineDistance: null
-          };
-        }
-        const stats = byUser[key];
-        if (stats.baselineDistance === null) {
-          stats.baselineDistance = e.distanceKm;
-        }
-        stats.runs += 1;
-        stats.totalDistance += e.distanceKm;
-        stats.totalTime += e.timeMinutes;
-        if (e.distanceKm > stats.bestDistance) {
-          stats.bestDistance = e.distanceKm;
-        }
-      });
+    reward(Math.floor(base * mult), `${action} ✔`);
+    onItemClearedSuccess();
+  }
 
-      let players = Object.values(byUser);
+  // ---------- Buttons + Keys ----------
+  function bindBtn(id, fn) {
+    const el = document.getElementById(id);
+    el.addEventListener('click', (e) => { e.preventDefault(); fn(); }, { passive:false });
+    el.addEventListener('pointerdown', (e) => { e.preventDefault(); fn(); }, { passive:false });
+  }
+  bindBtn('btnScan', () => doTaskAction(TASK.SCAN));
+  bindBtn('btnID', () => doTaskAction(TASK.ID));
+  bindBtn('btnDisc', () => doTaskAction(TASK.DISC));
+  bindBtn('btnBag', () => doTaskAction(TASK.BAG));
+  bindBtn('btnWeigh', () => doTaskAction(TASK.WEIGH));
+  bindBtn('btnReject', () => doTaskAction(TASK.REJECT));
 
-      players.sort((a, b) => {
-        if (b.totalDistance !== a.totalDistance) {
-          return b.totalDistance - a.totalDistance;
-        }
-        return a.totalTime - b.totalTime;
-      });
+  addEventListener('keydown', (e) => {
+    const k = e.key.toLowerCase();
+    if (k === 's') { e.preventDefault(); doTaskAction(TASK.SCAN); }
+    if (k === 'i') { e.preventDefault(); doTaskAction(TASK.ID); }
+    if (k === 'd') { e.preventDefault(); doTaskAction(TASK.DISC); }
+    if (k === 'b') { e.preventDefault(); doTaskAction(TASK.BAG); }
+    if (k === 'w') { e.preventDefault(); doTaskAction(TASK.WEIGH); }
+    if (k === 'r') { e.preventDefault(); doTaskAction(TASK.REJECT); }
+    if (k === 'enter' && (state === 'menu' || state === 'over' || state === 'levelup')) { startOrContinue(); }
+  });
 
-      players = players.map((p, index) => {
-        const rank = index + 1;
-        const avgDistance = p.runs > 0 ? p.totalDistance / p.runs : 0;
-        let improvement = 0;
-        if (p.baselineDistance && p.baselineDistance > 0 && p.runs > 1) {
-          improvement = ((avgDistance - p.baselineDistance) / p.baselineDistance) * 100;
-        }
+  addEventListener('pointerdown', () => {
+    if (state === 'menu' || state === 'over' || state === 'levelup') startOrContinue();
+  }, { passive:true });
 
-        return {
-          ...p,
-          rank,
-          avgDistance,
-          improvement
-        };
-      });
+  // ---------- Overlay ----------
+  function showOverlay(html) { card.innerHTML = html; overlay.style.display = 'flex'; }
+  function hideOverlay() { overlay.style.display = 'none'; }
 
-      return players;
-    }
+  // ---------- Level flow ----------
+  function startOrContinue() {
+    if (state === 'menu') startGame();
+    else if (state === 'over') restartGame();
+    else if (state === 'levelup') beginLevel(false);
+  }
 
-    // ========= PROMOTIONS & RELEGATIONS =========
-    function applyPromotions() {
-      const players = getPlayerStats();
-      const total = players.length;
-      if (total === 0) {
-        alert("No players yet.");
-        return;
+  function startGame() {
+    level = 1;
+    score = 0;
+    streak = 0;
+    mult = 1.0;
+    idCounter = 1;
+
+    cfg = levelConfig(level);
+    lives = cfg.livesStart ?? 6;
+
+    beginLevel(true);
+  }
+
+  function restartGame() {
+    state = 'running';
+    hideOverlay();
+    startGame();
+  }
+
+  function beginLevel(isNewGame) {
+    cfg = levelConfig(level);
+    levelGoal = computeGoal(level);
+    levelCleared = 0;
+
+    if (!isNewGame) lives = Math.min(6, lives + 1);
+
+    world.time = 0;
+    world.spawnCooldown = 0;
+    seedBelt();
+
+    toast.t = 0;
+    toast.text = '';
+
+    hideOverlay();
+    state = 'running';
+  }
+
+  function levelUp() {
+    state = 'levelup';
+    world.items.length = 0;
+
+    const next = level + 1;
+    const nextCfg = levelConfig(next);
+
+    showOverlay(`
+      <h1>Level ${level} cleared.</h1>
+      <p><b>Score:</b> ${Math.floor(score)} · <b>Lives:</b> ${lives} (you’ll get +1 next level, max 6)</p>
+      <p class="muted">Difficulty mostly ramps by speed. Hints are popup-only.</p>
+      <div class="row">
+        <div class="pill ok">Continue: click / tap / Enter</div>
+        <div class="pill warn">Next speed: ${nextCfg.beltSpeed.toFixed(0)} · hint: ${nextCfg.clueWindow.toFixed(2)}s</div>
+      </div>
+    `);
+
+    level += 1;
+  }
+
+  function gameOver() {
+    state = 'over';
+    showOverlay(`
+      <h1>Shift ended.</h1>
+      <p>
+        <b>Level reached:</b> ${level}<br>
+        <b>Score:</b> ${Math.floor(score)}<br>
+        <b>Streak:</b> ${streak}<br>
+        <b>Multiplier:</b> x${mult.toFixed(1)}
+      </p>
+      <p class="muted">Only the popup hint tells you what to do. Click/tap/Enter to restart.</p>
+      <div class="row">
+        <div class="pill ok">Restart: click / tap / Enter</div>
+      </div>
+    `);
+  }
+
+  function showMenu() {
+    state = 'menu';
+    showOverlay(`
+      <h1>Receipt Run (Popup Only)</h1>
+      <p>Items are spaced out. Each item has one action to do. The hint pops up briefly — no constant task label.</p>
+      <p class="muted">Scan only if the popup says Scan.</p>
+      <div class="row">
+        <div class="pill ok">Start: click / tap / Enter</div>
+        <div class="pill warn">Keys: S scan · I/D/B/W · R reject</div>
+      </div>
+    `);
+  }
+
+  // ---------- Update ----------
+  function update(dt) {
+    const L = layout();
+    world.time += dt;
+
+    for (const it of world.items) {
+      if (it.removed) continue;
+
+      it.wiggle += dt * 1.6;
+      it.x += cfg.beltSpeed * dt;
+
+      // popup hint only
+      if (!it.clueShown && it.x >= L.clueX) {
+        it.clueShown = true;
+        it.clueT = cfg.clueWindow;
       }
+      if (it.clueT > 0) it.clueT -= dt;
 
-      let moves = Math.floor(total / 5);
-      if (moves < 1) moves = 1;
-      if (moves > 3) moves = 3;
-
-      let promoted = 0;
-      for (let i = 0; i < players.length && promoted < moves; i++) {
-        const p = players[i];
-        const idx = leagueIndex(p.league);
-        if (idx < 0 || idx >= LEAGUES.length - 1) continue;
-        const user = getUserById(p.userId);
-        if (!user) continue;
-        user.league = LEAGUES[idx + 1];
-        promoted++;
-      }
-
-      let relegated = 0;
-      for (let i = players.length - 1; i >= 0 && relegated < moves; i--) {
-        const p = players[i];
-        const idx = leagueIndex(p.league);
-        if (idx <= 0) continue;
-        const user = getUserById(p.userId);
-        if (!user) continue;
-        user.league = LEAGUES[idx - 1];
-        relegated++;
-      }
-
-      saveUsers();
-      renderHeaderUser();
-      renderLeaderboard();
-      renderStats();
-      alert(`Promotions and relegations applied: ${moves} up, ${moves} down.`);
-    }
-
-    // ========= RENDER UI =========
-    function renderHeaderUser() {
-      const el = document.getElementById("user-controls");
-      const nameInput = document.getElementById("name");
-
-      if (!el) return;
-
-      el.innerHTML = "";
-      if (!currentUser) {
-        const statusSpan = document.createElement("span");
-        statusSpan.id = "user-status";
-        statusSpan.textContent = "Not logged in";
-        el.appendChild(statusSpan);
-
-        const btn = document.createElement("button");
-        btn.className = "btn-small";
-        btn.textContent = "Log in";
-        btn.onclick = () => showScene("login");
-        el.appendChild(btn);
-
-        if (nameInput) {
-          nameInput.value = "";
-          nameInput.placeholder = "Log in to set your name";
-        }
-        return;
-      }
-
-      const statusSpan = document.createElement("span");
-      statusSpan.id = "user-status";
-      statusSpan.innerHTML = `Logged in as <span class="user-name">${currentUser.name}</span> · <span class="badge-league ${currentUser.league}">${currentUser.league.charAt(0).toUpperCase() + currentUser.league.slice(1)}</span>`;
-      el.appendChild(statusSpan);
-
-      const logoutBtn = document.createElement("button");
-      logoutBtn.className = "btn-small";
-      logoutBtn.textContent = "Log out";
-      logoutBtn.onclick = logout;
-      el.appendChild(logoutBtn);
-
-      const deleteBtn = document.createElement("button");
-      deleteBtn.className = "btn-small danger";
-      deleteBtn.textContent = "Delete account";
-      deleteBtn.onclick = deleteAccount;
-      el.appendChild(deleteBtn);
-
-      if (nameInput) {
-        nameInput.value = currentUser.name;
-        nameInput.placeholder = "";
-      }
-    }
-
-    function renderLeaderboard() {
-      const tbody = document.getElementById("leaderboard-body");
-      const empty = document.getElementById("no-entries");
-      if (!tbody) return;
-
-      tbody.innerHTML = "";
-      const players = getPlayerStats();
-      const filter = document.getElementById("league-filter")?.value || "all";
-
-      let filtered = players;
-      if (filter !== "all") {
-        filtered = players.filter((p) => p.league === filter);
-      }
-
-      if (!filtered.length) {
-        if (empty) empty.style.display = "block";
-        return;
-      }
-      if (empty) empty.style.display = "none";
-
-      filtered.forEach((player) => {
-        const tr = document.createElement("tr");
-
-        let rankSymbol = player.rank;
-        if (player.rank === 1) rankSymbol = "🥇";
-        else if (player.rank === 2) rankSymbol = "🥈";
-        else if (player.rank === 3) rankSymbol = "🥉";
-
-        tr.innerHTML = `
-          <td class="rank-medal">${rankSymbol}</td>
-          <td>${player.name}</td>
-          <td><span class="badge-league ${player.league}">${player.league.charAt(0).toUpperCase() + player.league.slice(1)}</span></td>
-          <td>${player.totalDistance.toFixed(2)} km</td>
-          <td>${player.totalTime.toFixed(1)} min</td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
-
-    function renderStats() {
-      const tbody = document.getElementById("stats-body");
-      const empty = document.getElementById("no-stats");
-      if (!tbody) return;
-
-      tbody.innerHTML = "";
-
-      if (!entries.length) {
-        if (empty) empty.style.display = "block";
-        return;
-      }
-      if (empty) empty.style.display = "none";
-
-      const players = getPlayerStats();
-
-      players.forEach((stats) => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${stats.name}</td>
-          <td><span class="badge-league ${stats.league}">${stats.league.charAt(0).toUpperCase() + stats.league.slice(1)}</span></td>
-          <td>${stats.runs}</td>
-          <td>${stats.totalDistance.toFixed(2)} km</td>
-          <td>${stats.avgDistance.toFixed(2)} km</td>
-          <td>${stats.bestDistance.toFixed(2)} km</td>
-          <td>${formatImprovement(stats.improvement)}</td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
-
-    function renderMyActivities() {
-      const tbody = document.getElementById("my-activities-body");
-      const empty = document.getElementById("no-my-activities");
-      if (!tbody) return;
-
-      tbody.innerHTML = "";
-
-      if (!currentUser) {
-        if (empty) {
-          empty.style.display = "block";
-          empty.textContent = "Log in to see and manage your activities.";
-        }
-        return;
-      }
-
-      const myEntries = entries.filter((e) => e.userId === currentUser.id);
-
-      if (!myEntries.length) {
-        if (empty) {
-          empty.style.display = "block";
-          empty.textContent = "No activities yet for this account.";
-        }
-        return;
-      }
-      if (empty) empty.style.display = "none";
-
-      myEntries
-        .slice()
-        .sort((a, b) => b.timestamp - a.timestamp)
-        .forEach((e) => {
-          const tr = document.createElement("tr");
-          tr.innerHTML = `
-            <td>${formatDate(e.timestamp)}</td>
-            <td>${e.distanceKm.toFixed(2)} km</td>
-            <td>${e.timeMinutes.toFixed(1)} min</td>
-            <td class="actions-cell">
-              <button onclick="deleteActivity('${e.id}')">Delete</button>
-            </td>
-          `;
-          tbody.appendChild(tr);
-        });
-    }
-
-    // ========= ACTIVITY DELETION =========
-    function deleteActivity(id) {
-      if (!currentUser) {
-        alert("You need to be logged in to delete activities.");
-        return;
-      }
-      const entry = entries.find((e) => e.id === id);
-      if (!entry) return;
-      if (entry.userId !== currentUser.id) {
-        alert("You can only delete your own activities.");
-        return;
-      }
-      if (!confirm("Delete this activity?")) return;
-
-      entries = entries.filter((e) => e.id !== id);
-      saveEntries();
-      renderLeaderboard();
-      renderStats();
-      renderMyActivities();
-    }
-
-    // ========= AUTH: LOGIN / LOGOUT / DELETE ACCOUNT =========
-    function login(name, password) {
-      const trimmedName = name.trim();
-      if (!trimmedName || !password) {
-        alert("Please enter both name and password.");
-        return;
-      }
-
-      const existing = getUserByName(trimmedName);
-
-      if (!existing) {
-        const newLeague = assignStartingLeague();
-        const newUser = {
-          id: generateId(),
-          name: trimmedName,
-          password,
-          league: newLeague,
-          createdAt: Date.now(),
-          lastLoginAt: Date.now(),
-          lastLogoutAt: null
-        };
-        users.push(newUser);
-        currentUser = newUser;
-        saveUsers();
-        localStorage.setItem(STORAGE_KEY_CURRENT_USER, newUser.id);
-        renderHeaderUser();
-        showScene("welcome");
-        return;
-      }
-
-      if (existing.password !== password) {
-        alert("Wrong password for this name.");
-        return;
-      }
-
-      existing.lastLoginAt = Date.now();
-      if (!existing.league || !LEAGUES.includes(existing.league)) {
-        existing.league = "amateurs";
-      }
-      currentUser = existing;
-      saveUsers();
-      localStorage.setItem(STORAGE_KEY_CURRENT_USER, existing.id);
-      renderHeaderUser();
-      showScene("welcome");
-    }
-
-    function logout() {
-      if (!currentUser) return;
-      const user = getUserById(currentUser.id);
-      if (user) {
-        user.lastLogoutAt = Date.now();
-      }
-      saveUsers();
-      localStorage.removeItem(STORAGE_KEY_CURRENT_USER);
-      currentUser = null;
-      renderHeaderUser();
-      renderMyActivities();
-      showScene("login");
-    }
-
-    function deleteAccount() {
-      if (!currentUser) return;
-      const confirmText = "This will delete your account and all your activities. Are you sure?";
-      if (!confirm(confirmText)) return;
-
-      const userId = currentUser.id;
-      users = users.filter((u) => u.id !== userId);
-      entries = entries.filter((e) => e.userId !== userId);
-
-      saveUsers();
-      saveEntries();
-      localStorage.removeItem(STORAGE_KEY_CURRENT_USER);
-      currentUser = null;
-      renderHeaderUser();
-      renderLeaderboard();
-      renderStats();
-      renderMyActivities();
-      showScene("login");
-    }
-
-    // ========= FORM HANDLERS =========
-    const loginForm = document.getElementById("login-form");
-    if (loginForm) {
-      loginForm.addEventListener("submit", function (e) {
-        e.preventDefault();
-        const name = document.getElementById("login-name").value;
-        const password = document.getElementById("login-password").value;
-        login(name, password);
-        loginForm.reset();
-      });
-    }
-
-    const entryForm = document.getElementById("entry-form");
-    if (entryForm) {
-      entryForm.addEventListener("submit", function (e) {
-        e.preventDefault();
-        if (!currentUser) {
-          alert("Please log in before adding activities.");
-          showScene("login");
-          return;
-        }
-        const distance = parseFloat(document.getElementById("distance").value);
-        const time = parseFloat(document.getElementById("time").value);
-
-        if (isNaN(distance) || isNaN(time)) {
-          alert("Please fill in distance and time correctly.");
-          return;
-        }
-        if (distance <= 0 || time <= 0) {
-          alert("Distance and time must be bigger than zero.");
-          return;
-        }
-
-        entries.push({
-          id: generateId(),
-          userId: currentUser.id,
-          distanceKm: distance,
-          timeMinutes: time,
-          timestamp: Date.now()
-        });
-
-        saveEntries();
-        renderLeaderboard();
-        renderStats();
-        renderMyActivities();
-
-        entryForm.reset();
-        showScene("leaderboard");
-      });
-    }
-
-    // ========= INITIALISE =========
-    function init() {
-      loadEntries();
-      loadUsers();
-      cleanupOldAccounts();
-
-      const currentUserId = localStorage.getItem(STORAGE_KEY_CURRENT_USER);
-      if (currentUserId) {
-        const user = getUserById(currentUserId);
-        if (user) {
-          currentUser = user;
-        } else {
-          localStorage.removeItem(STORAGE_KEY_CURRENT_USER);
-          currentUser = null;
+      // missed (passed scanner without completing)
+      if (!it.passedScanner && it.x > L.scannerX + L.gateW + 30) {
+        it.passedScanner = true;
+        if (!it.removed) {
+          const msg = it.task === TASK.SCAN ? 'Missed scan' : 'Missed action';
+          punish(msg);
+          it.removed = true;
         }
       }
+    }
 
-      renderHeaderUser();
-      renderLeaderboard();
-      renderStats();
-      renderMyActivities();
+    world.items = world.items.filter(it => !it.removed && it.x < L.w + 220);
 
-      if (currentUser) {
-        showScene("welcome");
-      } else {
-        showScene("login");
+    world.spawnCooldown = Math.max(0, world.spawnCooldown - dt);
+    if (world.items.length < cfg.maxOnBelt && world.spawnCooldown <= 0) {
+      const rightmost = world.items.reduce((a,b) => (!a || b.x > a.x) ? b : a, null);
+      const safe = !rightmost || (rightmost.x > (-240 + 40));
+      if (safe) spawnItem();
+    }
+
+    if (toast.t > 0) toast.t -= dt;
+  }
+
+  // ---------- Draw ----------
+  function draw() {
+    const L = layout();
+    const w=L.w, h=L.h;
+
+    ctx.fillStyle = '#06070a';
+    ctx.fillRect(0,0,w,h);
+    const g = ctx.createLinearGradient(0, 0, 0, h);
+    g.addColorStop(0, '#070914');
+    g.addColorStop(1, '#04050a');
+    ctx.fillStyle = g;
+    ctx.fillRect(0,0,w,h);
+
+    const beltTop = L.beltY - L.beltH/2;
+    ctx.fillStyle = 'rgba(255,255,255,0.06)';
+    roundRect(12, beltTop, w-24, L.beltH, 18, true, false);
+
+    ctx.strokeStyle = 'rgba(255,255,255,0.07)';
+    ctx.lineWidth = 2;
+    for (let i=0;i<12;i++) {
+      const seg = (w/12);
+      const x = (i*seg + (performance.now()*0.05) % seg);
+      ctx.beginPath();
+      ctx.moveTo(x, beltTop + 14);
+      ctx.lineTo(x + 60, beltTop + L.beltH - 14);
+      ctx.stroke();
+    }
+
+    ctx.fillStyle = 'rgba(120,200,255,0.10)';
+    roundRect(L.scannerX - L.gateW, beltTop-14, L.gateW*2, L.beltH+28, 12, true, false);
+    ctx.strokeStyle = 'rgba(170,220,255,0.30)';
+    ctx.lineWidth = 2;
+    roundRect(L.scannerX - L.gateW, beltTop-14, L.gateW*2, L.beltH+28, 12, false, true);
+
+    ctx.strokeStyle = 'rgba(255,255,255,0.12)';
+    ctx.setLineDash([6,6]);
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.rect(L.prepLeft, beltTop-10, (L.prepRight - L.prepLeft), L.beltH+20);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    ctx.strokeStyle = 'rgba(255,255,255,0.10)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(L.clueX, beltTop-18);
+    ctx.lineTo(L.clueX, beltTop+L.beltH+18);
+    ctx.stroke();
+
+    const focus = getFocusItem(L);
+    const focusId = focus ? focus.id : null;
+
+    for (const it of world.items) {
+      const y = L.beltY + it.laneBob + Math.sin(it.wiggle)*4;
+      const x = it.x;
+
+      ctx.fillStyle = 'rgba(0,0,0,0.35)';
+      ctx.beginPath();
+      ctx.ellipse(x, y + 24, it.w*0.42, it.h*0.22, 0, 0, Math.PI*2);
+      ctx.fill();
+
+      ctx.fillStyle = it.color;
+      roundRect(x - it.w/2, y - it.h/2, it.w, it.h, 12, true, false);
+
+      ctx.strokeStyle = 'rgba(10,12,18,0.45)';
+      ctx.lineWidth = 2;
+      roundRect(x - it.w/2, y - it.h/2, it.w, it.h, 12, false, true);
+
+      ctx.fillStyle = 'rgba(10,12,18,0.72)';
+      ctx.font = '800 13px system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText(it.typeName, x, y + 5);
+
+      ctx.fillStyle = 'rgba(10,12,18,0.22)';
+      for (let k=0;k<10;k++) {
+        const bw = (k%3===0) ? 2 : 1;
+        ctx.fillRect(x - it.w/2 + 12 + k*6, y + it.h/2 - 11, bw, 9);
+      }
+
+      // popup hint only
+      if (it.clueT > 0) {
+        const a = clamp(it.clueT / cfg.clueWindow, 0, 1);
+        drawTags(x, y - it.h/2 - 18, it.clueTags, a);
+      }
+
+      // focus highlight only (no task label)
+      if (focusId === it.id) {
+        ctx.strokeStyle = 'rgba(255,255,255,0.24)';
+        ctx.lineWidth = 3;
+        roundRect(x - it.w/2 - 6, y - it.h/2 - 6, it.w+12, it.h+12, 14, false, true);
+
+        // tiny rescan hint only if it's scan+rescan (still popup-based overall)
+        if (it.task === TASK.SCAN && it.scanCount === 2) {
+          ctx.fillStyle = it.scansDone === 0 ? 'rgba(255,220,140,0.9)' : 'rgba(180,255,210,0.9)';
+          ctx.font = '950 11px system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial';
+          ctx.fillText(it.scansDone === 0 ? 'RESCAN' : '1/2 DONE', x, y - it.h/2 - 10);
+        }
       }
     }
 
-    init();
-  </script>
+    if (toast.t > 0) {
+      const a = clamp(toast.t / 1.05, 0, 1);
+      ctx.globalAlpha = 0.15 + a*0.85;
+
+      const text = toast.text;
+      ctx.font = '900 16px system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial';
+      const tw = ctx.measureText(text).width;
+      const bx = w/2 - tw/2 - 16;
+      const by = Math.max(70, Math.floor(h*0.14));
+      const bw = tw + 32;
+      const bh = 40;
+
+      ctx.fillStyle = 'rgba(10,12,18,0.65)';
+      roundRect(bx, by, bw, bh, 14, true, false);
+
+      const col = toast.kind === 'ok' ? 'rgba(170,255,200,0.95)'
+               : toast.kind === 'bad' ? 'rgba(255,130,150,0.95)'
+               : toast.kind === 'warn' ? 'rgba(255,220,140,0.95)'
+               : 'rgba(245,245,255,0.92)';
+      ctx.fillStyle = col;
+      ctx.textAlign = 'center';
+      ctx.fillText(text, w/2, by + 26);
+
+      ctx.globalAlpha = 1;
+    }
+
+    hud1.textContent = `Level ${level} · Score: ${Math.floor(score)} · Streak: ${streak} · Mult: x${mult.toFixed(1)} · Lives: ${lives}`;
+    const spd = (cfg.beltSpeed/200).toFixed(2);
+    const focusName = focus ? focus.typeName : 'none';
+    hud2.textContent = `Goal: ${levelCleared}/${levelGoal} · Speed: ${spd} · On belt: ${world.items.length}/${cfg.maxOnBelt} · Focus: ${focusName}`;
+  }
+
+  function drawTags(x, y, tags, alpha) {
+    if (!tags || tags.length === 0) return;
+    ctx.save();
+    ctx.globalAlpha = alpha * 0.95;
+    ctx.font = '900 12px system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial';
+    ctx.textAlign = 'left';
+
+    let px = x - 120;
+    let py = y;
+
+    for (const t of tags) {
+      const w = ctx.measureText(t).width + 18;
+      const h = 22;
+
+      const danger = (t === 'Reject');
+      const warn = (t === 'Rescan' || t === 'ID' || t === 'Weigh');
+      const bg = danger ? 'rgba(255,120,140,0.20)' : warn ? 'rgba(255,220,140,0.16)' : 'rgba(170,220,255,0.12)';
+      const stroke = danger ? 'rgba(255,120,140,0.35)' : warn ? 'rgba(255,220,140,0.28)' : 'rgba(170,220,255,0.22)';
+      const fg = danger ? 'rgba(255,160,175,0.95)' : warn ? 'rgba(255,230,170,0.95)' : 'rgba(210,235,255,0.92)';
+
+      ctx.fillStyle = bg;
+      roundRect(px, py, w, h, 999, true, false);
+      ctx.strokeStyle = stroke;
+      ctx.lineWidth = 1;
+      roundRect(px, py, w, h, 999, false, true);
+
+      ctx.fillStyle = fg;
+      ctx.fillText(t, px + 9, py + 15);
+
+      px += w + 8;
+    }
+    ctx.restore();
+  }
+
+  function roundRect(x, y, w, h, r, fill, stroke) {
+    r = Math.min(r, w/2, h/2);
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+    if (fill) ctx.fill();
+    if (stroke) ctx.stroke();
+  }
+
+  // ---------- Main loop ----------
+  function frame(t) {
+    if (!tPrev) tPrev = t;
+    const dt = clamp((t - tPrev) / 1000, 0, 0.033);
+    tPrev = t;
+
+    if (state === 'running') update(dt);
+    draw();
+
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+
+  // ---------- Menu / Start ----------
+  function showMenu() {
+    state = 'menu';
+    showOverlay(`
+      <h1>Receipt Run (Popup Only)</h1>
+      <p>Items are spaced out. The hint pops up briefly and tells you what to do.</p>
+      <p class="muted">Scan only if the popup says Scan.</p>
+      <div class="row">
+        <div class="pill ok">Start: click / tap / Enter</div>
+        <div class="pill warn">Keys: S scan · I/D/B/W · R reject</div>
+      </div>
+    `);
+  }
+  function showOverlay(html) { card.innerHTML = html; overlay.style.display = 'flex'; }
+  showMenu();
+
+  function startOrContinue() {
+    if (state === 'menu') startGame();
+    else if (state === 'over') restartGame();
+    else if (state === 'levelup') beginLevel(false);
+  }
+
+  addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && (state === 'menu' || state === 'over' || state === 'levelup')) startOrContinue();
+  });
+  addEventListener('pointerdown', () => {
+    if (state === 'menu' || state === 'over' || state === 'levelup') startOrContinue();
+  }, { passive:true });
+
+  function startGame() {
+    level = 1;
+    score = 0;
+    streak = 0;
+    mult = 1.0;
+    idCounter = 1;
+
+    cfg = levelConfig(level);
+    lives = cfg.livesStart ?? 6;
+
+    beginLevel(true);
+  }
+
+  function restartGame() {
+    state = 'running';
+    overlay.style.display = 'none';
+    startGame();
+  }
+
+  function beginLevel(isNewGame) {
+    cfg = levelConfig(level);
+    levelGoal = computeGoal(level);
+    levelCleared = 0;
+
+    if (!isNewGame) lives = Math.min(6, lives + 1);
+
+    world.time = 0;
+    world.spawnCooldown = 0;
+    seedBelt();
+
+    toast.t = 0;
+    toast.text = '';
+
+    overlay.style.display = 'none';
+    state = 'running';
+  }
+
+  function levelUp() {
+    state = 'levelup';
+    world.items.length = 0;
+
+    const next = level + 1;
+    const nextCfg = levelConfig(next);
+
+    showOverlay(`
+      <h1>Level ${level} cleared.</h1>
+      <p><b>Score:</b> ${Math.floor(score)} · <b>Lives:</b> ${lives} (you’ll get +1 next level, max 6)</p>
+      <p class="muted">Hints stay popup-only. Difficulty mostly ramps by speed.</p>
+      <div class="row">
+        <div class="pill ok">Continue: click / tap / Enter</div>
+        <div class="pill warn">Next speed: ${nextCfg.beltSpeed.toFixed(0)} · hint: ${nextCfg.clueWindow.toFixed(2)}s</div>
+      </div>
+    `);
+
+    level += 1;
+  }
+
+  function gameOver() {
+    state = 'over';
+    showOverlay(`
+      <h1>Shift ended.</h1>
+      <p>
+        <b>Level reached:</b> ${level}<br>
+        <b>Score:</b> ${Math.floor(score)}<br>
+        <b>Streak:</b> ${streak}<br>
+        <b>Multiplier:</b> x${mult.toFixed(1)}
+      </p>
+      <p class="muted">Only the popup hint tells you what to do. Click/tap/Enter to restart.</p>
+      <div class="row">
+        <div class="pill ok">Restart: click / tap / Enter</div>
+      </div>
+    `);
+  }
+})();
+</script>
 </body>
 </html>
