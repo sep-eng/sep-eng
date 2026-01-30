@@ -15,7 +15,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 
-  <!-- Firebase (MIH) - COMPAT -->
+  <!-- Firebase (MIH) - compat build -->
   <script src="https://www.gstatic.com/firebasejs/11.0.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/11.0.0/firebase-auth-compat.js"></script>
@@ -64,6 +64,7 @@
       display:flex;
       align-items:center;
       justify-content:center;
+      cursor:pointer;
     }
     .menu-line {
       width:20px;
@@ -367,6 +368,7 @@
   <div id="menuPanel" class="fixed top-0 right-0 h-full w-64 bg-black/90 text-white transform translate-x-full z-40 flex flex-col">
     <div class="p-5 border-b border-white/10 flex justify-between items-center">
       <span id="menuTitle" class="text-sm tracking-wide">SEP Menu</span>
+      <button id="menuClose" type="button" class="px-3 py-1 rounded-full bg-white/10 border border-white/20 text-xs">✕</button>
     </div>
     <div class="p-5 space-y-4 text-sm">
       <div>
@@ -402,7 +404,7 @@
         <a id="btnShopNow" href="#products" class="bg-white text-black px-6 py-3 rounded-full font-medium">Shop Now</a>
         <button id="viewCartBtn" class="border border-white text-white px-6 py-3 rounded-full font-medium relative" type="button">
           <span id="btnViewCart">View Cart</span>
-          <span id="cartCounter" class="absolute -top-2 -right-2 bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hidden">0</span>
+          <span id="cartCounter" class="absolute -top-2 -right-2 bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-content:center text-xs hidden">0</span>
         </button>
       </div>
     </header>
@@ -447,7 +449,7 @@
       <div class="grid grid-cols-1 md:grid-cols-5 gap-6 max-w-6xl mx-auto text-sm md:text-base">
         <div class="bg-white/10 rounded-xl p-6 backdrop-blur text-black">
           <h3 id="step1Title" class="font-bold text-lg mb-2">1. Choose</h3>
-          <p id="howStep1">Select your favourite SEP piece - T-shrt or Sweater - then pick your size and quantity.</p>
+          <p id="howStep1">Select your favourite SEP piece - T-shirt or Sweater - then pick your size and quantity.</p>
         </div>
         <div class="bg-white/10 rounded-xl p-6 backdrop-blur text-black">
           <h3 id="step2Title" class="font-bold text-lg mb-2">2. Add to Cart</h3>
@@ -507,8 +509,7 @@
   <div id="cartSidebar" class="fixed top-0 right-0 h-full w-80 bg-white shadow-xl translate-x-full transition-transform duration-300 z-50 overflow-y-auto">
     <div class="p-6">
       <div class="flex justify-between items-center mb-4">
-        <h3 id="cartTitle" class="text-xl font-bold">Yur Cart</h3>
-        <button id="closeCart" type="button">✕</button>
+        <h3 id="cartTitle" class="text-xl font-bold">Your Cart</h3>
       </div>
       <div id="cartItems" class="space-y-4 text-sm"></div>
       <div class="border-t border-gray-300 pt-4 mt-4">
@@ -742,23 +743,11 @@
 
 <script>
 /* =========================================================
-   GLOBAL LANGUAGE + ROUTER (PERSIST APP + SCENES)
+   GLOBAL LANGUAGE + ROUTER (NO SCENE PERSIST ON REFRESH)
 ========================================================= */
 
 const LS_GLOBAL_LANG = "global_lang_v1";
 let GLOBAL_LANG = localStorage.getItem(LS_GLOBAL_LANG) || "en";
-
-// Persist app + scenes
-const LS_ROUTE = "app_route_v1";
-function loadRoute(){
-  try { return JSON.parse(localStorage.getItem(LS_ROUTE) || "{}"); }
-  catch { return {}; }
-}
-function saveRoute(patch){
-  const cur = loadRoute();
-  const next = Object.assign({}, cur, patch);
-  localStorage.setItem(LS_ROUTE, JSON.stringify(next));
-}
 
 const GLOBAL_TRANSLATIONS = {
   en: {
@@ -844,8 +833,9 @@ const GLOBAL_TRANSLATIONS = {
     errActivityInvalid: "Please enter valid km and minutes.",
     noEntries: "No entries yet.",
     noPlayers: "No players yet.",
-    confirmDelete: "Are you sure? This will delete your account from the leaderboard.",
-    deletedOk: "Account deleted."
+    confirmDelete: "Are you sure? This will remove you from leaderboard (entries stay, but hidden).",
+    deletedOk: "Account deleted (hidden).",
+    deletedErr: "Could not delete. Check Firestore rules."
   },
   da: {
     welcomeTitle: "SEP",
@@ -930,8 +920,9 @@ const GLOBAL_TRANSLATIONS = {
     errActivityInvalid: "Indtast gyldige km og minutter.",
     noEntries: "Ingen entries endnu.",
     noPlayers: "Ingen spillere endnu.",
-    confirmDelete: "Er du sikker? Det sletter din konto fra leaderboardet.",
-    deletedOk: "Konto slettet."
+    confirmDelete: "Er du sikker? Det fjerner dig fra leaderboard (entries bliver, men skjult).",
+    deletedOk: "Konto slettet (skjult).",
+    deletedErr: "Kunne ikke slette. Tjek Firestore rules."
   },
   cs: {
     welcomeTitle: "SEP",
@@ -1016,8 +1007,9 @@ const GLOBAL_TRANSLATIONS = {
     errActivityInvalid: "Zadej platné km i minuty.",
     noEntries: "Zatím žádné záznamy.",
     noPlayers: "Zatím žádní hráči.",
-    confirmDelete: "Jsi si jistý? Smaže to tvůj účet z leaderboardu.",
-    deletedOk: "Účet smazán."
+    confirmDelete: "Jsi si jistý? Odstraní tě to z leaderboardu (záznamy zůstanou, ale skryté).",
+    deletedOk: "Účet smazán (skrytý).",
+    deletedErr: "Nešlo smazat. Zkontroluj Firestore rules."
   }
 };
 
@@ -1086,9 +1078,7 @@ function applyGlobalTranslations(){
 }
 
 function setGlobalLang(lang){
-  if (!lang) lang = "en";
-  if (lang === GLOBAL_LANG) return; // ✅ stop "refresh feel" if clicking same lang
-  GLOBAL_LANG = lang;
+  GLOBAL_LANG = lang || "en";
   localStorage.setItem(LS_GLOBAL_LANG, GLOBAL_LANG);
 
   document.querySelectorAll('.welcome-lang-btn').forEach(btn => {
@@ -1105,14 +1095,13 @@ function setGlobalLang(lang){
   applyGlobalTranslations();
 }
 
-/* Router */
+/* Router (NO persistence) */
 function showApp(app){
   const welcome = document.getElementById('welcome-screen');
   const sepApp = document.getElementById('sep-app');
   const mihApp = document.getElementById('mih-app');
 
   if (app === 'sep'){
-    saveRoute({ app: "sep" });
     welcome && welcome.classList.add('hidden');
     mihApp && mihApp.classList.add('hidden');
     sepApp && sepApp.classList.remove('hidden');
@@ -1120,7 +1109,6 @@ function showApp(app){
     return;
   }
   if (app === 'mih'){
-    saveRoute({ app: "mih" });
     welcome && welcome.classList.add('hidden');
     sepApp && sepApp.classList.add('hidden');
     mihApp && mihApp.classList.remove('hidden');
@@ -1128,7 +1116,6 @@ function showApp(app){
     return;
   }
 
-  saveRoute({ app: "welcome" });
   sepApp && sepApp.classList.add('hidden');
   mihApp && mihApp.classList.add('hidden');
   welcome && welcome.classList.remove('hidden');
@@ -1303,7 +1290,7 @@ function backToMainMenu(){ showApp('welcome'); }
     return str;
   }
 
-  window.__SEP_SET_LANG = function(lang){
+  window.__SEP_SET_LANG = function(){
     const map = [
       ['menuTitle','menuTitle'],
       ['menuAboutBtn','navAboutSep'],
@@ -1403,7 +1390,7 @@ function backToMainMenu(){ showApp('welcome'); }
     }
 
     const sub = cartSubtotal(cart);
-    const total = sub + SHIPPING_DKK; // keep shipping always in total
+    const total = sub + SHIPPING_DKK; // total = subtotal + 45
     const subEl = document.getElementById('cartSubtotal');
     const totalEl = document.getElementById('cartTotal');
     if (subEl) subEl.textContent = `${sub} DKK`;
@@ -1558,37 +1545,20 @@ function backToMainMenu(){ showApp('welcome'); }
 
 <script>
 /* =========================================================
-   MIH LOGIC (Firebase + Scenes + Leaderboard + Delete)
-   KEY FIXES:
-   - NO ES MODULE IMPORTS inside a normal script
-   - Anonymous auth waits for uid
-   - User docs + entry docs include uid
-   - Legacy accounts get "claimed" by writing uid once
-   - Delete actually deletes the user doc
+   MIH LOGIC (Firebase + Scenes + Leaderboard + Soft Delete)
+   - NO "remember scene after refresh"
+   - Delete account works by updating the user doc to status="deleted"
 ========================================================= */
 
 const LS_MIH_USER = "mih_username_v2";
 const LS_MIH_PASS = "mih_password_v2";
+
 let MIH = {
   ready:false,
-  user:null,  // { name, password }
-  db:null
+  user:null,      // { name, password }
+  db:null,
+  uid:null
 };
-
-const firebaseConfig = {
-  apiKey: "AIzaSyAkbH3mJkeheF3L7EaqN1kMgbFd_LJCIXo",
-  authDomain: "hitachi-vantara-make-it-happen.firebaseapp.com",
-  projectId: "hitachi-vantara-make-it-happen",
-  storageBucket: "hitachi-vantara-make-it-happen.firebasestorage.app",
-  messagingSenderId: "749690169824",
-  appId: "1:749690169824:web:21d6b8d2a5862847e4e385",
-  measurementId: "G-7WZ03E68MF"
-};
-
-function mihUid(){
-  try { return firebase.auth().currentUser ? firebase.auth().currentUser.uid : null; }
-  catch { return null; }
-}
 
 function mihSetPills(){
   const pill = document.getElementById('mih-user-pill');
@@ -1602,7 +1572,6 @@ function mihShowScene(id){
   document.querySelectorAll('#mih-app .scene').forEach(s=>s.classList.remove('active'));
   const el = document.getElementById(id);
   if (el) el.classList.add('active');
-  saveRoute({ mihScene: id });
 }
 
 function mihOpenMenu(){
@@ -1630,16 +1599,22 @@ function fmtDate(ts){
 
 async function mihInitFirebase(){
   try{
+    const firebaseConfig = {
+      apiKey: "AIzaSyAkbH3mJkeheF3L7EaqN1kMgbFd_LJCIXo",
+      authDomain: "hitachi-vantara-make-it-happen.firebaseapp.com",
+      projectId: "hitachi-vantara-make-it-happen",
+      storageBucket: "hitachi-vantara-make-it-happen.firebasestorage.app",
+      messagingSenderId: "749690169824",
+      appId: "1:749690169824:web:21d6b8d2a5862847e4e385",
+      measurementId: "G-7WZ03E68MF"
+    };
+
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     MIH.db = firebase.firestore();
 
-    try{
-      await firebase.auth().signInAnonymously();
-      await new Promise(res => firebase.auth().onAuthStateChanged(()=>res()));
-    }catch(e){
-      // If anonymous auth fails, Firestore rules that need uid won't work.
-      console.warn("Anonymous auth failed:", e);
-    }
+    // Anonymous auth so request.auth exists in rules (if you use rules with auth)
+    const cred = await firebase.auth().signInAnonymously();
+    MIH.uid = cred?.user?.uid || firebase.auth().currentUser?.uid || null;
 
     MIH.ready = true;
   }catch(err){
@@ -1655,12 +1630,6 @@ async function mihLoginOrCreate(username, password){
   const pass = (password || "").trim();
   if (!name || !pass) { toast(GT('errLoginMissing'), false); return; }
 
-  const uid = mihUid();
-  if (!uid){
-    toast("Auth not ready (no uid). Refresh once and try again.", false);
-    return;
-  }
-
   const userRef = MIH.db.collection('mih_users_v2').doc(name);
   const snap = await userRef.get();
 
@@ -1675,14 +1644,12 @@ async function mihLoginOrCreate(username, password){
       return;
     }
 
-    // ✅ Claim legacy account (no uid) OR fix mismatched uid
-    if (!data.uid || data.uid !== uid){
-      try{
-        await userRef.update({ uid, name, password: pass });
-      }catch(e){
-        console.warn("Claim/update uid failed:", e);
+    // Optional patch: ensure uid/name exist (helps if your rules require them)
+    try{
+      if (!data.uid || !data.name){
+        await userRef.set({ uid: MIH.uid || null, name }, { merge:true });
       }
-    }
+    }catch(e){ /* ignore */ }
 
     MIH.user = { name, password: pass };
     localStorage.setItem(LS_MIH_USER, name);
@@ -1696,7 +1663,7 @@ async function mihLoginOrCreate(username, password){
 
   // create new
   await userRef.set({
-    uid,
+    uid: MIH.uid || null,
     name,
     password: pass,
     status: "active",
@@ -1736,9 +1703,6 @@ async function mihAddActivity(km, minutes){
   if (!MIH.user?.name) { toast(GT('errMustLogin'), false); return; }
   if (!MIH.ready) { toast(GT('errFirebase'), false); return; }
 
-  const uid = mihUid();
-  if (!uid) { toast("No uid. Refresh and try again.", false); return; }
-
   const k = Number(km);
   const m = Number(minutes);
   if (!(k > 0) || !(m > 0)) { toast(GT('errActivityInvalid'), false); return; }
@@ -1749,15 +1713,8 @@ async function mihAddActivity(km, minutes){
   const entryRef = MIH.db.collection('mih_entries_v2').doc();
   const userRef = MIH.db.collection('mih_users_v2').doc(username);
 
-  // Ensure user doc has uid (important for rules)
-  try{
-    await userRef.update({ uid, name: username, password: MIH.user.password });
-  }catch(e){
-    // ignore - might already be correct, or rules might block if config differs
-  }
-
   const batch = MIH.db.batch();
-  batch.set(entryRef, { uid, username, km: k, minutes: m, ts });
+  batch.set(entryRef, { uid: MIH.uid || null, username, km: k, minutes: m, ts });
   batch.update(userRef, {
     totalKm: firebase.firestore.FieldValue.increment(k),
     totalMin: firebase.firestore.FieldValue.increment(m),
@@ -1981,28 +1938,30 @@ function mihCloseProfile(){
   document.getElementById('mihProfilePanel')?.classList.remove('show');
 }
 
-async function mihDeleteAccount(){
+async function mihSoftDeleteAccount(){
   if (!MIH.user?.name) return;
 
   const ok = confirm(GT('confirmDelete'));
   if (!ok) return;
 
   try{
-    const uid = mihUid();
     const ref = MIH.db.collection('mih_users_v2').doc(MIH.user.name);
 
-    // Make sure doc has uid before delete (helps rules)
-    try{
-      await ref.update({ uid, name: MIH.user.name, password: MIH.user.password });
-    }catch(e){ /* ignore */ }
+    // Set status="deleted" but keep other fields (merge) so it passes stricter rules more often
+    await ref.set({
+      uid: MIH.uid || null,
+      name: MIH.user.name,
+      password: MIH.user.password,
+      status: "deleted",
+      deletedAt: Date.now()
+    }, { merge:true });
 
-    await ref.delete();
     toast(GT('deletedOk'), true);
     mihLogout();
     await mihRefreshAll();
-  }catch(e){
-    console.error(e);
-    toast("Delete failed (check Firestore rules for uid).", false);
+  }catch(err){
+    console.error(err);
+    toast(GT('deletedErr'), false);
   }
 }
 
@@ -2010,6 +1969,7 @@ async function mihRefreshAll(){
   if (!MIH.ready) return;
   await mihLoadLeaderboard();
   await mihLoadProfiles();
+
   if (MIH.user?.name){
     await mihLoadMyRecent();
     await mihLoadMyStatsAndHistory();
@@ -2017,9 +1977,11 @@ async function mihRefreshAll(){
 }
 
 document.addEventListener('DOMContentLoaded', async ()=>{
+  // Welcome buttons
   document.getElementById('welcomeSepBtn')?.addEventListener('click', openSep);
   document.getElementById('welcomeMihBtn')?.addEventListener('click', openMih);
 
+  // Language buttons
   document.querySelectorAll('.welcome-lang-btn').forEach(btn=>{
     btn.addEventListener('click', ()=> setGlobalLang(btn.getAttribute('data-lang')));
   });
@@ -2030,12 +1992,14 @@ document.addEventListener('DOMContentLoaded', async ()=>{
     btn.addEventListener('click', ()=> setGlobalLang(btn.getAttribute('data-lang')));
   });
 
+  // MIH menu
   document.getElementById('mihMenuToggle')?.addEventListener('click', mihOpenMenu);
   document.getElementById('mihMenuClose')?.addEventListener('click', mihCloseMenu);
   document.getElementById('mihMenuOverlay')?.addEventListener('click', mihCloseMenu);
 
   document.getElementById('mihExitBtn')?.addEventListener('click', ()=>{ mihCloseMenu(); backToMainMenu(); });
 
+  // Scene nav from menu
   document.querySelectorAll('[data-mih-scene]').forEach(btn=>{
     btn.addEventListener('click', async ()=>{
       const scene = btn.getAttribute('data-mih-scene');
@@ -2049,6 +2013,7 @@ document.addEventListener('DOMContentLoaded', async ()=>{
     });
   });
 
+  // Login / activity
   document.getElementById('mih-login-btn')?.addEventListener('click', async ()=>{
     const u = document.getElementById('mih-username')?.value || "";
     const p = document.getElementById('mih-password')?.value || "";
@@ -2061,6 +2026,7 @@ document.addEventListener('DOMContentLoaded', async ()=>{
     await mihAddActivity(km, min);
   });
 
+  // View saved password
   document.getElementById('mih-view-saved-pass')?.addEventListener('click', ()=>{
     const box = document.getElementById('mih-saved-pass-display');
     if (!box) return;
@@ -2069,32 +2035,20 @@ document.addEventListener('DOMContentLoaded', async ()=>{
     box.textContent = p ? GT('mihSavedShow', { password: p }) : GT('mihSavedNone');
   });
 
+  // Logout / delete
   document.getElementById('mihLogoutBtn')?.addEventListener('click', ()=>{ mihCloseMenu(); mihLogout(); });
-  document.getElementById('mihDeleteAccountBtn')?.addEventListener('click', async ()=>{ mihCloseMenu(); await mihDeleteAccount(); });
+  document.getElementById('mihDeleteAccountBtn')?.addEventListener('click', async ()=>{ mihCloseMenu(); await mihSoftDeleteAccount(); });
 
+  // Profile close
   document.getElementById('mihProfileClose')?.addEventListener('click', mihCloseProfile);
 
-  // Init lang (no "refresh feel" if same)
-  document.querySelectorAll('.welcome-lang-btn').forEach(btn => btn.classList.toggle('active', btn.getAttribute('data-lang') === GLOBAL_LANG));
-  document.querySelectorAll('.mih-lang-btn').forEach(btn => btn.classList.toggle('active', btn.getAttribute('data-lang') === GLOBAL_LANG));
-  document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.toggle('active', btn.getAttribute('data-lang') === GLOBAL_LANG));
-  if (window.__SEP_SET_LANG) window.__SEP_SET_LANG(GLOBAL_LANG);
-  applyGlobalTranslations();
+  // Init lang (this does NOT change scenes)
+  setGlobalLang(GLOBAL_LANG);
 
   // Init Firebase
   await mihInitFirebase();
 
-  // Restore route
-  const r = loadRoute();
-  if (r.app === "sep") showApp("sep");
-  else if (r.app === "mih") showApp("mih");
-  else showApp("welcome");
-
-  if (r.app === "mih" && r.mihScene){
-    mihShowScene(r.mihScene);
-  }
-
-  // Restore login
+  // Restore login (optional) — keeps working, but it will NOT force you back into MIH on refresh
   const savedUser = localStorage.getItem(LS_MIH_USER);
   const savedPass = localStorage.getItem(LS_MIH_PASS);
   if (savedUser && savedPass){
@@ -2109,6 +2063,11 @@ document.addEventListener('DOMContentLoaded', async ()=>{
   mihSetPills();
   mihUpdateMenuButtons();
 
+  // IMPORTANT: Always start on welcome after refresh (no route persistence)
+  showApp("welcome");
+  mihShowScene("mih-login");
+
+  // Initial loads
   if (MIH.ready){
     await mihRefreshAll();
   }
