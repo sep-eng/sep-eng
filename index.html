@@ -15,7 +15,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 
-  <!-- Firebase (MIH) -->
+  <!-- Firebase (MIH) - COMPAT -->
   <script src="https://www.gstatic.com/firebasejs/11.0.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/11.0.0/firebase-auth-compat.js"></script>
@@ -367,7 +367,6 @@
   <div id="menuPanel" class="fixed top-0 right-0 h-full w-64 bg-black/90 text-white transform translate-x-full z-40 flex flex-col">
     <div class="p-5 border-b border-white/10 flex justify-between items-center">
       <span id="menuTitle" class="text-sm tracking-wide">SEP Menu</span>
-      <button id="menuClose" type="button" class="px-3 py-1 rounded-full bg-white/10 border border-white/20 text-xs">✕</button>
     </div>
     <div class="p-5 space-y-4 text-sm">
       <div>
@@ -845,8 +844,8 @@ const GLOBAL_TRANSLATIONS = {
     errActivityInvalid: "Please enter valid km and minutes.",
     noEntries: "No entries yet.",
     noPlayers: "No players yet.",
-    confirmDelete: "Are you sure? This will remove you from leaderboard (entries stay, but hidden).",
-    deletedOk: "Account deleted (hidden)."
+    confirmDelete: "Are you sure? This will delete your account from the leaderboard.",
+    deletedOk: "Account deleted."
   },
   da: {
     welcomeTitle: "SEP",
@@ -931,8 +930,8 @@ const GLOBAL_TRANSLATIONS = {
     errActivityInvalid: "Indtast gyldige km og minutter.",
     noEntries: "Ingen entries endnu.",
     noPlayers: "Ingen spillere endnu.",
-    confirmDelete: "Er du sikker? Det fjerner dig fra leaderboard (entries bliver, men skjult).",
-    deletedOk: "Konto slettet (skjult)."
+    confirmDelete: "Er du sikker? Det sletter din konto fra leaderboardet.",
+    deletedOk: "Konto slettet."
   },
   cs: {
     welcomeTitle: "SEP",
@@ -1017,8 +1016,8 @@ const GLOBAL_TRANSLATIONS = {
     errActivityInvalid: "Zadej platné km i minuty.",
     noEntries: "Zatím žádné záznamy.",
     noPlayers: "Zatím žádní hráči.",
-    confirmDelete: "Jsi si jistý? Odstraní tě to z leaderboardu (záznamy zůstanou, ale skryté).",
-    deletedOk: "Účet smazán (skrytý)."
+    confirmDelete: "Jsi si jistý? Smaže to tvůj účet z leaderboardu.",
+    deletedOk: "Účet smazán."
   }
 };
 
@@ -1087,7 +1086,9 @@ function applyGlobalTranslations(){
 }
 
 function setGlobalLang(lang){
-  GLOBAL_LANG = lang || "en";
+  if (!lang) lang = "en";
+  if (lang === GLOBAL_LANG) return; // ✅ stop "refresh feel" if clicking same lang
+  GLOBAL_LANG = lang;
   localStorage.setItem(LS_GLOBAL_LANG, GLOBAL_LANG);
 
   document.querySelectorAll('.welcome-lang-btn').forEach(btn => {
@@ -1402,7 +1403,7 @@ function backToMainMenu(){ showApp('welcome'); }
     }
 
     const sub = cartSubtotal(cart);
-    const total = sub + (sub > 0 ? SHIPPING_DKK : SHIPPING_DKK); // keep 45 even if empty (matches your UI)
+    const total = sub + SHIPPING_DKK; // keep shipping always in total
     const subEl = document.getElementById('cartSubtotal');
     const totalEl = document.getElementById('cartTotal');
     if (subEl) subEl.textContent = `${sub} DKK`;
@@ -1461,7 +1462,6 @@ function backToMainMenu(){ showApp('welcome'); }
     navigator.clipboard.writeText(msg).then(()=>{
       toast(ST('popupOrderCopied'), true);
     }).catch(()=>{
-      // fallback
       const ta = document.createElement('textarea');
       ta.value = msg;
       document.body.appendChild(ta);
@@ -1481,7 +1481,6 @@ function backToMainMenu(){ showApp('welcome'); }
       toast("Open MobilePay works on mobile.", false);
       return;
     }
-    // MobilePay deeplink varies by setup; keeping it simple:
     copyOrderMessage();
     alert("Copied your order message. Now open MobilePay and pay to box 5894BZ, then DM @seproairesis.");
   }
@@ -1518,9 +1517,7 @@ function backToMainMenu(){ showApp('welcome'); }
     }
   }
 
-  // Bind SEP handlers on DOM ready
   document.addEventListener('DOMContentLoaded', ()=>{
-    // Add-to-cart
     document.querySelectorAll('.add-to-cart').forEach(btn=>{
       btn.addEventListener('click', ()=>{
         const card = btn.closest('.product-card');
@@ -1538,22 +1535,18 @@ function backToMainMenu(){ showApp('welcome'); }
       });
     });
 
-    // Cart open/close
     document.getElementById('viewCartBtn')?.addEventListener('click', openCart);
     document.getElementById('closeCart')?.addEventListener('click', closeCart);
     document.getElementById('cartOverlay')?.addEventListener('click', closeCart);
     document.getElementById('copyMobilePay')?.addEventListener('click', copyOrderMessage);
     document.getElementById('openMobilePay')?.addEventListener('click', openMobilePay);
 
-    // About
     document.getElementById('menuAboutBtn')?.addEventListener('click', ()=>{ closeSepMenu(); openSepAbout(); });
     document.getElementById('aboutBackBtn')?.addEventListener('click', backToShop);
 
-    // Exit
     document.getElementById('sepExitBtn')?.addEventListener('click', ()=>{ closeSepMenu(); backToMainMenu(); });
     document.getElementById('sepExitBtn2')?.addEventListener('click', backToMainMenu);
 
-    // SEP menu open/close
     document.getElementById('menuToggle')?.addEventListener('click', openSepMenu);
     document.getElementById('menuClose')?.addEventListener('click', closeSepMenu);
     document.getElementById('menuOverlay')?.addEventListener('click', closeSepMenu);
@@ -1565,7 +1558,13 @@ function backToMainMenu(){ showApp('welcome'); }
 
 <script>
 /* =========================================================
-   MIH LOGIC (Firebase + Scenes + Leaderboard + Soft Delete)
+   MIH LOGIC (Firebase + Scenes + Leaderboard + Delete)
+   KEY FIXES:
+   - NO ES MODULE IMPORTS inside a normal script
+   - Anonymous auth waits for uid
+   - User docs + entry docs include uid
+   - Legacy accounts get "claimed" by writing uid once
+   - Delete actually deletes the user doc
 ========================================================= */
 
 const LS_MIH_USER = "mih_username_v2";
@@ -1575,6 +1574,21 @@ let MIH = {
   user:null,  // { name, password }
   db:null
 };
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAkbH3mJkeheF3L7EaqN1kMgbFd_LJCIXo",
+  authDomain: "hitachi-vantara-make-it-happen.firebaseapp.com",
+  projectId: "hitachi-vantara-make-it-happen",
+  storageBucket: "hitachi-vantara-make-it-happen.firebasestorage.app",
+  messagingSenderId: "749690169824",
+  appId: "1:749690169824:web:21d6b8d2a5862847e4e385",
+  measurementId: "G-7WZ03E68MF"
+};
+
+function mihUid(){
+  try { return firebase.auth().currentUser ? firebase.auth().currentUser.uid : null; }
+  catch { return null; }
+}
 
 function mihSetPills(){
   const pill = document.getElementById('mih-user-pill');
@@ -1604,7 +1618,7 @@ function paceStr(km, minutes){
   const m = Number(minutes)||0;
   const k = Number(km)||0;
   if (k <= 0 || m <= 0) return "0:00";
-  const pace = m / k; // minutes per km
+  const pace = m / k;
   const mm = Math.floor(pace);
   const ss = Math.round((pace - mm) * 60);
   return `${mm}:${String(ss).padStart(2,'0')}`;
@@ -1616,40 +1630,36 @@ function fmtDate(ts){
 
 async function mihInitFirebase(){
   try{
-    const firebaseConfig = {
-      apiKey: "AIzaSyAkbH3mJkeheF3L7EaqN1kMgbFd_LJCIXo",
-      authDomain: "hitachi-vantara-make-it-happen.firebaseapp.com",
-      projectId: "hitachi-vantara-make-it-happen",
-      storageBucket: "hitachi-vantara-make-it-happen.firebasestorage.app",
-      messagingSenderId: "749690169824",
-      appId: "1:749690169824:web:21d6b8d2a5862847e4e385",
-      measurementId: "G-7WZ03E68MF"
-    };
-
-    // Prevent double-init if the page reloads / hot refresh etc
-    if (!firebase.apps || !firebase.apps.length) {
-      firebase.initializeApp(firebaseConfig);
-    }
-
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     MIH.db = firebase.firestore();
 
-    // Optional
-    try { await firebase.auth().signInAnonymously(); } catch(e){}
+    try{
+      await firebase.auth().signInAnonymously();
+      await new Promise(res => firebase.auth().onAuthStateChanged(()=>res()));
+    }catch(e){
+      // If anonymous auth fails, Firestore rules that need uid won't work.
+      console.warn("Anonymous auth failed:", e);
+    }
 
     MIH.ready = true;
-  } catch (err) {
+  }catch(err){
     console.error(err);
     toast(GT('errFirebase'), false);
     MIH.ready = false;
   }
 }
 
-
 async function mihLoginOrCreate(username, password){
   if (!MIH.ready) { toast(GT('errFirebase'), false); return; }
   const name = (username || "").trim();
   const pass = (password || "").trim();
   if (!name || !pass) { toast(GT('errLoginMissing'), false); return; }
+
+  const uid = mihUid();
+  if (!uid){
+    toast("Auth not ready (no uid). Refresh once and try again.", false);
+    return;
+  }
 
   const userRef = MIH.db.collection('mih_users_v2').doc(name);
   const snap = await userRef.get();
@@ -1664,6 +1674,16 @@ async function mihLoginOrCreate(username, password){
       toast(GT('errWrongPass'), false);
       return;
     }
+
+    // ✅ Claim legacy account (no uid) OR fix mismatched uid
+    if (!data.uid || data.uid !== uid){
+      try{
+        await userRef.update({ uid, name, password: pass });
+      }catch(e){
+        console.warn("Claim/update uid failed:", e);
+      }
+    }
+
     MIH.user = { name, password: pass };
     localStorage.setItem(LS_MIH_USER, name);
     localStorage.setItem(LS_MIH_PASS, pass);
@@ -1676,6 +1696,7 @@ async function mihLoginOrCreate(username, password){
 
   // create new
   await userRef.set({
+    uid,
     name,
     password: pass,
     status: "active",
@@ -1715,6 +1736,9 @@ async function mihAddActivity(km, minutes){
   if (!MIH.user?.name) { toast(GT('errMustLogin'), false); return; }
   if (!MIH.ready) { toast(GT('errFirebase'), false); return; }
 
+  const uid = mihUid();
+  if (!uid) { toast("No uid. Refresh and try again.", false); return; }
+
   const k = Number(km);
   const m = Number(minutes);
   if (!(k > 0) || !(m > 0)) { toast(GT('errActivityInvalid'), false); return; }
@@ -1722,11 +1746,18 @@ async function mihAddActivity(km, minutes){
   const username = MIH.user.name;
   const ts = Date.now();
 
-  const entryRef = MIH.db.collection('mih_entries_v2').doc(); // random ID
+  const entryRef = MIH.db.collection('mih_entries_v2').doc();
   const userRef = MIH.db.collection('mih_users_v2').doc(username);
 
+  // Ensure user doc has uid (important for rules)
+  try{
+    await userRef.update({ uid, name: username, password: MIH.user.password });
+  }catch(e){
+    // ignore - might already be correct, or rules might block if config differs
+  }
+
   const batch = MIH.db.batch();
-  batch.set(entryRef, { username, km: k, minutes: m, ts });
+  batch.set(entryRef, { uid, username, km: k, minutes: m, ts });
   batch.update(userRef, {
     totalKm: firebase.firestore.FieldValue.increment(k),
     totalMin: firebase.firestore.FieldValue.increment(m),
@@ -1785,7 +1816,6 @@ async function mihLoadMyStatsAndHistory(){
   const histBody = document.getElementById('mih-history-body');
 
   if (histBody) histBody.innerHTML = "";
-
   if (!MIH.user?.name) return;
 
   const userSnap = await MIH.db.collection('mih_users_v2').doc(MIH.user.name).get();
@@ -1834,7 +1864,7 @@ async function mihLoadLeaderboard(){
   let users = [];
   snap.forEach(doc=>{
     const u = doc.data() || {};
-    if (u.status === "deleted") return; // hidden
+    if (u.status === "deleted") return;
     users.push({
       name: doc.id,
       totalKm: Number(u.totalKm||0),
@@ -1872,7 +1902,7 @@ async function mihLoadProfiles(){
   let users = [];
   snap.forEach(doc=>{
     const u = doc.data() || {};
-    if (u.status === "deleted") return; // hidden
+    if (u.status === "deleted") return;
     users.push({
       id: doc.id,
       totalKm: Number(u.totalKm||0),
@@ -1951,33 +1981,35 @@ function mihCloseProfile(){
   document.getElementById('mihProfilePanel')?.classList.remove('show');
 }
 
-async function mihSoftDeleteAccount(){
+async function mihDeleteAccount(){
   if (!MIH.user?.name) return;
 
   const ok = confirm(GT('confirmDelete'));
   if (!ok) return;
 
-  // This is a "soft delete" because Firestore rules can't password-check a real delete safely.
-  const ref = MIH.db.collection('mih_users_v2').doc(MIH.user.name);
+  try{
+    const uid = mihUid();
+    const ref = MIH.db.collection('mih_users_v2').doc(MIH.user.name);
 
-  // Must keep password the same (rules require password match).
-  await ref.update({
-    status: "deleted",
-    deletedAt: Date.now()
-  });
+    // Make sure doc has uid before delete (helps rules)
+    try{
+      await ref.update({ uid, name: MIH.user.name, password: MIH.user.password });
+    }catch(e){ /* ignore */ }
 
-  toast(GT('deletedOk'), true);
-  mihLogout();
-  await mihRefreshAll();
+    await ref.delete();
+    toast(GT('deletedOk'), true);
+    mihLogout();
+    await mihRefreshAll();
+  }catch(e){
+    console.error(e);
+    toast("Delete failed (check Firestore rules for uid).", false);
+  }
 }
 
 async function mihRefreshAll(){
   if (!MIH.ready) return;
-  // these are safe even if not logged in
   await mihLoadLeaderboard();
   await mihLoadProfiles();
-
-  // logged-in bits
   if (MIH.user?.name){
     await mihLoadMyRecent();
     await mihLoadMyStatsAndHistory();
@@ -1985,11 +2017,9 @@ async function mihRefreshAll(){
 }
 
 document.addEventListener('DOMContentLoaded', async ()=>{
-  // Welcome buttons
   document.getElementById('welcomeSepBtn')?.addEventListener('click', openSep);
   document.getElementById('welcomeMihBtn')?.addEventListener('click', openMih);
 
-  // Language buttons
   document.querySelectorAll('.welcome-lang-btn').forEach(btn=>{
     btn.addEventListener('click', ()=> setGlobalLang(btn.getAttribute('data-lang')));
   });
@@ -2000,21 +2030,18 @@ document.addEventListener('DOMContentLoaded', async ()=>{
     btn.addEventListener('click', ()=> setGlobalLang(btn.getAttribute('data-lang')));
   });
 
-  // MIH menu buttons
   document.getElementById('mihMenuToggle')?.addEventListener('click', mihOpenMenu);
   document.getElementById('mihMenuClose')?.addEventListener('click', mihCloseMenu);
   document.getElementById('mihMenuOverlay')?.addEventListener('click', mihCloseMenu);
 
   document.getElementById('mihExitBtn')?.addEventListener('click', ()=>{ mihCloseMenu(); backToMainMenu(); });
 
-  // Scene nav from menu
   document.querySelectorAll('[data-mih-scene]').forEach(btn=>{
     btn.addEventListener('click', async ()=>{
       const scene = btn.getAttribute('data-mih-scene');
       mihCloseMenu();
       mihShowScene(scene);
 
-      // refresh on view
       if (scene === "mih-leaderboard") await mihLoadLeaderboard();
       if (scene === "mih-profiles") await mihLoadProfiles();
       if (scene === "mih-stats") await mihLoadMyStatsAndHistory();
@@ -2022,7 +2049,6 @@ document.addEventListener('DOMContentLoaded', async ()=>{
     });
   });
 
-  // Login / activity
   document.getElementById('mih-login-btn')?.addEventListener('click', async ()=>{
     const u = document.getElementById('mih-username')?.value || "";
     const p = document.getElementById('mih-password')?.value || "";
@@ -2035,7 +2061,6 @@ document.addEventListener('DOMContentLoaded', async ()=>{
     await mihAddActivity(km, min);
   });
 
-  // View saved password
   document.getElementById('mih-view-saved-pass')?.addEventListener('click', ()=>{
     const box = document.getElementById('mih-saved-pass-display');
     if (!box) return;
@@ -2044,25 +2069,35 @@ document.addEventListener('DOMContentLoaded', async ()=>{
     box.textContent = p ? GT('mihSavedShow', { password: p }) : GT('mihSavedNone');
   });
 
-  // Logout / delete
   document.getElementById('mihLogoutBtn')?.addEventListener('click', ()=>{ mihCloseMenu(); mihLogout(); });
-  document.getElementById('mihDeleteAccountBtn')?.addEventListener('click', async ()=>{ mihCloseMenu(); await mihSoftDeleteAccount(); });
+  document.getElementById('mihDeleteAccountBtn')?.addEventListener('click', async ()=>{ mihCloseMenu(); await mihDeleteAccount(); });
 
-  // Profile close
   document.getElementById('mihProfileClose')?.addEventListener('click', mihCloseProfile);
 
-  // Init lang
-  setGlobalLang(GLOBAL_LANG);
+  // Init lang (no "refresh feel" if same)
+  document.querySelectorAll('.welcome-lang-btn').forEach(btn => btn.classList.toggle('active', btn.getAttribute('data-lang') === GLOBAL_LANG));
+  document.querySelectorAll('.mih-lang-btn').forEach(btn => btn.classList.toggle('active', btn.getAttribute('data-lang') === GLOBAL_LANG));
+  document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.toggle('active', btn.getAttribute('data-lang') === GLOBAL_LANG));
+  if (window.__SEP_SET_LANG) window.__SEP_SET_LANG(GLOBAL_LANG);
+  applyGlobalTranslations();
 
   // Init Firebase
   await mihInitFirebase();
 
+  // Restore route
+  const r = loadRoute();
+  if (r.app === "sep") showApp("sep");
+  else if (r.app === "mih") showApp("mih");
+  else showApp("welcome");
+
+  if (r.app === "mih" && r.mihScene){
+    mihShowScene(r.mihScene);
+  }
+
   // Restore login
   const savedUser = localStorage.getItem(LS_MIH_USER);
   const savedPass = localStorage.getItem(LS_MIH_PASS);
-
   if (savedUser && savedPass){
-    // Try silent login
     try{
       await mihLoginOrCreate(savedUser, savedPass);
     }catch(e){
@@ -2074,18 +2109,6 @@ document.addEventListener('DOMContentLoaded', async ()=>{
   mihSetPills();
   mihUpdateMenuButtons();
 
-  // Restore route
-  const r = loadRoute();
-  if (r.app === "sep") showApp("sep");
-  else if (r.app === "mih") showApp("mih");
-  else showApp("welcome");
-
-  // Restore MIH scene if in MIH app
-  if (r.app === "mih" && r.mihScene){
-    mihShowScene(r.mihScene);
-  }
-
-  // Initial loads
   if (MIH.ready){
     await mihRefreshAll();
   }
