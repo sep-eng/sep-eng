@@ -1,2220 +1,811 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SEP & Make It Happen</title>
-  <meta name="description" content="SEP clothing and Make It Happen health challenge." />
-  <link rel="icon" href="https://upload.wikimedia.org/wikipedia/commons/3/3f/Black_square.jpg">
-
-  <!-- Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-  <!-- Tailwind + GSAP (SEP) -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-
-  <!-- Firebase (MIH) -->
-  <script src="https://www.gstatic.com/firebasejs/11.0.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore-compat.js"></script>
-
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <title>Receipt Run</title>
   <style>
-  body{
-    margin:0;
-    font-family:'Inter',sans-serif;
-    background:linear-gradient(to bottom,#000,#fff);
-    color:#111;
-    scroll-behavior:smooth;
-  }
+    :root { color-scheme: dark; }
+    html, body { margin:0; height:100%; background:#06070a; overflow:hidden; font-family: system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif; }
+    canvas { display:block; width:100vw; height:100vh; }
 
-  /* Make .hidden work instantly (before Tailwind loads) */
-  .hidden { display: none !important; }
-
-  button,a{transition:all .25s ease;}
-  button:hover,a:hover{transform:translateY(-2px);}
-
-    button,a{transition:all .25s ease;}
-    button:hover,a:hover{transform:translateY(-2px);}
-
-    .popup{
-      position:fixed;top:20px;right:20px;
-      background:#16a34a;color:#fff;padding:10px 16px;border-radius:8px;
-      opacity:0;transition:opacity .3s;z-index:1000;
-      pointer-events:none;
+    /* HUD */
+    .hud {
+      position: fixed; inset: 0; pointer-events: none;
+      display:flex; align-items:flex-start; justify-content:space-between;
+      padding: 12px; gap: 12px;
+      color: rgba(245,245,255,0.92);
+      text-shadow: 0 2px 16px rgba(0,0,0,0.55);
+      font-size: 14px;
     }
-    .popup.show{opacity:1;}
-
-    .fade-section{opacity:0;transform:translateY(30px);}
-
-    #cartSidebar{color:#000;}
-
-    /* Utility: prevent invisible layers stealing clicks */
-    .pointer-none{pointer-events:none !important;}
-    .pointer-auto{pointer-events:auto !important;}
-
-    /* Burger menu styles (SEP) */
-    #menuToggle {
-      position:fixed;
-      top:16px;
-      right:16px;
-      z-index:60;
-      background:rgba(0,0,0,.6);
-      color:#fff;
-      border-radius:9999px;
-      padding:10px 12px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
+    .panel {
+      pointer-events: none;
+      background: rgba(10,12,18,0.55);
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 14px;
+      padding: 10px 12px;
+      backdrop-filter: blur(10px);
+      max-width: 560px;
     }
-    .menu-line {
-      width:20px;
-      height:2px;
-      background:#fff;
-      margin:2px 0;
-    }
-    #menuPanel {
-      transition:transform .3s ease;
+    .title { font-weight: 850; letter-spacing: 0.4px; }
+    .muted { opacity: 0.78; }
+    .kbd {
+      display:inline-block; padding: 1px 6px; border-radius: 7px;
+      border: 1px solid rgba(255,255,255,0.18);
+      background: rgba(255,255,255,0.06);
+      font-weight: 750; font-size: 12px; transform: translateY(-1px);
     }
 
-    /* Global welcome screen */
-    #welcome-screen{
-      min-height:100vh;
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      justify-content:center;
-      text-align:center;
-      padding:2rem;
-      background:radial-gradient(circle at top,#222,#000);
-      color:#fff;
+    /* Controls (touch-friendly) */
+    .controls {
+      position: fixed; left: 12px; right: 12px; bottom: 12px;
+      display:flex; gap: 10px; justify-content: space-between; flex-wrap: wrap;
+      pointer-events: auto;
+      user-select: none;
     }
-    #welcome-screen h1{
-      font-size:2.5rem;
-      margin-bottom:1rem;
-      color:#f5f5f5;
+    .btn {
+      flex: 1 1 140px;
+      min-width: 140px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.06);
+      color: rgba(245,245,255,0.92);
+      padding: 12px 12px;
+      font-weight: 800;
+      letter-spacing: 0.2px;
+      box-shadow: 0 14px 60px rgba(0,0,0,0.35);
+      backdrop-filter: blur(10px);
+      cursor: pointer;
     }
-    #welcome-screen p{
-      max-width:520px;
-      color:#e6e6e6;
-      margin-bottom:2rem;
-    }
-    #welcome-screen .welcome-btn{
-      background:#fff;
-      color:#000;
-      border:none;
-      padding:0.9rem 1.8rem;
-      border-radius:9999px;
-      font-weight:600;
-      cursor:pointer;
-      margin:0.25rem;
-    }
-    #welcome-screen .welcome-secondary{
-      background:transparent;
-      border:1px solid #fff;
-      color:#fff;
-    }
-    #welcome-lang-row{
-      margin-top:18px;
-      display:flex;
-      gap:8px;
-      justify-content:center;
-      flex-wrap:wrap;
-    }
-    #welcome-lang-row button{
-      background:transparent;
-      border:1px solid rgba(255,255,255,.35);
-      color:#fff;
-      padding:6px 10px;
-      border-radius:9999px;
-      font-size:12px;
-      cursor:pointer;
-    }
-    #welcome-lang-row button.active{
-      background:#fff;
-      color:#000;
-      border-color:#fff;
-    }
+    .btn:active { transform: translateY(1px); }
+    .btn small { display:block; opacity: 0.75; font-weight: 650; margin-top: 2px; }
 
-    /* MAKE IT HAPPEN styles (scoped) */
-    #mih-app{
-      background:#000;
-      color:#f7f7f7;
-      min-height:100vh;
+    /* Overlay */
+    .overlay {
+      position: fixed; inset: 0; display:flex; align-items:center; justify-content:center;
+      padding: 22px; background: rgba(0,0,0,0.35);
+      backdrop-filter: blur(10px);
+      pointer-events: auto;
     }
-    #mih-app header{
-      display:flex;
-      justify-content:space-between;
-      gap:12px;
-      padding:12px 16px;
-      background:#111111;
-      border-bottom:1px solid #333333;
-      position:sticky;
-      top:0;
-      z-index:10;
-      align-items:center;
+    .card {
+      width: min(720px, 92vw);
+      background: rgba(9,10,16,0.78);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 18px;
+      padding: 18px 18px 16px;
+      box-shadow: 0 20px 90px rgba(0,0,0,0.55);
+      color: rgba(245,245,255,0.92);
     }
-    #mih-app .scene{
-      display:none;
-      max-width:900px;
-      margin:auto;
-      padding:20px;
+    .card h1 { margin: 0 0 10px; font-size: 22px; }
+    .card p { margin: 0 0 10px; line-height: 1.45; opacity: 0.88; }
+    .row { display:flex; flex-wrap:wrap; gap: 10px; margin-top: 12px; }
+    .pill {
+      display:inline-flex; align-items:center; gap:8px;
+      padding: 8px 10px; border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.06);
+      font-weight: 750; font-size: 13px; opacity: 0.92;
     }
-    #mih-app .scene.active{display:block;}
-    #mih-app h1,#mih-app h2{color:#f5f5f5;}
-    #mih-app .btn{
-      background:#ffffff;
-      color:#000000;
-      border:none;
-      padding:10px 16px;
-      border-radius:6px;
-      cursor:pointer;
-      font-weight:600;
-      margin:8px 0;
-    }
-    #mih-app .btn-small{padding:6px 10px;font-size:14px;}
-    #mih-app .danger{background:#ef4444;color:#ffffff;}
-    #mih-app .input{
-      width:100%;
-      padding:10px;
-      margin:6px 0 14px;
-      border:1px solid #555;
-      border-radius:6px;
-      font-size:16px;
-      background:#111;
-      color:#f7f7f7;
-    }
-    #mih-app table{
-      width:100%;
-      border-collapse:collapse;
-      margin-top:14px;
-      background:#111111;
-    }
-    #mih-app th,#mih-app td{
-      padding:8px;
-      border-bottom:1px solid #333;
-      text-align:left;
-      color:#f7f7f7;
-      vertical-align:top;
-    }
-    #mih-app .muted{opacity:.8;}
-    #mih-app .chip{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding:8px 10px;
-      border:1px solid #333;
-      border-radius:9999px;
-      font-size:14px;
-      background:#0b0b0b;
-      flex-wrap:wrap;
-    }
-
-    /* MIH burger */
-    #mihMenuToggle{
-      position:relative;
-      z-index:60;
-      background:rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.18);
-      color:#fff;
-      border-radius:9999px;
-      padding:10px 12px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      cursor:pointer;
-    }
-    #mihMenuPanel{
-      position:fixed;
-      top:0; right:0;
-      height:100%;
-      width:280px;
-      background:rgba(0,0,0,.92);
-      border-left:1px solid rgba(255,255,255,.12);
-      transform:translateX(100%);
-      transition:transform .3s ease;
-      z-index:70;
-      display:flex;
-      flex-direction:column;
-      color:#fff;
-    }
-    #mihMenuPanel.open{ transform:translateX(0); }
-    #mihMenuOverlay{
-      position:fixed;
-      inset:0;
-      background:rgba(0,0,0,.5);
-      z-index:65;
-      display:none;
-    }
-    #mihMenuOverlay.open{ display:block; }
-    #mihMenuPanel .mihMenuTop{
-      padding:16px;
-      border-bottom:1px solid rgba(255,255,255,.12);
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-    }
-    #mihMenuPanel .mihMenuBody{
-      padding:16px;
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-      overflow:auto;
-    }
-    .mih-menu-btn{
-      width:100%;
-      text-align:left;
-      padding:10px 12px;
-      border-radius:10px;
-      background:rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.10);
-      color:#fff;
-      cursor:pointer;
-      font-size:14px;
-    }
-    .mih-menu-btn:hover{ background:rgba(255,255,255,.10); transform:none; }
-    .mih-menu-mini{
-      font-size:12px;
-      opacity:.85;
-      margin-top:4px;
-    }
-    .mih-menu-row{
-      display:flex;
-      gap:8px;
-      flex-wrap:wrap;
-    }
-    .mih-lang-btn{
-      background:transparent;
-      border:1px solid rgba(255,255,255,.25);
-      color:#fff;
-      padding:6px 10px;
-      border-radius:9999px;
-      font-size:12px;
-      cursor:pointer;
-    }
-    .mih-lang-btn.active{ background:#fff; color:#000; border-color:#fff; }
-
-    /* Profile drawer */
-    #mihProfilePanel{
-      border:1px solid #333;
-      border-radius:12px;
-      padding:14px;
-      background:#0b0b0b;
-      margin-top:14px;
-      display:none;
-    }
-    #mihProfilePanel.show{ display:block; }
-    #mihProfilePanel .row{
-      display:flex;
-      justify-content:space-between;
-      gap:12px;
-      padding:6px 0;
-      border-bottom:1px solid rgba(255,255,255,.08);
-    }
-    #mihProfilePanel .row:last-child{ border-bottom:none; }
+    .ok { color: rgba(170,255,200,0.95); }
+    .warn { color: rgba(255,220,140,0.95); }
+    .bad { color: rgba(255,130,150,0.95); }
   </style>
-
-  <script>
-    // GSAP fade-in for SEP sections
-    window.addEventListener('load',()=>{
-      if (window.gsap && window.ScrollTrigger) {
-        gsap.registerPlugin(ScrollTrigger);
-        gsap.utils.toArray('.fade-section').forEach(sec=>{
-          gsap.to(sec,{
-            opacity:1,y:0,duration:1,
-            scrollTrigger:{trigger:sec,start:'top 80%',once:true}
-          });
-        });
-      }
-    });
-  </script>
 </head>
-
 <body>
+<canvas id="c"></canvas>
 
-<!-- GLOBAL WELCOME SCREEN -->
-<section id="welcome-screen">
-  <h1 id="welcomeTitle">SEP</h1>
-  <p id="welcomeSubtitle">Your Choice. Either shop (SEP shop), or move (Make It Happen). That simple.</p>
-  <div>
-    <button class="welcome-btn" id="welcomeSepBtn" type="button">SEP shop</button>
-    <button class="welcome-btn welcome-secondary" id="welcomeMihBtn" type="button">Make It Happen</button>
+<div class="hud">
+  <div class="panel">
+    <div class="title">Receipt Run <span class="muted">· remember the rules, prep fast, scan clean</span></div>
+    <div id="hud1" class="muted">Score: 0 · Streak: 0 · Mult: x1.0 · Lives: 3</div>
+    <div id="hud2" class="muted">Speed: 1.0 · Focus: none</div>
   </div>
-  <div id="welcome-lang-row">
-    <button type="button" class="welcome-lang-btn" data-lang="en">English</button>
-    <button type="button" class="welcome-lang-btn" data-lang="da">Dansk</button>
-    <button type="button" class="welcome-lang-btn" data-lang="cs">Čeština</button>
+  <div class="panel muted" style="text-align:right">
+    <div>Keys: <span class="kbd">S</span> Scan · <span class="kbd">I</span> ID · <span class="kbd">D</span> Discount · <span class="kbd">B</span> Bag · <span class="kbd">W</span> Weigh · <span class="kbd">R</span> Reject</div>
+    <div>Tip: do actions in the “prep zone”, then scan in the scanner gate.</div>
   </div>
-</section>
-
-<!-- =========================================================
-     SEP APP
-========================================================= -->
-<div id="sep-app" class="hidden">
-
-  <!-- Burger menu button -->
-  <button id="menuToggle" aria-label="Open menu" type="button">
-    <div class="flex flex-col">
-      <span class="menu-line"></span>
-      <span class="menu-line"></span>
-      <span class="menu-line"></span>
-    </div>
-  </button>
-
-  <!-- Burger menu panel -->
-  <div id="menuPanel" class="fixed top-0 right-0 h-full w-64 bg-black/90 text-white transform translate-x-full z-40 flex flex-col">
-    <div class="p-5 border-b border-white/10 flex justify-between items-center">
-      <span id="menuTitle" class="text-sm tracking-wide">SEP Menu</span>
-    </div>
-    <div class="p-5 space-y-4 text-sm">
-      <div>
-        <p id="sepLangLabel" class="mb-2 font-semibold text-xs tracking-wide uppercase text-white/70">Language</p>
-        <div class="flex flex-wrap gap-2">
-          <button data-lang="en" class="lang-btn px-3 py-1 rounded-full border border-white/30 text-xs" type="button">English</button>
-          <button data-lang="da" class="lang-btn px-3 py-1 rounded-full border border-white/30 text-xs" type="button">Dansk</button>
-          <button data-lang="cs" class="lang-btn px-3 py-1 rounded-full border border-white/30 text-xs" type="button">Čeština</button>
-        </div>
-      </div>
-      <div class="pt-4 border-t border-white/10">
-        <p id="sepInfoLabel" class="mb-2 font-semibold text-xs tracking-wide uppercase text-white/70">Info</p>
-        <button id="menuAboutBtn" class="w-full text-left px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-sm" type="button">
-          About "SEP"
-        </button>
-      </div>
-      <div class="pt-4 border-t border-white/10">
-        <p id="sepExitLabel" class="mb-2 font-semibold text-xs tracking-wide uppercase text-white/70">Exit</p>
-        <button id="sepExitBtn" class="w-full text-left px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-sm" type="button">
-          Back to main menu
-        </button>
-      </div>
-    </div>
-  </div>
-  <div id="menuOverlay" class="fixed inset-0 bg-black/40 hidden pointer-none z-30"></div>
-
-  <!-- MAIN SCENE (shop) -->
-  <div id="sep-scene-main">
-    <header class="py-20 text-center fade-section">
-      <h1 id="heroTitle" class="theme-text text-5xl font-bold mb-4 text-white">
-        Clothes chosen for you.
-      </h1>
-      <p id="heroSubtitle" class="theme-text text-lg mb-8 text-white">
-        Your choice.
-      </p>
-      <div class="flex justify-center gap-4">
-        <a id="btnShopNow" href="#products" class="bg-white text-black px-6 py-3 rounded-full font-medium">Shop Now</a>
-        <button id="viewCartBtn" class="border border-white text-white px-6 py-3 rounded-full font-medium relative" type="button">
-          <span id="btnViewCart">View Cart</span>
-          <span id="cartCounter" class="absolute -top-2 -right-2 bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hidden">0</span>
-        </button>
-      </div>
-    </header>
-
-    <section id="products" class="py-20 px-6 fade-section">
-      <div class="text-center mb-12">
-        <h2 id="productsTitle" class="theme-text text-4xl font-bold mb-4 text-white">Two products. Three choices.</h2>
-        <p id="productsSubtitle" class="theme-text text-white">Our soft collection:</p>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-        <div class="product-card bg-white/10 p-6 rounded-xl shadow-md text-center backdrop-blur">
-          <img src="https://picsum.photos/1024/1024" class="w-full h-64 object-cover rounded mb-4" alt="White T-shirt">
-          <h3 id="product1Name" class="text-xl font-bold mb-2">SEP White T-shirt</h3>
-          <p class="mb-2">180 DKK</p>
-          <select class="theme-text border rounded px-3 py-2 mb-2 bg-transparent">
-            <option>XS</option><option>S</option><option>M</option><option>L</option><option>XL</option>
-          </select>
-          <div class="flex justify-center gap-2">
-            <input type="number" min="1" value="1" class="theme-text border rounded w-16 text-center bg-transparent quantity-selector">
-            <button class="add-to-cart bg-white text-black px-4 py-2 rounded" data-i18n-btn="addToCart" type="button">Add</button>
-          </div>
-        </div>
-
-        <div class="product-card bg-white/10 p-6 rounded-xl shadow-md text-center backdrop-blur">
-          <img src="https://picsum.photos/1024/1024" class="w-full h-64 object-cover rounded mb-4" alt="Black Hoodie">
-          <h3 id="product2Name" class="text-xl font-bold mb-2">SEP Sweater</h3>
-          <p class="mb-2">180 DKK</p>
-          <select class="theme-text border rounded px-3 py-2 mb-2 bg-transparent">
-            <option>XS</option><option>S</option><option>M</option><option>L</option><option>XL</option>
-          </select>
-          <div class="flex justify-center gap-2">
-            <input type="number" min="1" value="1" class="theme-text border rounded w-16 text-center bg-transparent quantity-selector">
-            <button class="add-to-cart bg-white text-black px-4 py-2 rounded" data-i18n-btn="addToCart" type="button">Add</button>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="py-20 text-center fade-section">
-      <h2 id="howToOrderTitle" class="text-3xl font-bold mb-10">How to Order</h2>
-      <div class="grid grid-cols-1 md:grid-cols-5 gap-6 max-w-6xl mx-auto text-sm md:text-base">
-        <div class="bg-white/10 rounded-xl p-6 backdrop-blur">
-          <h3 id="step1Title" class="font-bold text-lg mb-2">1. Choose</h3>
-          <p id="howStep1">Select your favourite SEP piece - T-shirt or Sweater - then pick your size and quantity.</p>
-        </div>
-        <div class="bg-white/10 rounded-xl p-6 backdrop-blur">
-          <h3 id="step2Title" class="font-bold text-lg mb-2">2. Add to Cart</h3>
-          <p id="howStep2">Click “Add” to add your chosen items to your cart. When ready, click “View Cart” to review your order.</p>
-        </div>
-        <div class="bg-white/10 rounded-xl p-6 backdrop-blur">
-          <h3 id="step3Title" class="font-bold text-lg mb-2">3. Copy Order Message</h3>
-          <p id="howStep3">Inside your cart, press “Copy Order Message”. This copies your full order, including shipping, automatically.</p>
-        </div>
-        <div class="bg-white/10 rounded-xl p-6 backdrop-blur">
-          <h3 id="step4Title" class="font-bold text-lg mb-2">4. Pay with MobilePay</h3>
-          <p id="howStep4">Send the total amount (incl. +45 DKK shipping, free in copenhagen.) to <b>5894BZ</b> using MobilePay.<br><span class="text-xs italic">“Open MobilePay” works only on mobile devices.</span></p>
-        </div>
-        <div class="bg-white/10 rounded-xl p-6 backdrop-blur">
-          <h3 id="step5Title" class="font-bold text-lg mb-2">5. Send us your order</h3>
-          <p id="howStep5">DM your copied message to <b>@seproairesis</b> (Instagram) or <b>@se
-            proairesis</b> (TikTok).<br>We currently deliver only within Denmark.</p>
-        </div>
-      </div>
-    </section>
-
-    <footer class="text-center py-10 fade-section">
-      <p id="footerText">
-        © 2025 SEP - Se Proairesis • MobilePay 5894BZ • +45 DKK Shipping • Made in Copenhagen. Only delivered across Denmark.
-      </p>
-      <div class="flex justify-center gap-4 mt-4">
-        <a href="https://instagram.com/seproairesis" class="bg-gradient-to-br from-pink-500 to-purple-600 text-white p-3 rounded-full" target="_blank" rel="noreferrer">IG</a>
-        <a href="https://tiktok.com/@seproairesis" class="bg-black text-white p-3 rounded-full" target="_blank" rel="noreferrer">TT</a>
-      </div>
-    </footer>
-  </div>
-
-  <!-- ABOUT SCENE -->
-  <section id="sep-scene-about" class="py-20 px-6 hidden">
-    <div class="max-w-3xl mx-auto text-center">
-      <h2 id="aboutTitle" class="theme-text text-3xl font-bold mb-4">About SEP</h2>
-      <p id="aboutBody1" class="theme-text mb-4">
-        SEP stands for Se Proairesis - your choice in ancient greek. Each piece is pressed by hand in Copenhagen in small batches.
-      </p>
-      <p id="aboutBody2" class="theme-text mb-4">
-        We make batches with small choice but good quality - rather focusing on quality than choice. That doesn't mean we wont do big batches though. We can't buy thousands of peices yet (we are still a small brand staring up)      </p>
-      <p id="aboutBody3" class="theme-text mb-8">
-        One t-shirt, one sweater; all built to be the first thing you reach for when you open your wardrobe. I'm still a 13-year-old which means I cant have apple pay yet. So there's only mobile pay so far.
-      </p>
-      <button id="aboutBackBtn" class="mt-4 px-6 py-3 rounded-full border border-white/40 bg-white/10 hover:bg-white/20" type="button">
-        Back to shop
-      </button>
-      <div class="mt-6">
-        <button id="sepExitBtn2" class="px-5 py-2 rounded-full border border-white/30 bg-transparent hover:bg-white/10 text-sm" type="button">
-          Exit to main menu
-        </button>
-      </div>
-    </div>
-  </section>
-
-  <!-- CART -->
-  <div id="cartSidebar" class="fixed top-0 right-0 h-full w-80 bg-white shadow-xl translate-x-full transition-transform duration-300 z-50 overflow-y-auto">
-    <div class="p-6">
-      <div class="flex justify-between items-center mb-4">
-        <h3 id="cartTitle" class="text-xl font-bold">Your Cart</h3>
-        <button id="closeCart" type="button">✕</button>
-      </div>
-      <div id="cartItems" class="space-y-4 text-sm"></div>
-      <div class="border-t border-gray-300 pt-4 mt-4">
-        <div class="flex justify-between mb-1">
-          <span id="cartSubtotalLabel">Subtotal:</span><span id="cartSubtotal" class="font-bold">0 DKK</span>
-        </div>
-        <div class="flex justify-between mb-2 text-sm text-gray-600">
-          <span id="cartShippingLabel">Shipping:</span><span id="cartShippingValue">+45 DKK</span>
-        </div>
-        <div class="flex justify-between font-semibold border-t border-gray-300 pt-2 mb-3">
-          <span id="cartTotalLabel">Total:</span><span id="cartTotal">45 DKK</span>
-        </div>
-        <button id="openMobilePay" class="w-full bg-green-500 text-white py-2 rounded mb-2" type="button">
-          <span id="cartMobilePayButton">Open MobilePay</span>
-        </button>
-        <p id="cartMobilePayNote" class="text-xs text-gray-500 mb-2 text-center">
-          *Open MobilePay button is only valid on mobile*
-        </p>
-        <button id="copyMobilePay" class="w-full bg-gray-200 py-2 rounded" type="button">
-          <span id="cartCopyOrder">Copy Order Message</span>
-        </button>
-      </div>
-    </div>
-  </div>
-  <div id="cartOverlay" class="fixed inset-0 bg-black/50 hidden pointer-none z-40"></div>
 </div>
 
-<!-- =========================================================
-     MAKE IT HAPPEN APP
-========================================================= -->
-<div id="mih-app" class="hidden">
+<div class="controls">
+  <button class="btn" id="btnScan">SCAN <small>(S)</small></button>
+  <button class="btn" id="btnID">ID CHECK <small>(I)</small></button>
+  <button class="btn" id="btnDisc">DISCOUNT <small>(D)</small></button>
+  <button class="btn" id="btnBag">BAG <small>(B)</small></button>
+  <button class="btn" id="btnWeigh">WEIGH <small>(W)</small></button>
+  <button class="btn" id="btnReject">REJECT <small>(R)</small></button>
+</div>
 
-  <header>
-    <div class="chip">
-      <span id="mihTitle" style="font-weight:700; letter-spacing:.08em;">MAKE IT HAPPEN</span>
-      <span id="mihLeaguePill" class="muted">The League of Choice</span>
-      <span id="mih-user-pill" class="muted">Not logged in</span>
-    </div>
-
-    <button id="mihMenuToggle" type="button" aria-label="Open menu">
-      <div class="flex flex-col">
-        <span class="menu-line"></span>
-        <span class="menu-line"></span>
-        <span class="menu-line"></span>
-      </div>
-    </button>
-  </header>
-
-  <div id="mihMenuOverlay"></div>
-  <aside id="mihMenuPanel" aria-label="MIH menu">
-    <div class="mihMenuTop">
-      <div>
-        <div id="mihMenuTitle" style="font-weight:700;letter-spacing:.08em;">MENU</div>
-        <div id="mihMenuUserMini" class="mih-menu-mini">Not logged in</div>
-      </div>
-      <button id="mihMenuClose" type="button" class="mih-menu-btn" style="width:auto;padding:8px 10px;border-radius:9999px;">✕</button>
-    </div>
-
-    <div class="mihMenuBody">
-      <button class="mih-menu-btn" type="button" data-mih-scene="mih-login" id="mihMenuLoginBtn">Login</button>
-      <button class="mih-menu-btn" type="button" data-mih-scene="mih-home" id="mihMenuHomeBtn">Home</button>
-      <button class="mih-menu-btn" type="button" data-mih-scene="mih-leaderboard" id="mihMenuLeaderboardBtn">Leaderboard</button>
-      <button class="mih-menu-btn" type="button" data-mih-scene="mih-profiles" id="mihMenuProfilesBtn">Profiles</button>
-      <button class="mih-menu-btn" type="button" data-mih-scene="mih-stats" id="mihMenuStatsBtn">Stats</button>
-      <button class="mih-menu-btn" type="button" data-mih-scene="mih-about" id="mihMenuAboutBtn">About</button>
-
-      <div style="border-top:1px solid rgba(255,255,255,.12); margin:6px 0;"></div>
-
-      <div id="mihLangLabel" class="mih-menu-mini">Language</div>
-      <div class="mih-menu-row">
-        <button type="button" class="mih-lang-btn" data-lang="en">English</button>
-        <button type="button" class="mih-lang-btn" data-lang="da">Dansk</button>
-        <button type="button" class="mih-lang-btn" data-lang="cs">Čeština</button>
-      </div>
-
-      <div style="border-top:1px solid rgba(255,255,255,.12); margin:6px 0;"></div>
-
-      <button class="mih-menu-btn danger" type="button" id="mihLogoutBtn" style="display:none;">Log out</button>
-      <button class="mih-menu-btn" type="button" id="mihExitBtn" style="border-color:rgba(239,68,68,.35);">Exit</button>
-    </div>
-  </aside>
-
-  <!-- LOGIN SCENE -->
-  <section id="mih-login" class="scene active">
-    <h1 id="mihLoginTitle">Welcome back</h1>
-    <p class="muted" id="mihLoginSubtitle">Enter your username and password.</p>
-
-    <input id="mih-username" class="input" placeholder="Your name" />
-    <input id="mih-password" class="input" type="password" placeholder="Password" />
-
-    <button class="btn" id="mih-login-btn" type="button">Enter</button>
-
-    <div style="margin-top:12px;">
-      <button class="btn btn-small" id="mih-view-saved-pass" type="button">View saved login password</button>
-      <div id="mih-saved-pass-display" class="muted" style="margin-top:10px; display:none;"></div>
-    </div>
-  </section>
-
-  <!-- HOME SCENE -->
-  <section id="mih-home" class="scene">
-    <h1 id="mihHomeTitle">Your Dashboard</h1>
-    <p class="muted" id="mihHomeSubtitle">Log your activity. Every kilometre counts.</p>
-
-    <h2 id="mihAddTitle" style="margin-top:30px;">Log a new activity</h2>
-    <input id="mih-distance" class="input" type="number" step="0.01" placeholder="Kilometres (e.g. 3.5)" />
-    <input id="mih-minutes" class="input" type="number" step="1" placeholder="Time in minutes (e.g. 28)" />
-    <button class="btn" id="mih-add-activity" type="button">Submit</button>
-
-    <h2 id="mihRecentTitle" style="margin-top:40px;">Your recent entries</h2>
-    <table>
-      <thead>
-        <tr>
-          <th id="mihRecentColDate">Date</th>
-          <th id="mihRecentColKm">Distance (km)</th>
-          <th id="mihRecentColMin">Time (min)</th>
-          <th id="mihRecentColPace">Pace</th>
-        </tr>
-      </thead>
-      <tbody id="mih-recent"></tbody>
-    </table>
-  </section>
-
-  <!-- LEADERBOARD SCENE -->
-  <section id="mih-leaderboard" class="scene">
-    <h1 id="mihLbTitle">Leaderboard</h1>
-    <p class="muted" id="mihLbSubtitle">The League of Choice. Totals, all-time.</p>
-    <table>
-      <thead>
-        <tr>
-          <th id="mihLbColRank">#</th>
-          <th id="mihLbColName">Name</th>
-          <th id="mihLbColKm">Total km</th>
-          <th id="mihLbColMin">Total min</th>
-          <th id="mihLbColPace">Avg pace</th>
-        </tr>
-      </thead>
-      <tbody id="mih-leaderboard-body"></tbody>
-    </table>
-  </section>
-
-  <!-- PROFILES SCENE -->
-  <section id="mih-profiles" class="scene">
-    <h1 id="mihProfilesTitle">Profiles</h1>
-    <p class="muted" id="mihProfilesSubtitle">Tap a player's name to view their stats.</p>
-
-    <table>
-      <thead>
-        <tr>
-          <th id="mihProfilesColName">Name</th>
-          <th id="mihProfilesColKm">Total km</th>
-          <th id="mihProfilesColMin">Total min</th>
-          <th id="mihProfilesColRuns">Entries</th>
-        </tr>
-      </thead>
-      <tbody id="mih-profiles-body"></tbody>
-    </table>
-
-    <div id="mihProfilePanel">
-      <div style="display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:8px;">
-        <div>
-          <div id="mihProfileName" style="font-weight:700;font-size:18px;">—</div>
-          <div id="mihProfileLeague" class="muted">The League of Choice</div>
-        </div>
-        <button type="button" class="btn btn-small" id="mihProfileClose">Close</button>
-      </div>
-
-      <div class="row"><span id="mihProfileRowKmLabel">Total km</span><b id="mihProfileKm">0</b></div>
-      <div class="row"><span id="mihProfileRowMinLabel">Total min</span><b id="mihProfileMin">0</b></div>
-      <div class="row"><span id="mihProfileRowRunsLabel">Entries</span><b id="mihProfileRuns">0</b></div>
-      <div class="row"><span id="mihProfileRowAvgPaceLabel">Avg pace</span><b id="mihProfileAvgPace">0:00</b></div>
-
-      <div style="margin-top:14px;">
-        <div class="muted" id="mihProfileHistoryTitle">Recent activities</div>
-        <table style="margin-top:10px;">
-          <thead>
-            <tr>
-              <th id="mihProfileHistDate">Date</th>
-              <th id="mihProfileHistKm">Km</th>
-              <th id="mihProfileHistMin">Min</th>
-              <th id="mihProfileHistPace">Pace</th>
-            </tr>
-          </thead>
-          <tbody id="mih-profile-history"></tbody>
-        </table>
-      </div>
-    </div>
-  </section>
-
-  <!-- STATS SCENE -->
-  <section id="mih-stats" class="scene">
-    <h1 id="mihStatsTitle">Your Stats</h1>
-
-    <div style="margin-top:20px;">
-      <p><b id="mihStatsTotalKmLabel">Total km:</b> <span id="mih-total-km">0</span></p>
-      <p><b id="mihStatsTotalMinLabel">Total minutes:</b> <span id="mih-total-min">0</span></p>
-      <p><b id="mihStatsEntriesLabel">Entries:</b> <span id="mih-total-entries">0</span></p>
-      <p><b id="mihStatsAvgKmLabel">Average distance:</b> <span id="mih-average-km">0</span></p>
-      <p><b id="mihStatsAvgPaceLabel">Average pace:</b> <span id="mih-average-pace">0:00</span></p>
-    </div>
-
-    <h2 id="mihStatsHistoryTitle" style="margin-top:30px;">Your entry history</h2>
-    <table>
-      <thead>
-        <tr>
-          <th id="mihHistColDate">Date</th>
-          <th id="mihHistColKm">Distance (km)</th>
-          <th id="mihHistColMin">Time (min)</th>
-          <th id="mihHistColPace">Pace</th>
-        </tr>
-      </thead>
-      <tbody id="mih-history-body"></tbody>
-    </table>
-  </section>
-
-  <!-- ABOUT SCENE -->
-  <section id="mih-about" class="scene">
-    <h1 id="mihAboutTitle">About the challenge</h1>
-    <p class="muted" id="mihAboutBody">
-      Make It Happen is about consistency. Not perfection.
-      Log your movement, no matter how small. Every metre counts.
-      We find that a league with competition motivates people to move more.
+<div class="overlay" id="overlay">
+  <div class="card" id="card">
+    <h1>Receipt Run</h1>
+    <p>
+      Items roll in fast. Each item flashes its “rules” for a moment: <b>18+</b>, <b>Coupon</b>, <b>Fragile</b>, <b>Weigh</b>, or <b>Suspicious</b>.
+      Prep the focused item in the prep zone, then scan it in the scanner gate.
     </p>
-  </section>
+    <p class="muted">
+      Mistakes cost lives. Streaks boost multiplier. Speed ramps up. This is basically panic, but satisfying.
+    </p>
+    <div class="row">
+      <div class="pill ok">Start: click / tap anywhere</div>
+      <div class="pill warn">Clues fade quickly</div>
+      <div class="pill bad">Wrong prep or late scan = life lost</div>
+    </div>
+  </div>
 </div>
 
 <script>
-/* =========================================================
-   GLOBAL LANGUAGE + WELCOME / ROUTER
-========================================================= */
+(() => {
+  // ---------- Canvas ----------
+  const canvas = document.getElementById('c');
+  const ctx = canvas.getContext('2d', { alpha: false });
 
-const LS_GLOBAL_LANG = "global_lang_v1";
-let GLOBAL_LANG = localStorage.getItem(LS_GLOBAL_LANG) || "en";
-let WELCOME_REMOVED = false;
-
-const GLOBAL_TRANSLATIONS = {
-  en: {
-    welcomeTitle: "SEP",
-    welcomeSubtitle: "Your Choice. Either shop (SEP shop), or move (Make It Happen). That simple.",
-    welcomeSepBtn: "SEP shop",
-    welcomeMihBtn: "Make It Happen",
-    sepLangLabel: "Language",
-    sepInfoLabel: "Info",
-    sepExitLabel: "Exit",
-    sepExitBtn: "Back to main menu",
-    sepExitBtn2: "Back to main menu",
-
-    mihMenuTitle: "MENU",
-    mihMenuLoginBtn: "Login",
-    mihMenuHomeBtn: "Home",
-    mihMenuLeaderboardBtn: "Leaderboard",
-    mihMenuProfilesBtn: "Profiles",
-    mihMenuStatsBtn: "Stats",
-    mihMenuAboutBtn: "About",
-    mihLangLabel: "Language",
-    mihLogoutBtn: "Log out",
-    mihExitBtn: "Exit",
-
-    mihLoginTitle: "Welcome back",
-    mihLoginSubtitle: "Enter your username and password.",
-    mihUsernamePh: "Your name",
-    mihPasswordPh: "Password",
-    mihEnterBtn: "Enter",
-    mihViewSaved: "View saved login password",
-    mihSavedNone: "No login password has been saved on this device yet.",
-    mihSavedShow: "Saved login password on this device: {password}",
-
-    mihHomeTitle: "Your Dashboard",
-    mihHomeSubtitle: "Log your activity. Every kilometre counts.",
-    mihAddTitle: "Log a new activity",
-    mihDistancePh: "Kilometres (e.g. 3.5)",
-    mihMinutesPh: "Time in minutes (e.g. 28)",
-    mihSubmit: "Submit",
-    mihRecentTitle: "Your recent entries",
-    mihRecentColDate: "Date",
-    mihRecentColKm: "Distance (km)",
-    mihRecentColMin: "Time (min)",
-    mihRecentColPace: "Pace",
-
-    mihLbTitle: "Leaderboard",
-    mihLbSubtitle: "The League of Choice. Totals, all-time.",
-    mihLbColRank: "#",
-    mihLbColName: "Name",
-    mihLbColKm: "Total km",
-    mihLbColMin: "Total min",
-    mihLbColPace: "Avg pace",
-
-    mihProfilesTitle: "Profiles",
-    mihProfilesSubtitle: "Tap a player to view their stats.",
-    mihProfilesColName: "Name",
-    mihProfilesColKm: "Total km",
-    mihProfilesColMin: "Total min",
-    mihProfilesColRuns: "Entries",
-    mihProfileClose: "Close",
-    mihProfileRowKmLabel: "Total km",
-    mihProfileRowMinLabel: "Total min",
-    mihProfileRowRunsLabel: "Entries",
-    mihProfileRowAvgPaceLabel: "Avg pace",
-    mihProfileHistoryTitle: "Recent activities",
-    mihProfileHistDate: "Date",
-    mihProfileHistKm: "Km",
-    mihProfileHistMin: "Min",
-    mihProfileHistPace: "Pace",
-
-    mihStatsTitle: "Your Stats",
-    mihStatsTotalKmLabel: "Total km:",
-    mihStatsTotalMinLabel: "Total minutes:",
-    mihStatsEntriesLabel: "Entries:",
-    mihStatsAvgKmLabel: "Average distance:",
-    mihStatsAvgPaceLabel: "Average pace:",
-    mihStatsHistoryTitle: "Your entry history",
-    mihHistColDate: "Date",
-    mihHistColKm: "Distance (km)",
-    mihHistColMin: "Time (min)",
-    mihHistColPace: "Pace",
-
-    mihAboutTitle: "About the challenge",
-    mihAboutBody: "Make It Happen is about consistency. Not perfection. Log your movement, no matter how small. Every metre counts. We find that a league with copmetition motivates people to move more.",
-
-    toastSaved: "Saved",
-    errLoginMissing: "Please enter both name and password.",
-    errWrongPass: "Wrong password for this name.",
-    errFirebase: "Firebase failed to initialise. Check your config + internet connection.",
-    errMustLogin: "Please log in first.",
-    errActivityInvalid: "Please enter valid km and minutes.",
-    noEntries: "No entries yet.",
-    noPlayers: "No players yet."
-  },
-  da: {
-    welcomeTitle: "Vælg din vej",
-    welcomeSubtitle: "Shop SEP, eller join Make It Happen og bevæg dig sammen med andre.",
-    welcomeSepBtn: "Gå ind i SEP shop",
-    welcomeMihBtn: "Gå ind i Make It Happen",
-    sepLangLabel: "Sprog",
-    sepInfoLabel: "Info",
-    sepExitLabel: "Exit",
-    sepExitBtn: "Tilbage til hovedmenu",
-    sepExitBtn2: "Til hovedmenu",
-
-    mihMenuTitle: "MENU",
-    mihMenuLoginBtn: "Login",
-    mihMenuHomeBtn: "Hjem",
-    mihMenuLeaderboardBtn: "Leaderboard",
-    mihMenuProfilesBtn: "Profiler",
-    mihMenuStatsBtn: "Stats",
-    mihMenuAboutBtn: "Om",
-    mihLangLabel: "Sprog",
-    mihLogoutBtn: "Log ud",
-    mihExitBtn: "Exit",
-
-    mihLoginTitle: "Velkommen tilbage",
-    mihLoginSubtitle: "Indtast dit navn og din adgangskode.",
-    mihUsernamePh: "Dit navn",
-    mihPasswordPh: "Adgangskode",
-    mihEnterBtn: "Gå ind",
-    mihViewSaved: "Se gemt login-adgangskode",
-    mihSavedNone: "Der er ikke gemt nogen login-adgangskode på denne enhed endnu.",
-    mihSavedShow: "Gemt login-adgangskode på denne enhed: {password}",
-
-    mihHomeTitle: "Dit dashboard",
-    mihHomeSubtitle: "Log din aktivitet. Hver kilometer tæller.",
-    mihAddTitle: "Log en ny aktivitet",
-    mihDistancePh: "Kilometer (fx 3,5)",
-    mihMinutesPh: "Tid i minutter (fx 28)",
-    mihSubmit: "Indsend",
-    mihRecentTitle: "Dine seneste entries",
-    mihRecentColDate: "Dato",
-    mihRecentColKm: "Distance (km)",
-    mihRecentColMin: "Tid (min)",
-    mihRecentColPace: "Tempo",
-
-    mihLbTitle: "Leaderboard",
-    mihLbSubtitle: "The League of Choice. Samlet, all-time.",
-    mihLbColRank: "#",
-    mihLbColName: "Navn",
-    mihLbColKm: "Total km",
-    mihLbColMin: "Total min",
-    mihLbColPace: "Gns. tempo",
-
-    mihProfilesTitle: "Profiler",
-    mihProfilesSubtitle: "Tryk på en spiller for at se stats.",
-    mihProfilesColName: "Navn",
-    mihProfilesColKm: "Total km",
-    mihProfilesColMin: "Total min",
-    mihProfilesColRuns: "Entries",
-    mihProfileClose: "Luk",
-    mihProfileRowKmLabel: "Total km",
-    mihProfileRowMinLabel: "Total min",
-    mihProfileRowRunsLabel: "Entries",
-    mihProfileRowAvgPaceLabel: "Gns. tempo",
-    mihProfileHistoryTitle: "Seneste aktiviteter",
-    mihProfileHistDate: "Dato",
-    mihProfileHistKm: "Km",
-    mihProfileHistMin: "Min",
-    mihProfileHistPace: "Tempo",
-
-    mihStatsTitle: "Dine stats",
-    mihStatsTotalKmLabel: "Total km:",
-    mihStatsTotalMinLabel: "Total minutter:",
-    mihStatsEntriesLabel: "Entries:",
-    mihStatsAvgKmLabel: "Gns. distance:",
-    mihStatsAvgPaceLabel: "Gns. tempo:",
-    mihStatsHistoryTitle: "Din historik",
-    mihHistColDate: "Dato",
-    mihHistColKm: "Distance (km)",
-    mihHistColMin: "Tid (min)",
-    mihHistColPace: "Tempo",
-
-    mihAboutTitle: "Om challenge",
-    mihAboutBody: "Make It Happen handler om kontinuitet. Ikke perfektion. Log din bevægelse, uanset hvor lidt. Hver kilometer tæller.",
-
-    toastSaved: "Gemt",
-    errLoginMissing: "Indtast både navn og adgangskode.",
-    errWrongPass: "Forkert adgangskode til dette navn.",
-    errFirebase: "Firebase kunne ikke starte. Tjek din config + internet.",
-    errMustLogin: "Log ind først.",
-    errActivityInvalid: "Indtast gyldige km og minutter.",
-    noEntries: "Ingen entries endnu.",
-    noPlayers: "Ingen spillere endnu."
-  },
-  cs: {
-    welcomeTitle: "Vyber si cestu",
-    welcomeSubtitle: "Nakup SEP, nebo se přidej k Make It Happen a hýbej se spolu s ostatními.",
-    welcomeSepBtn: "Vstoupit do SEP shopu",
-    welcomeMihBtn: "Vstoupit do Make It Happen",
-    sepLangLabel: "Jazyk",
-    sepInfoLabel: "Info",
-    sepExitLabel: "Exit",
-    sepExitBtn: "Zpět do hlavního menu",
-    sepExitBtn2: "Zpět do hlavního menu",
-
-    mihMenuTitle: "MENU",
-    mihMenuLoginBtn: "Login",
-    mihMenuHomeBtn: "Domů",
-    mihMenuLeaderboardBtn: "Leaderboard",
-    mihMenuProfilesBtn: "Profily",
-    mihMenuStatsBtn: "Statistiky",
-    mihMenuAboutBtn: "O aplikaci",
-    mihLangLabel: "Jazyk",
-    mihLogoutBtn: "Odhlásit",
-    mihExitBtn: "Exit",
-
-    mihLoginTitle: "Vítej zpět",
-    mihLoginSubtitle: "Zadej jméno a heslo.",
-    mihUsernamePh: "Tvoje jméno",
-    mihPasswordPh: "Heslo",
-    mihEnterBtn: "Vstoupit",
-    mihViewSaved: "Zobrazit uložené heslo",
-    mihSavedNone: "Na tomto zařízení zatím není uložené žádné heslo.",
-    mihSavedShow: "Uložené heslo na tomto zařízení: {password}",
-
-    mihHomeTitle: "Tvůj dashboard",
-    mihHomeSubtitle: "Loguj aktivitu. Každý kilometr se počítá.",
-    mihAddTitle: "Zaloguj novou aktivitu",
-    mihDistancePh: "Kilometry (např. 3.5)",
-    mihMinutesPh: "Čas v minutách (např. 28)",
-    mihSubmit: "Odeslat",
-    mihRecentTitle: "Tvoje poslední záznamy",
-    mihRecentColDate: "Datum",
-    mihRecentColKm: "Vzdálenost (km)",
-    mihRecentColMin: "Čas (min)",
-    mihRecentColPace: "Tempo",
-
-    mihLbTitle: "Leaderboard",
-    mihLbSubtitle: "The League of Choice. Celkem, all-time.",
-    mihLbColRank: "#",
-    mihLbColName: "Jméno",
-    mihLbColKm: "Celkem km",
-    mihLbColMin: "Celkem min",
-    mihLbColPace: "Prům. tempo",
-
-    mihProfilesTitle: "Profily",
-    mihProfilesSubtitle: "Klikni na hráče pro zobrazení statistik.",
-    mihProfilesColName: "Jméno",
-    mihProfilesColKm: "Celkem km",
-    mihProfilesColMin: "Celkem min",
-    mihProfilesColRuns: "Záznamy",
-    mihProfileClose: "Zavřít",
-    mihProfileRowKmLabel: "Celkem km",
-    mihProfileRowMinLabel: "Celkem min",
-    mihProfileRowRunsLabel: "Záznamy",
-    mihProfileRowAvgPaceLabel: "Prům. tempo",
-    mihProfileHistoryTitle: "Poslední aktivity",
-    mihProfileHistDate: "Datum",
-    mihProfileHistKm: "Km",
-    mihProfileHistMin: "Min",
-    mihProfileHistPace: "Tempo",
-
-    mihStatsTitle: "Tvoje statistiky",
-    mihStatsTotalKmLabel: "Celkem km:",
-    mihStatsTotalMinLabel: "Celkem minut:",
-    mihStatsEntriesLabel: "Záznamy:",
-    mihStatsAvgKmLabel: "Prům. vzdálenost:",
-    mihStatsAvgPaceLabel: "Prům. tempo:",
-    mihStatsHistoryTitle: "Historie",
-    mihHistColDate: "Datum",
-    mihHistColKm: "Vzdálenost (km)",
-    mihHistColMin: "Čas (min)",
-    mihHistColPace: "Tempo",
-
-    mihAboutTitle: "O výzvě",
-    mihAboutBody: "Make It Happen je o konzistenci. Ne o perfektnosti. Loguj pohyb, i když je malý. Každý kilometr se počítá.",
-
-    toastSaved: "Uloženo",
-    errLoginMissing: "Zadej jméno i heslo.",
-    errWrongPass: "Špatné heslo pro toto jméno.",
-    errFirebase: "Firebase se nepodařilo spustit. Zkontroluj config + internet.",
-    errMustLogin: "Nejdřív se přihlas.",
-    errActivityInvalid: "Zadej platné km i minuty.",
-    noEntries: "Zatím žádné záznamy.",
-    noPlayers: "Zatím žádní hráči."
+  function resize() {
+    const dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+    canvas.width = Math.floor(innerWidth * dpr);
+    canvas.height = Math.floor(innerHeight * dpr);
+    canvas.style.width = innerWidth + 'px';
+    canvas.style.height = innerHeight + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
-};
+  addEventListener('resize', resize, { passive: true });
+  resize();
 
-function GT(key, vars){
-  const pack = GLOBAL_TRANSLATIONS[GLOBAL_LANG] || GLOBAL_TRANSLATIONS.en;
-  let str = pack[key] || (GLOBAL_TRANSLATIONS.en[key] || key);
-  if (vars){
-    Object.keys(vars).forEach(k => { str = str.replace(`{${k}}`, vars[k]); });
-  }
-  return str;
-}
+  // ---------- HUD ----------
+  const hud1 = document.getElementById('hud1');
+  const hud2 = document.getElementById('hud2');
+  const overlay = document.getElementById('overlay');
+  const card = document.getElementById('card');
 
-function setGlobalLang(lang){
-  GLOBAL_LANG = lang;
-  localStorage.setItem(LS_GLOBAL_LANG, GLOBAL_LANG);
-  applyGlobalTranslations();
-  // also sync SEP language buttons
-  document.querySelectorAll('.lang-btn').forEach(btn => {
-    if (btn.getAttribute('data-lang') === GLOBAL_LANG) btn.click();
-  });
-  // sync MIH language buttons
-  document.querySelectorAll('.mih-lang-btn').forEach(btn => {
-    btn.classList.toggle('active', btn.getAttribute('data-lang') === GLOBAL_LANG);
-  });
-  // sync welcome language buttons
-  document.querySelectorAll('.welcome-lang-btn').forEach(btn => {
-    btn.classList.toggle('active', btn.getAttribute('data-lang') === GLOBAL_LANG);
-  });
-}
-
-function applyGlobalTranslations(){
-  // Welcome
-  const wTitle = document.getElementById('welcomeTitle');
-  const wSub = document.getElementById('welcomeSubtitle');
-  const wSep = document.getElementById('welcomeSepBtn');
-  const wMih = document.getElementById('welcomeMihBtn');
-  if (wTitle) wTitle.textContent = GT('welcomeTitle');
-  if (wSub) wSub.textContent = GT('welcomeSubtitle');
-  if (wSep) wSep.textContent = GT('welcomeSepBtn');
-  if (wMih) wMih.textContent = GT('welcomeMihBtn');
-
-  // SEP menu misc
-  const sepLangLabel = document.getElementById('sepLangLabel');
-  const sepInfoLabel = document.getElementById('sepInfoLabel');
-  const sepExitLabel = document.getElementById('sepExitLabel');
-  const sepExitBtn = document.getElementById('sepExitBtn');
-  const sepExitBtn2 = document.getElementById('sepExitBtn2');
-  if (sepLangLabel) sepLangLabel.textContent = GT('sepLangLabel');
-  if (sepInfoLabel) sepInfoLabel.textContent = GT('sepInfoLabel');
-  if (sepExitLabel) sepExitLabel.textContent = GT('sepExitLabel');
-  if (sepExitBtn) sepExitBtn.textContent = GT('sepExitBtn');
-  if (sepExitBtn2) sepExitBtn2.textContent = GT('sepExitBtn2');
-
-  // MIH menu + scenes
-  const ids = [
-    'mihMenuTitle','mihMenuLoginBtn','mihMenuHomeBtn','mihMenuLeaderboardBtn','mihMenuProfilesBtn','mihMenuStatsBtn','mihMenuAboutBtn',
-    'mihLangLabel','mihLogoutBtn','mihExitBtn',
-    'mihLoginTitle','mihLoginSubtitle','mihHomeTitle','mihHomeSubtitle','mihAddTitle','mihRecentTitle',
-    'mihLbTitle','mihLbSubtitle','mihProfilesTitle','mihProfilesSubtitle','mihStatsTitle','mihStatsHistoryTitle',
-    'mihAboutTitle'
-  ];
-  ids.forEach(id => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    const key = id;
-    if (GLOBAL_TRANSLATIONS.en[key]) el.textContent = GT(key);
-  });
-
-  const mihAboutBody = document.getElementById('mihAboutBody');
-  if (mihAboutBody) mihAboutBody.textContent = GT('mihAboutBody');
-
-  // MIH placeholders + buttons
-  const u = document.getElementById('mih-username');
-  const p = document.getElementById('mih-password');
-  const d = document.getElementById('mih-distance');
-  const m = document.getElementById('mih-minutes');
-  if (u) u.placeholder = GT('mihUsernamePh');
-  if (p) p.placeholder = GT('mihPasswordPh');
-  if (d) d.placeholder = GT('mihDistancePh');
-  if (m) m.placeholder = GT('mihMinutesPh');
-
-  const enter = document.getElementById('mih-login-btn');
-  const submit = document.getElementById('mih-add-activity');
-  const viewSaved = document.getElementById('mih-view-saved-pass');
-  if (enter) enter.textContent = GT('mihEnterBtn');
-  if (submit) submit.textContent = GT('mihSubmit');
-  if (viewSaved) viewSaved.textContent = GT('mihViewSaved');
-
-  // MIH table headers
-  const headIds = [
-    'mihRecentColDate','mihRecentColKm','mihRecentColMin','mihRecentColPace',
-    'mihLbColRank','mihLbColName','mihLbColKm','mihLbColMin','mihLbColPace',
-    'mihProfilesColName','mihProfilesColKm','mihProfilesColMin','mihProfilesColRuns',
-    'mihProfileRowKmLabel','mihProfileRowMinLabel','mihProfileRowRunsLabel','mihProfileRowAvgPaceLabel',
-    'mihProfileHistoryTitle','mihProfileHistDate','mihProfileHistKm','mihProfileHistMin','mihProfileHistPace',
-    'mihStatsTotalKmLabel','mihStatsTotalMinLabel','mihStatsEntriesLabel','mihStatsAvgKmLabel','mihStatsAvgPaceLabel',
-    'mihHistColDate','mihHistColKm','mihHistColMin','mihHistColPace'
-  ];
-  headIds.forEach(id => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    if (GLOBAL_TRANSLATIONS.en[id]) el.textContent = GT(id);
-  });
-}
-
-/* FIX: do NOT remove the welcome screen from the DOM (prevents white screen / glitch) */
-function removeWelcomeForever(){
-  WELCOME_REMOVED = true;
-}
-
-function showApp(app) {
-  const sepApp  = document.getElementById('sep-app');
-  const mihApp  = document.getElementById('mih-app');
-  const welcome = document.getElementById('welcome-screen');
-
-  if (app === 'sep') {
-    if (welcome) welcome.classList.add('hidden');
-    if (mihApp) mihApp.classList.add('hidden');
-    if (sepApp) sepApp.classList.remove('hidden');
-    window.scrollTo({ top: 0, behavior: 'auto' });
-  } else if (app === 'mih') {
-    if (welcome) welcome.classList.add('hidden');
-    if (sepApp) sepApp.classList.add('hidden');
-    if (mihApp) mihApp.classList.remove('hidden');
-    window.scrollTo({ top: 0, behavior: 'auto' });
-  } else if (app === 'welcome') {
-    /* FIX: proper welcome state, no reload */
-    if (sepApp) sepApp.classList.add('hidden');
-    if (mihApp) mihApp.classList.add('hidden');
-    if (welcome) welcome.classList.remove('hidden');
-    window.scrollTo({ top: 0, behavior: 'auto' });
-  }
-}
-
-function openSep(){
-  showApp('sep');
-  removeWelcomeForever();
-}
-function openMih(){
-  showApp('mih');
-  removeWelcomeForever();
-}
-
-/* expose router globally so other scripts can return to welcome without reload */
-window.showApp = showApp;
-</script>
-
-<script>
-/* =========================================================
-   SEP LOGIC (Translations + Burger + Cart)
-========================================================= */
-(function () {
-  const sepTranslations = {
-    en: {
-      menuTitle: "SEP Menu",
-      navAboutSep: "About SEP",
-      heroTitle: "Minimalist clothing, made with intention.",
-      heroSubtitle: "Soft, clean, and hand-pressed in Copenhagen.",
-      btnShopNow: "Shop Now",
-      btnViewCart: "View Cart",
-      addToCart: "Add",
-      productsTitle: "Three products. One choice.",
-      productsSubtitle: "Soft, durable, and timeless.",
-      product1Name: "SEP White T-shirt",
-      product2Name: "SEP Black Hoodie",
-      product3Name: "SEP Black Trousers",
-      aboutTitle: "About SEP",
-      aboutBody1: "SEP stands for Se Proairesis - your choice. Each piece is pressed by hand in Copenhagen in small batches.",
-      aboutBody2: "The goal is not hype. It is to make a small number of things that feel good on your skin, last a long time, and stay in your rotation.",
-      aboutBody3: "One tee, one hoodie, one pair of trousers; all built to be the first thing you reach for when you open your wardrobe.",
-      aboutBackBtn: "Back to shop",
-      howToOrderTitle: "How to Order",
-      step1Title: "1. Choose",
-      step2Title: "2. Add to Cart",
-      step3Title: "3. Copy Order Message",
-      step4Title: "4. Pay with MobilePay",
-      step5Title: "5. Send us your order",
-      howStep1: "Select your favourite SEP piece - T-shirt, Hoodie, or Trousers - then pick your size and quantity.",
-      howStep2: "Click “Add” to add your chosen items to your cart. When ready, click “View Cart” to review your order.",
-      howStep3: "Inside your cart, press “Copy Order Message”. This copies your full order, including shipping, automatically.",
-      howStep4: "Send the total amount (incl. +45 DKK shipping) to 51 34 31 33 using MobilePay.\n“Open MobilePay” works only on mobile devices.",
-      howStep5: "DM your copied message to @seproairesis (Instagram) or @se.proairesis (TikTok).\nWe currently deliver within Denmark.",
-      footerText: "© 2025 SEP - Se Proairesis • MobilePay 51 34 31 33 • +45 DKK Shipping • Made in Copenhagen. Delivered across Denmark.",
-      cartTitle: "Your Cart",
-      cartSubtotalLabel: "Subtotal:",
-      cartShippingLabel: "Shipping:",
-      cartShippingValue: "+45 DKK",
-      cartTotalLabel: "Total:",
-      cartMobilePayButton: "Open MobilePay",
-      cartMobilePayNote: "Open MobilePay button is only a valid link on mobile.",
-      cartCopyOrder: "Copy Order Message",
-      cartEmpty: "Cart is empty",
-      labelSizeQty: "Size: {size} | Qty: {qty}",
-      btnRemove: "Remove",
-      popupAdded: "Added to cart",
-      popupOrderCopied: "Order message copied!",
-      mobilePayThanks: "Thanks for supporting SEP!",
-      orderIntro: "Hi SEP, here is my order:",
-      orderSubtotalLabel: "Subtotal:",
-      orderShippingLabel: "Shipping:",
-      orderTotalLabel: "Total:",
-      orderItem: "{qty}× {name} (Size: {size})"
-    },
-    da: {
-      menuTitle: "SEP menu",
-      navAboutSep: "Om SEP",
-      heroTitle: "Minimalistisk tøj, lavet med omtanke.",
-      heroSubtitle: "Blødt, rent og håndpresset i København.",
-      btnShopNow: "Shop nu",
-      btnViewCart: "Se kurv",
-      addToCart: "Læg i kurv",
-      productsTitle: "Tre produkter. Ét valg.",
-      productsSubtitle: "Blødt, holdbart og tidløst.",
-      product1Name: "SEP Hvid T-shirt",
-      product2Name: "SEP Sort Hoodie",
-      product3Name: "SEP Sorte Bukser",
-      aboutTitle: "Om SEP",
-      aboutBody1: "SEP står for Se Proairesis - dit valg. Hver style bliver håndpresset i København i små batches.",
-      aboutBody2: "Målet er ikke hype. Det er at lave få ting, der føles godt på huden, holder længe og bliver i din rotation.",
-      aboutBody3: "En T-shirt, en hoodie, et par bukser; alt sammen lavet til at være det første, du rækker ud efter i garderoben.",
-      aboutBackBtn: "Tilbage til shop",
-      howToOrderTitle: "Sådan bestiller du",
-      step1Title: "1. Vælg",
-      step2Title: "2. Læg i kurv",
-      step3Title: "3. Kopiér ordrebesked",
-      step4Title: "4. Betal med MobilePay",
-      step5Title: "5. Send din ordre",
-      howStep1: "Vælg dit favorit-SEP - T-shirt, hoodie eller bukser - og vælg størrelse og antal.",
-      howStep2: "Tryk “Læg i kurv” for at lægge dine varer i kurven. Når du er klar, trykker du “Se kurv” for at tjekke din ordre.",
-      howStep3: "Inde i kurven trykker du “Kopiér ordrebesked”. Det kopierer hele din ordre automatisk, inkl. fragt.",
-      howStep4: "Send det samlede beløb (inkl. +45 DKK fragt) til 51 34 31 33 via MobilePay.\n“Åbn MobilePay” virker kun på mobilenheder.",
-      howStep5: "Send din kopierede besked som DM til @seproairesis (Instagram) eller @se.proairesis (TikTok).\nVi leverer i Danmark.",
-      footerText: "© 2025 SEP - Se Proairesis • MobilePay 51 34 31 33 • +45 DKK fragt • Lavet i København. Leveret i Danmark.",
-      cartTitle: "Din kurv",
-      cartSubtotalLabel: "Subtotal:",
-      cartShippingLabel: "Fragt:",
-      cartShippingValue: "+45 DKK",
-      cartTotalLabel: "Total:",
-      cartMobilePayButton: "Åbn MobilePay",
-      cartMobilePayNote: "Knap til MobilePay virker kun som link på mobil.",
-      cartCopyOrder: "Kopiér ordrebesked",
-      cartEmpty: "Kurven er tom",
-      labelSizeQty: "Størrelse: {size} | Antal: {qty}",
-      btnRemove: "Fjern",
-      popupAdded: "Lagt i kurv",
-      popupOrderCopied: "Ordrebesked kopieret!",
-      mobilePayThanks: "Tak fordi du støtter SEP!",
-      orderIntro: "Hej SEP, her er min ordre:",
-      orderSubtotalLabel: "Subtotal:",
-      orderShippingLabel: "Fragt:",
-      orderTotalLabel: "Total:",
-      orderItem: "{qty}× {name} (Størrelse: {size})"
-    },
-    cs: {
-      menuTitle: "Nabídka SEP",
-      navAboutSep: "O značce SEP",
-      heroTitle: "Minimalistické oblečení dělané s úmyslem.",
-      heroSubtitle: "Měkké, čisté a ručně lisované v Kodani.",
-      btnShopNow: "Nakoupit",
-      btnViewCart: "Zobrazit košík",
-      addToCart: "Přidat",
-      productsTitle: "Tři produkty. Jedna volba.",
-      productsSubtitle: "Měkké, odolné a nadčasové.",
-      product1Name: "SEP bílé tričko",
-      product2Name: "SEP černá mikina",
-      product3Name: "SEP černé kalhoty",
-      aboutTitle: "O značce SEP",
-      aboutBody1: "SEP znamená Se Proairesis - tvoje volba. Každý kousek je ručně lisovaný v Kodani v malých sériích.",
-      aboutBody2: "Cílem není hype. Jde o to dělat pár věcí, které jsou příjemné na těle, dlouho vydrží a pořád po nich saháš.",
-      aboutBody3: "Jedno tričko, jedna mikina, jedny kalhoty; všechno tak, aby to byl první kousek, po kterém sáhneš ve skříni.",
-      aboutBackBtn: "Zpět do shopu",
-      howToOrderTitle: "Jak objednat",
-      step1Title: "1. Vyber",
-      step2Title: "2. Přidej do košíku",
-      step3Title: "3. Zkopíruj zprávu s objednávkou",
-      step4Title: "4. Zaplať přes MobilePay",
-      step5Title: "5. Pošli nám objednávku",
-      howStep1: "Vyber si svůj oblíbený SEP kousek - tričko, mikinu nebo kalhoty - a zvol velikost a množství.",
-      howStep2: "Klikni na “Přidat”, aby se věci přidaly do košíku. Až budeš připravený, klikni na “Zobrazit košík” a zkontroluj objednávku.",
-      howStep3: "V košíku stiskni “Zkopírovat zprávu s objednávkou”. Tím se automaticky zkopíruje celá objednávka včetně dopravy.",
-      howStep4: "Pošli celkovou částku (včetně +45 DKK poštovného) na 51 34 31 33 přes MobilePay.\n“Open MobilePay” funguje jen v mobilu.",
-      howStep5: "Pošli zkopírovanou zprávu do DM na @seproairesis (Instagram) nebo @se.proairesis (TikTok).\nAktuálně doručujeme v Dánsku.",
-      footerText: "© 2025 SEP - Se Proairesis • MobilePay 51 34 31 33 • +45 DKK poštovné • Vyrobeno v Kodani. Doručujeme v Dánsku.",
-      cartTitle: "Košík",
-      cartSubtotalLabel: "Mezisoučet:",
-      cartShippingLabel: "Poštovné:",
-      cartShippingValue: "+45 DKK",
-      cartTotalLabel: "Celkem:",
-      cartMobilePayButton: "Otevřít MobilePay",
-      cartMobilePayNote: "Tlačítko MobilePay funguje jako odkaz pouze na mobilu.",
-      cartCopyOrder: "Zkopírovat zprávu s objednávkou",
-      cartEmpty: "Košík je prázdný",
-      labelSizeQty: "Velikost: {size} | Počet: {qty}",
-      btnRemove: "Odebrat",
-      popupAdded: "Přidáno",
-      popupOrderCopied: "Zkopírováno!",
-      mobilePayThanks: "Díky, že podporuješ SEP!",
-      orderIntro: "Ahoj SEP, tady je moje objednávka:",
-      orderSubtotalLabel: "Mezisoučet:",
-      orderShippingLabel: "Poštovné:",
-      orderTotalLabel: "Celkem:",
-      orderItem: "{qty}× {name} (Velikost: {size})"
-    }
+  // ---------- Helpers ----------
+  const rand = (a,b) => a + Math.random() * (b - a);
+  const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
+  const dist2 = (ax,ay,bx,by) => {
+    const dx=ax-bx, dy=ay-by;
+    return dx*dx + dy*dy;
   };
 
-  let sepCurrentLang = GLOBAL_LANG;
-  const SHIPPING_COST = 45;
-  let cart = JSON.parse(localStorage.getItem('cart')) || [];
+  // ---------- Game State ----------
+  let state = 'menu'; // menu | running | over
+  let tPrev = 0;
 
-  function sepTr(key) {
-    const pack = sepTranslations[sepCurrentLang] || sepTranslations.en;
-    return pack[key] || key;
-  }
+  let score = 0;
+  let streak = 0;
+  let mult = 1.0;
+  let lives = 3;
 
-  function setText(id, text) {
-    const el = document.getElementById(id);
-    if (!el) return;
-    if (typeof text === 'string' && text.includes("\n")) {
-      el.innerHTML = text.split("\n").join("<br>");
-    } else {
-      el.textContent = text;
-    }
-  }
+  // difficulty / pacing
+  let speedScale = 1.0;
+  let clueWindow = 0.85;   // seconds clues are visible
+  let spawnGap = 150;      // px baseline spacing (lower = harder)
+  let beltSpeed = 220;     // px/sec baseline
 
-  function sepApplyLanguage() {
-    const t = sepTranslations[sepCurrentLang] || sepTranslations.en;
-    document.documentElement.lang = sepCurrentLang;
-
-    setText('menuTitle', t.menuTitle);
-    const menuAboutBtn = document.getElementById('menuAboutBtn');
-    if (menuAboutBtn) menuAboutBtn.textContent = t.navAboutSep;
-
-    setText('heroTitle', t.heroTitle);
-    setText('heroSubtitle', t.heroSubtitle);
-    setText('btnShopNow', t.btnShopNow);
-    setText('btnViewCart', t.btnViewCart);
-
-    setText('productsTitle', t.productsTitle);
-    setText('productsSubtitle', t.productsSubtitle);
-
-    setText('product1Name', t.product1Name);
-    setText('product2Name', t.product2Name);
-    setText('product3Name', t.product3Name);
-
-    setText('aboutTitle', t.aboutTitle);
-    setText('aboutBody1', t.aboutBody1);
-    setText('aboutBody2', t.aboutBody2);
-    setText('aboutBody3', t.aboutBody3);
-    setText('aboutBackBtn', t.aboutBackBtn);
-
-    setText('howToOrderTitle', t.howToOrderTitle);
-    setText('step1Title', t.step1Title);
-    setText('step2Title', t.step2Title);
-    setText('step3Title', t.step3Title);
-    setText('step4Title', t.step4Title);
-    setText('step5Title', t.step5Title);
-    setText('howStep1', t.howStep1);
-    setText('howStep2', t.howStep2);
-    setText('howStep3', t.howStep3);
-    setText('howStep4', t.howStep4);
-    setText('howStep5', t.howStep5);
-    setText('footerText', t.footerText);
-
-    setText('cartTitle', t.cartTitle);
-    setText('cartSubtotalLabel', t.cartSubtotalLabel);
-    setText('cartShippingLabel', t.cartShippingLabel);
-    setText('cartShippingValue', t.cartShippingValue);
-    setText('cartTotalLabel', t.cartTotalLabel);
-    setText('cartMobilePayButton', t.cartMobilePayButton);
-    setText('cartMobilePayNote', t.cartMobilePayNote);
-    setText('cartCopyOrder', t.cartCopyOrder);
-
-    document.querySelectorAll('.add-to-cart[data-i18n-btn="addToCart"]').forEach(btn => {
-      btn.textContent = t.addToCart;
-    });
-
-    document.querySelectorAll('.lang-btn').forEach(btn => {
-      const isActive = btn.getAttribute('data-lang') === sepCurrentLang;
-      btn.classList.toggle('bg-white', isActive);
-      btn.classList.toggle('text-black', isActive);
-    });
-
-    sepUpdateCart();
-  }
-
-  function sepSetLanguage(lang){
-    sepCurrentLang = lang;
-    setGlobalLang(lang);
-    sepApplyLanguage();
-  }
-
-  // Burger menu
-  const menuToggle = document.getElementById('menuToggle');
-  const menuPanel  = document.getElementById('menuPanel');
-  const menuOverlay = document.getElementById('menuOverlay');
-  const closeMenuBtn = document.getElementById('closeMenuBtn');
-
-  function openMenu(){
-    if (!menuPanel || !menuOverlay) return;
-    menuPanel.classList.remove('translate-x-full');
-    menuOverlay.classList.remove('hidden');
-    menuOverlay.classList.remove('pointer-none');
-    menuOverlay.classList.add('pointer-auto');
-  }
-  function closeMenu(){
-    if (!menuPanel || !menuOverlay) return;
-    menuPanel.classList.add('translate-x-full');
-    menuOverlay.classList.add('hidden');
-    menuOverlay.classList.remove('pointer-auto');
-    menuOverlay.classList.add('pointer-none');
-  }
-
-  if (menuToggle) menuToggle.addEventListener('click', () => {
-    const closed = menuPanel.classList.contains('translate-x-full');
-    closed ? openMenu() : closeMenu();
-  });
-  if (menuOverlay) menuOverlay.addEventListener('click', closeMenu);
-  if (closeMenuBtn) closeMenuBtn.addEventListener('click', closeMenu);
-
-  document.querySelectorAll('.lang-btn').forEach(btn => {
-    btn.addEventListener('click', () => sepSetLanguage(btn.getAttribute('data-lang')));
-  });
-
-  // SEP scene switching
-  window.sepShowScene = function(scene){
-    const main = document.getElementById('sep-scene-main');
-    const about = document.getElementById('sep-scene-about');
-    if (!main || !about) return;
-
-    if (scene === 'about') {
-      main.classList.add('hidden');
-      about.classList.remove('hidden');
-    } else {
-      about.classList.add('hidden');
-      main.classList.remove('hidden');
-    }
-    window.scrollTo({ top: 0, behavior: 'auto' });
-    closeMenu();
+  const world = {
+    items: [],
+    nextSpawnX: -200,
+    time: 0,
+    lastFocusId: null
   };
 
-  // Wire menu + about buttons
-  document.getElementById('menuAboutBtn')?.addEventListener('click', () => window.sepShowScene('about'));
-  document.getElementById('aboutBackBtn')?.addEventListener('click', () => window.sepShowScene('main'));
+  // conveyor layout
+  function layout() {
+    const w = innerWidth, h = innerHeight;
+    const beltY = Math.floor(h * 0.64);
+    const beltH = Math.max(120, Math.floor(h * 0.18));
+    const scannerX = Math.floor(w * 0.72);
+    const gateW = 46; // scan window width-ish
+    const prepLeft = scannerX - 260;
+    const prepRight = scannerX - 70;
+    const clueX = Math.floor(w * 0.28);
+    return { w, h, beltY, beltH, scannerX, gateW, prepLeft, prepRight, clueX };
+  }
 
-  // Cart
-  const cartSidebar = document.getElementById('cartSidebar');
-  const cartOverlay = document.getElementById('cartOverlay');
+  // ---------- Items + Rules ----------
+  // Each item has:
+  // rules: set of required actions before scanning
+  // flags: suspicious means should be rejected instead of scanned
+  // scanCount: number of scans required (e.g. "bad barcode" requires 2 scans)
+  const RULE = {
+    ID: 'ID',
+    DISC: 'DISC',
+    BAG: 'BAG',
+    WEIGH: 'WEIGH',
+    REJECT: 'REJECT' // used only as required rule for suspicious items
+  };
 
-  function sepUpdateCounter() {
-    const c = document.getElementById('cartCounter');
-    if (!c) return;
-    const t = cart.reduce((s, i) => s + i.qty, 0);
-    if (t > 0) {
-      c.textContent = t;
-      c.classList.remove('hidden');
-    } else {
-      c.classList.add('hidden');
+  const TYPES = [
+    { name:'Apple',       base:'produce',  color:'#9be27f', possible:[RULE.WEIGH] },
+    { name:'Milk',        base:'normal',   color:'#cfe8ff', possible:[RULE.DISC] },
+    { name:'Glass Jar',   base:'fragile',  color:'#a6d4ff', possible:[RULE.BAG] },
+    { name:'Wine',        base:'age',      color:'#ffb3c2', possible:[RULE.ID] },
+    { name:'Energy',      base:'age',      color:'#ffd27a', possible:[RULE.ID, RULE.DISC] },
+    { name:'Cereal',      base:'normal',   color:'#ffeaa8', possible:[RULE.DISC] },
+    { name:'Perfume',     base:'fragile',  color:'#d8b3ff', possible:[RULE.BAG, RULE.DISC] },
+    { name:'Mystery Box', base:'sus',      color:'#ff7b8f', possible:[RULE.REJECT] }
+  ];
+
+  let idCounter = 1;
+
+  function makeItem(spawnX) {
+    const t = TYPES[Math.floor(Math.random() * TYPES.length)];
+    const rules = new Set();
+
+    // decide required rules
+    // suspicious items should be rejected, not scanned
+    let suspicious = (t.base === 'sus') || (Math.random() < (0.06 + clamp(speedScale-1,0,1)*0.05));
+    if (suspicious) rules.add(RULE.REJECT);
+
+    // regular rules
+    // difficulty increases rule count slightly over time
+    const difficulty = clamp((score / 1200) + (speedScale - 1) * 0.8, 0, 1);
+
+    // base rule from type
+    if (!suspicious && t.possible.length) {
+      if (Math.random() < 0.70) rules.add(t.possible[Math.floor(Math.random() * t.possible.length)]);
+    }
+
+    // extra chance for second rule
+    if (!suspicious && Math.random() < (0.12 + difficulty * 0.25)) {
+      const pool = [RULE.ID, RULE.DISC, RULE.BAG, RULE.WEIGH];
+      rules.add(pool[Math.floor(Math.random() * pool.length)]);
+    }
+
+    // fragile implies bag (more intuitive)
+    if (!suspicious && t.base === 'fragile') {
+      if (Math.random() < 0.75) rules.add(RULE.BAG);
+    }
+
+    // produce implies weigh sometimes
+    if (!suspicious && t.base === 'produce') {
+      if (Math.random() < 0.80) rules.add(RULE.WEIGH);
+    }
+
+    // age items usually need ID
+    if (!suspicious && t.base === 'age') {
+      if (Math.random() < 0.88) rules.add(RULE.ID);
+    }
+
+    // rare “bad barcode” -> needs 2 scans (spicy pressure)
+    const needsRescan = !suspicious && Math.random() < (0.06 + difficulty * 0.06);
+    const scanCount = needsRescan ? 2 : 1;
+
+    // clue tags shown briefly near clue zone
+    const clueTags = [];
+    if (rules.has(RULE.ID)) clueTags.push('18+');
+    if (rules.has(RULE.DISC)) clueTags.push('Coupon');
+    if (rules.has(RULE.BAG)) clueTags.push('Fragile');
+    if (rules.has(RULE.WEIGH)) clueTags.push('Weigh');
+    if (rules.has(RULE.REJECT)) clueTags.push('Suspicious');
+    if (needsRescan) clueTags.push('Barcode?');
+
+    return {
+      id: idCounter++,
+      typeName: t.name,
+      color: t.color,
+      x: spawnX,
+      laneBob: rand(-10, 10),
+      w: rand(82, 102),
+      h: rand(42, 52),
+      rules,
+      suspicious: rules.has(RULE.REJECT),
+      scanCount,
+      scansDone: 0,
+      actionsDone: new Set(),
+      clueTags,
+      clueShown: false,
+      clueT: 0,
+      passedScanner: false,
+      removed: false,
+      // tiny personality wobble
+      wiggle: rand(0, Math.PI * 2)
+    };
+  }
+
+  // ---------- Focus selection ----------
+  function getFocusItem(L) {
+    // Focus item: nearest to scanner but not passed it yet
+    const sx = L.scannerX;
+    let best = null;
+    let bestX = -Infinity;
+    for (const it of world.items) {
+      if (it.removed) continue;
+      // allow small overshoot still focusable for a brief moment
+      if (it.x > sx + 24) continue;
+      if (it.x > bestX) { bestX = it.x; best = it; }
+    }
+    return best;
+  }
+
+  // ---------- Actions ----------
+  function inPrepZone(it, L) {
+    const left = L.prepLeft;
+    const right = L.prepRight;
+    return it && it.x > left && it.x < right;
+  }
+
+  function inScanGate(it, L) {
+    const dx = Math.abs(it.x - L.scannerX);
+    return dx <= L.gateW;
+  }
+
+  function punish(msg) {
+    lives -= 1;
+    streak = 0;
+    mult = 1.0;
+    flash(msg, 'bad');
+    if (lives <= 0) gameOver();
+  }
+
+  function reward(points, msg) {
+    score += points;
+    streak += 1;
+    mult = clamp(1.0 + streak * 0.06, 1, 4.0);
+    flash(msg, 'ok');
+  }
+
+  // little status text pop
+  let toast = { t: 0, text: '', kind: 'muted' };
+  function flash(text, kind='muted') {
+    toast.t = 1.05;
+    toast.text = text;
+    toast.kind = kind;
+  }
+
+  function doAction(action) {
+    if (state !== 'running') return;
+    const L = layout();
+    const it = getFocusItem(L);
+
+    if (!it) { punish('No item!'); return; }
+
+    // Reject is allowed in scan gate OR prep zone (panic option)
+    const okZone = action === RULE.REJECT ? (inPrepZone(it, L) || inScanGate(it, L)) : inPrepZone(it, L);
+    if (!okZone) { punish('Too late/early'); return; }
+
+    // Prevent spamming same action
+    if (it.actionsDone.has(action) && action !== 'SCAN') {
+      punish('Duplicate action');
+      return;
+    }
+
+    if (action === RULE.ID || action === RULE.DISC || action === RULE.BAG || action === RULE.WEIGH) {
+      it.actionsDone.add(action);
+
+      // If action wasn’t required, it’s a mistake (tight, but addictive)
+      if (!it.rules.has(action)) {
+        punish('Wrong prep');
+      } else {
+        reward(Math.floor(10 * mult), action === RULE.ID ? 'ID ok' :
+               action === RULE.DISC ? 'Discount ok' :
+               action === RULE.BAG ? 'Bagged' : 'Weighed');
+      }
+      return;
+    }
+
+    if (action === RULE.REJECT) {
+      if (it.suspicious) {
+        it.removed = true;
+        reward(Math.floor(90 * mult), 'Rejected ✔');
+      } else {
+        // rejecting a normal item is harsh
+        it.removed = true;
+        punish('Rejected wrong item');
+      }
+      return;
     }
   }
 
-  function sepUpdateCart(){
-    const items    = document.getElementById('cartItems');
-    const subtotal = document.getElementById('cartSubtotal');
-    const total    = document.getElementById('cartTotal');
-    if (!items || !subtotal || !total) return;
+  function doScan() {
+    if (state !== 'running') return;
+    const L = layout();
+    const it = getFocusItem(L);
 
-    items.innerHTML = '';
-    let sum = 0;
+    if (!it) { punish('No item!'); return; }
+    if (!inScanGate(it, L)) { punish('Scan timing'); return; }
 
-    if (cart.length === 0) {
-      items.innerHTML = `<p class="text-center text-gray-500 py-10">${sepTr('cartEmpty')}</p>`;
-      subtotal.textContent = '0 DKK';
-      total.textContent = SHIPPING_COST + ' DKK';
-    } else {
-      cart.forEach((it, i) => {
-        const each = parseInt(String(it.price).replace(/\D/g, ''), 10) || 0;
-        const price = each * it.qty;
-        sum += price;
-
-        const labelSizeQty = sepTr('labelSizeQty')
-          .replace('{size}', it.size)
-          .replace('{qty}', it.qty);
-
-        items.insertAdjacentHTML('beforeend', `
-          <div class="border-b pb-2">
-            <div class="flex justify-between"><span>${it.name}</span><span>${price} DKK</span></div>
-            <div class="text-gray-500">${labelSizeQty}</div>
-            <button type="button" class="text-red-500 text-xs mt-1" data-remove="${i}">${sepTr('btnRemove')}</button>
-          </div>
-        `);
-      });
-
-      items.querySelectorAll('[data-remove]').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const idx = parseInt(btn.getAttribute('data-remove'), 10);
-          cart.splice(idx, 1);
-          sepUpdateCart();
-        });
-      });
-
-      subtotal.textContent = sum + ' DKK';
-      total.textContent = (sum + SHIPPING_COST) + ' DKK';
+    // If suspicious item reaches scanner: should have been rejected
+    if (it.suspicious) {
+      punish('Scanned suspicious item');
+      it.removed = true;
+      return;
     }
 
-    localStorage.setItem('cart', JSON.stringify(cart));
-    sepUpdateCounter();
+    // Check missing required actions (excluding reject)
+    for (const r of it.rules) {
+      if (r === RULE.REJECT) continue;
+      if (!it.actionsDone.has(r)) {
+        punish('Missing prep');
+        it.removed = true;
+        return;
+      }
+    }
+
+    it.scansDone += 1;
+
+    if (it.scansDone < it.scanCount) {
+      // Needs another scan: tiny reward, but keep pressure
+      reward(Math.floor(18 * mult), 'Rescan!');
+      return;
+    }
+
+    // Successful scan
+    it.removed = true;
+    const base = 60 + Math.floor((it.rules.size) * 18) + (it.scanCount === 2 ? 20 : 0);
+    reward(Math.floor(base * mult), 'Scan ✔');
   }
 
-  function toast(msg){
-    const popup = document.createElement('div');
-    popup.className = 'popup';
-    popup.textContent = msg;
-    document.body.appendChild(popup);
-    setTimeout(() => popup.classList.add('show'), 10);
-    setTimeout(() => {
-      popup.classList.remove('show');
-      setTimeout(() => popup.remove(), 300);
-    }, 2000);
+  // ---------- Input wiring ----------
+  function bindBtn(id, fn) {
+    const el = document.getElementById(id);
+    el.addEventListener('click', (e) => { e.preventDefault(); fn(); }, { passive: false });
+    el.addEventListener('pointerdown', (e) => { e.preventDefault(); fn(); }, { passive: false });
   }
 
-  function sepAddToCart(n, p, s, q) {
-    const f = cart.findIndex(i => i.name === n && i.size === s);
-    if (f >= 0) cart[f].qty += q;
-    else cart.push({ name: n, price: p, size: s, qty: q });
+  bindBtn('btnScan', doScan);
+  bindBtn('btnID',   () => doAction(RULE.ID));
+  bindBtn('btnDisc', () => doAction(RULE.DISC));
+  bindBtn('btnBag',  () => doAction(RULE.BAG));
+  bindBtn('btnWeigh',() => doAction(RULE.WEIGH));
+  bindBtn('btnReject',() => doAction(RULE.REJECT));
 
-    sepUpdateCart();
-    toast(sepTr('popupAdded'));
-  }
-
-  // Add-to-cart buttons
-  document.querySelectorAll('.add-to-cart').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const card = btn.closest('.product-card');
-      if (!card) return;
-      const name = card.querySelector('h3')?.textContent?.trim() || 'Item';
-      const price = card.querySelector('p')?.textContent?.trim() || '0 DKK';
-      const size = card.querySelector('select')?.value || 'M';
-      const qty = parseInt(card.querySelector('.quantity-selector')?.value, 10) || 1;
-      sepAddToCart(name, price, size, qty);
-    });
+  addEventListener('keydown', (e) => {
+    const k = e.key.toLowerCase();
+    if (k === 's') { e.preventDefault(); doScan(); }
+    if (k === 'i') { e.preventDefault(); doAction(RULE.ID); }
+    if (k === 'd') { e.preventDefault(); doAction(RULE.DISC); }
+    if (k === 'b') { e.preventDefault(); doAction(RULE.BAG); }
+    if (k === 'w') { e.preventDefault(); doAction(RULE.WEIGH); }
+    if (k === 'r') { e.preventDefault(); doAction(RULE.REJECT); }
+    if (k === 'enter' && (state === 'menu' || state === 'over')) { start(); }
   });
 
-  /* FIX: when cart opens, hide burger menu button until cart closes */
-  function setBurgerVisible(visible){
-    const t = document.getElementById('menuToggle');
-    if (!t) return;
-    if (visible) t.classList.remove('hidden');
-    else t.classList.add('hidden');
+  // start on any click
+  addEventListener('pointerdown', () => {
+    if (state === 'menu' || state === 'over') start();
+  }, { passive: true });
+
+  // ---------- Start/Reset ----------
+  function start() {
+    state = 'running';
+    overlay.style.display = 'none';
+
+    score = 0;
+    streak = 0;
+    mult = 1.0;
+    lives = 3;
+
+    speedScale = 1.0;
+    clueWindow = 0.85;
+    spawnGap = 150;
+    beltSpeed = 220;
+
+    world.items.length = 0;
+    world.time = 0;
+
+    world.nextSpawnX = -220;
+    seed();
+    toast.t = 0;
+    toast.text = '';
   }
 
-  // Open/close cart (and make overlay clickable only when visible)
-  function openCart(){
-    if (!cartSidebar || !cartOverlay) return;
-    cartSidebar.classList.remove('translate-x-full');
-    cartOverlay.classList.remove('hidden');
-    cartOverlay.classList.remove('pointer-none');
-    cartOverlay.classList.add('pointer-auto');
-    closeMenu();
-    setBurgerVisible(false);
-  }
-  function closeCart(){
-    if (!cartSidebar || !cartOverlay) return;
-    cartSidebar.classList.add('translate-x-full');
-    cartOverlay.classList.add('hidden');
-    cartOverlay.classList.remove('pointer-auto');
-    cartOverlay.classList.add('pointer-none');
-    setBurgerVisible(true);
-  }
-
-  document.getElementById('viewCartBtn')?.addEventListener('click', openCart);
-  document.getElementById('closeCart')?.addEventListener('click', closeCart);
-  if (cartOverlay) cartOverlay.addEventListener('click', closeCart);
-
-  // MobilePay + copy message
-  const mobilePayNum = '51 34 31 33';
-
-  document.getElementById('openMobilePay')?.addEventListener('click', () => {
-    window.location.href = 'mobilepay://transfer?phone=' + mobilePayNum.replace(/\D/g, '');
-    alert(sepTr('mobilePayThanks'));
-  });
-
-  document.getElementById('copyMobilePay')?.addEventListener('click', async () => {
-    const subtotal = document.getElementById('cartSubtotal')?.textContent || '0 DKK';
-    const total = document.getElementById('cartTotal')?.textContent || (SHIPPING_COST + ' DKK');
-
-    const lines = [];
-    lines.push(sepTr('orderIntro'));
-    if (cart.length > 0) {
-      cart.forEach(i => {
-        lines.push(
-          sepTr('orderItem')
-            .replace('{qty}', i.qty)
-            .replace('{name}', i.name)
-            .replace('{size}', i.size)
-        );
-      });
+  function seed() {
+    // pre-fill conveyor
+    const L = layout();
+    let x = -260;
+    for (let i=0;i<6;i++) {
+      x -= rand(120, 160);
+      world.items.push(makeItem(x));
     }
-    lines.push(`${sepTr('orderSubtotalLabel')} ${subtotal}`);
-    lines.push(`${sepTr('orderShippingLabel')} +${SHIPPING_COST} DKK`);
-    lines.push(`${sepTr('orderTotalLabel')} ${total}`);
-
-    const msg = lines.join('\n');
-    try {
-      await navigator.clipboard.writeText(msg);
-      toast(sepTr('popupOrderCopied'));
-    } catch (e) {
-      alert('Clipboard blocked by browser. Try HTTPS or copy manually.');
-    }
-  });
-
-  /* FIX: Exit buttons go back to welcome without reload (prevents white screen) */
-  function backToMainMenu(){
-    closeCart();
-    closeMenu();
-    setBurgerVisible(true);
-    if (window.sepShowScene) window.sepShowScene('main');
-    if (window.showApp) window.showApp('welcome');
+    world.nextSpawnX = x - 140;
   }
 
-  document.getElementById('sepExitBtn')?.addEventListener('click', backToMainMenu);
-  document.getElementById('sepExitBtn2')?.addEventListener('click', backToMainMenu);
+  function gameOver() {
+    state = 'over';
+    overlay.style.display = 'flex';
+    card.innerHTML = `
+      <h1>Shift ended.</h1>
+      <p>
+        <b>Score:</b> ${Math.floor(score)}<br>
+        <b>Streak:</b> ${streak}<br>
+        <b>Multiplier:</b> x${mult.toFixed(1)}
+      </p>
+      <p class="muted">Click/tap to restart. Tip: do prep actions early in the prep zone, then scan dead-centre.</p>
+      <div class="row">
+        <div class="pill ok">Restart: click / tap / Enter</div>
+        <div class="pill warn">Clues fade faster as you score more</div>
+      </div>
+    `;
+  }
 
-  // Init
-  sepApplyLanguage();
+  // ---------- Update ----------
+  function update(dt) {
+    const L = layout();
+    world.time += dt;
 
-  // expose for global sync
-  window.__SEP_SET_LANG = (lang) => { sepCurrentLang = lang; sepApplyLanguage(); };
+    // ramp difficulty with score
+    const targetScale = 1.0 + clamp(score / 2200, 0, 1.2);
+    speedScale += (targetScale - speedScale) * 0.05;
+
+    beltSpeed = 220 * speedScale;
+    clueWindow = clamp(0.85 - (speedScale - 1) * 0.22, 0.45, 0.90);
+    spawnGap = clamp(150 - (speedScale - 1) * 28, 110, 160);
+
+    // move items
+    for (const it of world.items) {
+      if (it.removed) continue;
+      it.wiggle += dt * (1.2 + speedScale * 0.3);
+      it.x += beltSpeed * dt;
+
+      // show clue once when crossing clue zone (briefly)
+      if (!it.clueShown && it.x >= L.clueX) {
+        it.clueShown = true;
+        it.clueT = clueWindow;
+      }
+      if (it.clueT > 0) it.clueT -= dt;
+
+      // if item passes scanner without being removed => missed
+      if (!it.passedScanner && it.x > L.scannerX + L.gateW + 24) {
+        it.passedScanner = true;
+
+        // suspicious item passing through = huge mistake (you let it through)
+        if (!it.removed) {
+          if (it.suspicious) punish('Let suspicious through');
+          else punish('Missed scan');
+          it.removed = true;
+        }
+      }
+    }
+
+    // cleanup removed items
+    world.items = world.items.filter(it => it.x < L.w + 220 && !it.removed);
+
+    // spawn new items behind
+    const leftBound = -260;
+    // ensure we always have enough
+    while (world.items.length < 8) {
+      world.nextSpawnX = leftBound - rand(spawnGap, spawnGap + 70);
+      world.items.unshift(makeItem(world.nextSpawnX));
+    }
+
+    // toast timer
+    if (toast.t > 0) toast.t -= dt;
+  }
+
+  // ---------- Draw ----------
+  function draw() {
+    const L = layout();
+    const w=L.w, h=L.h;
+
+    // background
+    ctx.fillStyle = '#06070a';
+    ctx.fillRect(0,0,w,h);
+
+    // subtle gradient band
+    const g = ctx.createLinearGradient(0, 0, 0, h);
+    g.addColorStop(0, '#070914');
+    g.addColorStop(1, '#04050a');
+    ctx.fillStyle = g;
+    ctx.fillRect(0,0,w,h);
+
+    // belt
+    const beltTop = L.beltY - L.beltH/2;
+    ctx.fillStyle = 'rgba(255,255,255,0.06)';
+    roundRect(12, beltTop, w-24, L.beltH, 18, true, false);
+
+    // belt lines
+    ctx.strokeStyle = 'rgba(255,255,255,0.07)';
+    ctx.lineWidth = 2;
+    for (let i=0;i<12;i++) {
+      const x = (i* (w/12) + (performance.now()*0.05) % (w/12));
+      ctx.beginPath();
+      ctx.moveTo(x, beltTop + 14);
+      ctx.lineTo(x + 60, beltTop + L.beltH - 14);
+      ctx.stroke();
+    }
+
+    // scanner gate
+    ctx.fillStyle = 'rgba(120,200,255,0.10)';
+    roundRect(L.scannerX - L.gateW, beltTop-14, L.gateW*2, L.beltH+28, 12, true, false);
+    ctx.strokeStyle = 'rgba(170,220,255,0.30)';
+    ctx.lineWidth = 2;
+    roundRect(L.scannerX - L.gateW, beltTop-14, L.gateW*2, L.beltH+28, 12, false, true);
+
+    // prep zone
+    ctx.strokeStyle = 'rgba(255,255,255,0.12)';
+    ctx.setLineDash([6,6]);
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.rect(L.prepLeft, beltTop-10, (L.prepRight - L.prepLeft), L.beltH+20);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // clue zone marker
+    ctx.strokeStyle = 'rgba(255,255,255,0.10)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(L.clueX, beltTop-18);
+    ctx.lineTo(L.clueX, beltTop+L.beltH+18);
+    ctx.stroke();
+
+    // focus item
+    const focus = getFocusItem(L);
+    const focusId = focus ? focus.id : null;
+
+    // items
+    for (const it of world.items) {
+      const iy = L.beltY + it.laneBob + Math.sin(it.wiggle)*4;
+      const x = it.x;
+      const y = iy;
+
+      // shadow
+      ctx.fillStyle = 'rgba(0,0,0,0.35)';
+      ctx.beginPath();
+      ctx.ellipse(x, y + 22, it.w*0.42, it.h*0.22, 0, 0, Math.PI*2);
+      ctx.fill();
+
+      // body
+      ctx.fillStyle = it.color;
+      roundRect(x - it.w/2, y - it.h/2, it.w, it.h, 12, true, false);
+
+      // outline
+      ctx.strokeStyle = 'rgba(10,12,18,0.45)';
+      ctx.lineWidth = 2;
+      roundRect(x - it.w/2, y - it.h/2, it.w, it.h, 12, false, true);
+
+      // label
+      ctx.fillStyle = 'rgba(10,12,18,0.70)';
+      ctx.font = '700 12px system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText(it.typeName, x, y + 4);
+
+      // barcode stripes
+      ctx.fillStyle = 'rgba(10,12,18,0.22)';
+      for (let k=0;k<10;k++) {
+        const bw = (k%3===0) ? 2 : 1;
+        ctx.fillRect(x - it.w/2 + 10 + k*6, y + it.h/2 - 10, bw, 8);
+      }
+
+      // focus highlight
+      if (focusId === it.id) {
+        ctx.strokeStyle = 'rgba(255,255,255,0.22)';
+        ctx.lineWidth = 3;
+        roundRect(x - it.w/2 - 6, y - it.h/2 - 6, it.w+12, it.h+12, 14, false, true);
+      }
+
+      // clue tags (brief)
+      if (it.clueT > 0) {
+        const alpha = clamp(it.clueT / clueWindow, 0, 1);
+        drawTags(x, y - it.h/2 - 18, it.clueTags, alpha);
+      }
+
+      // progress dots for required rules (only for focus item, and only if you did them)
+      if (focusId === it.id) {
+        const req = [...it.rules].filter(r => r !== RULE.REJECT);
+        const done = req.filter(r => it.actionsDone.has(r)).length;
+        const total = Math.max(0, req.length);
+
+        // small indicator under item
+        if (total > 0) {
+          const baseY = y + it.h/2 + 18;
+          const startX = x - (total-1)*10/2;
+          for (let i=0;i<total;i++) {
+            const on = i < done;
+            ctx.fillStyle = on ? 'rgba(180,255,210,0.95)' : 'rgba(255,255,255,0.16)';
+            ctx.beginPath();
+            ctx.arc(startX + i*10, baseY, 3.4, 0, Math.PI*2);
+            ctx.fill();
+          }
+        }
+
+        // rescan indicator
+        if (it.scanCount === 2) {
+          ctx.fillStyle = it.scansDone === 0 ? 'rgba(255,220,140,0.9)' : 'rgba(180,255,210,0.9)';
+          ctx.font = '800 11px system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial';
+          ctx.fillText(it.scansDone === 0 ? 'RESCAN' : '1/2 DONE', x, y - it.h/2 - 6);
+        }
+
+        if (it.suspicious) {
+          ctx.fillStyle = 'rgba(255,130,150,0.92)';
+          ctx.font = '900 11px system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial';
+          ctx.fillText('REJECT', x, y - it.h/2 - 6);
+        }
+      }
+    }
+
+    // toast message (top-middle)
+    if (toast.t > 0) {
+      const a = clamp(toast.t / 1.05, 0, 1);
+      ctx.globalAlpha = 0.15 + a*0.85;
+
+      const text = toast.text;
+      ctx.font = '900 16px system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial';
+      const tw = ctx.measureText(text).width;
+      const bx = w/2 - tw/2 - 16;
+      const by = Math.max(70, Math.floor(h*0.14));
+      const bw = tw + 32;
+      const bh = 40;
+
+      ctx.fillStyle = 'rgba(10,12,18,0.65)';
+      roundRect(bx, by, bw, bh, 14, true, false);
+
+      const col = toast.kind === 'ok' ? 'rgba(170,255,200,0.95)'
+               : toast.kind === 'bad' ? 'rgba(255,130,150,0.95)'
+               : 'rgba(245,245,255,0.92)';
+      ctx.fillStyle = col;
+      ctx.textAlign = 'center';
+      ctx.fillText(text, w/2, by + 26);
+
+      ctx.globalAlpha = 1;
+    }
+
+    // HUD update
+    hud1.textContent = `Score: ${Math.floor(score)} · Streak: ${streak} · Mult: x${mult.toFixed(1)} · Lives: ${lives}`;
+    const focusName = focus ? focus.typeName : 'none';
+    hud2.textContent = `Speed: ${speedScale.toFixed(2)} · Focus: ${focusName}`;
+  }
+
+  function drawTags(x, y, tags, alpha) {
+    if (!tags || tags.length === 0) return;
+
+    ctx.save();
+    ctx.globalAlpha = alpha * 0.95;
+    ctx.font = '800 12px system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial';
+    ctx.textAlign = 'left';
+
+    let px = x - 110;
+    let py = y;
+
+    for (const t of tags) {
+      const w = ctx.measureText(t).width + 18;
+      const h = 22;
+
+      const danger = (t === 'Suspicious');
+      const warn = (t === '18+' || t === 'Barcode?' || t === 'Weigh');
+      const bg = danger ? 'rgba(255,120,140,0.20)' : warn ? 'rgba(255,220,140,0.16)' : 'rgba(170,220,255,0.12)';
+      const stroke = danger ? 'rgba(255,120,140,0.35)' : warn ? 'rgba(255,220,140,0.28)' : 'rgba(170,220,255,0.22)';
+      const fg = danger ? 'rgba(255,160,175,0.95)' : warn ? 'rgba(255,230,170,0.95)' : 'rgba(210,235,255,0.92)';
+
+      ctx.fillStyle = bg;
+      roundRect(px, py, w, h, 999, true, false);
+      ctx.strokeStyle = stroke;
+      ctx.lineWidth = 1;
+      roundRect(px, py, w, h, 999, false, true);
+
+      ctx.fillStyle = fg;
+      ctx.fillText(t, px + 9, py + 15);
+
+      px += w + 8;
+    }
+
+    ctx.restore();
+  }
+
+  function roundRect(x, y, w, h, r, fill, stroke) {
+    r = Math.min(r, w/2, h/2);
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+    if (fill) ctx.fill();
+    if (stroke) ctx.stroke();
+  }
+
+  // ---------- Main Loop ----------
+  function frame(t) {
+    if (!tPrev) tPrev = t;
+    const dt = clamp((t - tPrev) / 1000, 0, 0.033);
+    tPrev = t;
+
+    if (state === 'running') update(dt);
+    draw();
+
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
 
 })();
 </script>
-
-<script>
-/* =========================================================
-   MAKE IT HAPPEN (FIRESTORE) — PASSWORD LOGIN + TIME + PROFILES
-========================================================= */
-(function(){
-  // Firebase config (yours)
-  const firebaseConfig = {
-    apiKey: "AIzaSyAkbH3mJkeheF3L7EaqN1kMgbFd_LJCIXo",
-    authDomain: "hitachi-vantara-make-it-happen.firebaseapp.com",
-    projectId: "hitachi-vantara-make-it-happen",
-    storageBucket: "hitachi-vantara-make-it-happen.firebasestorage.app",
-    messagingSenderId: "749690169824",
-    appId: "1:749690169824:web:21d6b8d2a5862847e4e385",
-    measurementId: "G-7WZ03E68MF"
-  };
-
-  const LS_USER = "mih_username_v2";
-  const LS_PASS = "mih_saved_password_v2";
-
-  const COL_USERS = "mih_users_v2";
-  const COL_ENTRIES = "mih_entries_v2";
-
-  let db = null;
-  let currentUser = localStorage.getItem(LS_USER) || "";
-
-  function safeName(name){
-    return (name || "").trim().slice(0, 40);
-  }
-
-  function toast(msg){
-    const popup = document.createElement('div');
-    popup.className = 'popup';
-    popup.textContent = msg;
-    document.body.appendChild(popup);
-    setTimeout(() => popup.classList.add('show'), 10);
-    setTimeout(() => {
-      popup.classList.remove('show');
-      setTimeout(() => popup.remove(), 300);
-    }, 1800);
-  }
-
-  function formatDate(ts){
-    const d = new Date(ts);
-    return isNaN(d.getTime()) ? "" : d.toLocaleDateString();
-  }
-
-  function paceFrom(km, minutes){
-    if (!isFinite(km) || !isFinite(minutes) || km <= 0 || minutes <= 0) return "0:00";
-    const paceMin = minutes / km;
-    const m = Math.floor(paceMin);
-    const s = Math.round((paceMin - m) * 60);
-    return `${m}:${String(s).padStart(2,'0')}`;
-  }
-
-  // Scenes
-  function mihShowScene(id){
-    document.querySelectorAll('#mih-app .scene').forEach(s => s.classList.remove('active'));
-    const el = document.getElementById(id);
-    if (el) el.classList.add('active');
-    closeMihMenu();
-    updateMihMenuLoginVisibility();
-  }
-
-  // MIH menu open/close
-  const mihMenuToggle = document.getElementById('mihMenuToggle');
-  const mihMenuPanel = document.getElementById('mihMenuPanel');
-  const mihMenuOverlay = document.getElementById('mihMenuOverlay');
-  const mihMenuClose = document.getElementById('mihMenuClose');
-
-  function openMihMenu(){
-    mihMenuPanel.classList.add('open');
-    mihMenuOverlay.classList.add('open');
-  }
-  function closeMihMenu(){
-    mihMenuPanel.classList.remove('open');
-    mihMenuOverlay.classList.remove('open');
-  }
-
-  if (mihMenuToggle) mihMenuToggle.addEventListener('click', () => {
-    if (mihMenuPanel.classList.contains('open')) closeMihMenu();
-    else openMihMenu();
-  });
-  if (mihMenuOverlay) mihMenuOverlay.addEventListener('click', closeMihMenu);
-  if (mihMenuClose) mihMenuClose.addEventListener('click', closeMihMenu);
-
-  // Menu buttons to scenes
-  document.querySelectorAll('[data-mih-scene]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const scene = btn.getAttribute('data-mih-scene');
-      if (scene) mihShowScene(scene);
-    });
-  });
-
-  // Language buttons
-  document.querySelectorAll('.mih-lang-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const lang = btn.getAttribute('data-lang');
-      setGlobalLang(lang);
-      applyGlobalTranslations();
-      // keep SEP in sync too
-      if (window.__SEP_SET_LANG) window.__SEP_SET_LANG(lang);
-    });
-  });
-
-  function setUserPills(){
-    const pill = document.getElementById('mih-user-pill');
-    const mini = document.getElementById('mihMenuUserMini');
-    const logoutBtn = document.getElementById('mihLogoutBtn');
-    if (!pill || !mini || !logoutBtn) return;
-
-    if (currentUser){
-      pill.textContent = (GLOBAL_LANG === 'da') ? (`Logget ind som ${currentUser}`) :
-                         (GLOBAL_LANG === 'cs') ? (`Přihlášen jako ${currentUser}`) :
-                         (`Logged in as ${currentUser}`);
-      mini.textContent = pill.textContent;
-      logoutBtn.style.display = "block";
-    } else {
-      pill.textContent = (GLOBAL_LANG === 'da') ? "Ikke logget ind" :
-                         (GLOBAL_LANG === 'cs') ? "Nepřihlášen" :
-                         "Not logged in";
-      mini.textContent = pill.textContent;
-      logoutBtn.style.display = "none";
-    }
-  }
-
-  function updateMihMenuLoginVisibility(){
-    const loginBtn = document.getElementById('mihMenuLoginBtn');
-    if (!loginBtn) return;
-    loginBtn.style.display = currentUser ? "none" : "block";
-  }
-
-  async function initFirebase(){
-    try {
-      if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-      db = firebase.firestore();
-    } catch(e){
-      console.error(e);
-      alert(GT('errFirebase'));
-    }
-  }
-
-  async function ensureUserDoc(name, password){
-    const ref = db.collection(COL_USERS).doc(name);
-    const snap = await ref.get();
-
-    if (!snap.exists){
-      await ref.set({
-        name,
-        password,
-        league: "The League of Choice",
-        totalKm: 0,
-        totalMin: 0,
-        entries: 0,
-        updatedAt: Date.now(),
-        createdAt: Date.now()
-      });
-      return { created: true, wrongPass: false };
-    }
-
-    const data = snap.data() || {};
-    if ((data.password || "") !== password){
-      return { created: false, wrongPass: true };
-    }
-
-    // keep league label consistent
-    if (data.league !== "The League of Choice"){
-      await ref.set({ league: "The League of Choice" }, { merge:true });
-    }
-
-    return { created: false, wrongPass: false };
-  }
-
-  async function login(){
-    if (!db) return;
-
-    const name = safeName(document.getElementById('mih-username')?.value || "");
-    const password = (document.getElementById('mih-password')?.value || "").trim();
-
-    if (!name || !password){
-      alert(GT('errLoginMissing'));
-      return;
-    }
-
-    const res = await ensureUserDoc(name, password);
-    if (res.wrongPass){
-      alert(GT('errWrongPass'));
-      return;
-    }
-
-    currentUser = name;
-    localStorage.setItem(LS_USER, currentUser);
-    localStorage.setItem(LS_PASS, password);
-
-    setUserPills();
-    updateMihMenuLoginVisibility();
-    await refreshAll();
-
-    mihShowScene('mih-home');
-  }
-
-  async function logout(){
-    currentUser = "";
-    localStorage.removeItem(LS_USER);
-    setUserPills();
-    updateMihMenuLoginVisibility();
-    await refreshAll();
-    mihShowScene('mih-login');
-  }
-
-  async function addActivity(){
-    if (!currentUser) { alert(GT('errMustLogin')); mihShowScene('mih-login'); return; }
-
-    const km = parseFloat(document.getElementById('mih-distance')?.value);
-    const minutes = parseFloat(document.getElementById('mih-minutes')?.value);
-
-    if (!isFinite(km) || !isFinite(minutes) || km <= 0 || minutes <= 0){
-      alert(GT('errActivityInvalid'));
-      return;
-    }
-
-    const ts = Date.now();
-
-    // 1) add entry
-    await db.collection(COL_ENTRIES).add({
-      username: currentUser,
-      km,
-      minutes,
-      ts
-    });
-
-    // 2) update user totals atomically
-    const uref = db.collection(COL_USERS).doc(currentUser);
-    await db.runTransaction(async (tx) => {
-      const snap = await tx.get(uref);
-      const data = snap.exists ? snap.data() : { totalKm:0, totalMin:0, entries:0, createdAt: ts };
-      const totalKm = (Number(data.totalKm) || 0) + km;
-      const totalMin = (Number(data.totalMin) || 0) + minutes;
-      const entries = (Number(data.entries) || 0) + 1;
-
-      tx.set(uref, {
-        name: currentUser,
-        league: "The League of Choice",
-        totalKm,
-        totalMin,
-        entries,
-        updatedAt: ts,
-        createdAt: data.createdAt || ts
-      }, { merge:true });
-    });
-
-    document.getElementById('mih-distance').value = "";
-    document.getElementById('mih-minutes').value = "";
-
-    toast(GT('toastSaved'));
-    await refreshAll();
-    mihShowScene('mih-home');
-  }
-
-  async function loadRecent(){
-    const tbody = document.getElementById('mih-recent');
-    if (!tbody) return;
-    tbody.innerHTML = "";
-
-    if (!currentUser){
-      tbody.innerHTML = `<tr><td colspan="4" class="muted">${GT('errMustLogin')}</td></tr>`;
-      return;
-    }
-
-    const snap = await db.collection(COL_ENTRIES)
-      .where("username","==",currentUser)
-      .orderBy("ts","desc")
-      .limit(10)
-      .get();
-
-    if (snap.empty){
-      tbody.innerHTML = `<tr><td colspan="4" class="muted">${GT('noEntries')}</td></tr>`;
-      return;
-    }
-
-    snap.forEach(doc => {
-      const e = doc.data();
-      const tr = document.createElement('tr');
-      const km = Number(e.km || 0);
-      const min = Number(e.minutes || 0);
-      tr.innerHTML = `<td>${formatDate(e.ts)}</td><td>${km.toFixed(2)}</td><td>${min.toFixed(0)}</td><td>${paceFrom(km,min)}</td>`;
-      tbody.appendChild(tr);
-    });
-  }
-
-  async function loadHistory(){
-    const tbody = document.getElementById('mih-history-body');
-    if (!tbody) return;
-    tbody.innerHTML = "";
-
-    if (!currentUser){
-      tbody.innerHTML = `<tr><td colspan="4" class="muted">${GT('errMustLogin')}</td></tr>`;
-      return;
-    }
-
-    const snap = await db.collection(COL_ENTRIES)
-      .where("username","==",currentUser)
-      .orderBy("ts","desc")
-      .limit(80)
-      .get();
-
-    if (snap.empty){
-      tbody.innerHTML = `<tr><td colspan="4" class="muted">${GT('noEntries')}</td></tr>`;
-      return;
-    }
-
-    snap.forEach(doc => {
-      const e = doc.data();
-      const tr = document.createElement('tr');
-      const km = Number(e.km || 0);
-      const min = Number(e.minutes || 0);
-      tr.innerHTML = `<td>${formatDate(e.ts)}</td><td>${km.toFixed(2)}</td><td>${min.toFixed(0)}</td><td>${paceFrom(km,min)}</td>`;
-      tbody.appendChild(tr);
-    });
-  }
-
-  async function loadLeaderboard(){
-    const tbody = document.getElementById('mih-leaderboard-body');
-    if (!tbody) return;
-    tbody.innerHTML = "";
-
-    const snap = await db.collection(COL_USERS)
-      .orderBy("totalKm","desc")
-      .limit(60)
-      .get();
-
-    if (snap.empty){
-      tbody.innerHTML = `<tr><td colspan="5" class="muted">${GT('noPlayers')}</td></tr>`;
-      return;
-    }
-
-    let rank = 0;
-    snap.forEach(doc => {
-      rank++;
-      const u = doc.data() || {};
-      const km = Number(u.totalKm || 0);
-      const min = Number(u.totalMin || 0);
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td>${rank}</td>
-        <td>${u.name || doc.id}</td>
-        <td>${km.toFixed(2)}</td>
-        <td>${min.toFixed(0)}</td>
-        <td>${paceFrom(km, min)}</td>
-      `;
-      tbody.appendChild(tr);
-    });
-  }
-
-  async function loadProfilesList(){
-    const tbody = document.getElementById('mih-profiles-body');
-    if (!tbody) return;
-    tbody.innerHTML = "";
-
-    const snap = await db.collection(COL_USERS)
-      .orderBy("totalKm","desc")
-      .limit(80)
-      .get();
-
-    if (snap.empty){
-      tbody.innerHTML = `<tr><td colspan="4" class="muted">${GT('noPlayers')}</td></tr>`;
-      return;
-    }
-
-    snap.forEach(doc => {
-      const u = doc.data() || {};
-      const tr = document.createElement('tr');
-      tr.style.cursor = "pointer";
-      tr.innerHTML = `
-        <td>${u.name || doc.id}</td>
-        <td>${Number(u.totalKm || 0).toFixed(2)}</td>
-        <td>${Number(u.totalMin || 0).toFixed(0)}</td>
-        <td>${Number(u.entries || 0)}</td>
-      `;
-      tr.addEventListener('click', () => openProfile(u.name || doc.id));
-      tbody.appendChild(tr);
-    });
-  }
-
-  async function openProfile(username){
-    const panel = document.getElementById('mihProfilePanel');
-    if (!panel) return;
-
-    // user doc
-    const userSnap = await db.collection(COL_USERS).doc(username).get();
-    const u = userSnap.exists ? (userSnap.data() || {}) : { name: username, totalKm:0, totalMin:0, entries:0 };
-
-    document.getElementById('mihProfileName').textContent = u.name || username;
-    document.getElementById('mihProfileLeague').textContent = "The League of Choice";
-    document.getElementById('mihProfileKm').textContent = Number(u.totalKm || 0).toFixed(2);
-    document.getElementById('mihProfileMin').textContent = Number(u.totalMin || 0).toFixed(0);
-    document.getElementById('mihProfileRuns').textContent = Number(u.entries || 0).toString();
-    document.getElementById('mihProfileAvgPace').textContent = paceFrom(Number(u.totalKm||0), Number(u.totalMin||0));
-
-    // history
-    const tbody = document.getElementById('mih-profile-history');
-    tbody.innerHTML = "";
-
-    const snap = await db.collection(COL_ENTRIES)
-      .where("username","==",username)
-      .orderBy("ts","desc")
-      .limit(12)
-      .get();
-
-    if (snap.empty){
-      tbody.innerHTML = `<tr><td colspan="4" class="muted">${GT('noEntries')}</td></tr>`;
-    } else {
-      snap.forEach(doc => {
-        const e = doc.data();
-        const km = Number(e.km || 0);
-        const min = Number(e.minutes || 0);
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${formatDate(e.ts)}</td><td>${km.toFixed(2)}</td><td>${min.toFixed(0)}</td><td>${paceFrom(km,min)}</td>`;
-        tbody.appendChild(tr);
-      });
-    }
-
-    panel.classList.add('show');
-  }
-
-  function closeProfile(){
-    document.getElementById('mihProfilePanel')?.classList.remove('show');
-  }
-
-  async function loadStats(){
-    const totalKmEl = document.getElementById('mih-total-km');
-    const totalMinEl = document.getElementById('mih-total-min');
-    const entriesEl = document.getElementById('mih-total-entries');
-    const avgKmEl = document.getElementById('mih-average-km');
-    const avgPaceEl = document.getElementById('mih-average-pace');
-
-    if (!totalKmEl || !totalMinEl || !entriesEl || !avgKmEl || !avgPaceEl) return;
-
-    if (!currentUser){
-      totalKmEl.textContent = "0";
-      totalMinEl.textContent = "0";
-      entriesEl.textContent = "0";
-      avgKmEl.textContent = "0";
-      avgPaceEl.textContent = "0:00";
-      return;
-    }
-
-    const snap = await db.collection(COL_USERS).doc(currentUser).get();
-    if (!snap.exists){
-      totalKmEl.textContent = "0";
-      totalMinEl.textContent = "0";
-      entriesEl.textContent = "0";
-      avgKmEl.textContent = "0";
-      avgPaceEl.textContent = "0:00";
-      return;
-    }
-
-    const u = snap.data() || {};
-    const totalKm = Number(u.totalKm || 0);
-    const totalMin = Number(u.totalMin || 0);
-    const entries = Number(u.entries || 0);
-    const avgKm = entries > 0 ? (totalKm / entries) : 0;
-
-    totalKmEl.textContent = totalKm.toFixed(2);
-    totalMinEl.textContent = totalMin.toFixed(0);
-    entriesEl.textContent = entries.toString();
-    avgKmEl.textContent = avgKm.toFixed(2);
-    avgPaceEl.textContent = paceFrom(totalKm, totalMin);
-  }
-
-  async function refreshAll(){
-    if (!db) return;
-    setUserPills();
-    updateMihMenuLoginVisibility();
-    await Promise.all([
-      loadRecent(),
-      loadLeaderboard(),
-      loadProfilesList(),
-      loadStats(),
-      loadHistory()
-    ]);
-  }
-
-  // View saved password
-  function viewSavedPassword(){
-    const box = document.getElementById('mih-saved-pass-display');
-    if (!box) return;
-    const saved = localStorage.getItem(LS_PASS);
-    box.style.display = "block";
-    box.textContent = saved ? GT('mihSavedShow', { password: saved }) : GT('mihSavedNone');
-  }
-
-  // Wire buttons
-  document.getElementById('mih-login-btn')?.addEventListener('click', login);
-  document.getElementById('mih-add-activity')?.addEventListener('click', addActivity);
-  document.getElementById('mihLogoutBtn')?.addEventListener('click', logout);
-  document.getElementById('mihExitBtn')?.addEventListener('click', () => {
-    closeMihMenu();
-    if (window.showApp) window.showApp('welcome');
-  });
-  document.getElementById('mih-view-saved-pass')?.addEventListener('click', viewSavedPassword);
-  document.getElementById('mihProfileClose')?.addEventListener('click', closeProfile);
-
-  // Enter key support
-  document.getElementById('mih-username')?.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') login();
-  });
-  document.getElementById('mih-password')?.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') login();
-  });
-  document.getElementById('mih-minutes')?.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') addActivity();
-  });
-  document.getElementById('mih-distance')?.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') addActivity();
-  });
-
-  // Init
-  document.addEventListener('DOMContentLoaded', async () => {
-    // Welcome buttons
-    document.getElementById('welcomeSepBtn')?.addEventListener('click', openSep);
-    document.getElementById('welcomeMihBtn')?.addEventListener('click', openMih);
-
-    // Welcome language buttons
-    document.querySelectorAll('.welcome-lang-btn').forEach(btn => {
-      btn.addEventListener('click', () => setGlobalLang(btn.getAttribute('data-lang')));
-    });
-
-    // Apply global translations now
-    applyGlobalTranslations();
-    setGlobalLang(GLOBAL_LANG); // also updates active states
-
-    // Init firebase + data
-    await initFirebase();
-    setUserPills();
-    updateMihMenuLoginVisibility();
-
-    // If user exists, stay logged in and hide login menu item
-    if (currentUser){
-      mihShowScene('mih-home');
-      await refreshAll();
-    } else {
-      mihShowScene('mih-login');
-      await refreshAll();
-    }
-  });
-
-})();
-</script>
-
-<script>
-/* =========================================================
-   START STATE
-   - Start on welcome every time (NO reload loop)
-========================================================= */
-document.addEventListener('DOMContentLoaded', () => {
-  applyGlobalTranslations();
-  document.querySelectorAll('.welcome-lang-btn').forEach(btn => {
-    btn.classList.toggle('active', btn.getAttribute('data-lang') === GLOBAL_LANG);
-  });
-  showApp('welcome');
-});
-</script>
-
 </body>
 </html>
