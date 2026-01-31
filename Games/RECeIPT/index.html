@@ -1,528 +1,902 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>RECeIPT?</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <title>Receipt Run</title>
   <style>
-    :root { --scale: 4; }
-    html, body { height: 100%; margin: 0; background: #000; }
-    body { display: grid; place-items: center; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
-    .wrap { display:flex; flex-direction:column; align-items:center; gap:12px; }
-    canvas {
-      width: calc(160px * var(--scale));
-      height: calc(144px * var(--scale));
-      image-rendering: pixelated;
-      image-rendering: crisp-edges;
-      border-radius: 14px;
-      box-shadow: 0 14px 60px rgba(0,0,0,.6);
-      background:#000;
-      touch-action: none;
-      user-select: none;
-      -webkit-user-select: none;
+    :root { color-scheme: dark; }
+    html, body { margin:0; height:100%; background:#06070a; overflow:hidden; font-family: system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif; }
+    canvas { display:block; width:100vw; height:100vh; }
+
+    .hud{
+      position:fixed; inset:0; pointer-events:none;
+      display:flex; align-items:flex-start; justify-content:space-between;
+      padding:12px; gap:12px;
+      color:rgba(245,245,255,0.92);
+      text-shadow:0 2px 16px rgba(0,0,0,0.55);
+      font-size:14px;
     }
-    .mini {
-      opacity: .7;
-      font-size: 12px;
-      color: #fff;
-      letter-spacing: .08em;
-      text-transform: uppercase;
+    .panel{
+      background:rgba(10,12,18,0.55);
+      border:1px solid rgba(255,255,255,0.10);
+      border-radius:14px;
+      padding:10px 12px;
+      backdrop-filter: blur(10px);
+      max-width: 820px;
     }
-    @media (max-width: 520px){
-      :root { --scale: 3; }
+    .title{ font-weight:850; letter-spacing:0.4px; }
+    .muted{ opacity:0.78; }
+    .kbd{
+      display:inline-block; padding:1px 6px; border-radius:7px;
+      border:1px solid rgba(255,255,255,0.18);
+      background:rgba(255,255,255,0.06);
+      font-weight:750; font-size:12px; transform: translateY(-1px);
     }
+
+    .controls{
+      position:fixed; left:12px; right:12px; bottom:12px;
+      display:flex; gap:10px; justify-content:space-between; flex-wrap:wrap;
+      pointer-events:auto;
+      user-select:none;
+    }
+    .btn{
+      flex:1 1 140px; min-width:140px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,0.14);
+      background:rgba(255,255,255,0.06);
+      color:rgba(245,245,255,0.92);
+      padding:12px 12px;
+      font-weight:800;
+      letter-spacing:0.2px;
+      box-shadow:0 14px 60px rgba(0,0,0,0.35);
+      backdrop-filter: blur(10px);
+      cursor:pointer;
+    }
+    .btn:active{ transform: translateY(1px); }
+    .btn small{ display:block; opacity:0.75; font-weight:650; margin-top:2px; }
+
+    .overlay{
+      position:fixed; inset:0; display:none; align-items:center; justify-content:center;
+      padding:22px; background: rgba(0,0,0,0.35);
+      backdrop-filter: blur(10px);
+      pointer-events:auto;
+    }
+    .card{
+      width:min(780px, 92vw);
+      background: rgba(9,10,16,0.82);
+      border:1px solid rgba(255,255,255,0.12);
+      border-radius:18px;
+      padding:18px 18px 16px;
+      box-shadow:0 20px 90px rgba(0,0,0,0.55);
+      color: rgba(245,245,255,0.92);
+    }
+    .card h1{ margin:0 0 10px; font-size:22px; }
+    .card p{ margin:0 0 10px; line-height:1.45; opacity:0.88; }
+    .row{ display:flex; flex-wrap:wrap; gap:10px; margin-top:12px; }
+    .pill{
+      display:inline-flex; align-items:center; gap:8px;
+      padding:8px 10px; border-radius:999px;
+      border:1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.06);
+      font-weight:750; font-size:13px; opacity:0.92;
+    }
+    .ok{ color: rgba(170,255,200,0.95); }
+    .warn{ color: rgba(255,220,140,0.95); }
+    .bad{ color: rgba(255,130,150,0.95); }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <canvas id="c" width="160" height="144" aria-label="RECeIPT? game canvas"></canvas>
-    <div class="mini">RECeIPT?</div>
+<canvas id="c"></canvas>
+
+<div class="hud">
+  <div class="panel">
+    <div class="title">Receipt Run</div>
+    <div id="hud1" class="muted">Level 1 · Score: 0 · Streak: 0 · Mult: x1.0 · Lives: 1</div>
+    <div id="hud2" class="muted">Goal: 0/0 · Speed: 0.80 · On belt: 0 · Focus: none</div>
   </div>
+  <div class="panel muted" style="text-align:right">
+    <div>Keys: <span class="kbd">S</span> Scan · <span class="kbd">I</span> ID · <span class="kbd">D</span> Discount · <span class="kbd">B</span> Bag · <span class="kbd">W</span> Weigh · <span class="kbd">R</span> Reject</div>
+  </div>
+</div>
+
+<div class="controls">
+  <button class="btn" id="btnScan">SCAN <small>(S)</small></button>
+  <button class="btn" id="btnID">ID CHECK <small>(I)</small></button>
+  <button class="btn" id="btnDisc">DISCOUNT <small>(D)</small></button>
+  <button class="btn" id="btnBag">BAG <small>(B)</small></button>
+  <button class="btn" id="btnWeigh">WEIGH <small>(W)</small></button>
+  <button class="btn" id="btnReject">REJECT <small>(R)</small></button>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="card" id="card"></div>
+</div>
 
 <script>
 (() => {
-  const W = 160, H = 144;
-  const canvas = document.getElementById("c");
-  const ctx = canvas.getContext("2d", { alpha: false });
+  // ---------- Canvas ----------
+  const canvas = document.getElementById('c');
+  const ctx = canvas.getContext('2d', { alpha: false });
+  function resize() {
+    const dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+    canvas.width = Math.floor(innerWidth * dpr);
+    canvas.height = Math.floor(innerHeight * dpr);
+    canvas.style.width = innerWidth + 'px';
+    canvas.style.height = innerHeight + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  addEventListener('resize', resize, { passive: true });
+  resize();
 
-  ctx.imageSmoothingEnabled = false;
+  // ---------- UI ----------
+  const hud1 = document.getElementById('hud1');
+  const hud2 = document.getElementById('hud2');
+  const overlay = document.getElementById('overlay');
+  const card = document.getElementById('card');
 
-  // Real images (Wikimedia)
-  const ASSET_URLS = {
-    milkCarton: "https://upload.wikimedia.org/wikipedia/commons/4/4d/Milk_carton_illustration.png",
-    milkPhoto:  "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/Mleko.jpg/320px-Mleko.jpg",
-    receipt:    "https://upload.wikimedia.org/wikipedia/commons/thumb/7/76/ReceiptSwiss.jpg/500px-ReceiptSwiss.jpg",
-    printer:    "https://upload.wikimedia.org/wikipedia/commons/thumb/0/08/PICOL_icon_Printer_add.svg/250px-PICOL_icon_Printer_add.svg.png"
+  // ---------- Helpers ----------
+  const rand = (a,b) => a + Math.random() * (b - a);
+  const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
+
+  // ---------- Item images ----------
+  // Swap these URLs for your own JPG/PNG files if you want.
+  const IMG_URL = {
+    'Apple':       'https://upload.wikimedia.org/wikipedia/commons/f/f4/Red_Apple.jpg',
+    'Milk':        'https://upload.wikimedia.org/wikipedia/commons/0/0c/Milk_2007.jpg',
+    'Glass Jar':   'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/Dulce_de_leche_in_Mason_Jar.jpg/800px-Dulce_de_leche_in_Mason_Jar.jpg',
+    'Wine':        'https://upload.wikimedia.org/wikipedia/commons/4/44/Wine_bottle_2.jpg',
+    'Energy':      'https://upload.wikimedia.org/wikipedia/commons/d/db/Celsius.png',
+    'Cereal':      'https://upload.wikimedia.org/wikipedia/commons/6/6f/Wheaties_8.jpg',
+    'Perfume':     'https://upload.wikimedia.org/wikipedia/commons/8/8f/Perfume_bottle_01.jpg',
+    'Mystery Box': 'https://upload.wikimedia.org/wikipedia/commons/b/bf/Cardboard_boxes_in_different_sizes_for_sale_-_Thailand_Post.JPG'
   };
 
-  function loadImage(url){
-    return new Promise((resolve) => {
-      const img = new Image();
-      img.crossOrigin = "anonymous";
-      img.onload = () => resolve(img);
-      img.onerror = () => resolve(null);
-      img.src = url;
-    });
+  const IMAGES = {};
+  for (const [name, url] of Object.entries(IMG_URL)) {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.decoding = 'async';
+    img.loading = 'eager';
+    img.src = url;
+    IMAGES[name] = img;
   }
 
-  const IMG = { milkCarton:null, milkPhoto:null, receipt:null, printer:null };
+  function drawImageCover(img, dx, dy, dw, dh) {
+    const iw = img.naturalWidth || img.width;
+    const ih = img.naturalHeight || img.height;
+    if (!iw || !ih) return false;
 
-  // Input
-  const keys = new Set();
-  let pointerDown = false;
-  let pointerX = W/2;
+    const s = Math.max(dw / iw, dh / ih);
+    const sw = dw / s;
+    const sh = dh / s;
+    const sx = (iw - sw) * 0.5;
+    const sy = (ih - sh) * 0.5;
 
-  window.addEventListener("keydown", (e) => {
-    keys.add(e.key.toLowerCase());
-    if (STATE.mode === "menu" && (e.key === "Enter" || e.key === " ")) startRun();
-    if (STATE.mode === "dead" && (e.key === "Enter" || e.key === " ")) { /* ignore */ }
-  });
-  window.addEventListener("keyup", (e) => keys.delete(e.key.toLowerCase()));
+    ctx.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh);
+    return true;
+  }
 
-  canvas.addEventListener("pointerdown", (e) => {
-    pointerDown = true;
-    const p = getPointer(e);
-    pointerX = p.x;
-    if (STATE.mode === "menu") startRun();
-  });
-  canvas.addEventListener("pointermove", (e) => {
-    if (!pointerDown) return;
-    pointerX = getPointer(e).x;
-  });
-  window.addEventListener("pointerup", () => pointerDown = false);
+  // ---------- Tasks ----------
+  const TASK = {
+    SCAN: 'SCAN',
+    ID: 'ID',
+    DISC: 'DISC',
+    BAG: 'BAG',
+    WEIGH: 'WEIGH',
+    REJECT: 'REJECT'
+  };
 
-  function getPointer(e){
-    const r = canvas.getBoundingClientRect();
-    const sx = W / r.width;
-    const sy = H / r.height;
+  const TYPES_ALL = [
+    { name:'Apple',       base:'produce',  color:'#9be27f' },
+    { name:'Milk',        base:'normal',   color:'#cfe8ff' },
+    { name:'Glass Jar',   base:'fragile',  color:'#a6d4ff' },
+    { name:'Wine',        base:'age',      color:'#ffb3c2' },
+    { name:'Energy',      base:'age',      color:'#ffd27a' },
+    { name:'Cereal',      base:'normal',   color:'#ffeaa8' },
+    { name:'Perfume',     base:'fragile',  color:'#d8b3ff' },
+    { name:'Mystery Box', base:'sus',      color:'#ff7b8f' }
+  ];
+
+  // ---------- Levels ----------
+  let level = 1;
+  let levelGoal = 0;
+  let levelCleared = 0;
+
+  function levelConfig(L) {
+    if (L === 1) {
+      return {
+        livesStart: 1,
+        beltSpeed: 165,
+        clueWindow: 2.35,
+        scanGateW: 86,
+        prepExtra: 105,
+
+        spacingPx: 540,
+        maxOnBelt: 2,
+
+        allowTasks: new Set([TASK.SCAN, TASK.WEIGH, TASK.BAG]),
+        suspiciousChance: 0.0,
+        discountTaskChance: 0.0,
+        rescanChance: 0.0,
+
+        softWrongAction: true,
+        types: ['Apple','Milk','Glass Jar','Cereal']
+      };
+    }
+
+    if (L === 2) {
+      return {
+        livesStart: null,
+        beltSpeed: 195,
+        clueWindow: 1.95,
+        scanGateW: 78,
+        prepExtra: 92,
+
+        spacingPx: 520,
+        maxOnBelt: 2,
+
+        allowTasks: new Set([TASK.SCAN, TASK.WEIGH, TASK.BAG, TASK.ID, TASK.DISC]),
+        suspiciousChance: 0.0,
+        discountTaskChance: 0.18,
+        rescanChance: 0.02,
+
+        softWrongAction: true,
+        types: ['Apple','Milk','Glass Jar','Cereal','Energy','Wine']
+      };
+    }
+
+    if (L === 3) {
+      return {
+        livesStart: null,
+        beltSpeed: 225,
+        clueWindow: 1.65,
+        scanGateW: 70,
+        prepExtra: 84,
+
+        spacingPx: 500,
+        maxOnBelt: 3,
+
+        allowTasks: new Set([TASK.SCAN, TASK.WEIGH, TASK.BAG, TASK.ID, TASK.DISC, TASK.REJECT]),
+        suspiciousChance: 0.05,
+        discountTaskChance: 0.22,
+        rescanChance: 0.03,
+
+        softWrongAction: false,
+        types: ['Apple','Milk','Glass Jar','Cereal','Energy','Wine','Perfume','Mystery Box']
+      };
+    }
+
+    const t = clamp((L - 4) / 16, 0, 1);
     return {
-      x: (e.clientX - r.left) * sx,
-      y: (e.clientY - r.top) * sy
+      livesStart: null,
+      beltSpeed: 240 + t * 220,
+      clueWindow: clamp(1.55 - t * 0.70, 0.70, 1.55),
+      scanGateW: clamp(68 - t * 16, 52, 68),
+      prepExtra: clamp(82 - t * 24, 48, 82),
+
+      spacingPx: clamp(490 - t * 130, 330, 490),
+      maxOnBelt: 3,
+
+      allowTasks: new Set([TASK.SCAN, TASK.WEIGH, TASK.BAG, TASK.ID, TASK.DISC, TASK.REJECT]),
+      suspiciousChance: 0.06 + t * 0.12,
+      discountTaskChance: 0.24 + t * 0.16,
+      rescanChance: 0.04 + t * 0.08,
+
+      softWrongAction: false,
+      types: ['Apple','Milk','Glass Jar','Cereal','Energy','Wine','Perfume','Mystery Box']
     };
   }
 
-  // Game state
-  const LEVELS = [
-    { goal: 4,  speed: 36, spawn: 0.75, hazard: 0.22, drift: 0.00 },
-    { goal: 5,  speed: 42, spawn: 0.80, hazard: 0.25, drift: 0.02 },
-    { goal: 6,  speed: 48, spawn: 0.85, hazard: 0.28, drift: 0.03 },
-    { goal: 7,  speed: 54, spawn: 0.90, hazard: 0.30, drift: 0.04 },
-    { goal: 8,  speed: 60, spawn: 0.98, hazard: 0.33, drift: 0.05 },
-    { goal: 9,  speed: 66, spawn: 1.05, hazard: 0.36, drift: 0.06 },
-    { goal: 10, speed: 72, spawn: 1.15, hazard: 0.38, drift: 0.07 },
-    { goal: 12, speed: 78, spawn: 1.25, hazard: 0.41, drift: 0.08 },
-    { goal: 14, speed: 86, spawn: 1.35, hazard: 0.44, drift: 0.09 },
-    { goal: 16, speed: 94, spawn: 1.50, hazard: 0.47, drift: 0.10 },
-    { goal: 18, speed: 104, spawn: 1.65, hazard: 0.50, drift: 0.11 },
-    { goal: 20, speed: 116, spawn: 1.80, hazard: 0.52, drift: 0.12 }
-  ];
+  function computeGoal(L) {
+    if (L === 1) return 5;
+    if (L === 2) return 6;
+    if (L === 3) return 7;
+    return Math.min(16, 6 + Math.floor(L * 0.55));
+  }
 
-  const STATE = {
-    mode: "loading", // loading | menu | play | dead
-    t: 0,
-    level: 1,
-    collected: 0,
-    score: 0,
-    spawnAcc: 0,
-    flash: 0,
-    shake: 0,
-    levelBanner: 0,
-    lastDt: 1/60
+  // ---------- Game State ----------
+  let state = 'menu';
+  let tPrev = 0;
+
+  let score = 0;
+  let streak = 0;
+  let mult = 1.0;
+  let lives = 1;
+
+  let cfg = levelConfig(level);
+
+  const world = {
+    items: [],
+    time: 0,
+    spawnCooldown: 0
   };
 
-  const player = {
-    x: W/2,
-    y: H - 22,
-    w: 14,
-    h: 16,
-    speed: 105
-  };
+  let idCounter = 1;
 
-  const things = [];     // falling entities
-  const particles = [];  // small polish bursts
-
-  function resetRun(){
-    STATE.level = 1;
-    STATE.collected = 0;
-    STATE.score = 0;
-    STATE.spawnAcc = 0;
-    STATE.flash = 0;
-    STATE.shake = 0;
-    STATE.levelBanner = 0.9;
-
-    things.length = 0;
-    particles.length = 0;
-
-    player.x = W/2;
+  // ---------- Layout ----------
+  function layout() {
+    const w = innerWidth, h = innerHeight;
+    const beltY = Math.floor(h * 0.64);
+    const beltH = Math.max(120, Math.floor(h * 0.18));
+    const scannerX = Math.floor(w * 0.72);
+    const gateW = cfg.scanGateW;
+    const prepLeft = scannerX - 260 - cfg.prepExtra;
+    const prepRight = scannerX - 70 + cfg.prepExtra;
+    const clueX = Math.floor(w * 0.28);
+    return { w, h, beltY, beltH, scannerX, gateW, prepLeft, prepRight, clueX };
   }
 
-  function startRun(){
-    resetRun();
-    STATE.mode = "play";
+  // ---------- Toast ----------
+  let toast = { t: 0, text: '', kind: 'muted' };
+  function flash(text, kind='muted') {
+    toast.t = 1.05;
+    toast.text = text;
+    toast.kind = kind;
   }
 
-  function die(){
-    STATE.mode = "dead";
-    STATE.flash = 0.9;
-    STATE.shake = 0.55;
-
-    // restart from level 1 automatically
-    setTimeout(() => {
-      startRun();
-    }, 900);
+  // ---------- Items ----------
+  function getEnabledTypes() {
+    const allowedNames = new Set(cfg.types);
+    return TYPES_ALL.filter(t => allowedNames.has(t.name));
   }
 
-  function nextLevel(){
-    STATE.level = Math.min(STATE.level + 1, LEVELS.length);
-    STATE.collected = 0;
-    STATE.levelBanner = 0.9;
-    STATE.shake = 0.12;
-    // clear screen so it feels clean
-    things.length = 0;
-    particles.length = 0;
-  }
-
-  function rand(min, max){ return min + Math.random() * (max - min); }
-  function clamp(v, a, b){ return Math.max(a, Math.min(b, v)); }
-
-  function spawnEntity(){
-    const L = LEVELS[STATE.level - 1];
-    const x = rand(10, W - 10);
-    const isHazard = Math.random() < L.hazard;
-
-    if (isHazard){
-      things.push({
-        type: "hazard",
-        x, y: -12,
-        w: 14, h: 14,
-        vy: L.speed * rand(0.95, 1.15),
-        vx: (Math.random() < 0.5 ? -1 : 1) * L.speed * L.drift * rand(0.5, 1.2),
-        spin: rand(-2.5, 2.5),
-        a: rand(0, Math.PI*2)
-      });
-    } else {
-      things.push({
-        type: "receipt",
-        x, y: -18,
-        w: 10, h: 14,
-        vy: L.speed * rand(0.85, 1.05),
-        vx: (Math.random() < 0.5 ? -1 : 1) * L.speed * L.drift * rand(0.4, 1.0),
-        wob: rand(1.5, 3.2),
-        a: rand(0, Math.PI*2)
-      });
+  function pickTaskForType(typeBase) {
+    if (cfg.allowTasks.has(TASK.REJECT) && (typeBase === 'sus' ? (Math.random() < 0.85) : (Math.random() < cfg.suspiciousChance))) {
+      return TASK.REJECT;
     }
+    if (typeBase === 'produce' && cfg.allowTasks.has(TASK.WEIGH)) return TASK.WEIGH;
+    if (typeBase === 'fragile' && cfg.allowTasks.has(TASK.BAG)) return TASK.BAG;
+    if (typeBase === 'age' && cfg.allowTasks.has(TASK.ID)) return TASK.ID;
+
+    if (cfg.allowTasks.has(TASK.DISC) && Math.random() < cfg.discountTaskChance) return TASK.DISC;
+    return TASK.SCAN;
   }
 
-  function aabb(ax, ay, aw, ah, bx, by, bw, bh){
-    return ax < bx + bw && ax + aw > bx && ay < by + bh && ay + ah > by;
+  function makeItem(spawnX) {
+    const catalog = getEnabledTypes();
+    const t = catalog[Math.floor(Math.random() * catalog.length)];
+
+    const task = pickTaskForType(t.base);
+    const isScanTask = (task === TASK.SCAN);
+
+    const needsRescan = isScanTask && (Math.random() < cfg.rescanChance);
+    const scanCount = needsRescan ? 2 : 1;
+
+    const clueTags = [];
+    clueTags.push(task === TASK.SCAN ? 'Scan' :
+                 task === TASK.WEIGH ? 'Weigh' :
+                 task === TASK.BAG ? 'Bag' :
+                 task === TASK.ID ? 'ID' :
+                 task === TASK.DISC ? 'Discount' : 'Reject');
+    if (needsRescan) clueTags.push('Rescan');
+
+    return {
+      id: idCounter++,
+      typeName: t.name,
+      base: t.base,
+      color: t.color,
+      x: spawnX,
+      laneBob: rand(-10, 10),
+      w: rand(86, 108),
+      h: rand(44, 56),
+
+      task,
+      scanCount,
+      scansDone: 0,
+
+      clueTags,
+      clueShown: false,
+      clueT: 0,
+
+      removed: false,
+      passedScanner: false,
+      wiggle: rand(0, Math.PI * 2)
+    };
   }
 
-  function burst(x, y, n=10){
-    for (let i=0;i<n;i++){
-      particles.push({
-        x, y,
-        vx: rand(-30, 30),
-        vy: rand(-40, 10),
-        life: rand(0.25, 0.55)
-      });
-    }
+  function spawnItem() {
+    const spawnX = -240;
+    world.items.push(makeItem(spawnX));
+    world.spawnCooldown = cfg.spacingPx / cfg.beltSpeed;
   }
 
-  function update(dt){
-    STATE.t += dt;
-    STATE.lastDt = dt;
+  function seedBelt() {
+    world.items.length = 0;
+    world.spawnCooldown = 0;
 
-    // menu animation
-    if (STATE.mode === "menu") return;
-
-    if (STATE.flash > 0) STATE.flash = Math.max(0, STATE.flash - dt*1.8);
-    if (STATE.shake > 0) STATE.shake = Math.max(0, STATE.shake - dt*1.6);
-    if (STATE.levelBanner > 0) STATE.levelBanner = Math.max(0, STATE.levelBanner - dt*1.1);
-
-    if (STATE.mode !== "play") return;
-
-    // player movement
-    let mv = 0;
-    if (keys.has("arrowleft") || keys.has("a")) mv -= 1;
-    if (keys.has("arrowright") || keys.has("d")) mv += 1;
-
-    if (pointerDown){
-      // follow finger/mouse smoothly
-      const dx = pointerX - player.x;
-      mv += clamp(dx / 18, -1, 1);
-    }
-
-    player.x += mv * player.speed * dt;
-    player.x = clamp(player.x, 6, W - 6);
-
-    // spawning
-    const L = LEVELS[STATE.level - 1];
-    STATE.spawnAcc += dt * L.spawn;
-    while (STATE.spawnAcc >= 1){
-      STATE.spawnAcc -= 1;
-      spawnEntity();
-    }
-
-    // update things
-    for (let i = things.length - 1; i >= 0; i--){
-      const t = things[i];
-      t.a = (t.a || 0) + dt * (t.spin || 0);
-
-      if (t.type === "receipt"){
-        t.x += t.vx * dt + Math.sin((STATE.t * t.wob) + t.a) * 0.25;
-      } else {
-        t.x += t.vx * dt;
-      }
-
-      t.y += t.vy * dt;
-
-      // bounce side gently
-      if (t.x < 4){ t.x = 4; t.vx *= -0.9; }
-      if (t.x > W - 4){ t.x = W - 4; t.vx *= -0.9; }
-
-      // collisions (player is centered on x, y is top-left-ish)
-      const px = player.x - player.w/2;
-      const py = player.y - player.h/2;
-
-      if (aabb(px, py, player.w, player.h, t.x - t.w/2, t.y - t.h/2, t.w, t.h)){
-        if (t.type === "hazard"){
-          burst(player.x, player.y, 18);
-          die();
-          return;
-        } else {
-          burst(t.x, t.y, 10);
-          things.splice(i, 1);
-          STATE.collected += 1;
-          STATE.score += 10;
-
-          if (STATE.collected >= L.goal){
-            nextLevel();
-          }
-          continue;
-        }
-      }
-
-      // remove offscreen
-      if (t.y > H + 22) things.splice(i, 1);
-    }
-
-    // particles
-    for (let i=particles.length-1;i>=0;i--){
-      const p = particles[i];
-      p.x += p.vx * dt;
-      p.y += p.vy * dt;
-      p.vy += 80 * dt;
-      p.life -= dt;
-      if (p.life <= 0) particles.splice(i,1);
+    spawnItem();
+    if (cfg.maxOnBelt >= 2) {
+      const it = makeItem(-240 - cfg.spacingPx);
+      world.items.unshift(it);
+      world.spawnCooldown = cfg.spacingPx / cfg.beltSpeed;
     }
   }
 
-  function drawBackground(){
-    ctx.fillStyle = "#000";
-    ctx.fillRect(0,0,W,H);
-
-    // subtle moving banding
-    const t = STATE.t;
-    ctx.globalAlpha = 0.22;
-    for (let i=0;i<6;i++){
-      const y = (i*26 + (t*8)) % (H+26) - 26;
-      ctx.fillStyle = i % 2 ? "#0a0a0a" : "#050505";
-      ctx.fillRect(0, y, W, 18);
+  // ---------- Focus ----------
+  function getFocusItem(L) {
+    const sx = L.scannerX;
+    let best = null;
+    let bestX = -Infinity;
+    for (const it of world.items) {
+      if (it.removed) continue;
+      if (it.x > sx + 24) continue;
+      if (it.x > bestX) { bestX = it.x; best = it; }
     }
-    ctx.globalAlpha = 1;
-
-    // milk photo wash
-    if (IMG.milkPhoto){
-      ctx.globalAlpha = 0.10;
-      ctx.drawImage(IMG.milkPhoto, 0, 0, W, H);
-      ctx.globalAlpha = 1;
-    }
+    return best;
   }
 
-  function drawEntity(t){
-    const x = (t.x - t.w/2) | 0;
-    const y = (t.y - t.h/2) | 0;
-
-    if (t.type === "hazard"){
-      if (IMG.printer){
-        ctx.drawImage(IMG.printer, x, y, t.w, t.h);
-      } else {
-        ctx.fillStyle = "#ef4444";
-        ctx.fillRect(x, y, t.w, t.h);
-      }
-    } else {
-      if (IMG.receipt){
-        ctx.drawImage(IMG.receipt, x, y, t.w, t.h);
-      } else {
-        ctx.fillStyle = "#f5f5f5";
-        ctx.fillRect(x, y, t.w, t.h);
-      }
-    }
+  // ---------- Zones ----------
+  function inPrepZone(it, L) {
+    return it && it.x > L.prepLeft && it.x < L.prepRight;
+  }
+  function inScanGate(it, L) {
+    return it && Math.abs(it.x - L.scannerX) <= L.gateW;
   }
 
-  function drawPlayer(){
-    const x = (player.x - player.w/2) | 0;
-    const y = (player.y - player.h/2) | 0;
-
-    if (IMG.milkCarton){
-      ctx.drawImage(IMG.milkCarton, x-1, y-2, player.w+2, player.h+4);
-    } else {
-      ctx.fillStyle = "#fff";
-      ctx.fillRect(x, y, player.w, player.h);
-    }
+  // ---------- Score / punish ----------
+  function punish(msg) {
+    lives -= 1;
+    streak = 0;
+    mult = 1.0;
+    flash(msg, 'bad');
+    if (lives <= 0) gameOver();
+  }
+  function reward(points, msg) {
+    score += points;
+    streak += 1;
+    mult = clamp(1.0 + streak * 0.06, 1, 4.0);
+    flash(msg, 'ok');
+  }
+  function softMistake(msg) {
+    streak = 0;
+    mult = 1.0;
+    flash(msg, 'warn');
   }
 
-  function drawHUD(){
-    ctx.fillStyle = "#fff";
-    ctx.globalAlpha = 0.85;
-    ctx.font = "9px system-ui, sans-serif";
-    ctx.fillText(`L${STATE.level}`, 6, 12);
-    ctx.fillText(`${STATE.collected}/${LEVELS[STATE.level-1].goal}`, 26, 12);
-    ctx.fillText(`${STATE.score}`, W - 6 - ctx.measureText(String(STATE.score)).width, 12);
-    ctx.globalAlpha = 1;
-
-    if (STATE.levelBanner > 0){
-      const a = Math.min(1, STATE.levelBanner * 1.4);
-      ctx.globalAlpha = a;
-      ctx.fillStyle = "#000";
-      ctx.fillRect(0, (H/2 - 12) | 0, W, 24);
-      ctx.fillStyle = "#fff";
-      ctx.font = "12px system-ui, sans-serif";
-      const txt = `LEVEL ${STATE.level}`;
-      const tw = ctx.measureText(txt).width;
-      ctx.fillText(txt, ((W - tw)/2) | 0, (H/2 + 4) | 0);
-      ctx.globalAlpha = 1;
-    }
+  function onItemClearedSuccess() {
+    levelCleared += 1;
+    if (levelCleared >= levelGoal) levelUp();
   }
 
-  function drawMenu(){
-    ctx.fillStyle = "#000";
-    ctx.fillRect(0,0,W,H);
+  // ---------- Actions ----------
+  function doTaskAction(action) {
+    if (state !== 'running') return;
+    const L = layout();
+    const it = getFocusItem(L);
+    if (!it) { flash('No item in focus', 'muted'); return; }
 
-    if (IMG.milkPhoto){
-      ctx.globalAlpha = 0.25;
-      ctx.drawImage(IMG.milkPhoto, 0, 0, W, H);
-      ctx.globalAlpha = 1;
-    }
+    if (!cfg.allowTasks.has(action)) { flash('Not in this level', 'warn'); return; }
 
-    // vignette
-    ctx.globalAlpha = 0.55;
-    ctx.fillStyle = "#000";
-    ctx.fillRect(0,0,W, H);
-    ctx.globalAlpha = 1;
-
-    // title
-    ctx.fillStyle = "#fff";
-    ctx.font = "18px system-ui, sans-serif";
-    const title = "RECeIPT?";
-    const tw = ctx.measureText(title).width;
-    ctx.fillText(title, ((W - tw)/2) | 0, 56);
-
-    // start badge
-    const bx = (W/2 - 34) | 0;
-    const by = 78;
-    ctx.fillStyle = "#fff";
-    ctx.fillRect(bx, by, 68, 18);
-    ctx.fillStyle = "#000";
-    ctx.font = "10px system-ui, sans-serif";
-    const st = "START";
-    const sw = ctx.measureText(st).width;
-    ctx.fillText(st, ((W - sw)/2) | 0, by + 12);
-
-    // little scene bits
-    if (IMG.milkCarton){
-      ctx.drawImage(IMG.milkCarton, 16, 92, 18, 22);
-    }
-    if (IMG.receipt){
-      ctx.drawImage(IMG.receipt, W - 34, 92, 14, 18);
-    }
-    if (IMG.printer){
-      ctx.drawImage(IMG.printer, W/2 - 7, 102, 14, 14);
-    }
-  }
-
-  function drawDeadFlash(){
-    if (STATE.flash <= 0) return;
-    ctx.globalAlpha = Math.min(0.55, STATE.flash);
-    ctx.fillStyle = "#ef4444";
-    ctx.fillRect(0,0,W,H);
-    ctx.globalAlpha = 1;
-  }
-
-  function drawParticles(){
-    if (!particles.length) return;
-    ctx.globalAlpha = 0.9;
-    for (const p of particles){
-      ctx.fillStyle = "#fff";
-      ctx.fillRect((p.x|0), (p.y|0), 1, 1);
-    }
-    ctx.globalAlpha = 1;
-  }
-
-  function render(){
-    // camera shake
-    let ox = 0, oy = 0;
-    if (STATE.shake > 0){
-      const s = STATE.shake * 4.0;
-      ox = (rand(-s, s)) | 0;
-      oy = (rand(-s, s)) | 0;
-    }
-
-    ctx.save();
-    ctx.translate(ox, oy);
-
-    if (STATE.mode === "menu"){
-      drawMenu();
-      ctx.restore();
+    if (action === TASK.SCAN && it.task !== TASK.SCAN) {
+      softMistake('No scan needed');
       return;
     }
 
-    drawBackground();
+    if (action === TASK.SCAN) {
+      if (!inScanGate(it, L)) { punish('Scan timing'); return; }
+    } else if (action === TASK.REJECT) {
+      const ok = inPrepZone(it, L) || inScanGate(it, L);
+      if (!ok) { punish('Wrong zone'); return; }
+    } else {
+      if (!inPrepZone(it, L)) { punish('Wrong zone'); return; }
+    }
 
-    // entities
-    for (const t of things) drawEntity(t);
+    if (it.task !== action) {
+      if (cfg.softWrongAction) softMistake('Wrong action');
+      else punish('Wrong action');
+      return;
+    }
 
-    drawPlayer();
-    drawParticles();
-    drawHUD();
-    drawDeadFlash();
+    if (action === TASK.SCAN) {
+      it.scansDone += 1;
+      if (it.scansDone < it.scanCount) {
+        reward(Math.floor(18 * mult), 'Rescan!');
+        return;
+      }
+      it.removed = true;
+      const base = 70 + (it.scanCount === 2 ? 25 : 0);
+      reward(Math.floor(base * mult), 'Scan ✔');
+      onItemClearedSuccess();
+      return;
+    }
 
+    it.removed = true;
+    const base =
+      action === TASK.WEIGH ? 75 :
+      action === TASK.BAG   ? 70 :
+      action === TASK.ID    ? 80 :
+      action === TASK.DISC  ? 65 :
+      action === TASK.REJECT? 90 : 70;
+
+    reward(Math.floor(base * mult), `${action} ✔`);
+    onItemClearedSuccess();
+  }
+
+  // ---------- Buttons + Keys ----------
+  function bindBtn(id, fn) {
+    const el = document.getElementById(id);
+    el.addEventListener('click', (e) => { e.preventDefault(); fn(); }, { passive:false });
+    el.addEventListener('pointerdown', (e) => { e.preventDefault(); fn(); }, { passive:false });
+  }
+  bindBtn('btnScan', () => doTaskAction(TASK.SCAN));
+  bindBtn('btnID', () => doTaskAction(TASK.ID));
+  bindBtn('btnDisc', () => doTaskAction(TASK.DISC));
+  bindBtn('btnBag', () => doTaskAction(TASK.BAG));
+  bindBtn('btnWeigh', () => doTaskAction(TASK.WEIGH));
+  bindBtn('btnReject', () => doTaskAction(TASK.REJECT));
+
+  addEventListener('keydown', (e) => {
+    const k = e.key.toLowerCase();
+    if (k === 's') { e.preventDefault(); doTaskAction(TASK.SCAN); }
+    if (k === 'i') { e.preventDefault(); doTaskAction(TASK.ID); }
+    if (k === 'd') { e.preventDefault(); doTaskAction(TASK.DISC); }
+    if (k === 'b') { e.preventDefault(); doTaskAction(TASK.BAG); }
+    if (k === 'w') { e.preventDefault(); doTaskAction(TASK.WEIGH); }
+    if (k === 'r') { e.preventDefault(); doTaskAction(TASK.REJECT); }
+    if (k === 'enter' && (state === 'menu' || state === 'over' || state === 'levelup')) { startOrContinue(); }
+  });
+
+  addEventListener('pointerdown', () => {
+    if (state === 'menu' || state === 'over' || state === 'levelup') startOrContinue();
+  }, { passive:true });
+
+  // ---------- Overlay ----------
+  function showOverlay(html) { card.innerHTML = html; overlay.style.display = 'flex'; }
+  function hideOverlay() { overlay.style.display = 'none'; }
+
+  // ---------- Level flow ----------
+  function startOrContinue() {
+    if (state === 'menu') startGame();
+    else if (state === 'over') restartGame();
+    else if (state === 'levelup') beginLevel(false);
+  }
+
+  function startGame() {
+    level = 1;
+    score = 0;
+    streak = 0;
+    mult = 1.0;
+    idCounter = 1;
+
+    cfg = levelConfig(level);
+    lives = 1;
+
+    beginLevel(true);
+  }
+
+  function restartGame() {
+    state = 'running';
+    hideOverlay();
+    startGame(); // always back to level 1
+  }
+
+  function beginLevel(isNewGame) {
+    cfg = levelConfig(level);
+    levelGoal = computeGoal(level);
+    levelCleared = 0;
+
+    // one life only (no refills between levels)
+    if (isNewGame) lives = 1;
+
+    world.time = 0;
+    world.spawnCooldown = 0;
+    seedBelt();
+
+    toast.t = 0;
+    toast.text = '';
+
+    hideOverlay();
+    state = 'running';
+  }
+
+  function levelUp() {
+    state = 'levelup';
+    world.items.length = 0;
+
+    const next = level + 1;
+    const nextCfg = levelConfig(next);
+
+    showOverlay(`
+      <h1>Level ${level} cleared.</h1>
+      <p><b>Score:</b> ${Math.floor(score)} · <b>Life:</b> ${lives}</p>
+      <div class="row">
+        <div class="pill ok">Continue: click / tap / Enter</div>
+        <div class="pill warn">Next speed: ${nextCfg.beltSpeed.toFixed(0)} · hint: ${nextCfg.clueWindow.toFixed(2)}s</div>
+      </div>
+    `);
+
+    level += 1;
+  }
+
+  function gameOver() {
+    state = 'over';
+    showOverlay(`
+      <h1>Shift ended.</h1>
+      <p>
+        <b>Level reached:</b> ${level}<br>
+        <b>Score:</b> ${Math.floor(score)}<br>
+        <b>Streak:</b> ${streak}<br>
+        <b>Multiplier:</b> x${mult.toFixed(1)}
+      </p>
+      <div class="row">
+        <div class="pill ok">Restart: click / tap / Enter</div>
+      </div>
+    `);
+  }
+
+  function showMenu() {
+    state = 'menu';
+    showOverlay(`
+      <h1>Receipt Run</h1>
+      <p class="muted">Click / tap / Enter to start.</p>
+      <div class="row">
+        <div class="pill ok">Start: click / tap / Enter</div>
+        <div class="pill warn">Keys: S · I · D · B · W · R</div>
+      </div>
+    `);
+  }
+
+  // ---------- Update ----------
+  function update(dt) {
+    const L = layout();
+    world.time += dt;
+
+    for (const it of world.items) {
+      if (it.removed) continue;
+
+      it.wiggle += dt * 1.6;
+      it.x += cfg.beltSpeed * dt;
+
+      if (!it.clueShown && it.x >= L.clueX) {
+        it.clueShown = true;
+        it.clueT = cfg.clueWindow;
+      }
+      if (it.clueT > 0) it.clueT -= dt;
+
+      if (!it.passedScanner && it.x > L.scannerX + L.gateW + 30) {
+        it.passedScanner = true;
+        if (!it.removed) {
+          const msg = it.task === TASK.SCAN ? 'Missed scan' : 'Missed action';
+          punish(msg);
+          it.removed = true;
+        }
+      }
+    }
+
+    world.items = world.items.filter(it => !it.removed && it.x < L.w + 220);
+
+    world.spawnCooldown = Math.max(0, world.spawnCooldown - dt);
+    if (world.items.length < cfg.maxOnBelt && world.spawnCooldown <= 0) {
+      const rightmost = world.items.reduce((a,b) => (!a || b.x > a.x) ? b : a, null);
+      const safe = !rightmost || (rightmost.x > (-240 + 40));
+      if (safe) spawnItem();
+    }
+
+    if (toast.t > 0) toast.t -= dt;
+  }
+
+  // ---------- Draw ----------
+  function draw() {
+    const L = layout();
+    const w=L.w, h=L.h;
+
+    ctx.fillStyle = '#06070a';
+    ctx.fillRect(0,0,w,h);
+    const g = ctx.createLinearGradient(0, 0, 0, h);
+    g.addColorStop(0, '#070914');
+    g.addColorStop(1, '#04050a');
+    ctx.fillStyle = g;
+    ctx.fillRect(0,0,w,h);
+
+    const beltTop = L.beltY - L.beltH/2;
+    ctx.fillStyle = 'rgba(255,255,255,0.06)';
+    roundRect(12, beltTop, w-24, L.beltH, 18, true, false);
+
+    ctx.strokeStyle = 'rgba(255,255,255,0.07)';
+    ctx.lineWidth = 2;
+    for (let i=0;i<12;i++) {
+      const seg = (w/12);
+      const x = (i*seg + (performance.now()*0.05) % seg);
+      ctx.beginPath();
+      ctx.moveTo(x, beltTop + 14);
+      ctx.lineTo(x + 60, beltTop + L.beltH - 14);
+      ctx.stroke();
+    }
+
+    ctx.fillStyle = 'rgba(120,200,255,0.10)';
+    roundRect(L.scannerX - L.gateW, beltTop-14, L.gateW*2, L.beltH+28, 12, true, false);
+    ctx.strokeStyle = 'rgba(170,220,255,0.30)';
+    ctx.lineWidth = 2;
+    roundRect(L.scannerX - L.gateW, beltTop-14, L.gateW*2, L.beltH+28, 12, false, true);
+
+    ctx.strokeStyle = 'rgba(255,255,255,0.12)';
+    ctx.setLineDash([6,6]);
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.rect(L.prepLeft, beltTop-10, (L.prepRight - L.prepLeft), L.beltH+20);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    ctx.strokeStyle = 'rgba(255,255,255,0.10)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(L.clueX, beltTop-18);
+    ctx.lineTo(L.clueX, beltTop+L.beltH+18);
+    ctx.stroke();
+
+    const focus = getFocusItem(L);
+    const focusId = focus ? focus.id : null;
+
+    for (const it of world.items) {
+      const y = L.beltY + it.laneBob + Math.sin(it.wiggle)*4;
+      const x = it.x;
+
+      ctx.fillStyle = 'rgba(0,0,0,0.35)';
+      ctx.beginPath();
+      ctx.ellipse(x, y + 24, it.w*0.42, it.h*0.22, 0, 0, Math.PI*2);
+      ctx.fill();
+
+      const rx = x - it.w/2;
+      const ry = y - it.h/2;
+
+      // Image-first item render (fallback to colour block if image not loaded)
+      const img = IMAGES[it.typeName];
+      const canDrawImg = img && img.complete && (img.naturalWidth || img.width);
+
+      if (canDrawImg) {
+        ctx.save();
+        roundRect(rx, ry, it.w, it.h, 12, false, true);
+        ctx.clip();
+        drawImageCover(img, rx, ry, it.w, it.h);
+        ctx.restore();
+
+        // subtle dark glass overlay to unify readability
+        ctx.fillStyle = 'rgba(0,0,0,0.18)';
+        roundRect(rx, ry, it.w, it.h, 12, true, false);
+      } else {
+        ctx.fillStyle = it.color;
+        roundRect(rx, ry, it.w, it.h, 12, true, false);
+      }
+
+      ctx.strokeStyle = 'rgba(10,12,18,0.45)';
+      ctx.lineWidth = 2;
+      roundRect(rx, ry, it.w, it.h, 12, false, true);
+
+      // label strip (skip for Mystery Box)
+      if (it.typeName !== 'Mystery Box') {
+        ctx.fillStyle = 'rgba(10,12,18,0.55)';
+        roundRect(rx + 6, ry + 6, it.w - 12, 18, 9, true, false);
+
+        ctx.fillStyle = 'rgba(245,245,255,0.92)';
+        ctx.font = '800 12px system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText(it.typeName, x, ry + 20);
+      } else {
+        // question mark overlay
+        ctx.fillStyle = 'rgba(10,12,18,0.45)';
+        roundRect(rx + 6, ry + 6, it.w - 12, it.h - 12, 10, true, false);
+
+        ctx.fillStyle = 'rgba(245,245,255,0.92)';
+        ctx.font = '950 26px system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('?', x, y + 10);
+      }
+
+      // popup hint
+      if (it.clueT > 0) {
+        const a = clamp(it.clueT / cfg.clueWindow, 0, 1);
+        drawTags(x, ry - 18, it.clueTags, a);
+      }
+
+      // focus highlight
+      if (focusId === it.id) {
+        ctx.strokeStyle = 'rgba(255,255,255,0.24)';
+        ctx.lineWidth = 3;
+        roundRect(rx - 6, ry - 6, it.w+12, it.h+12, 14, false, true);
+
+        if (it.task === TASK.SCAN && it.scanCount === 2) {
+          ctx.fillStyle = it.scansDone === 0 ? 'rgba(255,220,140,0.9)' : 'rgba(180,255,210,0.9)';
+          ctx.font = '950 11px system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial';
+          ctx.fillText(it.scansDone === 0 ? 'RESCAN' : '1/2 DONE', x, ry - 10);
+        }
+      }
+    }
+
+    if (toast.t > 0) {
+      const a = clamp(toast.t / 1.05, 0, 1);
+      ctx.globalAlpha = 0.15 + a*0.85;
+
+      const text = toast.text;
+      ctx.font = '900 16px system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial';
+      const tw = ctx.measureText(text).width;
+      const bx = w/2 - tw/2 - 16;
+      const by = Math.max(70, Math.floor(h*0.14));
+      const bw = tw + 32;
+      const bh = 40;
+
+      ctx.fillStyle = 'rgba(10,12,18,0.65)';
+      roundRect(bx, by, bw, bh, 14, true, false);
+
+      const col = toast.kind === 'ok' ? 'rgba(170,255,200,0.95)'
+               : toast.kind === 'bad' ? 'rgba(255,130,150,0.95)'
+               : toast.kind === 'warn' ? 'rgba(255,220,140,0.95)'
+               : 'rgba(245,245,255,0.92)';
+      ctx.fillStyle = col;
+      ctx.textAlign = 'center';
+      ctx.fillText(text, w/2, by + 26);
+
+      ctx.globalAlpha = 1;
+    }
+
+    hud1.textContent = `Level ${level} · Score: ${Math.floor(score)} · Streak: ${streak} · Mult: x${mult.toFixed(1)} · Lives: ${lives}`;
+    const spd = (cfg.beltSpeed/200).toFixed(2);
+    const focusName = focus ? focus.typeName : 'none';
+    hud2.textContent = `Goal: ${levelCleared}/${levelGoal} · Speed: ${spd} · On belt: ${world.items.length}/${cfg.maxOnBelt} · Focus: ${focusName}`;
+  }
+
+  function drawTags(x, y, tags, alpha) {
+    if (!tags || tags.length === 0) return;
+    ctx.save();
+    ctx.globalAlpha = alpha * 0.95;
+    ctx.font = '900 12px system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial';
+    ctx.textAlign = 'left';
+
+    let px = x - 120;
+    let py = y;
+
+    for (const t of tags) {
+      const w = ctx.measureText(t).width + 18;
+      const h = 22;
+
+      const danger = (t === 'Reject');
+      const warn = (t === 'Rescan' || t === 'ID' || t === 'Weigh');
+      const bg = danger ? 'rgba(255,120,140,0.20)' : warn ? 'rgba(255,220,140,0.16)' : 'rgba(170,220,255,0.12)';
+      const stroke = danger ? 'rgba(255,120,140,0.35)' : warn ? 'rgba(255,220,140,0.28)' : 'rgba(170,220,255,0.22)';
+      const fg = danger ? 'rgba(255,160,175,0.95)' : warn ? 'rgba(255,230,170,0.95)' : 'rgba(210,235,255,0.92)';
+
+      ctx.fillStyle = bg;
+      roundRect(px, py, w, h, 999, true, false);
+      ctx.strokeStyle = stroke;
+      ctx.lineWidth = 1;
+      roundRect(px, py, w, h, 999, false, true);
+
+      ctx.fillStyle = fg;
+      ctx.fillText(t, px + 9, py + 15);
+
+      px += w + 8;
+    }
     ctx.restore();
   }
 
-  let last = performance.now();
-  function loop(now){
-    const dt = clamp((now - last) / 1000, 0, 1/20);
-    last = now;
-
-    if (STATE.mode === "play" || STATE.mode === "dead"){
-      update(dt);
-    }
-
-    render();
-    requestAnimationFrame(loop);
+  function roundRect(x, y, w, h, r, fill, stroke) {
+    r = Math.min(r, w/2, h/2);
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+    if (fill) ctx.fill();
+    if (stroke) ctx.stroke();
   }
 
-  async function boot(){
-    STATE.mode = "loading";
+  // ---------- Main loop ----------
+  function frame(t) {
+    if (!tPrev) tPrev = t;
+    const dt = clamp((t - tPrev) / 1000, 0, 0.033);
+    tPrev = t;
 
-    const [a,b,c,d] = await Promise.all([
-      loadImage(ASSET_URLS.milkCarton),
-      loadImage(ASSET_URLS.milkPhoto),
-      loadImage(ASSET_URLS.receipt),
-      loadImage(ASSET_URLS.printer)
-    ]);
+    if (state === 'running') update(dt);
+    draw();
 
-    IMG.milkCarton = a;
-    IMG.milkPhoto   = b;
-    IMG.receipt     = c;
-    IMG.printer     = d;
-
-    STATE.mode = "menu";
-    requestAnimationFrame(loop);
+    requestAnimationFrame(frame);
   }
+  requestAnimationFrame(frame);
 
-  boot();
+  // ---------- Start ----------
+  showMenu();
 })();
 </script>
 </body>
