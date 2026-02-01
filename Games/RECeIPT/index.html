@@ -2,901 +2,952 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Receipt Run</title>
   <style>
-    :root { color-scheme: dark; }
-    html, body { margin:0; height:100%; background:#06070a; overflow:hidden; font-family: system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif; }
-    canvas { display:block; width:100vw; height:100vh; }
-
-    .hud{
-      position:fixed; inset:0; pointer-events:none;
-      display:flex; align-items:flex-start; justify-content:space-between;
-      padding:12px; gap:12px;
-      color:rgba(245,245,255,0.92);
-      text-shadow:0 2px 16px rgba(0,0,0,0.55);
-      font-size:14px;
+    :root{
+      --bg0:#060812;
+      --bg1:#0b0f1f;
+      --ink:#e9edff;
+      --muted:#9aa6c7;
+      --good:#36d39a;
+      --bad:#ff4d6d;
+      --warn:#ffd166;
+      --blue:#2f7dff;
+      --panel:rgba(14,18,36,.72);
+      --stroke:rgba(255,255,255,.10);
+      --shadow:rgba(0,0,0,.35);
     }
-    .panel{
-      background:rgba(10,12,18,0.55);
-      border:1px solid rgba(255,255,255,0.10);
-      border-radius:14px;
-      padding:10px 12px;
-      backdrop-filter: blur(10px);
-      max-width: 820px;
+    html,body{height:100%;margin:0;background:radial-gradient(1200px 700px at 35% 10%, #1a2352 0%, var(--bg1) 40%, var(--bg0) 100%);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;overflow:hidden;}
+    .wrap{position:fixed;inset:0;display:flex;align-items:stretch;justify-content:center;}
+    canvas{width:100%;height:100%;display:block;}
+    .hud{position:absolute;inset:0;pointer-events:none;}
+    .topbar{position:absolute;top:14px;left:14px;right:14px;display:flex;gap:12px;align-items:flex-start;justify-content:space-between;}
+    .panel{pointer-events:auto;background:var(--panel);border:1px solid var(--stroke);box-shadow:0 20px 60px var(--shadow);backdrop-filter:blur(10px);border-radius:14px;padding:12px 14px;}
+    .stats{display:flex;gap:14px;flex-wrap:wrap}
+    .stat b{display:block;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+    .stat span{display:block;font-size:18px;font-weight:700;margin-top:2px}
+    .centerbar{position:absolute;left:50%;transform:translateX(-50%);top:14px;display:flex;gap:10px;align-items:center;}
+    .pill{pointer-events:auto;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.10);border-radius:999px;padding:8px 10px;font-weight:600}
+    .pill small{color:var(--muted);font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+    .controls{position:absolute;left:14px;right:14px;bottom:14px;display:flex;gap:12px;align-items:flex-end;justify-content:space-between;flex-wrap:wrap}
+    .btnrow{pointer-events:auto;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    button{appearance:none;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);color:var(--ink);border-radius:12px;padding:10px 12px;font-weight:750;letter-spacing:.02em;cursor:pointer;transition:transform .06s ease, background .15s ease, border-color .15s ease;}
+    button:hover{background:rgba(255,255,255,.10)}
+    button:active{transform:translateY(1px)}
+    button.primary{background:rgba(47,125,255,.22);border-color:rgba(47,125,255,.55)}
+    button.good{background:rgba(54,211,154,.18);border-color:rgba(54,211,154,.55)}
+    button.bad{background:rgba(255,77,109,.14);border-color:rgba(255,77,109,.55)}
+    button.locked{opacity:.38;filter:saturate(.6);cursor:not-allowed}
+    .help{pointer-events:auto;max-width:520px}
+    .help .line{color:var(--muted);font-size:13px;line-height:1.35}
+    .tasklabel{display:inline-flex;align-items:center;gap:8px}
+    .kbd{font-size:12px;color:var(--muted);border:1px solid rgba(255,255,255,.16);border-bottom-color:rgba(255,255,255,.08);padding:2px 7px;border-radius:7px;background:rgba(0,0,0,.25)}
+    .modal{position:absolute;inset:0;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);pointer-events:auto;}
+    .modal.show{display:flex}
+    .modalcard{max-width:760px;width:100%;border-radius:18px;padding:18px 18px 16px;background:rgba(12,14,26,.78);border:1px solid rgba(255,255,255,.12);box-shadow:0 30px 90px rgba(0,0,0,.55)}
+    .modalcard h1{margin:0 0 6px 0;font-size:22px}
+    .modalcard p{margin:0 0 12px 0;color:var(--muted);line-height:1.4}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .grid .panel{padding:12px}
+    .small{font-size:13px;color:var(--muted)}
+    .rightShelf{position:absolute;top:90px;right:14px;width:120px;pointer-events:none}
+    .shelfTitle{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:0 0 8px 0}
+    .shelf{display:flex;flex-direction:column;gap:10px}
+    .icon{width:110px;height:74px;border-radius:14px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.10);display:flex;align-items:center;justify-content:center;overflow:hidden}
+    .icon img{max-width:88px;max-height:60px;display:block;filter:drop-shadow(0 10px 10px rgba(0,0,0,.35))}
+    .loading{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-weight:800;letter-spacing:.04em;color:rgba(255,255,255,.86);text-align:center}
+    .loading small{display:block;color:var(--muted);font-weight:700;margin-top:6px}
+    @media (max-width:720px){
+      .rightShelf{display:none}
+      .grid{grid-template-columns:1fr}
+      button{padding:12px 12px}
     }
-    .title{ font-weight:850; letter-spacing:0.4px; }
-    .muted{ opacity:0.78; }
-    .kbd{
-      display:inline-block; padding:1px 6px; border-radius:7px;
-      border:1px solid rgba(255,255,255,0.18);
-      background:rgba(255,255,255,0.06);
-      font-weight:750; font-size:12px; transform: translateY(-1px);
-    }
-
-    .controls{
-      position:fixed; left:12px; right:12px; bottom:12px;
-      display:flex; gap:10px; justify-content:space-between; flex-wrap:wrap;
-      pointer-events:auto;
-      user-select:none;
-    }
-    .btn{
-      flex:1 1 140px; min-width:140px;
-      border-radius:14px;
-      border:1px solid rgba(255,255,255,0.14);
-      background:rgba(255,255,255,0.06);
-      color:rgba(245,245,255,0.92);
-      padding:12px 12px;
-      font-weight:800;
-      letter-spacing:0.2px;
-      box-shadow:0 14px 60px rgba(0,0,0,0.35);
-      backdrop-filter: blur(10px);
-      cursor:pointer;
-    }
-    .btn:active{ transform: translateY(1px); }
-    .btn small{ display:block; opacity:0.75; font-weight:650; margin-top:2px; }
-
-    .overlay{
-      position:fixed; inset:0; display:none; align-items:center; justify-content:center;
-      padding:22px; background: rgba(0,0,0,0.35);
-      backdrop-filter: blur(10px);
-      pointer-events:auto;
-    }
-    .card{
-      width:min(780px, 92vw);
-      background: rgba(9,10,16,0.82);
-      border:1px solid rgba(255,255,255,0.12);
-      border-radius:18px;
-      padding:18px 18px 16px;
-      box-shadow:0 20px 90px rgba(0,0,0,0.55);
-      color: rgba(245,245,255,0.92);
-    }
-    .card h1{ margin:0 0 10px; font-size:22px; }
-    .card p{ margin:0 0 10px; line-height:1.45; opacity:0.88; }
-    .row{ display:flex; flex-wrap:wrap; gap:10px; margin-top:12px; }
-    .pill{
-      display:inline-flex; align-items:center; gap:8px;
-      padding:8px 10px; border-radius:999px;
-      border:1px solid rgba(255,255,255,0.14);
-      background: rgba(255,255,255,0.06);
-      font-weight:750; font-size:13px; opacity:0.92;
-    }
-    .ok{ color: rgba(170,255,200,0.95); }
-    .warn{ color: rgba(255,220,140,0.95); }
-    .bad{ color: rgba(255,130,150,0.95); }
   </style>
 </head>
 <body>
-<canvas id="c"></canvas>
+<div class="wrap">
+  <canvas id="c"></canvas>
 
-<div class="hud">
-  <div class="panel">
-    <div class="title">Receipt Run</div>
-    <div id="hud1" class="muted">Level 1 · Score: 0 · Streak: 0 · Mult: x1.0 · Lives: 1</div>
-    <div id="hud2" class="muted">Goal: 0/0 · Speed: 0.80 · On belt: 0 · Focus: none</div>
+  <div class="hud">
+    <div class="topbar">
+      <div class="panel stats" id="stats">
+        <div class="stat"><b>Level</b><span id="uiLevel">1</span></div>
+        <div class="stat"><b>Score</b><span id="uiScore">0</span></div>
+        <div class="stat"><b>Streak</b><span id="uiStreak">0</span></div>
+        <div class="stat"><b>Misses</b><span id="uiMiss">0</span></div>
+      </div>
+
+      <div class="centerbar">
+        <div class="pill"><small>Next</small> <span id="uiNext">—</span></div>
+        <div class="pill"><small>Task</small> <span id="uiTask">—</span></div>
+        <div class="pill"><small>Speed</small> <span id="uiSpeed">—</span></div>
+      </div>
+
+      <div class="panel help">
+        <div class="line"><b>Action Zone</b> = the blue box. Do the right task while the item is inside it.</div>
+        <div class="line">Keyboard: <span class="kbd">1</span>-<span class="kbd">8</span> tasks, <span class="kbd">Space</span> pause.</div>
+      </div>
+    </div>
+
+    <div class="rightShelf">
+      <p class="shelfTitle">Unlocked items</p>
+      <div class="shelf" id="shelf"></div>
+    </div>
+
+    <div class="controls">
+      <div class="btnrow" id="taskButtons"></div>
+      <div class="btnrow">
+        <button class="primary" id="btnStart">Start</button>
+        <button id="btnPause">Pause</button>
+        <button id="btnRestart">Restart</button>
+      </div>
+    </div>
+
+    <div class="modal" id="modal">
+      <div class="modalcard">
+        <h1 id="mTitle">Receipt Run</h1>
+        <p id="mBody">Scan, weigh, bag, check ID and more — faster each level. You’ve got 100 levels.</p>
+        <div class="grid">
+          <div class="panel">
+            <b>How it works</b>
+            <p class="small" style="margin:8px 0 0 0;">
+              Each item has one task. A clue pops up briefly as it approaches. Do the task while the item is in the blue zone.
+            </p>
+          </div>
+          <div class="panel">
+            <b>Difficulty</b>
+            <p class="small" style="margin:8px 0 0 0;">
+              Belt speed increases every level. Clues get shorter. New products and new task buttons unlock over time.
+            </p>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:14px">
+          <button class="primary" id="mPlay">Play</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="loading" id="loading">
+      Loading images…
+      <small id="loadingSub">0 / 0</small>
+    </div>
   </div>
-  <div class="panel muted" style="text-align:right">
-    <div>Keys: <span class="kbd">S</span> Scan · <span class="kbd">I</span> ID · <span class="kbd">D</span> Discount · <span class="kbd">B</span> Bag · <span class="kbd">W</span> Weigh · <span class="kbd">R</span> Reject</div>
-  </div>
-</div>
-
-<div class="controls">
-  <button class="btn" id="btnScan">SCAN <small>(S)</small></button>
-  <button class="btn" id="btnID">ID CHECK <small>(I)</small></button>
-  <button class="btn" id="btnDisc">DISCOUNT <small>(D)</small></button>
-  <button class="btn" id="btnBag">BAG <small>(B)</small></button>
-  <button class="btn" id="btnWeigh">WEIGH <small>(W)</small></button>
-  <button class="btn" id="btnReject">REJECT <small>(R)</small></button>
-</div>
-
-<div class="overlay" id="overlay">
-  <div class="card" id="card"></div>
 </div>
 
 <script>
 (() => {
-  // ---------- Canvas ----------
-  const canvas = document.getElementById('c');
-  const ctx = canvas.getContext('2d', { alpha: false });
-  function resize() {
-    const dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
-    canvas.width = Math.floor(innerWidth * dpr);
-    canvas.height = Math.floor(innerHeight * dpr);
-    canvas.style.width = innerWidth + 'px';
-    canvas.style.height = innerHeight + 'px';
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  }
-  addEventListener('resize', resize, { passive: true });
-  resize();
+  // -------------------------
+  // Assets
+  // -------------------------
+  const ASSET_BASE = "./receipt_run_assets/";
 
-  // ---------- UI ----------
-  const hud1 = document.getElementById('hud1');
-  const hud2 = document.getElementById('hud2');
-  const overlay = document.getElementById('overlay');
-  const card = document.getElementById('card');
+  const PRODUCTS = [
+    // Level 1 (as requested)
+    { key:"apple",         name:"Apple",         h: 74,  weight: 1.2, tasks:["WEIGH","SCAN","PRICE","DISC","ID"] },
+    { key:"cereal",        name:"Cereal",        h: 108, weight: 1.0, tasks:["SCAN","PRICE","DISC","BAG"] },
+    { key:"butter",        name:"Butter",        h: 72,  weight: 1.0, tasks:["SCAN","BAG","DISC","PRICE"] },
+    { key:"beer",          name:"Beer",          h: 130, weight: 0.9, tasks:["ID","SCAN","REJECT","DISC","PRICE"] },
 
-  // ---------- Helpers ----------
-  const rand = (a,b) => a + Math.random() * (b - a);
-  const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
-
-  // ---------- Item images ----------
-  // Swap these URLs for your own JPG/PNG files if you want.
-  const IMG_URL = {
-    'Apple':       'https://upload.wikimedia.org/wikipedia/commons/f/f4/Red_Apple.jpg',
-    'Milk':        'https://upload.wikimedia.org/wikipedia/commons/0/0c/Milk_2007.jpg',
-    'Glass Jar':   'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/Dulce_de_leche_in_Mason_Jar.jpg/800px-Dulce_de_leche_in_Mason_Jar.jpg',
-    'Wine':        'https://upload.wikimedia.org/wikipedia/commons/4/44/Wine_bottle_2.jpg',
-    'Energy':      'https://upload.wikimedia.org/wikipedia/commons/d/db/Celsius.png',
-    'Cereal':      'https://upload.wikimedia.org/wikipedia/commons/6/6f/Wheaties_8.jpg',
-    'Perfume':     'https://upload.wikimedia.org/wikipedia/commons/8/8f/Perfume_bottle_01.jpg',
-    'Mystery Box': 'https://upload.wikimedia.org/wikipedia/commons/b/bf/Cardboard_boxes_in_different_sizes_for_sale_-_Thailand_Post.JPG'
-  };
-
-  const IMAGES = {};
-  for (const [name, url] of Object.entries(IMG_URL)) {
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.decoding = 'async';
-    img.loading = 'eager';
-    img.src = url;
-    IMAGES[name] = img;
-  }
-
-  function drawImageCover(img, dx, dy, dw, dh) {
-    const iw = img.naturalWidth || img.width;
-    const ih = img.naturalHeight || img.height;
-    if (!iw || !ih) return false;
-
-    const s = Math.max(dw / iw, dh / ih);
-    const sw = dw / s;
-    const sh = dh / s;
-    const sx = (iw - sw) * 0.5;
-    const sy = (ih - sh) * 0.5;
-
-    ctx.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh);
-    return true;
-  }
-
-  // ---------- Tasks ----------
-  const TASK = {
-    SCAN: 'SCAN',
-    ID: 'ID',
-    DISC: 'DISC',
-    BAG: 'BAG',
-    WEIGH: 'WEIGH',
-    REJECT: 'REJECT'
-  };
-
-  const TYPES_ALL = [
-    { name:'Apple',       base:'produce',  color:'#9be27f' },
-    { name:'Milk',        base:'normal',   color:'#cfe8ff' },
-    { name:'Glass Jar',   base:'fragile',  color:'#a6d4ff' },
-    { name:'Wine',        base:'age',      color:'#ffb3c2' },
-    { name:'Energy',      base:'age',      color:'#ffd27a' },
-    { name:'Cereal',      base:'normal',   color:'#ffeaa8' },
-    { name:'Perfume',     base:'fragile',  color:'#d8b3ff' },
-    { name:'Mystery Box', base:'sus',      color:'#ff7b8f' }
+    // Added 1-at-a-time on later levels
+    { key:"bread",         name:"Bread",         h: 150, weight: 1.0, tasks:["SCAN","BAG","PRICE","DISC"] },
+    { key:"water",         name:"Water",         h: 152, weight: 1.0, tasks:["SCAN","BAG","PRICE"] },
+    { key:"coffee",        name:"Coffee",        h: 150, weight: 0.9, tasks:["SCAN","PRICE","DISC"] },
+    { key:"cheese",        name:"Cheese",        h: 126, weight: 1.0, tasks:["SCAN","WEIGH","BAG","DISC"] },
+    { key:"honey",         name:"Honey",         h: 136, weight: 0.9, tasks:["SCAN","WEIGH","DISC","PRICE"] },
+    { key:"peanut_butter", name:"Peanut butter", h: 140, weight: 0.85,tasks:["SCAN","BAG","DISC","PRICE"] },
+    { key:"sugar",         name:"Sugar",         h: 166, weight: 0.75,tasks:["WEIGH","SCAN","SEAL","PRICE"] },
+    { key:"flour",         name:"Flour",         h: 170, weight: 0.75,tasks:["WEIGH","SCAN","SEAL","PRICE"] },
+    { key:"milk",          name:"Milk",          h: 170, weight: 0.8, tasks:["SCAN","BAG","PRICE","DISC"] },
+    { key:"energy",        name:"Energy drink",  h: 170, weight: 0.65,tasks:["SCAN","PRICE","ID","DISC","REJECT"] },
+    { key:"wine",          name:"Wine",          h: 180, weight: 0.55,tasks:["ID","SCAN","REJECT","DISC","PRICE"] },
   ];
 
-  // ---------- Levels ----------
-  let level = 1;
-  let levelGoal = 0;
-  let levelCleared = 0;
+  const TASKS = [
+    { id:"SCAN",   label:"Scan",    key:"1", kind:"primary" },
+    { id:"WEIGH",  label:"Weigh",   key:"2", kind:"good" },
+    { id:"BAG",    label:"Bag",     key:"3", kind:"" },
+    { id:"ID",     label:"Check ID",key:"4", kind:"" },
+    { id:"DISC",   label:"Discount",key:"5", kind:"" },
+    { id:"REJECT", label:"Reject",  key:"6", kind:"bad" },
+    { id:"PRICE",  label:"Price",   key:"7", kind:"" },
+    { id:"SEAL",   label:"Seal",    key:"8", kind:"" },
+  ];
 
-  function levelConfig(L) {
-    if (L === 1) {
-      return {
-        livesStart: 1,
-        beltSpeed: 165,
-        clueWindow: 2.35,
-        scanGateW: 86,
-        prepExtra: 105,
-
-        spacingPx: 540,
-        maxOnBelt: 2,
-
-        allowTasks: new Set([TASK.SCAN, TASK.WEIGH, TASK.BAG]),
-        suspiciousChance: 0.0,
-        discountTaskChance: 0.0,
-        rescanChance: 0.0,
-
-        softWrongAction: true,
-        types: ['Apple','Milk','Glass Jar','Cereal']
-      };
-    }
-
-    if (L === 2) {
-      return {
-        livesStart: null,
-        beltSpeed: 195,
-        clueWindow: 1.95,
-        scanGateW: 78,
-        prepExtra: 92,
-
-        spacingPx: 520,
-        maxOnBelt: 2,
-
-        allowTasks: new Set([TASK.SCAN, TASK.WEIGH, TASK.BAG, TASK.ID, TASK.DISC]),
-        suspiciousChance: 0.0,
-        discountTaskChance: 0.18,
-        rescanChance: 0.02,
-
-        softWrongAction: true,
-        types: ['Apple','Milk','Glass Jar','Cereal','Energy','Wine']
-      };
-    }
-
-    if (L === 3) {
-      return {
-        livesStart: null,
-        beltSpeed: 225,
-        clueWindow: 1.65,
-        scanGateW: 70,
-        prepExtra: 84,
-
-        spacingPx: 500,
-        maxOnBelt: 3,
-
-        allowTasks: new Set([TASK.SCAN, TASK.WEIGH, TASK.BAG, TASK.ID, TASK.DISC, TASK.REJECT]),
-        suspiciousChance: 0.05,
-        discountTaskChance: 0.22,
-        rescanChance: 0.03,
-
-        softWrongAction: false,
-        types: ['Apple','Milk','Glass Jar','Cereal','Energy','Wine','Perfume','Mystery Box']
-      };
-    }
-
-    const t = clamp((L - 4) / 16, 0, 1);
-    return {
-      livesStart: null,
-      beltSpeed: 240 + t * 220,
-      clueWindow: clamp(1.55 - t * 0.70, 0.70, 1.55),
-      scanGateW: clamp(68 - t * 16, 52, 68),
-      prepExtra: clamp(82 - t * 24, 48, 82),
-
-      spacingPx: clamp(490 - t * 130, 330, 490),
-      maxOnBelt: 3,
-
-      allowTasks: new Set([TASK.SCAN, TASK.WEIGH, TASK.BAG, TASK.ID, TASK.DISC, TASK.REJECT]),
-      suspiciousChance: 0.06 + t * 0.12,
-      discountTaskChance: 0.24 + t * 0.16,
-      rescanChance: 0.04 + t * 0.08,
-
-      softWrongAction: false,
-      types: ['Apple','Milk','Glass Jar','Cereal','Energy','Wine','Perfume','Mystery Box']
-    };
-  }
-
-  function computeGoal(L) {
-    if (L === 1) return 5;
-    if (L === 2) return 6;
-    if (L === 3) return 7;
-    return Math.min(16, 6 + Math.floor(L * 0.55));
-  }
-
-  // ---------- Game State ----------
-  let state = 'menu';
-  let tPrev = 0;
-
-  let score = 0;
-  let streak = 0;
-  let mult = 1.0;
-  let lives = 1;
-
-  let cfg = levelConfig(level);
-
-  const world = {
-    items: [],
-    time: 0,
-    spawnCooldown: 0
+  // Unlock ONE new task at a time (as requested)
+  const TASK_UNLOCK_LEVEL = {
+    SCAN:   1,
+    WEIGH:  4,
+    BAG:    8,
+    PRICE:  12,
+    DISC:   16,
+    ID:     22,
+    SEAL:   30,
+    REJECT: 40,
   };
 
-  let idCounter = 1;
+  // Some tasks shouldn't appear too early on certain products
+  const PRODUCT_TASK_MIN_LEVEL = {
+    beer:  { ID: 22, REJECT: 40 },
+    wine:  { ID: 22, REJECT: 40 },
+    energy:{ ID: 22, REJECT: 40 },
+    apple: { ID: 22 }, // funny, but unlocked later
+    sugar: { SEAL: 30 },
+    flour: { SEAL: 30 },
+  };
 
-  // ---------- Layout ----------
-  function layout() {
-    const w = innerWidth, h = innerHeight;
-    const beltY = Math.floor(h * 0.64);
-    const beltH = Math.max(120, Math.floor(h * 0.18));
-    const scannerX = Math.floor(w * 0.72);
-    const gateW = cfg.scanGateW;
-    const prepLeft = scannerX - 260 - cfg.prepExtra;
-    const prepRight = scannerX - 70 + cfg.prepExtra;
-    const clueX = Math.floor(w * 0.28);
-    return { w, h, beltY, beltH, scannerX, gateW, prepLeft, prepRight, clueX };
+  // -------------------------
+  // Canvas setup
+  // -------------------------
+  const canvas = document.getElementById("c");
+  const ctx = canvas.getContext("2d");
+  const DPR = () => Math.max(1, Math.min(2.5, window.devicePixelRatio || 1));
+  function resize() {
+    const dpr = DPR();
+    canvas.width = Math.floor(canvas.clientWidth * dpr);
+    canvas.height = Math.floor(canvas.clientHeight * dpr);
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+  }
+  window.addEventListener("resize", resize);
+
+  // -------------------------
+  // UI
+  // -------------------------
+  const uiLevel = document.getElementById("uiLevel");
+  const uiScore = document.getElementById("uiScore");
+  const uiStreak = document.getElementById("uiStreak");
+  const uiMiss  = document.getElementById("uiMiss");
+  const uiNext  = document.getElementById("uiNext");
+  const uiTask  = document.getElementById("uiTask");
+  const uiSpeed = document.getElementById("uiSpeed");
+  const taskButtons = document.getElementById("taskButtons");
+  const shelfEl = document.getElementById("shelf");
+  const loadingEl = document.getElementById("loading");
+  const loadingSub = document.getElementById("loadingSub");
+
+  const modal = document.getElementById("modal");
+  const mPlay = document.getElementById("mPlay");
+  const btnStart = document.getElementById("btnStart");
+  const btnPause = document.getElementById("btnPause");
+  const btnRestart = document.getElementById("btnRestart");
+
+  function showModal(on=true){ modal.classList.toggle("show", on); }
+
+  // -------------------------
+  // Images
+  // -------------------------
+  const images = new Map(); // key -> HTMLImageElement
+  function loadImages() {
+    const keys = PRODUCTS.map(p => p.key);
+    let done = 0;
+    loadingSub.textContent = `${done} / ${keys.length}`;
+    loadingEl.style.display = "block";
+
+    return Promise.all(keys.map(k => new Promise(resolve => {
+      const img = new Image();
+      img.onload = () => { done++; loadingSub.textContent = `${done} / ${keys.length}`; images.set(k,img); resolve(); };
+      img.onerror = () => { done++; loadingSub.textContent = `${done} / ${keys.length}`; resolve(); }; // fallback to box
+      img.src = ASSET_BASE + k + ".png";
+    }))).then(() => {
+      loadingEl.style.display = "none";
+    });
   }
 
-  // ---------- Toast ----------
-  let toast = { t: 0, text: '', kind: 'muted' };
-  function flash(text, kind='muted') {
-    toast.t = 1.05;
-    toast.text = text;
-    toast.kind = kind;
+  // -------------------------
+  // Level config
+  // -------------------------
+  const MAX_LEVEL = 100;
+
+  function clamp(n,a,b){ return Math.max(a, Math.min(b,n)); }
+
+  function unlockedProducts(level){
+    // Level 1 has the first 4 items. Each next level adds 1 product until all are in.
+    const count = clamp(4 + (level - 1), 4, PRODUCTS.length);
+    return PRODUCTS.slice(0, count);
   }
 
-  // ---------- Items ----------
-  function getEnabledTypes() {
-    const allowedNames = new Set(cfg.types);
-    return TYPES_ALL.filter(t => allowedNames.has(t.name));
+  function unlockedTaskIds(level){
+    return TASKS.filter(t => (TASK_UNLOCK_LEVEL[t.id] ?? 999) <= level).map(t => t.id);
   }
 
-  function pickTaskForType(typeBase) {
-    if (cfg.allowTasks.has(TASK.REJECT) && (typeBase === 'sus' ? (Math.random() < 0.85) : (Math.random() < cfg.suspiciousChance))) {
-      return TASK.REJECT;
+  function levelConfig(level){
+    const speed = clamp(180 * Math.pow(1.018, level - 1), 180, 980);         // belt gets faster
+    const clueS = clamp(2.1 * Math.pow(0.985, level - 1), 0.45, 2.1);         // clue gets shorter
+    const zoneW = clamp(110 - (level - 1) * 0.25, 86, 110);                   // slightly tighter
+    const minGap = clamp(560 - (level - 1) * 1.4, 430, 560);                  // never too small (prevents "2 in zone")
+    const maxOnBelt = level < 10 ? 2 : (level < 28 ? 3 : 4);
+    const rescanChance = clamp(0.05 + (level - 1) * 0.003, 0.05, 0.22);       // occasional double-scan later
+    const multiStepChance = clamp(0.00 + (level - 1) * 0.0025, 0, 0.18);      // later levels: same task twice (faster)
+    return { speed, clueS, zoneW, minGap, maxOnBelt, rescanChance, multiStepChance };
+  }
+
+  // -------------------------
+  // Belt look (pattern)
+  // -------------------------
+  function makeBeltPattern(){
+    const p = document.createElement("canvas");
+    p.width = 180; p.height = 80;
+    const g = p.getContext("2d");
+    // base
+    const grad = g.createLinearGradient(0,0,0,p.height);
+    grad.addColorStop(0, "rgba(255,255,255,.09)");
+    grad.addColorStop(.5,"rgba(255,255,255,.02)");
+    grad.addColorStop(1, "rgba(0,0,0,.18)");
+    g.fillStyle = grad; g.fillRect(0,0,p.width,p.height);
+
+    // diagonal texture
+    g.globalAlpha = 0.18;
+    g.fillStyle = "rgba(255,255,255,.55)";
+    for (let x=-p.height; x<p.width+p.height; x+=18){
+      g.beginPath();
+      g.moveTo(x,0); g.lineTo(x+18,0); g.lineTo(x+18-p.height,p.height); g.lineTo(x-p.height,p.height);
+      g.closePath(); g.fill();
     }
-    if (typeBase === 'produce' && cfg.allowTasks.has(TASK.WEIGH)) return TASK.WEIGH;
-    if (typeBase === 'fragile' && cfg.allowTasks.has(TASK.BAG)) return TASK.BAG;
-    if (typeBase === 'age' && cfg.allowTasks.has(TASK.ID)) return TASK.ID;
+    g.globalAlpha = 0.10;
+    g.fillStyle = "rgba(0,0,0,.85)";
+    for (let x=-p.height+9; x<p.width+p.height; x+=18){
+      g.beginPath();
+      g.moveTo(x,0); g.lineTo(x+18,0); g.lineTo(x+18-p.height,p.height); g.lineTo(x-p.height,p.height);
+      g.closePath(); g.fill();
+    }
 
-    if (cfg.allowTasks.has(TASK.DISC) && Math.random() < cfg.discountTaskChance) return TASK.DISC;
-    return TASK.SCAN;
+    // small noise dots
+    g.globalAlpha = 0.18;
+    for (let i=0;i<220;i++){
+      const x = Math.random()*p.width;
+      const y = Math.random()*p.height;
+      const r = Math.random()*1.2+0.3;
+      g.fillStyle = Math.random() > 0.5 ? "rgba(255,255,255,.22)" : "rgba(0,0,0,.25)";
+      g.beginPath(); g.arc(x,y,r,0,Math.PI*2); g.fill();
+    }
+
+    g.globalAlpha = 1;
+    return ctx.createPattern(p, "repeat");
+  }
+  const beltPattern = makeBeltPattern();
+
+  // -------------------------
+  // Game state
+  // -------------------------
+  const state = {
+    mode: "menu", // menu | running | paused | over
+    level: 1,
+    score: 0,
+    streak: 0,
+    misses: 0,
+    beltOffset: 0,
+    items: [],
+    nextSpawnIn: 0.0,
+    lastSpawnX: -9999,
+    unlocked: { products: [], tasks: [] },
+    cfg: levelConfig(1),
+    note: "",
+    noteUntil: 0,
+  };
+
+  function resetGame(){
+    state.level = 1;
+    state.score = 0;
+    state.streak = 0;
+    state.misses = 0;
+    state.items = [];
+    state.nextSpawnIn = 0.3;
+    state.lastSpawnX = -9999;
+    applyLevel(1);
+    state.mode = "menu";
+    showModal(true);
   }
 
-  function makeItem(spawnX) {
-    const catalog = getEnabledTypes();
-    const t = catalog[Math.floor(Math.random() * catalog.length)];
+  function applyLevel(level){
+    state.level = clamp(level, 1, MAX_LEVEL);
+    state.cfg = levelConfig(state.level);
+    state.unlocked.products = unlockedProducts(state.level);
+    state.unlocked.tasks = unlockedTaskIds(state.level);
+    refreshUI();
+    rebuildButtons();
+    rebuildShelf();
+  }
 
-    const task = pickTaskForType(t.base);
-    const isScanTask = (task === TASK.SCAN);
+  // -------------------------
+  // Spawning & tasks
+  // -------------------------
+  function pickWeighted(arr){
+    const total = arr.reduce((s,a)=>s + (a.weight ?? 1), 0);
+    let r = Math.random()*total;
+    for (const a of arr){
+      r -= (a.weight ?? 1);
+      if (r <= 0) return a;
+    }
+    return arr[arr.length-1];
+  }
 
-    const needsRescan = isScanTask && (Math.random() < cfg.rescanChance);
-    const scanCount = needsRescan ? 2 : 1;
+  function pickTaskForProduct(prod){
+    const unlocked = new Set(state.unlocked.tasks);
+    const minLevels = PRODUCT_TASK_MIN_LEVEL[prod.key] || {};
+    const candidates = prod.tasks.filter(tid => unlocked.has(tid) && (minLevels[tid] ? state.level >= minLevels[tid] : true));
+    // Fallback: if nothing unlocked matches (shouldn't happen because SCAN is unlocked at lvl1)
+    const safe = candidates.length ? candidates : ["SCAN"];
+    // Weight some tasks to feel sensible
+    const weighted = safe.map(tid => {
+      let w = 1;
+      if (tid === "SCAN") w = 1.2;
+      if (tid === "WEIGH") w = prod.key === "apple" ? 1.6 : 1.15;
+      if (tid === "ID") w = 1.0;
+      if (tid === "REJECT") w = 0.8;
+      if (tid === "SEAL") w = 1.1;
+      if (tid === "DISC") w = 0.9;
+      if (tid === "PRICE") w = 1.0;
+      if (tid === "BAG") w = 1.05;
+      return { tid, w };
+    });
+    const total = weighted.reduce((s,a)=>s+a.w,0);
+    let r = Math.random()*total;
+    for (const a of weighted){
+      r -= a.w;
+      if (r<=0) return a.tid;
+    }
+    return weighted[weighted.length-1].tid;
+  }
 
-    const clueTags = [];
-    clueTags.push(task === TASK.SCAN ? 'Scan' :
-                 task === TASK.WEIGH ? 'Weigh' :
-                 task === TASK.BAG ? 'Bag' :
-                 task === TASK.ID ? 'ID' :
-                 task === TASK.DISC ? 'Discount' : 'Reject');
-    if (needsRescan) clueTags.push('Rescan');
+  function spawnItem(){
+    const L = layout();
+    const minGap = state.cfg.minGap;
+    // Prevent a second item spawning too close to the spawn point (fixes "2 in one area")
+    const leftmost = state.items.reduce((m,it)=>Math.min(m,it.x), Infinity);
+    if (state.items.length && leftmost < -240 + minGap) return;
 
-    return {
-      id: idCounter++,
-      typeName: t.name,
-      base: t.base,
-      color: t.color,
-      x: spawnX,
-      laneBob: rand(-10, 10),
-      w: rand(86, 108),
-      h: rand(44, 56),
+    if (state.items.length >= state.cfg.maxOnBelt) return;
 
-      task,
-      scanCount,
-      scansDone: 0,
+    const prod = pickWeighted(state.unlocked.products);
+    const taskId = pickTaskForProduct(prod);
 
-      clueTags,
+    const img = images.get(prod.key) || null;
+    const ar = img ? (img.naturalWidth / img.naturalHeight) : 0.75;
+    const h = prod.h;
+    const w = clamp(h * ar, 40, 190);
+
+    // Later levels: sometimes repeat the same task twice (still "one task at a time", just 2 hits)
+    const needRepeats = (Math.random() < state.cfg.multiStepChance && state.level >= 10) ? 2 : 1;
+    const repeats = (taskId === "SCAN" && Math.random() < state.cfg.rescanChance) ? Math.max(2, needRepeats) : needRepeats;
+
+    const item = {
+      id: Math.random().toString(16).slice(2),
+      prodKey: prod.key,
+      prodName: prod.name,
+      x: -240,
+      y: L.beltY,
+      w, h,
+      taskId,
+      repeatsLeft: repeats,
+      clueUntil: 0,
       clueShown: false,
-      clueT: 0,
-
-      removed: false,
-      passedScanner: false,
-      wiggle: rand(0, Math.PI * 2)
+      done: false,
+      flash: 0,
     };
+    state.items.push(item);
+    state.lastSpawnX = item.x;
+    uiNext.textContent = prod.name;
+    uiTask.textContent = taskLabel(taskId) + (repeats>1 ? ` ×${repeats}` : "");
   }
 
-  function spawnItem() {
-    const spawnX = -240;
-    world.items.push(makeItem(spawnX));
-    world.spawnCooldown = cfg.spacingPx / cfg.beltSpeed;
+  function taskLabel(id){
+    const t = TASKS.find(t => t.id === id);
+    return t ? t.label : id;
   }
 
-  function seedBelt() {
-    world.items.length = 0;
-    world.spawnCooldown = 0;
+  // -------------------------
+  // Layout
+  // -------------------------
+  function layout(){
+    const w = canvas.clientWidth;
+    const h = canvas.clientHeight;
+    const beltH = clamp(h * 0.24, 140, 220);
+    const beltY = Math.floor(h * 0.62);
+    const beltTop = beltY - beltH/2;
+    const beltBot = beltY + beltH/2;
 
-    spawnItem();
-    if (cfg.maxOnBelt >= 2) {
-      const it = makeItem(-240 - cfg.spacingPx);
-      world.items.unshift(it);
-      world.spawnCooldown = cfg.spacingPx / cfg.beltSpeed;
+    const clueX = Math.floor(w * 0.40);
+    const zoneX = Math.floor(w * 0.73);
+    const zoneW = state.cfg.zoneW;
+    const zoneTop = beltTop + 16;
+    const zoneBot = beltBot - 16;
+
+    return { w,h, beltH,beltY,beltTop,beltBot, clueX, zoneX, zoneW, zoneTop, zoneBot };
+  }
+
+  // -------------------------
+  // Drawing
+  // -------------------------
+  function roundRect(g, x,y,w,h,r){
+    const rr = Math.min(r, w/2, h/2);
+    g.beginPath();
+    g.moveTo(x+rr,y);
+    g.arcTo(x+w,y,x+w,y+h,rr);
+    g.arcTo(x+w,y+h,x,y+h,rr);
+    g.arcTo(x,y+h,x,y,rr);
+    g.arcTo(x,y,x+w,y,rr);
+    g.closePath();
+  }
+
+  function drawBackground(){
+    const L = layout();
+    ctx.clearRect(0,0,L.w,L.h);
+
+    // subtle stars
+    ctx.globalAlpha = 0.28;
+    for (let i=0;i<50;i++){
+      const x = (i*97)%L.w;
+      const y = (i*193)%Math.floor(L.h*0.52);
+      const r = (i%5)*0.5 + 0.6;
+      ctx.fillStyle = "rgba(255,255,255,.25)";
+      ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+
+    // floor haze
+    const g = ctx.createLinearGradient(0, L.h*0.55, 0, L.h);
+    g.addColorStop(0, "rgba(255,255,255,0)");
+    g.addColorStop(1, "rgba(0,0,0,.32)");
+    ctx.fillStyle = g;
+    ctx.fillRect(0, L.h*0.55, L.w, L.h*0.45);
+  }
+
+  function drawBelt(){
+    const L = layout();
+    const x0 = -40, x1 = L.w + 40;
+    const y0 = L.beltTop, y1 = L.beltBot;
+
+    // shadow
+    ctx.globalAlpha = 0.65;
+    ctx.fillStyle = "rgba(0,0,0,.45)";
+    roundRect(ctx, 22, y0+16, L.w-44, (y1-y0)-8, 26);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+
+    // belt body
+    ctx.fillStyle = "rgba(18,22,40,.95)";
+    roundRect(ctx, 18, y0, L.w-36, (y1-y0), 28);
+    ctx.fill();
+
+    // moving texture
+    ctx.save();
+    ctx.globalAlpha = 0.9;
+    ctx.translate(-state.beltOffset, 0);
+    ctx.fillStyle = beltPattern;
+    roundRect(ctx, 18 + state.beltOffset, y0, L.w-36, (y1-y0), 28);
+    ctx.fill();
+    ctx.restore();
+
+    // rails
+    ctx.strokeStyle = "rgba(255,255,255,.13)";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(28, y0+18); ctx.lineTo(L.w-28, y0+18);
+    ctx.moveTo(28, y1-18); ctx.lineTo(L.w-28, y1-18);
+    ctx.stroke();
+
+    // rollers
+    function roller(cx){
+      const r = (y1-y0)/2 - 14;
+      const grad = ctx.createRadialGradient(cx, L.beltY, r*0.2, cx, L.beltY, r);
+      grad.addColorStop(0,"rgba(255,255,255,.18)");
+      grad.addColorStop(.6,"rgba(0,0,0,.35)");
+      grad.addColorStop(1,"rgba(0,0,0,.65)");
+      ctx.fillStyle = grad;
+      ctx.beginPath(); ctx.arc(cx, L.beltY, r, 0, Math.PI*2); ctx.fill();
+      ctx.strokeStyle = "rgba(255,255,255,.12)";
+      ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(cx, L.beltY, r, 0, Math.PI*2); ctx.stroke();
+    }
+    roller(38);
+    roller(L.w-38);
+  }
+
+  function drawActionZone(){
+    const L = layout();
+    const x = L.zoneX - L.zoneW;
+    const w = L.zoneW*2;
+    const y = L.zoneTop;
+    const h = L.zoneBot - L.zoneTop;
+
+    // glow
+    ctx.globalAlpha = 0.25;
+    ctx.fillStyle = "rgba(47,125,255,.55)";
+    roundRect(ctx, x-6, y-6, w+12, h+12, 14);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+
+    // main box
+    ctx.fillStyle = "rgba(47,125,255,.12)";
+    ctx.strokeStyle = "rgba(47,125,255,.75)";
+    ctx.lineWidth = 2;
+    roundRect(ctx, x, y, w, h, 12);
+    ctx.fill(); ctx.stroke();
+
+    // scanner line (center)
+    ctx.strokeStyle = "rgba(255,255,255,.25)";
+    ctx.setLineDash([6, 8]);
+    ctx.beginPath();
+    ctx.moveTo(L.zoneX, y+10);
+    ctx.lineTo(L.zoneX, y+h-10);
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  function drawClueLine(){
+    const L = layout();
+    ctx.strokeStyle = "rgba(255,255,255,.12)";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(L.clueX, L.beltTop-10);
+    ctx.lineTo(L.clueX, L.beltBot+10);
+    ctx.stroke();
+  }
+
+  function drawItem(it){
+    const img = images.get(it.prodKey);
+    const x = it.x, y = it.y;
+    // shadow
+    ctx.globalAlpha = 0.35;
+    ctx.fillStyle = "rgba(0,0,0,.55)";
+    ctx.beginPath();
+    ctx.ellipse(x, y + it.h*0.38, it.w*0.33, it.h*0.15, 0, 0, Math.PI*2);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+
+    // flash highlight on success/fail
+    if (it.flash > 0){
+      ctx.globalAlpha = clamp(it.flash, 0, 1);
+      ctx.fillStyle = it.flash > 0.55 ? "rgba(54,211,154,.25)" : "rgba(255,77,109,.25)";
+      ctx.beginPath();
+      ctx.ellipse(x, y, it.w*0.62, it.h*0.62, 0, 0, Math.PI*2);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+
+    if (img && img.complete && img.naturalWidth){
+      ctx.save();
+      // subtle bob
+      const bob = Math.sin((performance.now()/240) + (x*0.01)) * 1.2;
+      ctx.translate(0, bob);
+      ctx.drawImage(img, x - it.w/2, y - it.h/2, it.w, it.h);
+      ctx.restore();
+    } else {
+      // fallback box
+      ctx.fillStyle = "rgba(255,255,255,.08)";
+      ctx.strokeStyle = "rgba(255,255,255,.18)";
+      ctx.lineWidth = 2;
+      roundRect(ctx, x - it.w/2, y - it.h/2, it.w, it.h, 16);
+      ctx.fill(); ctx.stroke();
+      ctx.fillStyle = "rgba(255,255,255,.86)";
+      ctx.font = "700 13px system-ui";
+      ctx.textAlign = "center";
+      ctx.fillText(it.prodName, x, y+4);
+    }
+
+    // clue bubble
+    const now = performance.now()/1000;
+    if (it.clueUntil > now){
+      const text = `${taskLabel(it.taskId)}${it.repeatsLeft>1 ? ` ×${it.repeatsLeft}` : ""}`;
+      const padX = 10, padY = 7;
+      ctx.font = "800 13px system-ui";
+      const tw = ctx.measureText(text).width;
+      const bw = tw + padX*2;
+      const bh = 26;
+      const bx = x - bw/2;
+      const by = (y - it.h/2) - 36;
+
+      ctx.globalAlpha = 0.92;
+      ctx.fillStyle = "rgba(10,14,26,.92)";
+      ctx.strokeStyle = "rgba(255,255,255,.15)";
+      ctx.lineWidth = 1.5;
+      roundRect(ctx, bx, by, bw, bh, 10);
+      ctx.fill(); ctx.stroke();
+
+      // small triangle
+      ctx.fillStyle = "rgba(10,14,26,.92)";
+      ctx.beginPath();
+      ctx.moveTo(x-6, by+bh);
+      ctx.lineTo(x+6, by+bh);
+      ctx.lineTo(x, by+bh+8);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.fillStyle = "rgba(255,255,255,.92)";
+      ctx.textAlign = "center";
+      ctx.fillText(text, x, by+18);
+      ctx.globalAlpha = 1;
     }
   }
 
-  // ---------- Focus ----------
-  function getFocusItem(L) {
-    const sx = L.scannerX;
+  function draw(){
+    const L = layout();
+    drawBackground();
+    drawBelt();
+    drawClueLine();
+    drawActionZone();
+    for (const it of state.items) drawItem(it);
+
+    const now = performance.now()/1000;
+    if (state.noteUntil > now && state.note){
+      ctx.globalAlpha = 0.96;
+      ctx.font = "900 18px system-ui";
+      ctx.textAlign = "center";
+      ctx.fillStyle = "rgba(255,255,255,.92)";
+      ctx.fillText(state.note, L.w*0.5, L.h*0.18);
+      ctx.globalAlpha = 1;
+    }
+  }
+
+  // -------------------------
+  // Updating
+  // -------------------------
+  function focusItemInZone(){
+    const L = layout();
+    const xMin = L.zoneX - L.zoneW;
+    const xMax = L.zoneX + L.zoneW;
     let best = null;
-    let bestX = -Infinity;
-    for (const it of world.items) {
-      if (it.removed) continue;
-      if (it.x > sx + 24) continue;
-      if (it.x > bestX) { bestX = it.x; best = it; }
+    let bestDx = Infinity;
+    for (const it of state.items){
+      const left = it.x - it.w/2;
+      const right = it.x + it.w/2;
+      const inZone = right >= xMin && left <= xMax;
+      if (!inZone) continue;
+      const dx = Math.abs(it.x - L.zoneX);
+      if (dx < bestDx){ best = it; bestDx = dx; }
     }
     return best;
   }
 
-  // ---------- Zones ----------
-  function inPrepZone(it, L) {
-    return it && it.x > L.prepLeft && it.x < L.prepRight;
-  }
-  function inScanGate(it, L) {
-    return it && Math.abs(it.x - L.scannerX) <= L.gateW;
-  }
+  function update(dt){
+    if (state.mode !== "running") return;
 
-  // ---------- Score / punish ----------
-  function punish(msg) {
-    lives -= 1;
-    streak = 0;
-    mult = 1.0;
-    flash(msg, 'bad');
-    if (lives <= 0) gameOver();
-  }
-  function reward(points, msg) {
-    score += points;
-    streak += 1;
-    mult = clamp(1.0 + streak * 0.06, 1, 4.0);
-    flash(msg, 'ok');
-  }
-  function softMistake(msg) {
-    streak = 0;
-    mult = 1.0;
-    flash(msg, 'warn');
-  }
-
-  function onItemClearedSuccess() {
-    levelCleared += 1;
-    if (levelCleared >= levelGoal) levelUp();
-  }
-
-  // ---------- Actions ----------
-  function doTaskAction(action) {
-    if (state !== 'running') return;
     const L = layout();
-    const it = getFocusItem(L);
-    if (!it) { flash('No item in focus', 'muted'); return; }
+    const speed = state.cfg.speed;
 
-    if (!cfg.allowTasks.has(action)) { flash('Not in this level', 'warn'); return; }
+    state.beltOffset += (speed * dt) * 0.45;
+    if (state.beltOffset > 180) state.beltOffset -= 180;
 
-    if (action === TASK.SCAN && it.task !== TASK.SCAN) {
-      softMistake('No scan needed');
-      return;
+    state.nextSpawnIn -= dt;
+    if (state.nextSpawnIn <= 0){
+      spawnItem();
+      state.nextSpawnIn = (state.cfg.minGap / speed) * (0.86 + Math.random()*0.18);
     }
 
-    if (action === TASK.SCAN) {
-      if (!inScanGate(it, L)) { punish('Scan timing'); return; }
-    } else if (action === TASK.REJECT) {
-      const ok = inPrepZone(it, L) || inScanGate(it, L);
-      if (!ok) { punish('Wrong zone'); return; }
-    } else {
-      if (!inPrepZone(it, L)) { punish('Wrong zone'); return; }
-    }
+    const now = performance.now()/1000;
+    for (const it of state.items){
+      it.x += speed * dt;
+      it.flash = Math.max(0, it.flash - dt*1.6);
 
-    if (it.task !== action) {
-      if (cfg.softWrongAction) softMistake('Wrong action');
-      else punish('Wrong action');
-      return;
-    }
-
-    if (action === TASK.SCAN) {
-      it.scansDone += 1;
-      if (it.scansDone < it.scanCount) {
-        reward(Math.floor(18 * mult), 'Rescan!');
-        return;
+      if (!it.clueShown && it.x >= L.clueX){
+        it.clueShown = true;
+        it.clueUntil = now + state.cfg.clueS;
+        uiNext.textContent = it.prodName;
+        uiTask.textContent = taskLabel(it.taskId) + (it.repeatsLeft>1 ? ` ×${it.repeatsLeft}` : "");
       }
-      it.removed = true;
-      const base = 70 + (it.scanCount === 2 ? 25 : 0);
-      reward(Math.floor(base * mult), 'Scan ✔');
-      onItemClearedSuccess();
+    }
+
+    const before = state.items.length;
+    state.items = state.items.filter(it => it.x - it.w/2 < L.w + 220);
+    if (state.items.length !== before){
+      const missed = before - state.items.length;
+      if (missed > 0) onMiss(missed);
+    }
+
+    const target = 10 + Math.floor(state.level * 0.55);
+    if (state.score >= target){
+      if (state.level < MAX_LEVEL){
+        toast(`Level ${state.level} cleared!`);
+        applyLevel(state.level + 1);
+        state.items = [];
+        state.nextSpawnIn = 0.35;
+        state.streak = 0;
+      } else {
+        state.mode = "over";
+        toast("You beat level 100. Absolute menace.");
+        showModal(true);
+      }
+    }
+
+    refreshUI();
+  }
+
+  function toast(text){
+    state.note = text;
+    state.noteUntil = performance.now()/1000 + 1.15;
+  }
+
+  function onMiss(n=1){
+    state.misses += n;
+    state.streak = 0;
+    toast("Miss!");
+    if (state.misses >= 5){
+      state.mode = "over";
+      toast("Game over.");
+      showModal(true);
+    }
+  }
+
+  function onHit(good=true){
+    if (good){
+      state.streak++;
+      state.score += 1 + Math.floor(state.streak/6);
+      toast(state.streak >= 6 ? "Clean streak!" : "Nice.");
+    } else {
+      onMiss(1);
+    }
+  }
+
+  function doTask(taskId){
+    if (state.mode !== "running") return;
+    const L = layout();
+    const xMin = L.zoneX - L.zoneW;
+    const xMax = L.zoneX + L.zoneW;
+    const it = focusItemInZone();
+
+    if (!it){
+      toast("Too early / too late.");
+      onHit(false);
       return;
     }
 
-    it.removed = true;
-    const base =
-      action === TASK.WEIGH ? 75 :
-      action === TASK.BAG   ? 70 :
-      action === TASK.ID    ? 80 :
-      action === TASK.DISC  ? 65 :
-      action === TASK.REJECT? 90 : 70;
+    const left = it.x - it.w/2;
+    const right = it.x + it.w/2;
+    const inZone = right >= xMin && left <= xMax;
+    if (!inZone){
+      toast("Not in zone.");
+      onHit(false);
+      return;
+    }
 
-    reward(Math.floor(base * mult), `${action} ✔`);
-    onItemClearedSuccess();
+    if (!state.unlocked.tasks.includes(taskId)){
+      toast("Locked (yet).");
+      onHit(false);
+      return;
+    }
+
+    if (it.taskId === taskId){
+      it.repeatsLeft--;
+      it.flash = 1;
+      if (it.repeatsLeft <= 0){
+        it.done = true;
+        setTimeout(() => {
+          const idx = state.items.findIndex(x => x.id === it.id);
+          if (idx >= 0) state.items.splice(idx, 1);
+        }, 0);
+        onHit(true);
+      } else {
+        it.clueUntil = (performance.now()/1000) + Math.max(0.25, state.cfg.clueS * 0.65);
+        uiTask.textContent = taskLabel(it.taskId) + ` ×${it.repeatsLeft}`;
+        toast("Again!");
+        state.score += 1;
+      }
+    } else {
+      it.flash = 0.35;
+      toast("Wrong task.");
+      onHit(false);
+    }
   }
 
-  // ---------- Buttons + Keys ----------
-  function bindBtn(id, fn) {
-    const el = document.getElementById(id);
-    el.addEventListener('click', (e) => { e.preventDefault(); fn(); }, { passive:false });
-    el.addEventListener('pointerdown', (e) => { e.preventDefault(); fn(); }, { passive:false });
+  function rebuildButtons(){
+    taskButtons.innerHTML = "";
+    for (const t of TASKS){
+      const unlocked = state.unlocked.tasks.includes(t.id);
+      const btn = document.createElement("button");
+      btn.className = (t.kind ? t.kind+" " : "") + (unlocked ? "" : "locked");
+      btn.innerHTML = `<span class="tasklabel">${t.label} <span class="kbd">${t.key}</span></span>`;
+      btn.disabled = !unlocked;
+      btn.addEventListener("click", () => { if (unlocked) doTask(t.id); });
+      taskButtons.appendChild(btn);
+    }
   }
-  bindBtn('btnScan', () => doTaskAction(TASK.SCAN));
-  bindBtn('btnID', () => doTaskAction(TASK.ID));
-  bindBtn('btnDisc', () => doTaskAction(TASK.DISC));
-  bindBtn('btnBag', () => doTaskAction(TASK.BAG));
-  bindBtn('btnWeigh', () => doTaskAction(TASK.WEIGH));
-  bindBtn('btnReject', () => doTaskAction(TASK.REJECT));
 
-  addEventListener('keydown', (e) => {
-    const k = e.key.toLowerCase();
-    if (k === 's') { e.preventDefault(); doTaskAction(TASK.SCAN); }
-    if (k === 'i') { e.preventDefault(); doTaskAction(TASK.ID); }
-    if (k === 'd') { e.preventDefault(); doTaskAction(TASK.DISC); }
-    if (k === 'b') { e.preventDefault(); doTaskAction(TASK.BAG); }
-    if (k === 'w') { e.preventDefault(); doTaskAction(TASK.WEIGH); }
-    if (k === 'r') { e.preventDefault(); doTaskAction(TASK.REJECT); }
-    if (k === 'enter' && (state === 'menu' || state === 'over' || state === 'levelup')) { startOrContinue(); }
+  function rebuildShelf(){
+    shelfEl.innerHTML = "";
+    for (const p of state.unlocked.products){
+      const box = document.createElement("div");
+      box.className = "icon";
+      const img = images.get(p.key);
+      if (img && img.complete && img.naturalWidth){
+        const el = document.createElement("img");
+        el.src = img.src;
+        el.alt = p.name;
+        box.appendChild(el);
+      } else {
+        box.textContent = p.name;
+        box.style.fontWeight = "800";
+        box.style.color = "rgba(255,255,255,.85)";
+        box.style.fontSize = "12px";
+      }
+      shelfEl.appendChild(box);
+    }
+  }
+
+  function refreshUI(){
+    uiLevel.textContent = String(state.level);
+    uiScore.textContent = String(state.score);
+    uiStreak.textContent = String(state.streak);
+    uiMiss.textContent = String(state.misses);
+    uiSpeed.textContent = `${Math.round(state.cfg.speed)} px/s`;
+  }
+
+  window.addEventListener("keydown", (e) => {
+    if (e.code === "Space"){
+      e.preventDefault();
+      togglePause();
+      return;
+    }
+    const k = e.key;
+    const t = TASKS.find(t => t.key === k);
+    if (t) doTask(t.id);
   });
 
-  addEventListener('pointerdown', () => {
-    if (state === 'menu' || state === 'over' || state === 'levelup') startOrContinue();
-  }, { passive:true });
-
-  // ---------- Overlay ----------
-  function showOverlay(html) { card.innerHTML = html; overlay.style.display = 'flex'; }
-  function hideOverlay() { overlay.style.display = 'none'; }
-
-  // ---------- Level flow ----------
-  function startOrContinue() {
-    if (state === 'menu') startGame();
-    else if (state === 'over') restartGame();
-    else if (state === 'levelup') beginLevel(false);
+  function start(){
+    if (state.mode === "running") return;
+    state.mode = "running";
+    showModal(false);
+  }
+  function togglePause(){
+    if (state.mode === "running") state.mode = "paused";
+    else if (state.mode === "paused") state.mode = "running";
+  }
+  function restart(){
+    state.mode = "running";
+    state.score = 0;
+    state.streak = 0;
+    state.misses = 0;
+    state.items = [];
+    state.nextSpawnIn = 0.35;
+    applyLevel(1);
+    showModal(false);
   }
 
-  function startGame() {
-    level = 1;
-    score = 0;
-    streak = 0;
-    mult = 1.0;
-    idCounter = 1;
+  btnStart.addEventListener("click", start);
+  btnPause.addEventListener("click", togglePause);
+  btnRestart.addEventListener("click", restart);
+  mPlay.addEventListener("click", start);
 
-    cfg = levelConfig(level);
-    lives = 1;
-
-    beginLevel(true);
-  }
-
-  function restartGame() {
-    state = 'running';
-    hideOverlay();
-    startGame(); // always back to level 1
-  }
-
-  function beginLevel(isNewGame) {
-    cfg = levelConfig(level);
-    levelGoal = computeGoal(level);
-    levelCleared = 0;
-
-    // one life only (no refills between levels)
-    if (isNewGame) lives = 1;
-
-    world.time = 0;
-    world.spawnCooldown = 0;
-    seedBelt();
-
-    toast.t = 0;
-    toast.text = '';
-
-    hideOverlay();
-    state = 'running';
-  }
-
-  function levelUp() {
-    state = 'levelup';
-    world.items.length = 0;
-
-    const next = level + 1;
-    const nextCfg = levelConfig(next);
-
-    showOverlay(`
-      <h1>Level ${level} cleared.</h1>
-      <p><b>Score:</b> ${Math.floor(score)} · <b>Life:</b> ${lives}</p>
-      <div class="row">
-        <div class="pill ok">Continue: click / tap / Enter</div>
-        <div class="pill warn">Next speed: ${nextCfg.beltSpeed.toFixed(0)} · hint: ${nextCfg.clueWindow.toFixed(2)}s</div>
-      </div>
-    `);
-
-    level += 1;
-  }
-
-  function gameOver() {
-    state = 'over';
-    showOverlay(`
-      <h1>Shift ended.</h1>
-      <p>
-        <b>Level reached:</b> ${level}<br>
-        <b>Score:</b> ${Math.floor(score)}<br>
-        <b>Streak:</b> ${streak}<br>
-        <b>Multiplier:</b> x${mult.toFixed(1)}
-      </p>
-      <div class="row">
-        <div class="pill ok">Restart: click / tap / Enter</div>
-      </div>
-    `);
-  }
-
-  function showMenu() {
-    state = 'menu';
-    showOverlay(`
-      <h1>Receipt Run</h1>
-      <p class="muted">Click / tap / Enter to start.</p>
-      <div class="row">
-        <div class="pill ok">Start: click / tap / Enter</div>
-        <div class="pill warn">Keys: S · I · D · B · W · R</div>
-      </div>
-    `);
-  }
-
-  // ---------- Update ----------
-  function update(dt) {
-    const L = layout();
-    world.time += dt;
-
-    for (const it of world.items) {
-      if (it.removed) continue;
-
-      it.wiggle += dt * 1.6;
-      it.x += cfg.beltSpeed * dt;
-
-      if (!it.clueShown && it.x >= L.clueX) {
-        it.clueShown = true;
-        it.clueT = cfg.clueWindow;
-      }
-      if (it.clueT > 0) it.clueT -= dt;
-
-      if (!it.passedScanner && it.x > L.scannerX + L.gateW + 30) {
-        it.passedScanner = true;
-        if (!it.removed) {
-          const msg = it.task === TASK.SCAN ? 'Missed scan' : 'Missed action';
-          punish(msg);
-          it.removed = true;
-        }
-      }
-    }
-
-    world.items = world.items.filter(it => !it.removed && it.x < L.w + 220);
-
-    world.spawnCooldown = Math.max(0, world.spawnCooldown - dt);
-    if (world.items.length < cfg.maxOnBelt && world.spawnCooldown <= 0) {
-      const rightmost = world.items.reduce((a,b) => (!a || b.x > a.x) ? b : a, null);
-      const safe = !rightmost || (rightmost.x > (-240 + 40));
-      if (safe) spawnItem();
-    }
-
-    if (toast.t > 0) toast.t -= dt;
-  }
-
-  // ---------- Draw ----------
-  function draw() {
-    const L = layout();
-    const w=L.w, h=L.h;
-
-    ctx.fillStyle = '#06070a';
-    ctx.fillRect(0,0,w,h);
-    const g = ctx.createLinearGradient(0, 0, 0, h);
-    g.addColorStop(0, '#070914');
-    g.addColorStop(1, '#04050a');
-    ctx.fillStyle = g;
-    ctx.fillRect(0,0,w,h);
-
-    const beltTop = L.beltY - L.beltH/2;
-    ctx.fillStyle = 'rgba(255,255,255,0.06)';
-    roundRect(12, beltTop, w-24, L.beltH, 18, true, false);
-
-    ctx.strokeStyle = 'rgba(255,255,255,0.07)';
-    ctx.lineWidth = 2;
-    for (let i=0;i<12;i++) {
-      const seg = (w/12);
-      const x = (i*seg + (performance.now()*0.05) % seg);
-      ctx.beginPath();
-      ctx.moveTo(x, beltTop + 14);
-      ctx.lineTo(x + 60, beltTop + L.beltH - 14);
-      ctx.stroke();
-    }
-
-    ctx.fillStyle = 'rgba(120,200,255,0.10)';
-    roundRect(L.scannerX - L.gateW, beltTop-14, L.gateW*2, L.beltH+28, 12, true, false);
-    ctx.strokeStyle = 'rgba(170,220,255,0.30)';
-    ctx.lineWidth = 2;
-    roundRect(L.scannerX - L.gateW, beltTop-14, L.gateW*2, L.beltH+28, 12, false, true);
-
-    ctx.strokeStyle = 'rgba(255,255,255,0.12)';
-    ctx.setLineDash([6,6]);
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.rect(L.prepLeft, beltTop-10, (L.prepRight - L.prepLeft), L.beltH+20);
-    ctx.stroke();
-    ctx.setLineDash([]);
-
-    ctx.strokeStyle = 'rgba(255,255,255,0.10)';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(L.clueX, beltTop-18);
-    ctx.lineTo(L.clueX, beltTop+L.beltH+18);
-    ctx.stroke();
-
-    const focus = getFocusItem(L);
-    const focusId = focus ? focus.id : null;
-
-    for (const it of world.items) {
-      const y = L.beltY + it.laneBob + Math.sin(it.wiggle)*4;
-      const x = it.x;
-
-      ctx.fillStyle = 'rgba(0,0,0,0.35)';
-      ctx.beginPath();
-      ctx.ellipse(x, y + 24, it.w*0.42, it.h*0.22, 0, 0, Math.PI*2);
-      ctx.fill();
-
-      const rx = x - it.w/2;
-      const ry = y - it.h/2;
-
-      // Image-first item render (fallback to colour block if image not loaded)
-      const img = IMAGES[it.typeName];
-      const canDrawImg = img && img.complete && (img.naturalWidth || img.width);
-
-      if (canDrawImg) {
-        ctx.save();
-        roundRect(rx, ry, it.w, it.h, 12, false, true);
-        ctx.clip();
-        drawImageCover(img, rx, ry, it.w, it.h);
-        ctx.restore();
-
-        // subtle dark glass overlay to unify readability
-        ctx.fillStyle = 'rgba(0,0,0,0.18)';
-        roundRect(rx, ry, it.w, it.h, 12, true, false);
-      } else {
-        ctx.fillStyle = it.color;
-        roundRect(rx, ry, it.w, it.h, 12, true, false);
-      }
-
-      ctx.strokeStyle = 'rgba(10,12,18,0.45)';
-      ctx.lineWidth = 2;
-      roundRect(rx, ry, it.w, it.h, 12, false, true);
-
-      // label strip (skip for Mystery Box)
-      if (it.typeName !== 'Mystery Box') {
-        ctx.fillStyle = 'rgba(10,12,18,0.55)';
-        roundRect(rx + 6, ry + 6, it.w - 12, 18, 9, true, false);
-
-        ctx.fillStyle = 'rgba(245,245,255,0.92)';
-        ctx.font = '800 12px system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial';
-        ctx.textAlign = 'center';
-        ctx.fillText(it.typeName, x, ry + 20);
-      } else {
-        // question mark overlay
-        ctx.fillStyle = 'rgba(10,12,18,0.45)';
-        roundRect(rx + 6, ry + 6, it.w - 12, it.h - 12, 10, true, false);
-
-        ctx.fillStyle = 'rgba(245,245,255,0.92)';
-        ctx.font = '950 26px system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial';
-        ctx.textAlign = 'center';
-        ctx.fillText('?', x, y + 10);
-      }
-
-      // popup hint
-      if (it.clueT > 0) {
-        const a = clamp(it.clueT / cfg.clueWindow, 0, 1);
-        drawTags(x, ry - 18, it.clueTags, a);
-      }
-
-      // focus highlight
-      if (focusId === it.id) {
-        ctx.strokeStyle = 'rgba(255,255,255,0.24)';
-        ctx.lineWidth = 3;
-        roundRect(rx - 6, ry - 6, it.w+12, it.h+12, 14, false, true);
-
-        if (it.task === TASK.SCAN && it.scanCount === 2) {
-          ctx.fillStyle = it.scansDone === 0 ? 'rgba(255,220,140,0.9)' : 'rgba(180,255,210,0.9)';
-          ctx.font = '950 11px system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial';
-          ctx.fillText(it.scansDone === 0 ? 'RESCAN' : '1/2 DONE', x, ry - 10);
-        }
-      }
-    }
-
-    if (toast.t > 0) {
-      const a = clamp(toast.t / 1.05, 0, 1);
-      ctx.globalAlpha = 0.15 + a*0.85;
-
-      const text = toast.text;
-      ctx.font = '900 16px system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial';
-      const tw = ctx.measureText(text).width;
-      const bx = w/2 - tw/2 - 16;
-      const by = Math.max(70, Math.floor(h*0.14));
-      const bw = tw + 32;
-      const bh = 40;
-
-      ctx.fillStyle = 'rgba(10,12,18,0.65)';
-      roundRect(bx, by, bw, bh, 14, true, false);
-
-      const col = toast.kind === 'ok' ? 'rgba(170,255,200,0.95)'
-               : toast.kind === 'bad' ? 'rgba(255,130,150,0.95)'
-               : toast.kind === 'warn' ? 'rgba(255,220,140,0.95)'
-               : 'rgba(245,245,255,0.92)';
-      ctx.fillStyle = col;
-      ctx.textAlign = 'center';
-      ctx.fillText(text, w/2, by + 26);
-
-      ctx.globalAlpha = 1;
-    }
-
-    hud1.textContent = `Level ${level} · Score: ${Math.floor(score)} · Streak: ${streak} · Mult: x${mult.toFixed(1)} · Lives: ${lives}`;
-    const spd = (cfg.beltSpeed/200).toFixed(2);
-    const focusName = focus ? focus.typeName : 'none';
-    hud2.textContent = `Goal: ${levelCleared}/${levelGoal} · Speed: ${spd} · On belt: ${world.items.length}/${cfg.maxOnBelt} · Focus: ${focusName}`;
-  }
-
-  function drawTags(x, y, tags, alpha) {
-    if (!tags || tags.length === 0) return;
-    ctx.save();
-    ctx.globalAlpha = alpha * 0.95;
-    ctx.font = '900 12px system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial';
-    ctx.textAlign = 'left';
-
-    let px = x - 120;
-    let py = y;
-
-    for (const t of tags) {
-      const w = ctx.measureText(t).width + 18;
-      const h = 22;
-
-      const danger = (t === 'Reject');
-      const warn = (t === 'Rescan' || t === 'ID' || t === 'Weigh');
-      const bg = danger ? 'rgba(255,120,140,0.20)' : warn ? 'rgba(255,220,140,0.16)' : 'rgba(170,220,255,0.12)';
-      const stroke = danger ? 'rgba(255,120,140,0.35)' : warn ? 'rgba(255,220,140,0.28)' : 'rgba(170,220,255,0.22)';
-      const fg = danger ? 'rgba(255,160,175,0.95)' : warn ? 'rgba(255,230,170,0.95)' : 'rgba(210,235,255,0.92)';
-
-      ctx.fillStyle = bg;
-      roundRect(px, py, w, h, 999, true, false);
-      ctx.strokeStyle = stroke;
-      ctx.lineWidth = 1;
-      roundRect(px, py, w, h, 999, false, true);
-
-      ctx.fillStyle = fg;
-      ctx.fillText(t, px + 9, py + 15);
-
-      px += w + 8;
-    }
-    ctx.restore();
-  }
-
-  function roundRect(x, y, w, h, r, fill, stroke) {
-    r = Math.min(r, w/2, h/2);
-    ctx.beginPath();
-    ctx.moveTo(x + r, y);
-    ctx.arcTo(x + w, y, x + w, y + h, r);
-    ctx.arcTo(x + w, y + h, x, y + h, r);
-    ctx.arcTo(x, y + h, x, y, r);
-    ctx.arcTo(x, y, x + w, y, r);
-    ctx.closePath();
-    if (fill) ctx.fill();
-    if (stroke) ctx.stroke();
-  }
-
-  // ---------- Main loop ----------
-  function frame(t) {
-    if (!tPrev) tPrev = t;
-    const dt = clamp((t - tPrev) / 1000, 0, 0.033);
-    tPrev = t;
-
-    if (state === 'running') update(dt);
+  let last = performance.now();
+  function loop(t){
+    const dt = clamp((t - last) / 1000, 0, 0.033);
+    last = t;
+    if (state.mode === "running") update(dt);
     draw();
-
-    requestAnimationFrame(frame);
+    requestAnimationFrame(loop);
   }
-  requestAnimationFrame(frame);
 
-  // ---------- Start ----------
-  showMenu();
+  resize();
+  resetGame();
+  rebuildButtons();
+  rebuildShelf();
+  showModal(true);
+
+  loadImages().then(() => {
+    rebuildShelf();
+  });
+
+  window.__RR = { state, doTask };
+  requestAnimationFrame(loop);
 })();
 </script>
 </body>
