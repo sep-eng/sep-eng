@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SEP & Make It Happen</title>
+  <title>SEP</title>
   <meta name="description" content="SEP clothing and Make It Happen health challenge." />
   <link rel="icon" href="https://upload.wikimedia.org/wikipedia/commons/3/3f/Black_square.jpg">
 
@@ -19,8 +19,8 @@
     body{
       margin:0;
       font-family:'Inter',sans-serif;
-      background:linear-gradient(to bottom,#111,#d9d9d9);
-      color:#111;
+      background:#000;
+      color:#fff;
       scroll-behavior:smooth;
     }
     .hidden{display:none!important}
@@ -148,6 +148,25 @@
       display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.08)
     }
     #mihProfilePanel .row:last-child{border-bottom:none}
+
+    #sep-app,
+    #sep-scene-main,
+    #sep-scene-about{
+      background:#000;
+      color:#fff;
+    }
+
+    #sep-scene-about{
+      min-height:100vh;
+      padding-bottom:5rem;
+    }
+
+    .social-icon{
+      width:20px;
+      height:20px;
+      display:block;
+      fill:currentColor;
+    }
   </style>
 </head>
 <body>
@@ -216,7 +235,7 @@
 
     <section id="products" class="py-20 px-6 fade-section">
       <div class="text-center mb-12">
-        <h2 id="productsTitle" class="theme-text text-4xl font-bold mb-4 text-white">Two products. Three choices.</h2>
+        <h2 id="productsTitle" class="theme-text text-4xl font-bold mb-4 text-white">Two products.</h2>
         <p id="productsSubtitle" class="theme-text text-white">Our soft collection:</p>
       </div>
 
@@ -308,8 +327,16 @@
     <footer class="text-center py-10 fade-section text-white">
       <p id="footerText">© 2025 SEP - Se Proairesis • MobilePay 5894BZ • +45 DKK Shipping • Made in Copenhagen. Only delivered across Denmark.</p>
       <div class="flex justify-center gap-4 mt-4">
-        <a href="https://instagram.com/seproairesis" class="bg-gradient-to-br from-pink-500 to-purple-600 text-white p-3 rounded-full" target="_blank" rel="noreferrer">IG</a>
-        <a href="https://tiktok.com/@seproairesis" class="bg-black text-white p-3 rounded-full" target="_blank" rel="noreferrer">TT</a>
+        <a href="https://instagram.com/seproairesis" class="bg-gradient-to-br from-pink-500 to-purple-600 text-white p-3 rounded-full flex items-center justify-center" target="_blank" rel="noreferrer" aria-label="Instagram">
+          <svg class="social-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M7.75 2h8.5A5.75 5.75 0 0 1 22 7.75v8.5A5.75 5.75 0 0 1 16.25 22h-8.5A5.75 5.75 0 0 1 2 16.25v-8.5A5.75 5.75 0 0 1 7.75 2Zm0 1.5A4.25 4.25 0 0 0 3.5 7.75v8.5A4.25 4.25 0 0 0 7.75 20.5h8.5a4.25 4.25 0 0 0 4.25-4.25v-8.5A4.25 4.25 0 0 0 16.25 3.5h-8.5Zm8.88 1.12a1.13 1.13 0 1 1 0 2.26 1.13 1.13 0 0 1 0-2.26ZM12 6.5A5.5 5.5 0 1 1 6.5 12 5.51 5.51 0 0 1 12 6.5Zm0 1.5A4 4 0 1 0 16 12a4 4 0 0 0-4-4Z"/>
+          </svg>
+        </a>
+        <a href="https://tiktok.com/@seproairesis" class="bg-black border border-white/20 text-white p-3 rounded-full flex items-center justify-center" target="_blank" rel="noreferrer" aria-label="TikTok">
+          <svg class="social-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M14.5 2c.34 2.1 1.58 3.63 3.7 4.1.57.13 1.18.18 1.8.14v2.63a7.22 7.22 0 0 1-2.86-.56 8.16 8.16 0 0 1-1.86-1.04v7.23a6.44 6.44 0 1 1-6.44-6.43c.32 0 .63.03.93.07v2.7a3.68 3.68 0 0 0-.93-.12 3.69 3.69 0 1 0 3.69 3.78V2h1.97Z"/>
+          </svg>
+        </a>
       </div>
     </footer>
   </div>
@@ -339,10 +366,10 @@
           <span id="cartSubtotalLabel">Subtotal:</span><span id="cartSubtotal" class="font-bold">0 DKK</span>
         </div>
         <div class="flex justify-between mb-2 text-sm text-gray-600">
-          <span id="cartShippingLabel">Shipping:</span><span id="cartShippingValue">+45 DKK</span>
+          <span id="cartShippingLabel">Shipping:</span><span id="cartShippingValue">0 DKK</span>
         </div>
         <div class="flex justify-between font-semibold border-t border-gray-300 pt-2 mb-3">
-          <span id="cartTotalLabel">Total:</span><span id="cartTotal">45 DKK</span>
+          <span id="cartTotalLabel">Total:</span><span id="cartTotal">0 DKK</span>
         </div>
         <button id="openMobilePay" class="w-full bg-green-500 text-white py-2 rounded mb-2" type="button">
           <span id="cartMobilePayButton">Open MobilePay</span>
@@ -662,7 +689,7 @@
 
       sepLangLabel: "Sprog",
       sepInfoLabel: "Info",
-      sepExitLabel: "Exit",
+      sepExitLabel: "Afslut",
       sepExitBtn: "Tilbage til hovedmenu",
       sepExitBtn2: "Til hovedmenu",
 
@@ -675,7 +702,7 @@
       mihMenuAboutBtn: "Om",
       mihLangLabel: "Sprog",
       mihLogoutBtn: "Log ud",
-      mihExitBtn: "Exit",
+      mihExitBtn: "Afslut",
 
       mihLoginTitle: "Velkommen tilbage",
       mihLoginSubtitle: "Indtast dit brugernavn og din adgangskode.",
@@ -768,7 +795,7 @@
       mihMenuAboutBtn: "O aplikaci",
       mihLangLabel: "Jazyk",
       mihLogoutBtn: "Odhlásit",
-      mihExitBtn: "Exit",
+      mihExitBtn: "Ukončit",
 
       mihLoginTitle: "Vítej zpět",
       mihLoginSubtitle: "Zadej své uživatelské jméno a heslo.",
@@ -979,7 +1006,7 @@
       btnShopNow: "Shop Now",
       btnViewCart: "View Cart",
       addToCart: "Add",
-      productsTitle: "Two products. Three choices.",
+      productsTitle: "Two products.",
       productsSubtitle: "Our soft collection:",
       product1Name: "SEP White T-shirt",
       product2Name: "SEP Sweatshirt",
@@ -1035,7 +1062,7 @@
       btnShopNow: "Shop nu",
       btnViewCart: "Se kurv",
       addToCart: "Læg i kurv",
-      productsTitle: "To produkter. Tre valg.",
+      productsTitle: "To produkter.",
       productsSubtitle: "Vores bløde kollektion:",
       product1Name: "SEP hvid T-shirt",
       product2Name: "SEP sweatshirt",
@@ -1091,7 +1118,7 @@
       btnShopNow: "Nakoupit",
       btnViewCart: "Košík",
       addToCart: "Přidat",
-      productsTitle: "Dva produkty. Tři volby.",
+      productsTitle: "Dva produkty.",
       productsSubtitle: "Naše měkká kolekce:",
       product1Name: "SEP bílé tričko",
       product2Name: "SEP mikina",
@@ -1155,7 +1182,14 @@
 
   let sepCurrentLang = GLOBAL_LANG;
   const SHIPPING_COST = 45;
-  let cart = JSON.parse(localStorage.getItem('cart')) || [];
+  const LS_CART = "cart";
+  let cart = JSON.parse(localStorage.getItem(LS_CART) || "[]");
+
+  function getShippingCost(subtotal){
+    if (subtotal <= 0) return 0;
+    if (subtotal >= 500) return 0;
+    return SHIPPING_COST;
+  }
 
   const productState = {
     product1: { color: 'white', index: 0, touchStartX: 0 },
@@ -1254,7 +1288,6 @@
     setText('cartTitle', t.cartTitle);
     setText('cartSubtotalLabel', t.cartSubtotalLabel);
     setText('cartShippingLabel', t.cartShippingLabel);
-    setText('cartShippingValue', t.cartShippingValue);
     setText('cartTotalLabel', t.cartTotalLabel);
     setText('cartMobilePayButton', t.cartMobilePayButton);
     setText('cartMobilePayNote', t.cartMobilePayNote);
@@ -1357,6 +1390,7 @@
     const t = sepTranslations[sepCurrentLang] || sepTranslations.en;
     const items = document.getElementById('cartItems');
     const subtotal = document.getElementById('cartSubtotal');
+    const shippingValue = document.getElementById('cartShippingValue');
     const total = document.getElementById('cartTotal');
     items.innerHTML = '';
     let sum = 0;
@@ -1364,7 +1398,8 @@
     if (cart.length === 0) {
       items.innerHTML = `<p class="text-center text-gray-500 py-10">${t.cartEmpty}</p>`;
       subtotal.textContent = '0 DKK';
-      total.textContent = SHIPPING_COST + ' DKK';
+      shippingValue.textContent = '0 DKK';
+      total.textContent = '0 DKK';
     } else {
       cart.forEach((it, i) => {
         const price = Number(it.price || 0) * Number(it.qty || 0);
@@ -1387,16 +1422,18 @@
       items.querySelectorAll('[data-remove]').forEach(btn => {
         btn.addEventListener('click', () => {
           cart.splice(parseInt(btn.getAttribute('data-remove'), 10), 1);
-          localStorage.setItem('cart', JSON.stringify(cart));
+          localStorage.setItem(LS_CART, JSON.stringify(cart));
           sepUpdateCart();
         });
       });
 
+      const shipping = getShippingCost(sum);
       subtotal.textContent = sum + ' DKK';
-      total.textContent = (sum + SHIPPING_COST) + ' DKK';
+      shippingValue.textContent = shipping > 0 ? `+${shipping} DKK` : '0 DKK';
+      total.textContent = (sum + shipping) + ' DKK';
     }
 
-    localStorage.setItem('cart', JSON.stringify(cart));
+    localStorage.setItem(LS_CART, JSON.stringify(cart));
     sepUpdateCounter();
   }
 
@@ -1459,13 +1496,30 @@
   cartOverlay?.addEventListener('click', closeCart);
 
   document.getElementById('openMobilePay')?.addEventListener('click', () => {
-    alert((sepTranslations[sepCurrentLang] || sepTranslations.en).mobilePayThanks);
+    const subtotalNumber = cart.reduce((s, i) => s + (Number(i.price || 0) * Number(i.qty || 0)), 0);
+    const shipping = getShippingCost(subtotalNumber);
+    const totalAmount = subtotalNumber + shipping;
+
+    if (totalAmount <= 0) {
+      toast((sepTranslations[sepCurrentLang] || sepTranslations.en).cartEmpty);
+      return;
+    }
+
+    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+    if (isMobile) {
+      window.location.href = 'mobilepay://';
+    } else {
+      alert(`Open MobilePay on your phone and send ${totalAmount} DKK to 5894BZ.`);
+    }
   });
 
   document.getElementById('copyMobilePay')?.addEventListener('click', async () => {
     const t = sepTranslations[sepCurrentLang] || sepTranslations.en;
     const subtotal = document.getElementById('cartSubtotal')?.textContent || '0 DKK';
-    const total = document.getElementById('cartTotal')?.textContent || (SHIPPING_COST + ' DKK');
+    const total = document.getElementById('cartTotal')?.textContent || '0 DKK';
+    const subtotalNumber = cart.reduce((s, i) => s + (Number(i.price || 0) * Number(i.qty || 0)), 0);
+    const shipping = getShippingCost(subtotalNumber);
 
     const lines = [t.orderIntro];
     cart.forEach(i => {
@@ -1478,7 +1532,7 @@
       );
     });
     lines.push(`${t.orderSubtotalLabel} ${subtotal}`);
-    lines.push(`${t.orderShippingLabel} +${SHIPPING_COST} DKK`);
+    lines.push(`${t.orderShippingLabel} ${shipping > 0 ? `+${shipping} DKK` : '0 DKK'}`);
     lines.push(`${t.orderTotalLabel} ${total}`);
 
     try {
