@@ -1934,14 +1934,27 @@
   }
 
   async function initFirebase(){
-    try {
-      if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-      db = firebase.firestore();
-    } catch(e){
-      console.error(e);
-      alert(GT('errFirebase'));
+  try {
+    if (typeof firebase === "undefined") {
+      throw new Error("Firebase script did not load.");
     }
+
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
+
+    if (!firebase.firestore) {
+      throw new Error("Firestore SDK did not load.");
+    }
+
+    db = firebase.firestore();
+
+    console.log("Firebase initialised successfully");
+  } catch (e) {
+    console.error("Firebase init error:", e);
+    alert(`Firebase init error: ${e.message}`);
   }
+}
 
   async function ensureUserDoc(name, password){
     const ref = db.collection(COL_USERS).doc(name);
