@@ -377,7 +377,6 @@
       border-color:#000!important;
     }
 
-    /* Keep IG / TT colours unchanged */
     body.light-theme a[href*="instagram.com/se_proairesis"]{
       background:linear-gradient(to bottom right,#ec4899,#9333ea)!important;
       color:#fff!important;
@@ -609,7 +608,7 @@
         <button id="copyMobilePay" class="w-full bg-gray-200 py-2 rounded mb-2" type="button">
           <span id="cartCopyOrder">Copy Order Message</span>
         </button>
-        <button id="clearCartBtn" class="w-full bg-black text-grey py-2 rounded" type="button">Clear Cart</button>
+        <button id="clearCartBtn" class="w-full bg-black text-white py-2 rounded" type="button">Clear Cart</button>
       </div>
     </div>
   </div>
@@ -1118,6 +1117,15 @@
     return str;
   }
 
+  function escapeHTML(value){
+    return String(value ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
   function applyTheme(){
     document.body.classList.toggle('light-theme', GLOBAL_THEME === 'light');
   }
@@ -1440,7 +1448,16 @@
   const SHIPPING_COST = 45;
   const LS_CART = "cart";
   const LS_CPH = "sep_is_cph";
-  let cart = JSON.parse(localStorage.getItem(LS_CART) || "[]");
+
+  let cart = [];
+  try {
+    cart = JSON.parse(localStorage.getItem(LS_CART) || "[]");
+    if (!Array.isArray(cart)) cart = [];
+  } catch (e) {
+    cart = [];
+    localStorage.setItem(LS_CART, "[]");
+  }
+
   let isCopenhagen = localStorage.getItem(LS_CPH) === "true";
 
   function getShippingCost(subtotal){
@@ -1516,7 +1533,7 @@
     const el = document.getElementById(id);
     if (!el) return;
     if (typeof text === 'string' && text.includes("\n")) {
-      el.innerHTML = text.split("\n").join("<br>");
+      el.innerHTML = text.split("\n").map(escapeHTML).join("<br>");
     } else {
       el.textContent = text;
     }
@@ -1641,7 +1658,7 @@
 
   function sepUpdateCounter() {
     const c = document.getElementById('cartCounter');
-    const t = cart.reduce((s, i) => s + i.qty, 0);
+    const t = cart.reduce((s, i) => s + Number(i.qty || 0), 0);
     if (t > 0) {
       c.textContent = t;
       c.classList.remove('hidden');
@@ -1656,11 +1673,13 @@
     const subtotal = document.getElementById('cartSubtotal');
     const shippingValue = document.getElementById('cartShippingValue');
     const total = document.getElementById('cartTotal');
+    if (!items || !subtotal || !shippingValue || !total) return;
+
     items.innerHTML = '';
     let sum = 0;
 
     if (cart.length === 0) {
-      items.innerHTML = `<p class="text-center text-gray-500 py-10">${t.cartEmpty}</p>`;
+      items.innerHTML = `<p class="text-center text-gray-500 py-10">${escapeHTML(t.cartEmpty)}</p>`;
       subtotal.textContent = '0 DKK';
       shippingValue.textContent = '0 DKK';
       total.textContent = '0 DKK';
@@ -1676,9 +1695,9 @@
 
         items.insertAdjacentHTML('beforeend', `
           <div class="border-b pb-2">
-            <div class="flex justify-between"><span>${it.name}</span><span>${price} DKK</span></div>
-            <div class="text-gray-500">${label}</div>
-            <button type="button" class="text-red-500 text-xs mt-1" data-remove="${i}">${t.btnRemove}</button>
+            <div class="flex justify-between"><span>${escapeHTML(it.name)}</span><span>${price} DKK</span></div>
+            <div class="text-gray-500">${escapeHTML(label)}</div>
+            <button type="button" class="text-red-500 text-xs mt-1" data-remove="${i}">${escapeHTML(t.btnRemove)}</button>
           </div>
         `);
       });
@@ -1730,7 +1749,7 @@
       const name = card.querySelector('h3').textContent.trim();
       const price = Number(card.querySelector('.product-price').getAttribute('data-price'));
       const size = card.querySelector('.size-selector').value;
-      const qty = parseInt(card.querySelector('.quantity-selector').value, 10) || 1;
+      const qty = Math.max(1, parseInt(card.querySelector('.quantity-selector').value, 10) || 1);
 
       let color = 'white';
       const colorSelect = card.querySelector('.color-selector');
@@ -1798,12 +1817,19 @@
 
   document.getElementById('copyMobilePay')?.addEventListener('click', async () => {
     const t = sepTranslations[sepCurrentLang] || sepTranslations.en;
+
+    if (cart.length === 0) {
+      toast(t.cartEmpty);
+      return;
+    }
+
     const subtotal = document.getElementById('cartSubtotal')?.textContent || '0 DKK';
     const total = document.getElementById('cartTotal')?.textContent || '0 DKK';
     const subtotalNumber = cart.reduce((s, i) => s + (Number(i.price || 0) * Number(i.qty || 0)), 0);
     const shipping = getShippingCost(subtotalNumber);
 
     const lines = [t.orderIntro];
+
     cart.forEach(i => {
       lines.push(
         t.orderItem
@@ -1813,6 +1839,7 @@
           .replace('{color}', sepColorLabel(i.color))
       );
     });
+
     lines.push(`${t.orderSubtotalLabel} ${subtotal}`);
     lines.push(`${t.orderShippingLabel} ${shipping > 0 ? `+${shipping} DKK` : '0 DKK'}`);
     lines.push(`${t.orderTotalLabel} ${total}`);
@@ -1851,6 +1878,7 @@
     const d = new Date(ts);
     return isNaN(d.getTime()) ? "" : d.toLocaleDateString();
   }
+
   function paceFrom(km, minutes){
     if (!isFinite(km) || !isFinite(minutes) || km <= 0 || minutes <= 0) return "0:00";
     const paceMin = minutes / km;
@@ -1858,8 +1886,12 @@
     const s = Math.round((paceMin - m) * 60);
     return `${m}:${String(s).padStart(2,'0')}`;
   }
+
   function safeName(name){
-    return (name || "").trim().slice(0, 40);
+    return (name || "")
+      .trim()
+      .replace(/\//g, "-")
+      .slice(0, 40);
   }
 
   function mihShowScene(id){
@@ -1934,27 +1966,28 @@
   }
 
   async function initFirebase(){
-  try {
-    if (typeof firebase === "undefined") {
-      throw new Error("Firebase script did not load.");
+    try {
+      if (typeof firebase === "undefined") {
+        throw new Error("Firebase script did not load.");
+      }
+
+      if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+      }
+
+      if (!firebase.firestore) {
+        throw new Error("Firestore SDK did not load.");
+      }
+
+      db = firebase.firestore();
+
+      console.log("Firebase initialised successfully");
+    } catch (e) {
+      db = null;
+      console.error("Firebase init error:", e);
+      alert(`Firebase init error: ${e.message}`);
     }
-
-    if (!firebase.apps.length) {
-      firebase.initializeApp(firebaseConfig);
-    }
-
-    if (!firebase.firestore) {
-      throw new Error("Firestore SDK did not load.");
-    }
-
-    db = firebase.firestore();
-
-    console.log("Firebase initialised successfully");
-  } catch (e) {
-    console.error("Firebase init error:", e);
-    alert(`Firebase init error: ${e.message}`);
   }
-}
 
   async function ensureUserDoc(name, password){
     const ref = db.collection(COL_USERS).doc(name);
@@ -1985,7 +2018,10 @@
   }
 
   async function login(){
-    if (!db) return;
+    if (!db) {
+      alert("Firebase is not ready. Check config, Firestore rules, or internet.");
+      return;
+    }
 
     const btn = document.getElementById('mih-login-btn');
     const name = safeName(document.getElementById('mih-username')?.value || "");
@@ -2014,11 +2050,17 @@
 
       setUserPills();
       updateMihMenuLoginVisibility();
-      await refreshAll();
+
+      try {
+        await refreshAll();
+      } catch (refreshError) {
+        console.error("Refresh after login failed:", refreshError);
+      }
+
       mihShowScene('mih-home');
     } catch (e) {
       console.error("Login / Firestore error:", e);
-      alert(̀Login / Firestore error: ${e.message}̀);
+      alert(`Login / Firestore error: ${e.message}`);
     } finally {
       if (btn){
         btn.disabled = false;
@@ -2033,7 +2075,13 @@
     localStorage.removeItem(LS_USER);
     setUserPills();
     updateMihMenuLoginVisibility();
-    await refreshAll();
+
+    try {
+      await refreshAll();
+    } catch (e) {
+      console.error("Refresh after logout failed:", e);
+    }
+
     mihShowScene('mih-login');
   }
 
@@ -2041,31 +2089,47 @@
     if (!currentUser || !db) return;
     if (!confirm(GT('errDeleteConfirm'))) return;
 
-    const userToDelete = currentUser;
-    const entriesSnap = await db.collection(COL_ENTRIES).where("username","==",userToDelete).get();
+    try {
+      const userToDelete = currentUser;
+      const entriesSnap = await db.collection(COL_ENTRIES).where("username","==",userToDelete).get();
 
-    let docs = [];
-    entriesSnap.forEach(doc => docs.push(doc));
+      let docs = [];
+      entriesSnap.forEach(doc => docs.push(doc));
 
-    while (docs.length) {
-      const batch = db.batch();
-      docs.splice(0, 400).forEach(doc => batch.delete(doc.ref));
-      await batch.commit();
+      while (docs.length) {
+        const batch = db.batch();
+        docs.splice(0, 400).forEach(doc => batch.delete(doc.ref));
+        await batch.commit();
+      }
+
+      await db.collection(COL_USERS).doc(userToDelete).delete();
+
+      currentUser = "";
+      localStorage.removeItem(LS_USER);
+      setUserPills();
+      updateMihMenuLoginVisibility();
+      closeProfile();
+
+      try {
+        await refreshAll();
+      } catch (e) {
+        console.error("Refresh after delete failed:", e);
+      }
+
+      toast(GT('toastDeleted'));
+      mihShowScene('mih-login');
+    } catch (e) {
+      console.error("Delete account error:", e);
+      alert(`Delete account error: ${e.message}`);
     }
-
-    await db.collection(COL_USERS).doc(userToDelete).delete();
-
-    currentUser = "";
-    localStorage.removeItem(LS_USER);
-    setUserPills();
-    updateMihMenuLoginVisibility();
-    closeProfile();
-    await refreshAll();
-    toast(GT('toastDeleted'));
-    mihShowScene('mih-login');
   }
 
   async function addActivity(){
+    if (!db) {
+      alert("Firebase is not ready. Check config, Firestore rules, or internet.");
+      return;
+    }
+
     if (!currentUser) {
       alert(GT('errMustLogin'));
       mihShowScene('mih-login');
@@ -2080,36 +2144,41 @@
       return;
     }
 
-    const ts = Date.now();
+    try {
+      const ts = Date.now();
 
-    await db.collection(COL_ENTRIES).add({
-      username: currentUser,
-      km,
-      minutes,
-      ts
-    });
+      await db.collection(COL_ENTRIES).add({
+        username: currentUser,
+        km,
+        minutes,
+        ts
+      });
 
-    const uref = db.collection(COL_USERS).doc(currentUser);
-    await db.runTransaction(async (tx) => {
-      const snap = await tx.get(uref);
-      const data = snap.exists ? snap.data() : { totalKm:0, totalMin:0, entries:0, createdAt: ts };
-      tx.set(uref, {
-        name: currentUser,
-        league: "The League of Choice",
-        totalKm: (Number(data.totalKm) || 0) + km,
-        totalMin: (Number(data.totalMin) || 0) + minutes,
-        entries: (Number(data.entries) || 0) + 1,
-        updatedAt: ts,
-        createdAt: data.createdAt || ts
-      }, { merge:true });
-    });
+      const uref = db.collection(COL_USERS).doc(currentUser);
+      await db.runTransaction(async (tx) => {
+        const snap = await tx.get(uref);
+        const data = snap.exists ? snap.data() : { totalKm:0, totalMin:0, entries:0, createdAt: ts };
+        tx.set(uref, {
+          name: currentUser,
+          league: "The League of Choice",
+          totalKm: (Number(data.totalKm) || 0) + km,
+          totalMin: (Number(data.totalMin) || 0) + minutes,
+          entries: (Number(data.entries) || 0) + 1,
+          updatedAt: ts,
+          createdAt: data.createdAt || ts
+        }, { merge:true });
+      });
 
-    document.getElementById('mih-distance').value = "";
-    document.getElementById('mih-minutes').value = "";
+      document.getElementById('mih-distance').value = "";
+      document.getElementById('mih-minutes').value = "";
 
-    toast(GT('toastSaved'));
-    await refreshAll();
-    mihShowScene('mih-home');
+      toast(GT('toastSaved'));
+      await refreshAll();
+      mihShowScene('mih-home');
+    } catch (e) {
+      console.error("Add activity error:", e);
+      alert(`Add activity error: ${e.message}`);
+    }
   }
 
   async function loadRecent(){
@@ -2132,7 +2201,7 @@
       const e = doc.data();
       const km = Number(e.km || 0);
       const min = Number(e.minutes || 0);
-      tbody.insertAdjacentHTML('beforeend', `<tr><td>${formatDate(e.ts)}</td><td>${km.toFixed(2)}</td><td>${min.toFixed(0)}</td><td>${paceFrom(km,min)}</td></tr>`);
+      tbody.insertAdjacentHTML('beforeend', `<tr><td>${escapeHTML(formatDate(e.ts))}</td><td>${km.toFixed(2)}</td><td>${min.toFixed(0)}</td><td>${escapeHTML(paceFrom(km,min))}</td></tr>`);
     });
   }
 
@@ -2156,7 +2225,7 @@
       const e = doc.data();
       const km = Number(e.km || 0);
       const min = Number(e.minutes || 0);
-      tbody.insertAdjacentHTML('beforeend', `<tr><td>${formatDate(e.ts)}</td><td>${km.toFixed(2)}</td><td>${min.toFixed(0)}</td><td>${paceFrom(km,min)}</td></tr>`);
+      tbody.insertAdjacentHTML('beforeend', `<tr><td>${escapeHTML(formatDate(e.ts))}</td><td>${km.toFixed(2)}</td><td>${min.toFixed(0)}</td><td>${escapeHTML(paceFrom(km,min))}</td></tr>`);
     });
   }
 
@@ -2179,7 +2248,7 @@
       const km = Number(u.totalKm || 0);
       const min = Number(u.totalMin || 0);
       const tr = document.createElement('tr');
-      tr.innerHTML = `<td>${index + 1}</td><td><span class="leaderboard-name">${u.name || ''}</span></td><td>${km.toFixed(2)}</td><td>${min.toFixed(0)}</td><td>${paceFrom(km,min)}</td>`;
+      tr.innerHTML = `<td>${index + 1}</td><td><span class="leaderboard-name">${escapeHTML(u.name || '')}</span></td><td>${km.toFixed(2)}</td><td>${min.toFixed(0)}</td><td>${escapeHTML(paceFrom(km,min))}</td>`;
       tr.style.cursor = 'pointer';
       tr.addEventListener('click', async () => {
         mihShowScene('mih-profiles');
@@ -2207,7 +2276,7 @@
     players.slice(0,80).forEach(u => {
       const tr = document.createElement('tr');
       tr.style.cursor = "pointer";
-      tr.innerHTML = `<td><span class="leaderboard-name">${u.name || ''}</span></td><td>${Number(u.totalKm || 0).toFixed(2)}</td><td>${Number(u.totalMin || 0).toFixed(0)}</td><td>${Number(u.entries || 0)}</td>`;
+      tr.innerHTML = `<td><span class="leaderboard-name">${escapeHTML(u.name || '')}</span></td><td>${Number(u.totalKm || 0).toFixed(2)}</td><td>${Number(u.totalMin || 0).toFixed(0)}</td><td>${Number(u.entries || 0)}</td>`;
       tr.addEventListener('click', () => openProfile(u.name || ''));
       tbody.appendChild(tr);
     });
@@ -2215,7 +2284,7 @@
 
   async function openProfile(username){
     const panel = document.getElementById('mihProfilePanel');
-    if (!panel) return;
+    if (!panel || !db) return;
 
     const userSnap = await db.collection(COL_USERS).doc(username).get();
     const u = userSnap.exists ? (userSnap.data() || {}) : { name: username, totalKm:0, totalMin:0, entries:0 };
@@ -2238,7 +2307,7 @@
         const e = doc.data();
         const km = Number(e.km || 0);
         const min = Number(e.minutes || 0);
-        tbody.insertAdjacentHTML('beforeend', `<tr><td>${formatDate(e.ts)}</td><td>${km.toFixed(2)}</td><td>${min.toFixed(0)}</td><td>${paceFrom(km,min)}</td></tr>`);
+        tbody.insertAdjacentHTML('beforeend', `<tr><td>${escapeHTML(formatDate(e.ts))}</td><td>${km.toFixed(2)}</td><td>${min.toFixed(0)}</td><td>${escapeHTML(paceFrom(km,min))}</td></tr>`);
       });
     }
 
@@ -2255,6 +2324,8 @@
     const entriesEl = document.getElementById('mih-total-entries');
     const avgKmEl = document.getElementById('mih-average-km');
     const avgPaceEl = document.getElementById('mih-average-pace');
+
+    if (!totalKmEl || !totalMinEl || !entriesEl || !avgKmEl || !avgPaceEl) return;
 
     if (!currentUser){
       totalKmEl.textContent = "0";
@@ -2290,9 +2361,23 @@
 
   async function refreshAll(){
     if (!db) return;
+
     setUserPills();
     updateMihMenuLoginVisibility();
-    await Promise.all([loadRecent(), loadLeaderboard(), loadProfilesList(), loadStats(), loadHistory()]);
+
+    const results = await Promise.allSettled([
+      loadRecent(),
+      loadLeaderboard(),
+      loadProfilesList(),
+      loadStats(),
+      loadHistory()
+    ]);
+
+    results.forEach(result => {
+      if (result.status === "rejected") {
+        console.error("Refresh task failed:", result.reason);
+      }
+    });
   }
 
   document.getElementById('mih-login-btn')?.addEventListener('click', login);
