@@ -1892,10 +1892,14 @@
 
   function firebaseErrorMessage(e){
     const code = e && e.code ? e.code : "";
-    if (code === "auth/wrong-password" || code === "auth/invalid-credential") return GT('errWrongPass');
+
+    if (code === "auth/wrong-password") return GT('errWrongPass');
+    if (code === "auth/invalid-credential") return GT('errWrongPass');
     if (code === "auth/weak-password") return GT('errPasswordShort');
     if (code === "auth/email-already-in-use") return "This name already exists. Use the right password.";
     if (code === "auth/network-request-failed") return "Network error. Check your internet.";
+    if (code === "permission-denied") return "Missing or insufficient permissions. Check your Firestore rules.";
+
     return e && e.message ? e.message : "Unknown Firebase error.";
   }
 
@@ -2109,12 +2113,19 @@
 
       try {
         cred = await auth.signInWithEmailAndPassword(email, password);
-      } catch (e) {
-        if (e.code === "auth/user-not-found") {
+      } catch (signInError) {
+        console.warn("Sign in failed, trying to create account:", signInError.code);
+
+        try {
           cred = await auth.createUserWithEmailAndPassword(email, password);
           await cred.user.updateProfile({ displayName: name });
-        } else {
-          throw e;
+        } catch (createError) {
+          if (createError.code === "auth/email-already-in-use") {
+            alert(GT('errWrongPass'));
+            return;
+          }
+
+          throw createError;
         }
       }
 
