@@ -2017,8 +2017,8 @@
       await refreshAll();
       mihShowScene('mih-home');
     } catch (e) {
-      console.error(e);
-      alert(GT('errFirebase'));
+      console.error("Login / Firestore error:", e);
+      alert(̀Login / Firestore error: ${e.message}̀);
     } finally {
       if (btn){
         btn.disabled = false;
