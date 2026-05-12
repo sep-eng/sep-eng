@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>DONE?</title>
+  <title>SEP</title>
   <meta name="description" content="SEP clothing and Make It Happen health challenge." />
   <link rel="icon" href="https://upload.wikimedia.org/wikipedia/commons/3/3f/Black_square.jpg">
 
@@ -13,6 +13,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 
   <script src="https://www.gstatic.com/firebasejs/11.0.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.0.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore-compat.js"></script>
 
   <style>
@@ -673,7 +674,7 @@
 
   <section id="mih-login" class="scene active">
     <h1 id="mihLoginTitle">Welcome back</h1>
-    <p class="muted" id="mihLoginSubtitle">Enter your username and password.</p>
+    <p class="muted" id="mihLoginSubtitle">Enter your username and password. First time? It creates your account automatically. Password must be at least 6 characters.</p>
 
     <input id="mih-username" class="input" placeholder="Your name" />
     <input id="mih-password" class="input" type="password" placeholder="Password" />
@@ -817,6 +818,9 @@
 
   const LS_GLOBAL_LANG = "global_lang_v1";
   const LS_THEME = "global_theme_v1";
+  const LS_USER_NAME = "mih_username_v3";
+  const LS_USER_UID = "mih_uid_v3";
+
   let GLOBAL_LANG = localStorage.getItem(LS_GLOBAL_LANG) || "en";
   let GLOBAL_THEME = localStorage.getItem(LS_THEME) || "dark";
 
@@ -826,13 +830,11 @@
       welcomeSubtitle: "Your Choice. Either shop (SEP shop), or move (Make It Happen). That simple.",
       welcomeSepBtn: "SEP shop",
       welcomeMihBtn: "Make It Happen",
-
       sepLangLabel: "Language",
       sepInfoLabel: "Info",
       sepExitLabel: "Exit",
       sepExitBtn: "Back to main menu",
       sepExitBtn2: "Exit to main menu",
-
       mihMenuTitle: "MENU",
       mihMenuLoginBtn: "Login",
       mihMenuHomeBtn: "Home",
@@ -845,14 +847,12 @@
       mihDeleteAccountBtn: "Delete account",
       mihExitBtn: "Exit",
       mihLeagueText: "The League of Choice",
-
       mihLoginTitle: "Welcome back",
-      mihLoginSubtitle: "Enter your username and password.",
+      mihLoginSubtitle: "Enter your username and password. First time? It creates your account automatically. Password must be at least 6 characters.",
       mihUsernamePh: "Your name",
       mihPasswordPh: "Password",
       mihEnterBtn: "Enter",
       mihLoading: "Loading...",
-
       mihHomeTitle: "Your Dashboard",
       mihHomeSubtitle: "Log your activity. Every kilometre counts.",
       mihAddTitle: "Log a new activity",
@@ -864,7 +864,6 @@
       mihRecentColKm: "Distance (km)",
       mihRecentColMin: "Time (min)",
       mihRecentColPace: "Pace",
-
       mihLbTitle: "Leaderboard",
       mihLbSubtitle: "The League of Choice. Totals, all-time.",
       mihLbColRank: "#",
@@ -872,7 +871,6 @@
       mihLbColKm: "Total km",
       mihLbColMin: "Total min",
       mihLbColPace: "Avg pace",
-
       mihProfilesTitle: "Profiles",
       mihProfilesSubtitle: "Tap a player's name to view their stats.",
       mihProfilesColName: "Name",
@@ -889,7 +887,6 @@
       mihProfileHistKm: "Km",
       mihProfileHistMin: "Min",
       mihProfileHistPace: "Pace",
-
       mihStatsTitle: "Your Stats",
       mihStatsTotalKmLabel: "Total km:",
       mihStatsTotalMinLabel: "Total minutes:",
@@ -901,13 +898,12 @@
       mihHistColKm: "Distance (km)",
       mihHistColMin: "Time (min)",
       mihHistColPace: "Pace",
-
       mihAboutTitle: "About the challenge",
       mihAboutBody: "Make It Happen is about consistency. Not perfection. Log your movement, no matter how small. Every metre counts. We find that a league with competition motivates people to move more.",
-
       toastSaved: "Saved",
       toastDeleted: "Account deleted",
       errLoginMissing: "Please enter both name and password.",
+      errPasswordShort: "Password must be at least 6 characters.",
       errWrongPass: "Wrong password for this name.",
       errFirebase: "Firebase failed to initialise. Check your config + internet connection.",
       errMustLogin: "Please log in first.",
@@ -921,13 +917,11 @@
       welcomeSubtitle: "Dit valg. Enten shop (SEP shop), eller bevæg dig (Make It Happen). Så enkelt.",
       welcomeSepBtn: "SEP shop",
       welcomeMihBtn: "Make It Happen",
-
       sepLangLabel: "Sprog",
       sepInfoLabel: "Info",
       sepExitLabel: "Afslut",
       sepExitBtn: "Tilbage til hovedmenu",
       sepExitBtn2: "Til hovedmenu",
-
       mihMenuTitle: "MENU",
       mihMenuLoginBtn: "Login",
       mihMenuHomeBtn: "Hjem",
@@ -940,14 +934,12 @@
       mihDeleteAccountBtn: "Slet konto",
       mihExitBtn: "Afslut",
       mihLeagueText: "Ligaen for valg",
-
       mihLoginTitle: "Velkommen tilbage",
-      mihLoginSubtitle: "Indtast dit brugernavn og din adgangskode.",
+      mihLoginSubtitle: "Indtast dit brugernavn og din adgangskode. Første gang? Så oprettes kontoen automatisk. Adgangskoden skal være mindst 6 tegn.",
       mihUsernamePh: "Dit navn",
       mihPasswordPh: "Adgangskode",
       mihEnterBtn: "Gå ind",
       mihLoading: "Loader...",
-
       mihHomeTitle: "Dit dashboard",
       mihHomeSubtitle: "Log din aktivitet. Hver kilometer tæller.",
       mihAddTitle: "Log en ny aktivitet",
@@ -959,7 +951,6 @@
       mihRecentColKm: "Distance (km)",
       mihRecentColMin: "Tid (min)",
       mihRecentColPace: "Tempo",
-
       mihLbTitle: "Leaderboard",
       mihLbSubtitle: "The League of Choice. Samlet, all-time.",
       mihLbColRank: "#",
@@ -967,7 +958,6 @@
       mihLbColKm: "Total km",
       mihLbColMin: "Total min",
       mihLbColPace: "Gns. tempo",
-
       mihProfilesTitle: "Profiler",
       mihProfilesSubtitle: "Tryk på en spillers navn for at se deres stats.",
       mihProfilesColName: "Navn",
@@ -984,7 +974,6 @@
       mihProfileHistKm: "Km",
       mihProfileHistMin: "Min",
       mihProfileHistPace: "Tempo",
-
       mihStatsTitle: "Dine stats",
       mihStatsTotalKmLabel: "Total km:",
       mihStatsTotalMinLabel: "Total minutter:",
@@ -996,13 +985,12 @@
       mihHistColKm: "Distance (km)",
       mihHistColMin: "Tid (min)",
       mihHistColPace: "Tempo",
-
       mihAboutTitle: "Om challenge",
       mihAboutBody: "Make It Happen handler om kontinuitet. Ikke perfektion. Log din bevægelse, uanset hvor lidt. Hver meter tæller. Vi oplever, at en liga med konkurrence motiverer folk til at bevæge sig mere.",
-
       toastSaved: "Gemt",
       toastDeleted: "Konto slettet",
       errLoginMissing: "Indtast både navn og adgangskode.",
+      errPasswordShort: "Adgangskoden skal være mindst 6 tegn.",
       errWrongPass: "Forkert adgangskode til dette navn.",
       errFirebase: "Firebase kunne ikke starte. Tjek din config + internet.",
       errMustLogin: "Log ind først.",
@@ -1016,13 +1004,11 @@
       welcomeSubtitle: "Tvoje volba. Buď nakupuj (SEP shop), nebo se hýbej (Make It Happen). Tak jednoduché.",
       welcomeSepBtn: "SEP shop",
       welcomeMihBtn: "Make It Happen",
-
       sepLangLabel: "Jazyk",
       sepInfoLabel: "Info",
       sepExitLabel: "Ukončit",
       sepExitBtn: "Zpět do hlavního menu",
       sepExitBtn2: "Zpět do hlavního menu",
-
       mihMenuTitle: "MENU",
       mihMenuLoginBtn: "Login",
       mihMenuHomeBtn: "Domů",
@@ -1035,14 +1021,12 @@
       mihDeleteAccountBtn: "Smazat účet",
       mihExitBtn: "Ukončit",
       mihLeagueText: "Liga volby",
-
       mihLoginTitle: "Vítej zpět",
-      mihLoginSubtitle: "Zadej své uživatelské jméno a heslo.",
+      mihLoginSubtitle: "Zadej své uživatelské jméno a heslo. Poprvé? Účet se vytvoří automaticky. Heslo musí mít alespoň 6 znaků.",
       mihUsernamePh: "Tvoje jméno",
       mihPasswordPh: "Heslo",
       mihEnterBtn: "Vstoupit",
       mihLoading: "Načítání...",
-
       mihHomeTitle: "Tvůj dashboard",
       mihHomeSubtitle: "Zapisuj aktivitu. Každý kilometr se počítá.",
       mihAddTitle: "Zapiš novou aktivitu",
@@ -1054,7 +1038,6 @@
       mihRecentColKm: "Vzdálenost (km)",
       mihRecentColMin: "Čas (min)",
       mihRecentColPace: "Tempo",
-
       mihLbTitle: "Leaderboard",
       mihLbSubtitle: "The League of Choice. Celkem, all-time.",
       mihLbColRank: "#",
@@ -1062,7 +1045,6 @@
       mihLbColKm: "Celkem km",
       mihLbColMin: "Celkem min",
       mihLbColPace: "Prům. tempo",
-
       mihProfilesTitle: "Profily",
       mihProfilesSubtitle: "Klikni na jméno hráče a uvidíš jeho statistiky.",
       mihProfilesColName: "Jméno",
@@ -1079,7 +1061,6 @@
       mihProfileHistKm: "Km",
       mihProfileHistMin: "Min",
       mihProfileHistPace: "Tempo",
-
       mihStatsTitle: "Tvoje statistiky",
       mihStatsTotalKmLabel: "Celkem km:",
       mihStatsTotalMinLabel: "Celkem minut:",
@@ -1091,13 +1072,12 @@
       mihHistColKm: "Vzdálenost (km)",
       mihHistColMin: "Čas (min)",
       mihHistColPace: "Tempo",
-
       mihAboutTitle: "O výzvě",
       mihAboutBody: "Make It Happen je o konzistenci. Ne o perfektnosti. Zapisuj pohyb, i když je malý. Každý metr se počítá. Zjistili jsme, že liga s trochou soutěživosti motivuje lidi hýbat se víc.",
-
       toastSaved: "Uloženo",
       toastDeleted: "Účet smazán",
       errLoginMissing: "Zadej jméno i heslo.",
+      errPasswordShort: "Heslo musí mít alespoň 6 znaků.",
       errWrongPass: "Špatné heslo pro toto jméno.",
       errFirebase: "Firebase se nepodařilo spustit. Zkontroluj config + internet.",
       errMustLogin: "Nejdřív se přihlas.",
@@ -1151,6 +1131,7 @@
       'mihStatsTotalKmLabel','mihStatsTotalMinLabel','mihStatsEntriesLabel','mihStatsAvgKmLabel','mihStatsAvgPaceLabel',
       'mihHistColDate','mihHistColKm','mihHistColMin','mihHistColPace'
     ];
+
     map.forEach(id => {
       const el = document.getElementById(id);
       if (el && GLOBAL_TRANSLATIONS.en[id]) el.textContent = GT(id);
@@ -1868,11 +1849,13 @@
     measurementId: "G-7WZ03E68MF"
   };
 
-  const LS_USER = "mih_username_v2";
-  const COL_USERS = "mih_users_v2";
-  const COL_ENTRIES = "mih_entries_v2";
+  const COL_USERS = "mih_users_v3";
+  const COL_ENTRIES = "mih_entries_v3";
+
   let db = null;
-  let currentUser = localStorage.getItem(LS_USER) || "";
+  let auth = null;
+  let currentUser = localStorage.getItem(LS_USER_NAME) || "";
+  let currentUid = localStorage.getItem(LS_USER_UID) || "";
 
   function formatDate(ts){
     const d = new Date(ts);
@@ -1892,6 +1875,39 @@
       .trim()
       .replace(/\//g, "-")
       .slice(0, 40);
+  }
+
+  function usernameKey(name){
+    return safeName(name)
+      .toLowerCase()
+      .replace(/[^a-z0-9._-]/g, "-")
+      .replace(/-+/g, "-")
+      .replace(/^-|-$/g, "")
+      .slice(0, 40) || "user";
+  }
+
+  function usernameEmail(name){
+    return `${usernameKey(name)}@sep.local`;
+  }
+
+  function firebaseErrorMessage(e){
+    const code = e && e.code ? e.code : "";
+    if (code === "auth/wrong-password" || code === "auth/invalid-credential") return GT('errWrongPass');
+    if (code === "auth/weak-password") return GT('errPasswordShort');
+    if (code === "auth/email-already-in-use") return "This name already exists. Use the right password.";
+    if (code === "auth/network-request-failed") return "Network error. Check your internet.";
+    return e && e.message ? e.message : "Unknown Firebase error.";
+  }
+
+  function syncCurrentUser(name, uid){
+    currentUser = name || "";
+    currentUid = uid || "";
+
+    if (currentUser) localStorage.setItem(LS_USER_NAME, currentUser);
+    else localStorage.removeItem(LS_USER_NAME);
+
+    if (currentUid) localStorage.setItem(LS_USER_UID, currentUid);
+    else localStorage.removeItem(LS_USER_UID);
   }
 
   function mihShowScene(id){
@@ -1975,51 +1991,94 @@
         firebase.initializeApp(firebaseConfig);
       }
 
+      if (!firebase.auth) {
+        throw new Error("Firebase Auth SDK did not load.");
+      }
+
       if (!firebase.firestore) {
         throw new Error("Firestore SDK did not load.");
       }
 
+      auth = firebase.auth();
       db = firebase.firestore();
 
-      console.log("Firebase initialised successfully");
+      await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+
+      const user = await new Promise(resolve => {
+        const unsubscribe = auth.onAuthStateChanged(u => {
+          unsubscribe();
+          resolve(u);
+        });
+      });
+
+      if (user) {
+        currentUid = user.uid;
+
+        let profileName = user.displayName || localStorage.getItem(LS_USER_NAME) || "";
+        try {
+          const profileSnap = await db.collection(COL_USERS).doc(user.uid).get();
+          if (profileSnap.exists) {
+            const data = profileSnap.data() || {};
+            profileName = data.name || profileName;
+          }
+        } catch (e) {
+          console.error("Profile load during init failed:", e);
+        }
+
+        syncCurrentUser(profileName, user.uid);
+      } else {
+        syncCurrentUser("", "");
+      }
+
+      console.log("Firebase Auth and Firestore initialised successfully");
     } catch (e) {
       db = null;
+      auth = null;
+      syncCurrentUser("", "");
       console.error("Firebase init error:", e);
       alert(`Firebase init error: ${e.message}`);
     }
   }
 
-  async function ensureUserDoc(name, password){
-    const ref = db.collection(COL_USERS).doc(name);
+  async function ensureUserDoc(name, user){
+    if (!db || !user) throw new Error("Firebase is not ready.");
+
+    const now = Date.now();
+    const ref = db.collection(COL_USERS).doc(user.uid);
     const snap = await ref.get();
 
-    if (!snap.exists){
+    if (!snap.exists) {
       await ref.set({
+        uid: user.uid,
         name,
-        password,
+        usernameKey: usernameKey(name),
         league: "The League of Choice",
         totalKm: 0,
         totalMin: 0,
         entries: 0,
-        updatedAt: Date.now(),
-        createdAt: Date.now()
+        updatedAt: now,
+        createdAt: now
       });
-      return { wrongPass: false };
+      return;
     }
 
     const data = snap.data() || {};
-    if ((data.password || "") !== password) return { wrongPass: true };
-
-    if (data.league !== "The League of Choice"){
-      await ref.set({ league: "The League of Choice" }, { merge:true });
-    }
-
-    return { wrongPass: false };
+    await ref.set({
+      uid: user.uid,
+      name: data.name || name,
+      usernameKey: data.usernameKey || usernameKey(name),
+      league: "The League of Choice",
+      totalKm: Number(data.totalKm || 0),
+      totalMin: Number(data.totalMin || 0),
+      entries: Number(data.entries || 0),
+      updatedAt: now,
+      createdAt: Number(data.createdAt || now)
+    }, { merge: false });
   }
 
   async function login(){
-    if (!db) {
-      alert("Firebase is not ready. Check config, Firestore rules, or internet.");
+    if (!auth || !db) {
+      alert("Firebase is not ready. Check config, Authentication, Firestore rules, or internet.");
       return;
     }
 
@@ -2032,6 +2091,13 @@
       return;
     }
 
+    if (password.length < 6){
+      alert(GT('errPasswordShort'));
+      return;
+    }
+
+    const email = usernameEmail(name);
+
     try{
       if (btn){
         btn.disabled = true;
@@ -2039,14 +2105,24 @@
         btn.textContent = GT('mihLoading');
       }
 
-      const res = await ensureUserDoc(name, password);
-      if (res.wrongPass){
-        alert(GT('errWrongPass'));
-        return;
+      let cred;
+
+      try {
+        cred = await auth.signInWithEmailAndPassword(email, password);
+      } catch (e) {
+        if (e.code === "auth/user-not-found") {
+          cred = await auth.createUserWithEmailAndPassword(email, password);
+          await cred.user.updateProfile({ displayName: name });
+        } else {
+          throw e;
+        }
       }
 
-      currentUser = name;
-      localStorage.setItem(LS_USER, currentUser);
+      const user = cred.user;
+      const finalName = user.displayName || name;
+
+      await ensureUserDoc(finalName, user);
+      syncCurrentUser(finalName, user.uid);
 
       setUserPills();
       updateMihMenuLoginVisibility();
@@ -2059,8 +2135,8 @@
 
       mihShowScene('mih-home');
     } catch (e) {
-      console.error("Login / Firestore error:", e);
-      alert(`Login / Firestore error: ${e.message}`);
+      console.error("Login / Firebase Auth or Firestore error:", e);
+      alert(`Login error: ${firebaseErrorMessage(e)}`);
     } finally {
       if (btn){
         btn.disabled = false;
@@ -2071,8 +2147,13 @@
   }
 
   async function logout(){
-    currentUser = "";
-    localStorage.removeItem(LS_USER);
+    try {
+      if (auth) await auth.signOut();
+    } catch (e) {
+      console.error("Logout error:", e);
+    }
+
+    syncCurrentUser("", "");
     setUserPills();
     updateMihMenuLoginVisibility();
 
@@ -2086,12 +2167,12 @@
   }
 
   async function deleteAccount(){
-    if (!currentUser || !db) return;
+    if (!currentUser || !currentUid || !db || !auth) return;
     if (!confirm(GT('errDeleteConfirm'))) return;
 
     try {
-      const userToDelete = currentUser;
-      const entriesSnap = await db.collection(COL_ENTRIES).where("username","==",userToDelete).get();
+      const uidToDelete = currentUid;
+      const entriesSnap = await db.collection(COL_ENTRIES).where("userId","==",uidToDelete).get();
 
       let docs = [];
       entriesSnap.forEach(doc => docs.push(doc));
@@ -2102,10 +2183,14 @@
         await batch.commit();
       }
 
-      await db.collection(COL_USERS).doc(userToDelete).delete();
+      await db.collection(COL_USERS).doc(uidToDelete).delete();
 
-      currentUser = "";
-      localStorage.removeItem(LS_USER);
+      const user = auth.currentUser;
+      if (user) {
+        await user.delete();
+      }
+
+      syncCurrentUser("", "");
       setUserPills();
       updateMihMenuLoginVisibility();
       closeProfile();
@@ -2120,17 +2205,18 @@
       mihShowScene('mih-login');
     } catch (e) {
       console.error("Delete account error:", e);
-      alert(`Delete account error: ${e.message}`);
+      alert(`Delete account error: ${firebaseErrorMessage(e)}`);
     }
   }
 
   async function addActivity(){
-    if (!db) {
-      alert("Firebase is not ready. Check config, Firestore rules, or internet.");
+    if (!db || !auth || !auth.currentUser) {
+      alert("Firebase is not ready or you are not logged in.");
+      mihShowScene('mih-login');
       return;
     }
 
-    if (!currentUser) {
+    if (!currentUser || !currentUid) {
       alert(GT('errMustLogin'));
       mihShowScene('mih-login');
       return;
@@ -2144,29 +2230,47 @@
       return;
     }
 
+    if (km > 100 || minutes > 1440){
+      alert(GT('errActivityInvalid'));
+      return;
+    }
+
     try {
       const ts = Date.now();
 
       await db.collection(COL_ENTRIES).add({
+        userId: currentUid,
         username: currentUser,
         km,
         minutes,
         ts
       });
 
-      const uref = db.collection(COL_USERS).doc(currentUser);
+      const uref = db.collection(COL_USERS).doc(currentUid);
       await db.runTransaction(async (tx) => {
         const snap = await tx.get(uref);
-        const data = snap.exists ? snap.data() : { totalKm:0, totalMin:0, entries:0, createdAt: ts };
-        tx.set(uref, {
+        const data = snap.exists ? snap.data() : {
+          uid: currentUid,
           name: currentUser,
+          usernameKey: usernameKey(currentUser),
+          league: "The League of Choice",
+          totalKm: 0,
+          totalMin: 0,
+          entries: 0,
+          createdAt: ts
+        };
+
+        tx.set(uref, {
+          uid: currentUid,
+          name: data.name || currentUser,
+          usernameKey: data.usernameKey || usernameKey(currentUser),
           league: "The League of Choice",
           totalKm: (Number(data.totalKm) || 0) + km,
           totalMin: (Number(data.totalMin) || 0) + minutes,
           entries: (Number(data.entries) || 0) + 1,
           updatedAt: ts,
-          createdAt: data.createdAt || ts
-        }, { merge:true });
+          createdAt: Number(data.createdAt || ts)
+        }, { merge:false });
       });
 
       document.getElementById('mih-distance').value = "";
@@ -2177,7 +2281,7 @@
       mihShowScene('mih-home');
     } catch (e) {
       console.error("Add activity error:", e);
-      alert(`Add activity error: ${e.message}`);
+      alert(`Add activity error: ${firebaseErrorMessage(e)}`);
     }
   }
 
@@ -2186,12 +2290,12 @@
     if (!tbody) return;
     tbody.innerHTML = "";
 
-    if (!currentUser){
+    if (!currentUid){
       tbody.innerHTML = `<tr><td colspan="4" class="muted">${GT('errMustLogin')}</td></tr>`;
       return;
     }
 
-    const snap = await db.collection(COL_ENTRIES).where("username","==",currentUser).orderBy("ts","desc").limit(10).get();
+    const snap = await db.collection(COL_ENTRIES).where("userId","==",currentUid).orderBy("ts","desc").limit(10).get();
     if (snap.empty){
       tbody.innerHTML = `<tr><td colspan="4" class="muted">${GT('noEntries')}</td></tr>`;
       return;
@@ -2210,12 +2314,12 @@
     if (!tbody) return;
     tbody.innerHTML = "";
 
-    if (!currentUser){
+    if (!currentUid){
       tbody.innerHTML = `<tr><td colspan="4" class="muted">${GT('errMustLogin')}</td></tr>`;
       return;
     }
 
-    const snap = await db.collection(COL_ENTRIES).where("username","==",currentUser).orderBy("ts","desc").limit(80).get();
+    const snap = await db.collection(COL_ENTRIES).where("userId","==",currentUid).orderBy("ts","desc").limit(80).get();
     if (snap.empty){
       tbody.innerHTML = `<tr><td colspan="4" class="muted">${GT('noEntries')}</td></tr>`;
       return;
@@ -2234,9 +2338,14 @@
     if (!tbody) return;
     tbody.innerHTML = "";
 
+    if (!currentUid){
+      tbody.innerHTML = `<tr><td colspan="5" class="muted">${GT('errMustLogin')}</td></tr>`;
+      return;
+    }
+
     const snap = await db.collection(COL_USERS).get();
     const players = [];
-    snap.forEach(doc => players.push(doc.data() || { name: doc.id }));
+    snap.forEach(doc => players.push(doc.data() || { uid: doc.id }));
     players.sort((a,b) => Number(b.totalKm || 0) - Number(a.totalKm || 0));
 
     if (!players.length){
@@ -2252,7 +2361,7 @@
       tr.style.cursor = 'pointer';
       tr.addEventListener('click', async () => {
         mihShowScene('mih-profiles');
-        await openProfile(u.name || '');
+        await openProfile(u.uid || '');
       });
       tbody.appendChild(tr);
     });
@@ -2263,9 +2372,14 @@
     if (!tbody) return;
     tbody.innerHTML = "";
 
+    if (!currentUid){
+      tbody.innerHTML = `<tr><td colspan="4" class="muted">${GT('errMustLogin')}</td></tr>`;
+      return;
+    }
+
     const snap = await db.collection(COL_USERS).get();
     const players = [];
-    snap.forEach(doc => players.push(doc.data() || { name: doc.id }));
+    snap.forEach(doc => players.push(doc.data() || { uid: doc.id }));
     players.sort((a,b) => Number(b.totalKm || 0) - Number(a.totalKm || 0));
 
     if (!players.length){
@@ -2277,19 +2391,19 @@
       const tr = document.createElement('tr');
       tr.style.cursor = "pointer";
       tr.innerHTML = `<td><span class="leaderboard-name">${escapeHTML(u.name || '')}</span></td><td>${Number(u.totalKm || 0).toFixed(2)}</td><td>${Number(u.totalMin || 0).toFixed(0)}</td><td>${Number(u.entries || 0)}</td>`;
-      tr.addEventListener('click', () => openProfile(u.name || ''));
+      tr.addEventListener('click', () => openProfile(u.uid || ''));
       tbody.appendChild(tr);
     });
   }
 
-  async function openProfile(username){
+  async function openProfile(uid){
     const panel = document.getElementById('mihProfilePanel');
-    if (!panel || !db) return;
+    if (!panel || !db || !uid) return;
 
-    const userSnap = await db.collection(COL_USERS).doc(username).get();
-    const u = userSnap.exists ? (userSnap.data() || {}) : { name: username, totalKm:0, totalMin:0, entries:0 };
+    const userSnap = await db.collection(COL_USERS).doc(uid).get();
+    const u = userSnap.exists ? (userSnap.data() || {}) : { uid, name: "", totalKm:0, totalMin:0, entries:0 };
 
-    document.getElementById('mihProfileName').textContent = u.name || username;
+    document.getElementById('mihProfileName').textContent = u.name || "";
     document.getElementById('mihProfileLeague').textContent = GT('mihLeagueText');
     document.getElementById('mihProfileKm').textContent = Number(u.totalKm || 0).toFixed(2);
     document.getElementById('mihProfileMin').textContent = Number(u.totalMin || 0).toFixed(0);
@@ -2298,7 +2412,7 @@
 
     const tbody = document.getElementById('mih-profile-history');
     tbody.innerHTML = "";
-    const snap = await db.collection(COL_ENTRIES).where("username","==",username).orderBy("ts","desc").limit(12).get();
+    const snap = await db.collection(COL_ENTRIES).where("userId","==",uid).orderBy("ts","desc").limit(12).get();
 
     if (snap.empty){
       tbody.innerHTML = `<tr><td colspan="4" class="muted">${GT('noEntries')}</td></tr>`;
@@ -2327,7 +2441,7 @@
 
     if (!totalKmEl || !totalMinEl || !entriesEl || !avgKmEl || !avgPaceEl) return;
 
-    if (!currentUser){
+    if (!currentUid){
       totalKmEl.textContent = "0";
       totalMinEl.textContent = "0";
       entriesEl.textContent = "0";
@@ -2336,7 +2450,7 @@
       return;
     }
 
-    const snap = await db.collection(COL_USERS).doc(currentUser).get();
+    const snap = await db.collection(COL_USERS).doc(currentUid).get();
     if (!snap.exists){
       totalKmEl.textContent = "0";
       totalMinEl.textContent = "0";
