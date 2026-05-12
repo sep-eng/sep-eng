@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FINAL?</title>
+  <title>SEP</title>
   <meta name="description" content="SEP clothing and Make It Happen health challenge." />
   <link rel="icon" href="https://upload.wikimedia.org/wikipedia/commons/3/3f/Black_square.jpg">
 
@@ -2112,19 +2112,20 @@
       let cred;
 
       try {
-        cred = await auth.signInWithEmailAndPassword(email, password);
-      } catch (signInError) {
-        console.warn("Sign in failed, trying to create account:", signInError.code);
+        cred = await auth.createUserWithEmailAndPassword(email, password);
+        await cred.user.updateProfile({ displayName: name });
+      } catch (createError) {
+        console.warn("Create account failed:", createError.code);
 
-        try {
-          cred = await auth.createUserWithEmailAndPassword(email, password);
-          await cred.user.updateProfile({ displayName: name });
-        } catch (createError) {
-          if (createError.code === "auth/email-already-in-use") {
+        if (createError.code === "auth/email-already-in-use") {
+          try {
+            cred = await auth.signInWithEmailAndPassword(email, password);
+          } catch (signInError) {
+            console.error("Sign in failed:", signInError.code);
             alert(GT('errWrongPass'));
             return;
           }
-
+        } else {
           throw createError;
         }
       }
@@ -2145,6 +2146,7 @@
       }
 
       mihShowScene('mih-home');
+
     } catch (e) {
       console.error("Login / Firebase Auth or Firestore error:", e);
       alert(`Login error: ${firebaseErrorMessage(e)}`);
@@ -2307,6 +2309,7 @@
     }
 
     const snap = await db.collection(COL_ENTRIES).where("userId","==",currentUid).orderBy("ts","desc").limit(10).get();
+
     if (snap.empty){
       tbody.innerHTML = `<tr><td colspan="4" class="muted">${GT('noEntries')}</td></tr>`;
       return;
@@ -2331,6 +2334,7 @@
     }
 
     const snap = await db.collection(COL_ENTRIES).where("userId","==",currentUid).orderBy("ts","desc").limit(80).get();
+
     if (snap.empty){
       tbody.innerHTML = `<tr><td colspan="4" class="muted">${GT('noEntries')}</td></tr>`;
       return;
@@ -2354,28 +2358,53 @@
       return;
     }
 
-    const snap = await db.collection(COL_USERS).get();
-    const players = [];
-    snap.forEach(doc => players.push(doc.data() || { uid: doc.id }));
-    players.sort((a,b) => Number(b.totalKm || 0) - Number(a.totalKm || 0));
+    try {
+      const snap = await db.collection(COL_USERS).get();
+      const players = [];
 
-    if (!players.length){
-      tbody.innerHTML = `<tr><td colspan="5" class="muted">${GT('noPlayers')}</td></tr>`;
-      return;
-    }
-
-    players.slice(0,60).forEach((u, index) => {
-      const km = Number(u.totalKm || 0);
-      const min = Number(u.totalMin || 0);
-      const tr = document.createElement('tr');
-      tr.innerHTML = `<td>${index + 1}</td><td><span class="leaderboard-name">${escapeHTML(u.name || '')}</span></td><td>${km.toFixed(2)}</td><td>${min.toFixed(0)}</td><td>${escapeHTML(paceFrom(km,min))}</td>`;
-      tr.style.cursor = 'pointer';
-      tr.addEventListener('click', async () => {
-        mihShowScene('mih-profiles');
-        await openProfile(u.uid || '');
+      snap.forEach(doc => {
+        const data = doc.data() || {};
+        players.push({
+          ...data,
+          uid: data.uid || doc.id
+        });
       });
-      tbody.appendChild(tr);
-    });
+
+      players.sort((a,b) => Number(b.totalKm || 0) - Number(a.totalKm || 0));
+
+      if (!players.length){
+        tbody.innerHTML = `<tr><td colspan="5" class="muted">${GT('noPlayers')}</td></tr>`;
+        return;
+      }
+
+      players.slice(0,60).forEach((u, index) => {
+        const km = Number(u.totalKm || 0);
+        const min = Number(u.totalMin || 0);
+        const uid = u.uid || "";
+        const name = u.name || "";
+
+        const tr = document.createElement('tr');
+        tr.style.cursor = 'pointer';
+        tr.innerHTML = `
+          <td>${index + 1}</td>
+          <td><span class="leaderboard-name">${escapeHTML(name)}</span></td>
+          <td>${km.toFixed(2)}</td>
+          <td>${min.toFixed(0)}</td>
+          <td>${escapeHTML(paceFrom(km,min))}</td>
+        `;
+
+        tr.addEventListener('click', async () => {
+          if (!uid) return;
+          mihShowScene('mih-profiles');
+          await openProfile(uid);
+        });
+
+        tbody.appendChild(tr);
+      });
+    } catch (e) {
+      console.error("Load leaderboard error:", e);
+      tbody.innerHTML = `<tr><td colspan="5" class="muted">Could not load leaderboard.</td></tr>`;
+    }
   }
 
   async function loadProfilesList(){
@@ -2388,55 +2417,120 @@
       return;
     }
 
-    const snap = await db.collection(COL_USERS).get();
-    const players = [];
-    snap.forEach(doc => players.push(doc.data() || { uid: doc.id }));
-    players.sort((a,b) => Number(b.totalKm || 0) - Number(a.totalKm || 0));
+    try {
+      const snap = await db.collection(COL_USERS).get();
+      const players = [];
 
-    if (!players.length){
-      tbody.innerHTML = `<tr><td colspan="4" class="muted">${GT('noPlayers')}</td></tr>`;
-      return;
+      snap.forEach(doc => {
+        const data = doc.data() || {};
+        players.push({
+          ...data,
+          uid: data.uid || doc.id
+        });
+      });
+
+      players.sort((a,b) => Number(b.totalKm || 0) - Number(a.totalKm || 0));
+
+      if (!players.length){
+        tbody.innerHTML = `<tr><td colspan="4" class="muted">${GT('noPlayers')}</td></tr>`;
+        return;
+      }
+
+      players.slice(0,80).forEach(u => {
+        const km = Number(u.totalKm || 0);
+        const min = Number(u.totalMin || 0);
+        const entries = Number(u.entries || 0);
+        const uid = u.uid || "";
+        const name = u.name || "";
+
+        const tr = document.createElement('tr');
+        tr.style.cursor = "pointer";
+        tr.innerHTML = `
+          <td><span class="leaderboard-name">${escapeHTML(name)}</span></td>
+          <td>${km.toFixed(2)}</td>
+          <td>${min.toFixed(0)}</td>
+          <td>${entries}</td>
+        `;
+
+        tr.addEventListener('click', async () => {
+          if (!uid) return;
+          await openProfile(uid);
+        });
+
+        tbody.appendChild(tr);
+      });
+    } catch (e) {
+      console.error("Load profiles error:", e);
+      tbody.innerHTML = `<tr><td colspan="4" class="muted">Could not load profiles.</td></tr>`;
     }
-
-    players.slice(0,80).forEach(u => {
-      const tr = document.createElement('tr');
-      tr.style.cursor = "pointer";
-      tr.innerHTML = `<td><span class="leaderboard-name">${escapeHTML(u.name || '')}</span></td><td>${Number(u.totalKm || 0).toFixed(2)}</td><td>${Number(u.totalMin || 0).toFixed(0)}</td><td>${Number(u.entries || 0)}</td>`;
-      tr.addEventListener('click', () => openProfile(u.uid || ''));
-      tbody.appendChild(tr);
-    });
   }
 
   async function openProfile(uid){
     const panel = document.getElementById('mihProfilePanel');
     if (!panel || !db || !uid) return;
 
-    const userSnap = await db.collection(COL_USERS).doc(uid).get();
-    const u = userSnap.exists ? (userSnap.data() || {}) : { uid, name: "", totalKm:0, totalMin:0, entries:0 };
+    try {
+      const userSnap = await db.collection(COL_USERS).doc(uid).get();
 
-    document.getElementById('mihProfileName').textContent = u.name || "";
-    document.getElementById('mihProfileLeague').textContent = GT('mihLeagueText');
-    document.getElementById('mihProfileKm').textContent = Number(u.totalKm || 0).toFixed(2);
-    document.getElementById('mihProfileMin').textContent = Number(u.totalMin || 0).toFixed(0);
-    document.getElementById('mihProfileRuns').textContent = Number(u.entries || 0).toString();
-    document.getElementById('mihProfileAvgPace').textContent = paceFrom(Number(u.totalKm || 0), Number(u.totalMin || 0));
+      if (!userSnap.exists) {
+        panel.classList.add('show');
+        document.getElementById('mihProfileName').textContent = "Player not found";
+        document.getElementById('mihProfileLeague').textContent = GT('mihLeagueText');
+        document.getElementById('mihProfileKm').textContent = "0";
+        document.getElementById('mihProfileMin').textContent = "0";
+        document.getElementById('mihProfileRuns').textContent = "0";
+        document.getElementById('mihProfileAvgPace').textContent = "0:00";
+        document.getElementById('mih-profile-history').innerHTML = `<tr><td colspan="4" class="muted">${GT('noEntries')}</td></tr>`;
+        return;
+      }
 
-    const tbody = document.getElementById('mih-profile-history');
-    tbody.innerHTML = "";
-    const snap = await db.collection(COL_ENTRIES).where("userId","==",uid).orderBy("ts","desc").limit(12).get();
+      const u = userSnap.data() || {};
+      const totalKm = Number(u.totalKm || 0);
+      const totalMin = Number(u.totalMin || 0);
+      const entries = Number(u.entries || 0);
 
-    if (snap.empty){
-      tbody.innerHTML = `<tr><td colspan="4" class="muted">${GT('noEntries')}</td></tr>`;
-    } else {
-      snap.forEach(doc => {
-        const e = doc.data();
-        const km = Number(e.km || 0);
-        const min = Number(e.minutes || 0);
-        tbody.insertAdjacentHTML('beforeend', `<tr><td>${escapeHTML(formatDate(e.ts))}</td><td>${km.toFixed(2)}</td><td>${min.toFixed(0)}</td><td>${escapeHTML(paceFrom(km,min))}</td></tr>`);
-      });
+      document.getElementById('mihProfileName').textContent = u.name || "";
+      document.getElementById('mihProfileLeague').textContent = GT('mihLeagueText');
+      document.getElementById('mihProfileKm').textContent = totalKm.toFixed(2);
+      document.getElementById('mihProfileMin').textContent = totalMin.toFixed(0);
+      document.getElementById('mihProfileRuns').textContent = entries.toString();
+      document.getElementById('mihProfileAvgPace').textContent = paceFrom(totalKm, totalMin);
+
+      const tbody = document.getElementById('mih-profile-history');
+      tbody.innerHTML = "";
+
+      const snap = await db.collection(COL_ENTRIES)
+        .where("userId","==",uid)
+        .orderBy("ts","desc")
+        .limit(12)
+        .get();
+
+      if (snap.empty){
+        tbody.innerHTML = `<tr><td colspan="4" class="muted">${GT('noEntries')}</td></tr>`;
+      } else {
+        snap.forEach(doc => {
+          const e = doc.data();
+          const km = Number(e.km || 0);
+          const min = Number(e.minutes || 0);
+
+          tbody.insertAdjacentHTML('beforeend', `
+            <tr>
+              <td>${escapeHTML(formatDate(e.ts))}</td>
+              <td>${km.toFixed(2)}</td>
+              <td>${min.toFixed(0)}</td>
+              <td>${escapeHTML(paceFrom(km,min))}</td>
+            </tr>
+          `);
+        });
+      }
+
+      panel.classList.add('show');
+      panel.scrollIntoView({ behavior: "smooth", block: "start" });
+
+    } catch (e) {
+      console.error("Open profile error:", e);
+      alert(`Profile error: ${firebaseErrorMessage(e)}`);
     }
-
-    panel.classList.add('show');
   }
 
   function closeProfile(){
