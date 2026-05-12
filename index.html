@@ -676,8 +676,8 @@
     <h1 id="mihLoginTitle">Welcome back</h1>
     <p class="muted" id="mihLoginSubtitle">Enter your username and password. First time? It creates your account automatically. Password must be at least 6 characters.</p>
 
-    <input id="mih-username" class="input" placeholder="Your name" />
-    <input id="mih-password" class="input" type="password" placeholder="Password" />
+    <input id="mih-username" class="input" placeholder="Your name" autocomplete="username" />
+    <input id="mih-password" class="input" type="password" placeholder="Password" autocomplete="current-password" />
 
     <button class="btn" id="mih-login-btn" type="button">Enter</button>
   </section>
@@ -1189,6 +1189,7 @@
       window.scrollTo({ top: 0, behavior: 'auto' });
       return;
     }
+
     if (app === 'mih'){
       welcome.classList.add('hidden');
       sepApp.classList.add('hidden');
@@ -1242,7 +1243,6 @@
   const sepTranslations = {
     en: {
       menuTitle: "SEP Menu",
-      navAboutSep: 'About "SEP"',
       heroTitle: "Clothes chosen for you.",
       heroSubtitle: "Your choice.",
       btnShopNow: "Shop Now",
@@ -1283,7 +1283,6 @@
       popupAdded: "Added to cart",
       popupOrderCopied: "Order message copied!",
       popupCartCleared: "Cart cleared",
-      mobilePayThanks: "Thanks for supporting SEP!",
       orderIntro: "Hi SEP, here is my order:",
       orderSubtotalLabel: "Subtotal:",
       orderShippingLabel: "Shipping:",
@@ -1299,7 +1298,6 @@
     },
     da: {
       menuTitle: "SEP menu",
-      navAboutSep: 'Om "SEP"',
       heroTitle: "Tøj valgt til dig.",
       heroSubtitle: "Dit valg.",
       btnShopNow: "Shop nu",
@@ -1340,7 +1338,6 @@
       popupAdded: "Lagt i kurv",
       popupOrderCopied: "Ordrebesked kopieret!",
       popupCartCleared: "Kurv tømt",
-      mobilePayThanks: "Tak fordi du støtter SEP!",
       orderIntro: "Hej SEP, her er min ordre:",
       orderSubtotalLabel: "Subtotal:",
       orderShippingLabel: "Fragt:",
@@ -1356,7 +1353,6 @@
     },
     cs: {
       menuTitle: "Menu SEP",
-      navAboutSep: 'O „SEP“',
       heroTitle: "Oblečení vybrané pro tebe.",
       heroSubtitle: "Tvoje volba.",
       btnShopNow: "Nakoupit",
@@ -1397,7 +1393,6 @@
       popupAdded: "Přidáno do košíku",
       popupOrderCopied: "Zkopírováno!",
       popupCartCleared: "Košík vymazán",
-      mobilePayThanks: "Díky, že podporuješ SEP!",
       orderIntro: "Ahoj SEP, tady je moje objednávka:",
       orderSubtotalLabel: "Mezisoučet:",
       orderShippingLabel: "Doprava:",
@@ -1594,6 +1589,7 @@
     menuOverlay.classList.remove('pointer-none');
     menuOverlay.classList.add('pointer-auto');
   }
+
   function closeMenu(){
     menuPanel.classList.add('translate-x-full');
     menuOverlay.classList.add('hidden');
@@ -1639,6 +1635,7 @@
 
   function sepUpdateCounter() {
     const c = document.getElementById('cartCounter');
+    if (!c) return;
     const t = cart.reduce((s, i) => s + Number(i.qty || 0), 0);
     if (t > 0) {
       c.textContent = t;
@@ -1726,11 +1723,13 @@
   document.querySelectorAll('.add-to-cart').forEach(btn => {
     btn.addEventListener('click', () => {
       const card = btn.closest('.product-card');
+      if (!card) return;
+
       const productId = btn.getAttribute('data-product-id');
-      const name = card.querySelector('h3').textContent.trim();
-      const price = Number(card.querySelector('.product-price').getAttribute('data-price'));
-      const size = card.querySelector('.size-selector').value;
-      const qty = Math.max(1, parseInt(card.querySelector('.quantity-selector').value, 10) || 1);
+      const name = card.querySelector('h3')?.textContent.trim() || "";
+      const price = Number(card.querySelector('.product-price')?.getAttribute('data-price') || 0);
+      const size = card.querySelector('.size-selector')?.value || "M";
+      const qty = Math.max(1, parseInt(card.querySelector('.quantity-selector')?.value, 10) || 1);
 
       let color = 'white';
       const colorSelect = card.querySelector('.color-selector');
@@ -1747,6 +1746,7 @@
     cartOverlay.classList.add('pointer-auto');
     closeMenu();
   }
+
   function closeCart(){
     cartSidebar.classList.add('translate-x-full');
     cartOverlay.classList.add('hidden');
@@ -1898,7 +1898,9 @@
     if (code === "auth/weak-password") return GT('errPasswordShort');
     if (code === "auth/email-already-in-use") return "This name already exists. Use the right password.";
     if (code === "auth/network-request-failed") return "Network error. Check your internet.";
-    if (code === "permission-denied") return "Missing or insufficient permissions. Check your Firestore rules.";
+    if (code === "permission-denied" || code === "firestore/permission-denied") {
+      return "Missing or insufficient permissions. Check your Firestore rules.";
+    }
 
     return e && e.message ? e.message : "Unknown Firebase error.";
   }
@@ -1932,6 +1934,7 @@
     mihMenuPanel.classList.add('open');
     mihMenuOverlay.classList.add('open');
   }
+
   function closeMihMenu(){
     mihMenuPanel.classList.remove('open');
     mihMenuOverlay.classList.remove('open');
@@ -2238,12 +2241,7 @@
     const km = parseFloat(document.getElementById('mih-distance')?.value);
     const minutes = parseFloat(document.getElementById('mih-minutes')?.value);
 
-    if (!isFinite(km) || !isFinite(minutes) || km <= 0 || minutes <= 0){
-      alert(GT('errActivityInvalid'));
-      return;
-    }
-
-    if (km > 100 || minutes > 1440){
+    if (!isFinite(km) || !isFinite(minutes) || km <= 0 || minutes <= 0 || km > 100 || minutes > 1440){
       alert(GT('errActivityInvalid'));
       return;
     }
