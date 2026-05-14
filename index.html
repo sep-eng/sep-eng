@@ -81,39 +81,66 @@
     #menuPanel{transition:transform .3s ease;will-change:transform}
     #cartSidebar{color:#000;will-change:transform}
 
-    .carousel-wrap{position:relative}
     .carousel-img{
-      width:100%;height:100%;object-fit:cover;border-radius:.75rem;display:block;
+      width:100%;height:100%;object-fit:cover;border-radius:24px;display:block;
       user-select:none;-webkit-user-drag:none;will-change:transform
     }
     .carousel-arrow{
       position:absolute;top:50%;transform:translateY(-50%);
-      background:rgba(0,0,0,.55);color:#fff;border:none;border-radius:9999px;
-      width:34px;height:34px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:3
+      width:38px;height:38px;border-radius:9999px;
+      background:rgba(0,0,0,.36);color:#fff;border:1px solid rgba(255,255,255,.18);
+      display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:3;
+      backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+      opacity:0;
     }
-    .carousel-arrow:hover{transform:translateY(-50%)}
-    .carousel-arrow.left{left:10px}
-    .carousel-arrow.right{right:10px}
+    .carousel-arrow:hover{
+      transform:translateY(-50%);
+      background:rgba(0,0,0,.56);
+    }
+    .carousel-arrow.left{left:12px}
+    .carousel-arrow.right{right:12px}
     .carousel-dots{
-      position:absolute;left:50%;bottom:10px;transform:translateX(-50%);
-      display:flex;gap:6px;z-index:3
+      position:absolute;left:50%;bottom:14px;transform:translateX(-50%);
+      display:flex;gap:6px;z-index:3;
+      padding:5px 8px;border-radius:9999px;
+      background:rgba(0,0,0,.28);
+      backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
     }
     .carousel-dot{
-      width:8px;height:8px;border-radius:9999px;background:rgba(255,255,255,.45)
+      width:6px;height:6px;border-radius:9999px;background:rgba(255,255,255,.45)
     }
     .carousel-dot.active{background:#fff}
+
+    .product-grid{
+      align-items:start;
+    }
+
+    .product-card{
+      border:1px solid rgba(255,255,255,.08);
+      background:rgba(255,255,255,.055)!important;
+      box-shadow:0 18px 60px rgba(0,0,0,.22);
+      backdrop-filter:blur(16px);
+      -webkit-backdrop-filter:blur(16px);
+      transition:transform .25s ease,border-color .25s ease,box-shadow .25s ease,background-color .25s ease;
+    }
+
+    .product-card:hover{
+      transform:translateY(-4px);
+      border-color:rgba(255,255,255,.16);
+    }
 
     .product-image-frame{
       position:relative;
       width:100%;
-      height:18rem;
-      margin-bottom:1rem;
+      aspect-ratio:4 / 5;
+      margin-bottom:14px;
       overflow:hidden;
-      border-radius:1rem;
-      background:rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.12);
-      padding:6px;
+      border-radius:24px;
+      background:#111;
+      border:0;
+      padding:0;
     }
+
     .product-main-image-btn{
       width:100%;
       height:100%;
@@ -122,27 +149,60 @@
       background:transparent;
       padding:0;
       cursor:zoom-in;
-      border-radius:.75rem;
       overflow:hidden;
+      border-radius:24px;
     }
-    .product-main-image-btn:hover{transform:none}
+
+    .product-main-image-btn:hover{
+      transform:none;
+    }
+
+    .product-image-frame .carousel-img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      border-radius:24px;
+      display:block;
+      transition:transform .5s ease, opacity .25s ease;
+    }
+
+    .product-card:hover .product-image-frame .carousel-img{
+      transform:scale(1.025);
+    }
+
+    .product-card:hover .carousel-arrow{
+      opacity:1;
+    }
+
     .product-thumbs{
       display:grid;
       grid-template-columns:repeat(3,1fr);
-      gap:8px;
-      margin-bottom:1rem;
+      gap:10px;
+      margin-bottom:18px;
     }
+
     .product-thumb{
-      height:64px;
-      border-radius:.75rem;
+      height:78px;
+      border-radius:16px;
       overflow:hidden;
-      border:1px solid rgba(255,255,255,.18);
-      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.04);
       padding:0;
       cursor:pointer;
+      opacity:.68;
     }
-    .product-thumb:hover{transform:none}
-    .product-thumb.active{border-color:#fff}
+
+    .product-thumb:hover{
+      transform:none;
+      opacity:1;
+      border-color:rgba(255,255,255,.28);
+    }
+
+    .product-thumb.active{
+      opacity:1;
+      border-color:rgba(255,255,255,.85);
+    }
+
     .product-thumb img{
       width:100%;
       height:100%;
@@ -150,41 +210,65 @@
       display:block;
     }
 
+    .product-card h3{
+      letter-spacing:-.02em;
+    }
+
+    .product-card select,
+    .product-card input{
+      border-color:rgba(255,255,255,.18)!important;
+      background:rgba(255,255,255,.04)!important;
+      border-radius:9999px!important;
+    }
+
+    .product-card .add-to-cart{
+      border-radius:9999px!important;
+      padding-left:18px!important;
+      padding-right:18px!important;
+    }
+
     #imageModal{
       position:fixed;
       inset:0;
-      background:rgba(0,0,0,.95);
+      background:rgba(0,0,0,.92);
       z-index:90;
       align-items:center;
       justify-content:center;
-      padding:16px;
+      padding:20px;
+      backdrop-filter:blur(18px);
+      -webkit-backdrop-filter:blur(18px);
     }
+
     .image-modal-frame{
-      width:min(92vw,900px);
-      height:min(82vh,900px);
-      border:1px solid rgba(255,255,255,.18);
-      border-radius:1.5rem;
-      padding:10px;
-      background:linear-gradient(145deg,rgba(255,255,255,.12),rgba(255,255,255,.02));
+      width:min(92vw,860px);
+      height:min(84vh,920px);
+      border:0;
+      border-radius:28px;
+      padding:0;
+      background:#0b0b0b;
+      box-shadow:0 30px 100px rgba(0,0,0,.55);
       display:flex;
       align-items:center;
       justify-content:center;
+      overflow:hidden;
     }
+
     .image-modal-img{
       width:100%;
       height:100%;
       object-fit:contain;
-      border-radius:1rem;
+      border-radius:28px;
       display:block;
     }
+
     .image-modal-arrow{
       position:absolute;
       top:50%;
       transform:translateY(-50%);
-      width:46px;
-      height:46px;
+      width:48px;
+      height:48px;
       border-radius:9999px;
-      border:1px solid rgba(255,255,255,.25);
+      border:1px solid rgba(255,255,255,.16);
       background:rgba(255,255,255,.08);
       color:#fff;
       font-size:32px;
@@ -192,24 +276,44 @@
       align-items:center;
       justify-content:center;
       z-index:95;
+      backdrop-filter:blur(14px);
+      -webkit-backdrop-filter:blur(14px);
     }
+
     .image-modal-arrow:hover{
       transform:translateY(-50%);
-      background:rgba(255,255,255,.18);
+      background:rgba(255,255,255,.16);
     }
-    .image-modal-left{left:16px}
-    .image-modal-right{right:16px}
+
+    .image-modal-left{
+      left:20px;
+    }
+
+    .image-modal-right{
+      right:20px;
+    }
+
     #imageModalClose{
       position:absolute;
-      top:16px;
-      right:16px;
+      top:20px;
+      right:20px;
+      width:48px;
+      height:48px;
       color:#fff;
-      font-size:30px;
+      font-size:26px;
       line-height:1;
       z-index:95;
-      background:transparent;
-      border:none;
+      background:rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.16);
+      border-radius:9999px;
       cursor:pointer;
+      backdrop-filter:blur(14px);
+      -webkit-backdrop-filter:blur(14px);
+    }
+
+    #imageModalClose:hover{
+      transform:none;
+      background:rgba(255,255,255,.16);
     }
 
     #mih-app{background:#000;color:#f7f7f7;min-height:100vh}
@@ -453,11 +557,6 @@
       color:#fff!important;
     }
 
-    body.light-theme .carousel-arrow{
-      background:rgba(255,255,255,.8)!important;
-      color:#000!important;
-      border:1px solid rgba(0,0,0,.12);
-    }
     body.light-theme #cartSidebar{
       background:#fff!important;
       color:#000!important;
@@ -488,28 +587,65 @@
       border-color:#000!important;
     }
 
-    body.light-theme .product-image-frame,
-    body.light-theme .product-thumb{
-      background:rgba(0,0,0,.04)!important;
-      border-color:rgba(0,0,0,.14)!important;
+    body.light-theme .product-card{
+      background:rgba(0,0,0,.035)!important;
+      border-color:rgba(0,0,0,.08)!important;
+      box-shadow:0 18px 60px rgba(0,0,0,.08)!important;
     }
-    body.light-theme .product-thumb.active{
-      border-color:#000!important;
-    }
-    body.light-theme #imageModal{
-      background:rgba(255,255,255,.96)!important;
-    }
-    body.light-theme .image-modal-frame{
+
+    body.light-theme .product-card:hover{
       border-color:rgba(0,0,0,.16)!important;
-      background:linear-gradient(145deg,rgba(0,0,0,.06),rgba(0,0,0,.01))!important;
     }
+
+    body.light-theme .product-image-frame{
+      background:#f3f3f1!important;
+    }
+
+    body.light-theme .product-thumb{
+      background:rgba(0,0,0,.035)!important;
+      border-color:rgba(0,0,0,.08)!important;
+    }
+
+    body.light-theme .product-thumb:hover{
+      border-color:rgba(0,0,0,.22)!important;
+    }
+
+    body.light-theme .product-thumb.active{
+      border-color:rgba(0,0,0,.8)!important;
+    }
+
+    body.light-theme #imageModal{
+      background:rgba(246,246,244,.92)!important;
+    }
+
+    body.light-theme .image-modal-frame{
+      background:#f6f6f4!important;
+      box-shadow:0 30px 100px rgba(0,0,0,.16)!important;
+    }
+
     body.light-theme #imageModalClose,
     body.light-theme .image-modal-arrow{
       color:#000!important;
+      background:rgba(255,255,255,.72)!important;
+      border-color:rgba(0,0,0,.10)!important;
     }
-    body.light-theme .image-modal-arrow{
-      background:rgba(0,0,0,.06)!important;
-      border-color:rgba(0,0,0,.16)!important;
+
+    body.light-theme .carousel-arrow{
+      background:rgba(255,255,255,.72)!important;
+      color:#000!important;
+      border:1px solid rgba(0,0,0,.10)!important;
+    }
+
+    body.light-theme .carousel-dots{
+      background:rgba(255,255,255,.62)!important;
+    }
+
+    body.light-theme .carousel-dot{
+      background:rgba(0,0,0,.24)!important;
+    }
+
+    body.light-theme .carousel-dot.active{
+      background:#000!important;
     }
 
     body.light-theme a[href*="instagram.com/se_proairesis"]{
@@ -598,12 +734,12 @@
 
     <section id="products" class="py-20 px-6 fade-section">
       <div class="text-center mb-12">
-        <h2 id="productsTitle" class="theme-text text-4xl font-bold mb-4 text-white">Four products.</h2>
-        <p id="productsSubtitle" class="theme-text text-white">Our soft collection:</p>
+        <h2 id="productsTitle" class="theme-text text-4xl md:text-5xl font-semibold mb-4 text-white tracking-tight">The collection.</h2>
+        <p id="productsSubtitle" class="theme-text text-white/70 max-w-xl mx-auto">Soft everyday pieces, pressed in Copenhagen.</p>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8 max-w-7xl mx-auto">
-        <div class="product-card bg-white/10 p-6 rounded-xl shadow-md text-center backdrop-blur" data-product-id="product1" data-product-color="white">
+      <div class="product-grid grid grid-cols-1 md:grid-cols-2 gap-10 max-w-5xl mx-auto">
+        <div class="product-card p-5 md:p-6 rounded-[28px] text-center" data-product-id="product1" data-product-color="white">
           <div class="product-image-frame">
             <button class="product-main-image-btn" type="button" onclick="openImageModal('product1')" aria-label="Enlarge SEP White T-shirt image">
               <img id="product1Image" src="images/white-tshirt-front.jpg" class="carousel-img" alt="SEP White T-shirt">
@@ -628,7 +764,7 @@
           </div>
         </div>
 
-        <div class="product-card bg-white/10 p-6 rounded-xl shadow-md text-center backdrop-blur" data-product-id="product2" data-product-color="black">
+        <div class="product-card p-5 md:p-6 rounded-[28px] text-center" data-product-id="product2" data-product-color="black">
           <div class="product-image-frame">
             <button class="product-main-image-btn" type="button" onclick="openImageModal('product2')" aria-label="Enlarge SEP Black Sweatshirt image">
               <img id="product2Image" src="images/black-jumper-front.jpg" class="carousel-img" alt="SEP Black Sweatshirt">
@@ -653,7 +789,7 @@
           </div>
         </div>
 
-        <div class="product-card bg-white/10 p-6 rounded-xl shadow-md text-center backdrop-blur" data-product-id="product3" data-product-color="grey">
+        <div class="product-card p-5 md:p-6 rounded-[28px] text-center" data-product-id="product3" data-product-color="grey">
           <div class="product-image-frame">
             <button class="product-main-image-btn" type="button" onclick="openImageModal('product3')" aria-label="Enlarge SEP Grey Sweatshirt image">
               <img id="product3Image" src="images/grey-jumper-front.jpg" class="carousel-img" alt="SEP Grey Sweatshirt">
@@ -678,7 +814,7 @@
           </div>
         </div>
 
-        <div class="product-card bg-white/10 p-6 rounded-xl shadow-md text-center backdrop-blur" data-product-id="product4" data-product-color="cream">
+        <div class="product-card p-5 md:p-6 rounded-[28px] text-center" data-product-id="product4" data-product-color="cream">
           <div class="product-image-frame">
             <button class="product-main-image-btn" type="button" onclick="openImageModal('product4')" aria-label="Enlarge SEP Cream Sweatshirt image">
               <img id="product4Image" src="images/cream-jumper-front.jpg" class="carousel-img" alt="SEP Cream Sweatshirt">
@@ -1447,8 +1583,8 @@
       btnShopNow: "Shop Now",
       btnViewCart: "View Cart",
       addToCart: "Add",
-      productsTitle: "Four products.",
-      productsSubtitle: "Our soft collection:",
+      productsTitle: "The collection.",
+      productsSubtitle: "Soft everyday pieces, pressed in Copenhagen.",
       product1Name: "SEP White T-shirt",
       product2Name: "SEP Black Sweatshirt",
       product3Name: "SEP Grey Sweatshirt",
@@ -1501,8 +1637,8 @@
       btnShopNow: "Shop nu",
       btnViewCart: "Se kurv",
       addToCart: "Læg i kurv",
-      productsTitle: "Fire produkter.",
-      productsSubtitle: "Vores bløde kollektion:",
+      productsTitle: "Kollektionen.",
+      productsSubtitle: "Bløde hverdagsdele, presset i København.",
       product1Name: "SEP hvid T-shirt",
       product2Name: "SEP sort sweatshirt",
       product3Name: "SEP grå sweatshirt",
@@ -1555,8 +1691,8 @@
       btnShopNow: "Nakoupit",
       btnViewCart: "Košík",
       addToCart: "Přidat",
-      productsTitle: "Čtyři produkty.",
-      productsSubtitle: "Naše měkká kolekce:",
+      productsTitle: "Kolekce.",
+      productsSubtitle: "Měkké každodenní kousky, lisované v Kodani.",
       product1Name: "SEP bílé tričko",
       product2Name: "SEP černá mikina",
       product3Name: "SEP šedá mikina",
