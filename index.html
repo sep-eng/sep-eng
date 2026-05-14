@@ -7,7 +7,7 @@
   <meta name="description" content="SEP clothing and Make It Happen health challenge." />
   <link rel="icon" href="https://upload.wikimedia.org/wikipedia/commons/3/3f/Black_square.jpg">
 
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+Arabic:wght@400;700&family=Noto+Sans+Armenian:wght@400;700&family=Noto+Sans+Devanagari:wght@400;700&family=Noto+Sans+JP:wght@400;700&family=Noto+Sans+KR:wght@400;700&family=Noto+Sans+SC:wght@400;700&family=Noto+Sans+Thai:wght@400;700&family=PT+Mono&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
@@ -60,7 +60,17 @@
     #welcome-screen h1{font-size:2.5rem;margin-bottom:1rem;color:#f5f5f5}
 
     #welcomeTitle{
-      transition:font-family .35s ease,letter-spacing .35s ease,transform .35s ease;
+      height:88px;
+      min-width:260px;
+      max-width:92vw;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      overflow:hidden;
+      white-space:nowrap;
+      line-height:1;
+      font-size:clamp(2.2rem, 9vw, 4.5rem);
+      transition:font-family .18s ease,letter-spacing .18s ease,transform .18s ease,font-size .18s ease;
     }
 
     #welcome-screen p{max-width:560px;color:#e6e6e6;margin-bottom:2rem;line-height:1.5}
@@ -1150,39 +1160,76 @@
   let GLOBAL_LANG = localStorage.getItem(LS_GLOBAL_LANG) || "en";
   let GLOBAL_THEME = localStorage.getItem(LS_THEME) || "dark";
 
-  const SEP_WELCOME_FONTS = [
-    "'Helvetica Neue', Helvetica, Arial, sans-serif",
-    "'Courier New', Courier, monospace",
-    "'Arial Black', Arial, sans-serif",
-    "'Phosphate', sans-serif",
-    "'Beirut', serif",
-    "'Academy Engraved LET', serif",
-    "'Impact', sans-serif",
-    "'ITF Devanagari', serif",
-    "'Oriya MN', serif",
-    "'Brush Script MT', cursive",
-    "'Menlo', monospace",
-    "'Snell Roundhand', cursive",
-    "'Rockwell', serif",
-    "'Shree Devanagari 714', serif",
-    "'Zapfino', cursive",
-    "'DIN Condensed', sans-serif",
-    "'Skia', sans-serif",
-    "'Didot', serif"
+  const SEP_WELCOME_STYLES = [
+    { text:"SEP", font:"'Helvetica Neue', Helvetica, Arial, sans-serif", size:"clamp(2.5rem, 10vw, 4.5rem)", spacing:"0" },
+    { text:"SEP", font:"'Courier New', Courier, monospace", size:"clamp(2.3rem, 9vw, 4.2rem)", spacing:"-.03em" },
+    { text:"SEP", font:"'Arial Black', Arial, sans-serif", size:"clamp(2.2rem, 8.5vw, 4rem)", spacing:"-.06em" },
+    { text:"SEP", font:"'Phosphate', sans-serif", size:"clamp(2.2rem, 8.5vw, 4rem)", spacing:"-.05em" },
+    { text:"SEP", font:"'Beirut', serif", size:"clamp(2.3rem, 9vw, 4.2rem)", spacing:"-.02em" },
+    { text:"SEP", font:"'Academy Engraved LET', serif", size:"clamp(2.2rem, 8.5vw, 4rem)", spacing:"-.03em" },
+    { text:"SEP", font:"Impact, sans-serif", size:"clamp(2.3rem, 9vw, 4.1rem)", spacing:"-.03em" },
+    { text:"SEP", font:"'ITF Devanagari', 'Noto Sans Devanagari', serif", size:"clamp(2.1rem, 8vw, 3.7rem)", spacing:"-.02em" },
+    { text:"SEP", font:"'Oriya MN', serif", size:"clamp(2.1rem, 8vw, 3.8rem)", spacing:"-.02em" },
+    { text:"SEP", font:"'Brush Script MT', cursive", size:"clamp(2rem, 7.5vw, 3.3rem)", spacing:"-.05em" },
+    { text:"SEP", font:"Menlo, monospace", size:"clamp(2.3rem, 9vw, 4.2rem)", spacing:"-.04em" },
+    { text:"SEP", font:"'Snell Roundhand', cursive", size:"clamp(2rem, 7.5vw, 3.3rem)", spacing:"-.05em" },
+    { text:"SEP", font:"Rockwell, serif", size:"clamp(2.3rem, 9vw, 4.2rem)", spacing:"-.03em" },
+    { text:"SEP", font:"'Shree Devanagari 714', 'Noto Sans Devanagari', serif", size:"clamp(2rem, 7.5vw, 3.5rem)", spacing:"-.02em" },
+    { text:"SEP", font:"Zapfino, cursive", size:"clamp(1.6rem, 6.5vw, 2.8rem)", spacing:"-.08em" },
+    { text:"SEP", font:"'DIN Condensed', sans-serif", size:"clamp(2.5rem, 10vw, 4.5rem)", spacing:".02em" },
+    { text:"SEP", font:"Skia, sans-serif", size:"clamp(2.3rem, 9vw, 4.2rem)", spacing:"-.03em" },
+    { text:"SEP", font:"Didot, serif", size:"clamp(2.5rem, 10vw, 4.5rem)", spacing:"-.04em" },
+
+    { text:"SEP", font:"Futura, 'Helvetica Neue', Arial, sans-serif", size:"clamp(2.4rem, 9.5vw, 4.4rem)", spacing:"-.04em" },
+    { text:"SEP", font:"Cochin, Georgia, serif", size:"clamp(2.4rem, 9.5vw, 4.4rem)", spacing:"-.03em" },
+    { text:"SEP", font:"Copperplate, 'Copperplate Gothic Light', serif", size:"clamp(2.1rem, 8vw, 3.7rem)", spacing:"-.04em" },
+    { text:"SEP", font:"'Arial Rounded MT Bold', Arial, sans-serif", size:"clamp(2.2rem, 8.5vw, 4rem)", spacing:"-.06em" },
+    { text:"SEP", font:"'Corsiva Hebrew', serif", size:"clamp(2.2rem, 8.5vw, 4rem)", spacing:"-.04em" },
+    { text:"SEP", font:"AppleMyungjo, 'Noto Sans KR', serif", size:"clamp(2.2rem, 8.5vw, 4rem)", spacing:"-.03em" },
+    { text:"SEP", font:"Luminari, fantasy", size:"clamp(2.1rem, 8vw, 3.7rem)", spacing:"-.04em" },
+    { text:"SEP", font:"'PT Mono', Menlo, monospace", size:"clamp(2.2rem, 8.5vw, 4rem)", spacing:"-.04em" },
+    { text:"SEP", font:"SignPainter, 'Brush Script MT', cursive", size:"clamp(1.9rem, 7.2vw, 3.2rem)", spacing:"-.06em" },
+    { text:"SEP", font:"Cinzel, serif", size:"clamp(2.2rem, 8.5vw, 4rem)", spacing:"-.03em" },
+
+    { text:"СЭП", font:"Inter, Arial, sans-serif", size:"clamp(2.2rem, 8.5vw, 4rem)", spacing:"-.04em", lang:"ru" },
+    { text:"セップ", font:"'Noto Sans JP', sans-serif", size:"clamp(2rem, 7.5vw, 3.6rem)", spacing:"-.05em", lang:"ja" },
+    { text:"赛普", font:"'Noto Sans SC', sans-serif", size:"clamp(2rem, 7.5vw, 3.6rem)", spacing:"-.02em", lang:"zh" },
+    { text:"셉", font:"'Noto Sans KR', sans-serif", size:"clamp(2.3rem, 9vw, 4.1rem)", spacing:"0", lang:"ko" },
+    { text:"ΣΕΠ", font:"Cinzel, Georgia, serif", size:"clamp(2.2rem, 8.5vw, 4rem)", spacing:"-.02em", lang:"el" },
+    { text:"सेप", font:"'Noto Sans Devanagari', sans-serif", size:"clamp(2rem, 7.5vw, 3.5rem)", spacing:"-.03em", lang:"hi" },
+    { text:"เซพ", font:"'Noto Sans Thai', sans-serif", size:"clamp(2rem, 7.5vw, 3.5rem)", spacing:"-.02em", lang:"th" },
+    { text:"SÉP", font:"Futura, 'Helvetica Neue', Arial, sans-serif", size:"clamp(2.3rem, 9vw, 4.1rem)", spacing:"-.04em", lang:"vi" },
+    { text:"ՍԵՊ", font:"'Noto Sans Armenian', sans-serif", size:"clamp(2.1rem, 8vw, 3.8rem)", spacing:"-.02em", lang:"hy" },
+    { text:"سب", font:"'Noto Sans Arabic', sans-serif", size:"clamp(2.3rem, 9vw, 4rem)", spacing:"0", lang:"ar", dir:"rtl" },
+    { text:"SΞP", font:"Cinzel, Futura, 'Helvetica Neue', Arial, sans-serif", size:"clamp(2.4rem, 9.5vw, 4.4rem)", spacing:"-.03em", lang:"el" }
   ];
 
-  let sepWelcomeFontIndex = 0;
-  let sepWelcomeFontTimer = null;
+  let sepWelcomeStyleIndex = 0;
+  let sepWelcomeStyleTimer = null;
+
+  function applyCurrentSepWelcomeStyle(){
+    const sepTitle = document.getElementById('welcomeTitle');
+    if (!sepTitle) return;
+
+    const item = SEP_WELCOME_STYLES[sepWelcomeStyleIndex] || SEP_WELCOME_STYLES[0];
+
+    sepTitle.textContent = item.text;
+    sepTitle.style.fontFamily = item.font;
+    sepTitle.style.fontSize = item.size;
+    sepTitle.style.letterSpacing = item.spacing || "0";
+    sepTitle.dir = item.dir || "ltr";
+    sepTitle.lang = item.lang || GLOBAL_LANG || "en";
+  }
 
   function startSepWelcomeFontCycle(){
     const sepTitle = document.getElementById('welcomeTitle');
-    if (!sepTitle || sepWelcomeFontTimer) return;
+    if (!sepTitle || sepWelcomeStyleTimer) return;
 
-    sepTitle.style.fontFamily = SEP_WELCOME_FONTS[sepWelcomeFontIndex];
+    applyCurrentSepWelcomeStyle();
 
-    sepWelcomeFontTimer = setInterval(() => {
-      sepWelcomeFontIndex = (sepWelcomeFontIndex + 1) % SEP_WELCOME_FONTS.length;
-      sepTitle.style.fontFamily = SEP_WELCOME_FONTS[sepWelcomeFontIndex];
+    sepWelcomeStyleTimer = setInterval(() => {
+      sepWelcomeStyleIndex = (sepWelcomeStyleIndex + 1) % SEP_WELCOME_STYLES.length;
+      applyCurrentSepWelcomeStyle();
     }, 500);
   }
 
@@ -1498,6 +1545,8 @@
       const el = document.getElementById(id);
       if (el && GLOBAL_TRANSLATIONS.en[id]) el.textContent = GT(id);
     });
+
+    applyCurrentSepWelcomeStyle();
 
     const mihAboutBody = document.getElementById('mihAboutBody');
     if (mihAboutBody) mihAboutBody.textContent = GT('mihAboutBody');
