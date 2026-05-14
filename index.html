@@ -58,6 +58,11 @@
       position:absolute;top:16px;right:16px;display:flex;gap:8px;z-index:5
     }
     #welcome-screen h1{font-size:2.5rem;margin-bottom:1rem;color:#f5f5f5}
+
+    #welcomeTitle{
+      transition:font-family .35s ease,letter-spacing .35s ease,transform .35s ease;
+    }
+
     #welcome-screen p{max-width:560px;color:#e6e6e6;margin-bottom:2rem;line-height:1.5}
     #welcome-screen .welcome-btn{
       background:#fff;color:#000;border:none;padding:.9rem 1.8rem;border-radius:9999px;
@@ -1144,6 +1149,42 @@
 
   let GLOBAL_LANG = localStorage.getItem(LS_GLOBAL_LANG) || "en";
   let GLOBAL_THEME = localStorage.getItem(LS_THEME) || "dark";
+
+  const SEP_WELCOME_FONTS = [
+    "'Helvetica Neue', Helvetica, Arial, sans-serif",
+    "'Courier New', Courier, monospace",
+    "'Arial Black', Arial, sans-serif",
+    "'Phosphate', sans-serif",
+    "'Beirut', serif",
+    "'Academy Engraved LET', serif",
+    "'Impact', sans-serif",
+    "'ITF Devanagari', serif",
+    "'Oriya MN', serif",
+    "'Brush Script MT', cursive",
+    "'Menlo', monospace",
+    "'Snell Roundhand', cursive",
+    "'Rockwell', serif",
+    "'Shree Devanagari 714', serif",
+    "'Zapfino', cursive",
+    "'DIN Condensed', sans-serif",
+    "'Skia', sans-serif",
+    "'Didot', serif"
+  ];
+
+  let sepWelcomeFontIndex = 0;
+  let sepWelcomeFontTimer = null;
+
+  function startSepWelcomeFontCycle(){
+    const sepTitle = document.getElementById('welcomeTitle');
+    if (!sepTitle || sepWelcomeFontTimer) return;
+
+    sepTitle.style.fontFamily = SEP_WELCOME_FONTS[sepWelcomeFontIndex];
+
+    sepWelcomeFontTimer = setInterval(() => {
+      sepWelcomeFontIndex = (sepWelcomeFontIndex + 1) % SEP_WELCOME_FONTS.length;
+      sepTitle.style.fontFamily = SEP_WELCOME_FONTS[sepWelcomeFontIndex];
+    }, 1000);
+  }
 
   const GLOBAL_TRANSLATIONS = {
     en: {
@@ -3012,6 +3053,8 @@
   document.getElementById('mih-distance')?.addEventListener('keydown', e => { if (e.key === 'Enter') addActivity(); });
 
   document.addEventListener('DOMContentLoaded', async () => {
+    startSepWelcomeFontCycle();
+
     document.getElementById('welcomeSepBtn')?.addEventListener('click', openSep);
     document.getElementById('welcomeMihBtn')?.addEventListener('click', openMih);
 
