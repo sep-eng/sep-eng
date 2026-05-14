@@ -82,32 +82,53 @@
     #cartSidebar{color:#000;will-change:transform}
 
     .carousel-img{
-      width:100%;height:100%;object-fit:cover;border-radius:24px;display:block;
+      width:100%;height:100%;object-fit:cover;border-radius:26px;display:block;
       user-select:none;-webkit-user-drag:none;will-change:transform
     }
     .carousel-arrow{
-      position:absolute;top:50%;transform:translateY(-50%);
-      width:38px;height:38px;border-radius:9999px;
-      background:rgba(0,0,0,.36);color:#fff;border:1px solid rgba(255,255,255,.18);
-      display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:3;
-      backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+      position:absolute;
+      top:50%;
+      transform:translateY(-50%);
+      width:34px;
+      height:34px;
+      border-radius:9999px;
+      background:rgba(0,0,0,.28);
+      color:#fff;
+      border:1px solid rgba(255,255,255,.12);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      cursor:pointer;
+      z-index:3;
+      backdrop-filter:blur(14px);
+      -webkit-backdrop-filter:blur(14px);
       opacity:0;
     }
     .carousel-arrow:hover{
       transform:translateY(-50%);
-      background:rgba(0,0,0,.56);
+      background:rgba(0,0,0,.46);
     }
     .carousel-arrow.left{left:12px}
     .carousel-arrow.right{right:12px}
     .carousel-dots{
-      position:absolute;left:50%;bottom:14px;transform:translateX(-50%);
-      display:flex;gap:6px;z-index:3;
-      padding:5px 8px;border-radius:9999px;
-      background:rgba(0,0,0,.28);
-      backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+      position:absolute;
+      left:50%;
+      bottom:12px;
+      transform:translateX(-50%);
+      display:flex;
+      gap:6px;
+      z-index:3;
+      padding:5px 8px;
+      border-radius:9999px;
+      background:rgba(0,0,0,.22);
+      backdrop-filter:blur(12px);
+      -webkit-backdrop-filter:blur(12px);
     }
     .carousel-dot{
-      width:6px;height:6px;border-radius:9999px;background:rgba(255,255,255,.45)
+      width:5px;
+      height:5px;
+      border-radius:9999px;
+      background:rgba(255,255,255,.42);
     }
     .carousel-dot.active{background:#fff}
 
@@ -116,26 +137,27 @@
     }
 
     .product-card{
-      border:1px solid rgba(255,255,255,.08);
-      background:rgba(255,255,255,.055)!important;
-      box-shadow:0 18px 60px rgba(0,0,0,.22);
-      backdrop-filter:blur(16px);
-      -webkit-backdrop-filter:blur(16px);
-      transition:transform .25s ease,border-color .25s ease,box-shadow .25s ease,background-color .25s ease;
+      border:1px solid rgba(255,255,255,.07);
+      background:rgba(255,255,255,.045)!important;
+      box-shadow:none;
+      backdrop-filter:blur(18px);
+      -webkit-backdrop-filter:blur(18px);
+      transition:transform .22s ease,border-color .22s ease,background-color .22s ease;
     }
 
     .product-card:hover{
-      transform:translateY(-4px);
-      border-color:rgba(255,255,255,.16);
+      transform:translateY(-3px);
+      border-color:rgba(255,255,255,.14);
+      background:rgba(255,255,255,.06)!important;
     }
 
     .product-image-frame{
       position:relative;
       width:100%;
-      aspect-ratio:4 / 5;
-      margin-bottom:14px;
+      aspect-ratio:1 / 1;
+      margin-bottom:18px;
       overflow:hidden;
-      border-radius:24px;
+      border-radius:26px;
       background:#111;
       border:0;
       padding:0;
@@ -150,7 +172,7 @@
       padding:0;
       cursor:zoom-in;
       overflow:hidden;
-      border-radius:24px;
+      border-radius:26px;
     }
 
     .product-main-image-btn:hover{
@@ -161,13 +183,13 @@
       width:100%;
       height:100%;
       object-fit:cover;
-      border-radius:24px;
+      border-radius:26px;
       display:block;
-      transition:transform .5s ease, opacity .25s ease;
+      transition:transform .45s ease;
     }
 
     .product-card:hover .product-image-frame .carousel-img{
-      transform:scale(1.025);
+      transform:scale(1.018);
     }
 
     .product-card:hover .carousel-arrow{
@@ -175,56 +197,40 @@
     }
 
     .product-thumbs{
-      display:grid;
-      grid-template-columns:repeat(3,1fr);
-      gap:10px;
-      margin-bottom:18px;
-    }
-
-    .product-thumb{
-      height:78px;
-      border-radius:16px;
-      overflow:hidden;
-      border:1px solid rgba(255,255,255,.10);
-      background:rgba(255,255,255,.04);
-      padding:0;
-      cursor:pointer;
-      opacity:.68;
-    }
-
-    .product-thumb:hover{
-      transform:none;
-      opacity:1;
-      border-color:rgba(255,255,255,.28);
-    }
-
-    .product-thumb.active{
-      opacity:1;
-      border-color:rgba(255,255,255,.85);
-    }
-
-    .product-thumb img{
-      width:100%;
-      height:100%;
-      object-fit:cover;
-      display:block;
+      display:none;
     }
 
     .product-card h3{
       letter-spacing:-.02em;
+      font-size:1.05rem;
+      line-height:1.2;
+      margin-bottom:6px;
+    }
+
+    .product-card .product-price{
+      font-size:.95rem;
+      opacity:.72;
+      margin-bottom:14px;
     }
 
     .product-card select,
     .product-card input{
-      border-color:rgba(255,255,255,.18)!important;
-      background:rgba(255,255,255,.04)!important;
+      height:40px;
+      border-color:rgba(255,255,255,.14)!important;
+      background:rgba(255,255,255,.035)!important;
       border-radius:9999px!important;
+      font-size:14px;
+    }
+
+    .product-card .quantity-selector{
+      width:56px!important;
     }
 
     .product-card .add-to-cart{
+      height:40px;
       border-radius:9999px!important;
-      padding-left:18px!important;
-      padding-right:18px!important;
+      padding:0 18px!important;
+      font-size:14px;
     }
 
     #imageModal{
@@ -240,10 +246,10 @@
     }
 
     .image-modal-frame{
-      width:min(92vw,860px);
-      height:min(84vh,920px);
+      width:min(92vw,760px);
+      height:min(82vh,760px);
       border:0;
-      border-radius:28px;
+      border-radius:30px;
       padding:0;
       background:#0b0b0b;
       box-shadow:0 30px 100px rgba(0,0,0,.55);
@@ -257,7 +263,7 @@
       width:100%;
       height:100%;
       object-fit:contain;
-      border-radius:28px;
+      border-radius:30px;
       display:block;
     }
 
@@ -265,13 +271,13 @@
       position:absolute;
       top:50%;
       transform:translateY(-50%);
-      width:48px;
-      height:48px;
+      width:46px;
+      height:46px;
       border-radius:9999px;
-      border:1px solid rgba(255,255,255,.16);
+      border:1px solid rgba(255,255,255,.14);
       background:rgba(255,255,255,.08);
       color:#fff;
-      font-size:32px;
+      font-size:30px;
       display:flex;
       align-items:center;
       justify-content:center;
@@ -297,14 +303,14 @@
       position:absolute;
       top:20px;
       right:20px;
-      width:48px;
-      height:48px;
+      width:46px;
+      height:46px;
       color:#fff;
-      font-size:26px;
+      font-size:24px;
       line-height:1;
       z-index:95;
       background:rgba(255,255,255,.08);
-      border:1px solid rgba(255,255,255,.16);
+      border:1px solid rgba(255,255,255,.14);
       border-radius:9999px;
       cursor:pointer;
       backdrop-filter:blur(14px);
@@ -588,30 +594,18 @@
     }
 
     body.light-theme .product-card{
-      background:rgba(0,0,0,.035)!important;
-      border-color:rgba(0,0,0,.08)!important;
-      box-shadow:0 18px 60px rgba(0,0,0,.08)!important;
+      background:rgba(0,0,0,.025)!important;
+      border-color:rgba(0,0,0,.07)!important;
+      box-shadow:none!important;
     }
 
     body.light-theme .product-card:hover{
-      border-color:rgba(0,0,0,.16)!important;
+      background:rgba(0,0,0,.04)!important;
+      border-color:rgba(0,0,0,.12)!important;
     }
 
     body.light-theme .product-image-frame{
-      background:#f3f3f1!important;
-    }
-
-    body.light-theme .product-thumb{
-      background:rgba(0,0,0,.035)!important;
-      border-color:rgba(0,0,0,.08)!important;
-    }
-
-    body.light-theme .product-thumb:hover{
-      border-color:rgba(0,0,0,.22)!important;
-    }
-
-    body.light-theme .product-thumb.active{
-      border-color:rgba(0,0,0,.8)!important;
+      background:#f5f5f3!important;
     }
 
     body.light-theme #imageModal{
@@ -620,7 +614,7 @@
 
     body.light-theme .image-modal-frame{
       background:#f6f6f4!important;
-      box-shadow:0 30px 100px rgba(0,0,0,.16)!important;
+      box-shadow:0 30px 100px rgba(0,0,0,.14)!important;
     }
 
     body.light-theme #imageModalClose,
@@ -738,8 +732,8 @@
         <p id="productsSubtitle" class="theme-text text-white/70 max-w-xl mx-auto">Soft everyday pieces, pressed in Copenhagen.</p>
       </div>
 
-      <div class="product-grid grid grid-cols-1 md:grid-cols-2 gap-10 max-w-5xl mx-auto">
-        <div class="product-card p-5 md:p-6 rounded-[28px] text-center" data-product-id="product1" data-product-color="white">
+      <div class="product-grid grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 max-w-4xl mx-auto">
+        <div class="product-card p-4 rounded-[30px] text-center" data-product-id="product1" data-product-color="white">
           <div class="product-image-frame">
             <button class="product-main-image-btn" type="button" onclick="openImageModal('product1')" aria-label="Enlarge SEP White T-shirt image">
               <img id="product1Image" src="images/white-tshirt-front.jpg" class="carousel-img" alt="SEP White T-shirt">
@@ -764,7 +758,7 @@
           </div>
         </div>
 
-        <div class="product-card p-5 md:p-6 rounded-[28px] text-center" data-product-id="product2" data-product-color="black">
+        <div class="product-card p-4 rounded-[30px] text-center" data-product-id="product2" data-product-color="black">
           <div class="product-image-frame">
             <button class="product-main-image-btn" type="button" onclick="openImageModal('product2')" aria-label="Enlarge SEP Black Sweatshirt image">
               <img id="product2Image" src="images/black-jumper-front.jpg" class="carousel-img" alt="SEP Black Sweatshirt">
@@ -789,7 +783,7 @@
           </div>
         </div>
 
-        <div class="product-card p-5 md:p-6 rounded-[28px] text-center" data-product-id="product3" data-product-color="grey">
+        <div class="product-card p-4 rounded-[30px] text-center" data-product-id="product3" data-product-color="grey">
           <div class="product-image-frame">
             <button class="product-main-image-btn" type="button" onclick="openImageModal('product3')" aria-label="Enlarge SEP Grey Sweatshirt image">
               <img id="product3Image" src="images/grey-jumper-front.jpg" class="carousel-img" alt="SEP Grey Sweatshirt">
@@ -814,7 +808,7 @@
           </div>
         </div>
 
-        <div class="product-card p-5 md:p-6 rounded-[28px] text-center" data-product-id="product4" data-product-color="cream">
+        <div class="product-card p-4 rounded-[30px] text-center" data-product-id="product4" data-product-color="cream">
           <div class="product-image-frame">
             <button class="product-main-image-btn" type="button" onclick="openImageModal('product4')" aria-label="Enlarge SEP Cream Sweatshirt image">
               <img id="product4Image" src="images/cream-jumper-front.jpg" class="carousel-img" alt="SEP Cream Sweatshirt">
