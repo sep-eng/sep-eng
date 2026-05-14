@@ -91,6 +91,7 @@
       background:rgba(0,0,0,.55);color:#fff;border:none;border-radius:9999px;
       width:34px;height:34px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:3
     }
+    .carousel-arrow:hover{transform:translateY(-50%)}
     .carousel-arrow.left{left:10px}
     .carousel-arrow.right{right:10px}
     .carousel-dots{
@@ -101,6 +102,115 @@
       width:8px;height:8px;border-radius:9999px;background:rgba(255,255,255,.45)
     }
     .carousel-dot.active{background:#fff}
+
+    .product-image-frame{
+      position:relative;
+      width:100%;
+      height:18rem;
+      margin-bottom:1rem;
+      overflow:hidden;
+      border-radius:1rem;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.12);
+      padding:6px;
+    }
+    .product-main-image-btn{
+      width:100%;
+      height:100%;
+      display:block;
+      border:none;
+      background:transparent;
+      padding:0;
+      cursor:zoom-in;
+      border-radius:.75rem;
+      overflow:hidden;
+    }
+    .product-main-image-btn:hover{transform:none}
+    .product-thumbs{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:8px;
+      margin-bottom:1rem;
+    }
+    .product-thumb{
+      height:64px;
+      border-radius:.75rem;
+      overflow:hidden;
+      border:1px solid rgba(255,255,255,.18);
+      background:rgba(255,255,255,.06);
+      padding:0;
+      cursor:pointer;
+    }
+    .product-thumb:hover{transform:none}
+    .product-thumb.active{border-color:#fff}
+    .product-thumb img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+    }
+
+    #imageModal{
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,.95);
+      z-index:90;
+      align-items:center;
+      justify-content:center;
+      padding:16px;
+    }
+    .image-modal-frame{
+      width:min(92vw,900px);
+      height:min(82vh,900px);
+      border:1px solid rgba(255,255,255,.18);
+      border-radius:1.5rem;
+      padding:10px;
+      background:linear-gradient(145deg,rgba(255,255,255,.12),rgba(255,255,255,.02));
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+    .image-modal-img{
+      width:100%;
+      height:100%;
+      object-fit:contain;
+      border-radius:1rem;
+      display:block;
+    }
+    .image-modal-arrow{
+      position:absolute;
+      top:50%;
+      transform:translateY(-50%);
+      width:46px;
+      height:46px;
+      border-radius:9999px;
+      border:1px solid rgba(255,255,255,.25);
+      background:rgba(255,255,255,.08);
+      color:#fff;
+      font-size:32px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      z-index:95;
+    }
+    .image-modal-arrow:hover{
+      transform:translateY(-50%);
+      background:rgba(255,255,255,.18);
+    }
+    .image-modal-left{left:16px}
+    .image-modal-right{right:16px}
+    #imageModalClose{
+      position:absolute;
+      top:16px;
+      right:16px;
+      color:#fff;
+      font-size:30px;
+      line-height:1;
+      z-index:95;
+      background:transparent;
+      border:none;
+      cursor:pointer;
+    }
 
     #mih-app{background:#000;color:#f7f7f7;min-height:100vh}
     #mih-app header{
@@ -378,6 +488,30 @@
       border-color:#000!important;
     }
 
+    body.light-theme .product-image-frame,
+    body.light-theme .product-thumb{
+      background:rgba(0,0,0,.04)!important;
+      border-color:rgba(0,0,0,.14)!important;
+    }
+    body.light-theme .product-thumb.active{
+      border-color:#000!important;
+    }
+    body.light-theme #imageModal{
+      background:rgba(255,255,255,.96)!important;
+    }
+    body.light-theme .image-modal-frame{
+      border-color:rgba(0,0,0,.16)!important;
+      background:linear-gradient(145deg,rgba(0,0,0,.06),rgba(0,0,0,.01))!important;
+    }
+    body.light-theme #imageModalClose,
+    body.light-theme .image-modal-arrow{
+      color:#000!important;
+    }
+    body.light-theme .image-modal-arrow{
+      background:rgba(0,0,0,.06)!important;
+      border-color:rgba(0,0,0,.16)!important;
+    }
+
     body.light-theme a[href*="instagram.com/se_proairesis"]{
       background:linear-gradient(to bottom right,#ec4899,#9333ea)!important;
       color:#fff!important;
@@ -464,25 +598,25 @@
 
     <section id="products" class="py-20 px-6 fade-section">
       <div class="text-center mb-12">
-        <h2 id="productsTitle" class="theme-text text-4xl font-bold mb-4 text-white">Two products.</h2>
+        <h2 id="productsTitle" class="theme-text text-4xl font-bold mb-4 text-white">Four products.</h2>
         <p id="productsSubtitle" class="theme-text text-white">Our soft collection:</p>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto">
-        <div class="product-card bg-white/10 p-6 rounded-xl shadow-md text-center backdrop-blur">
-          <div class="carousel-wrap w-full h-72 mb-4 overflow-hidden rounded-xl" data-product-id="product1">
-            <img id="product1Image" src="white-tee-1.jpeg" class="carousel-img" alt="White T-shirt">
+      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8 max-w-7xl mx-auto">
+        <div class="product-card bg-white/10 p-6 rounded-xl shadow-md text-center backdrop-blur" data-product-id="product1" data-product-color="white">
+          <div class="product-image-frame">
+            <button class="product-main-image-btn" type="button" onclick="openImageModal('product1')" aria-label="Enlarge SEP White T-shirt image">
+              <img id="product1Image" src="images/white-tshirt-front.jpg" class="carousel-img" alt="SEP White T-shirt">
+            </button>
             <button class="carousel-arrow left" type="button" onclick="prevImage('product1')">‹</button>
             <button class="carousel-arrow right" type="button" onclick="nextImage('product1')">›</button>
             <div class="carousel-dots" id="product1Dots"></div>
           </div>
 
+          <div class="product-thumbs" id="product1Thumbs"></div>
+
           <h3 id="product1Name" class="text-xl font-bold mb-2 text-white">SEP White T-shirt</h3>
           <p class="mb-2 text-white product-price" data-price="180">180 DKK</p>
-
-          <select class="theme-text border rounded px-3 py-2 mb-2 bg-transparent text-white color-selector hidden">
-            <option value="white">White</option>
-          </select>
 
           <select class="theme-text border rounded px-3 py-2 mb-2 bg-transparent text-white size-selector">
             <option>XS</option><option>S</option><option>M</option><option>L</option><option>XL</option>
@@ -494,22 +628,20 @@
           </div>
         </div>
 
-        <div class="product-card bg-white/10 p-6 rounded-xl shadow-md text-center backdrop-blur">
-          <div class="carousel-wrap w-full h-72 mb-4 overflow-hidden rounded-xl" data-product-id="product2">
-            <img id="product2Image" src="sweatshirt-black-1.jpeg" class="carousel-img" alt="Sweatshirt">
+        <div class="product-card bg-white/10 p-6 rounded-xl shadow-md text-center backdrop-blur" data-product-id="product2" data-product-color="black">
+          <div class="product-image-frame">
+            <button class="product-main-image-btn" type="button" onclick="openImageModal('product2')" aria-label="Enlarge SEP Black Sweatshirt image">
+              <img id="product2Image" src="images/black-jumper-front.jpg" class="carousel-img" alt="SEP Black Sweatshirt">
+            </button>
             <button class="carousel-arrow left" type="button" onclick="prevImage('product2')">‹</button>
             <button class="carousel-arrow right" type="button" onclick="nextImage('product2')">›</button>
             <div class="carousel-dots" id="product2Dots"></div>
           </div>
 
-          <h3 id="product2Name" class="text-xl font-bold mb-2 text-white">SEP Sweatshirt</h3>
-          <p class="mb-2 text-white product-price" data-price="180">180 DKK</p>
+          <div class="product-thumbs" id="product2Thumbs"></div>
 
-          <select id="product2Color" class="theme-text border rounded px-3 py-2 mb-2 bg-transparent text-white color-selector">
-            <option value="black">Black</option>
-            <option value="grey">Grey</option>
-            <option value="cream">Cream</option>
-          </select>
+          <h3 id="product2Name" class="text-xl font-bold mb-2 text-white">SEP Black Sweatshirt</h3>
+          <p class="mb-2 text-white product-price" data-price="180">180 DKK</p>
 
           <select class="theme-text border rounded px-3 py-2 mb-2 bg-transparent text-white size-selector">
             <option>XS</option><option>S</option><option>M</option><option>L</option><option>XL</option>
@@ -518,6 +650,56 @@
           <div class="flex justify-center gap-2">
             <input type="number" min="1" value="1" class="theme-text border rounded w-16 text-center bg-transparent text-white quantity-selector">
             <button class="add-to-cart bg-white text-black px-4 py-2 rounded" type="button" data-product-id="product2">Add</button>
+          </div>
+        </div>
+
+        <div class="product-card bg-white/10 p-6 rounded-xl shadow-md text-center backdrop-blur" data-product-id="product3" data-product-color="grey">
+          <div class="product-image-frame">
+            <button class="product-main-image-btn" type="button" onclick="openImageModal('product3')" aria-label="Enlarge SEP Grey Sweatshirt image">
+              <img id="product3Image" src="images/grey-jumper-front.jpg" class="carousel-img" alt="SEP Grey Sweatshirt">
+            </button>
+            <button class="carousel-arrow left" type="button" onclick="prevImage('product3')">‹</button>
+            <button class="carousel-arrow right" type="button" onclick="nextImage('product3')">›</button>
+            <div class="carousel-dots" id="product3Dots"></div>
+          </div>
+
+          <div class="product-thumbs" id="product3Thumbs"></div>
+
+          <h3 id="product3Name" class="text-xl font-bold mb-2 text-white">SEP Grey Sweatshirt</h3>
+          <p class="mb-2 text-white product-price" data-price="180">180 DKK</p>
+
+          <select class="theme-text border rounded px-3 py-2 mb-2 bg-transparent text-white size-selector">
+            <option>XS</option><option>S</option><option>M</option><option>L</option><option>XL</option>
+          </select>
+
+          <div class="flex justify-center gap-2">
+            <input type="number" min="1" value="1" class="theme-text border rounded w-16 text-center bg-transparent text-white quantity-selector">
+            <button class="add-to-cart bg-white text-black px-4 py-2 rounded" type="button" data-product-id="product3">Add</button>
+          </div>
+        </div>
+
+        <div class="product-card bg-white/10 p-6 rounded-xl shadow-md text-center backdrop-blur" data-product-id="product4" data-product-color="cream">
+          <div class="product-image-frame">
+            <button class="product-main-image-btn" type="button" onclick="openImageModal('product4')" aria-label="Enlarge SEP Cream Sweatshirt image">
+              <img id="product4Image" src="images/cream-jumper-front.jpg" class="carousel-img" alt="SEP Cream Sweatshirt">
+            </button>
+            <button class="carousel-arrow left" type="button" onclick="prevImage('product4')">‹</button>
+            <button class="carousel-arrow right" type="button" onclick="nextImage('product4')">›</button>
+            <div class="carousel-dots" id="product4Dots"></div>
+          </div>
+
+          <div class="product-thumbs" id="product4Thumbs"></div>
+
+          <h3 id="product4Name" class="text-xl font-bold mb-2 text-white">SEP Cream Sweatshirt</h3>
+          <p class="mb-2 text-white product-price" data-price="180">180 DKK</p>
+
+          <select class="theme-text border rounded px-3 py-2 mb-2 bg-transparent text-white size-selector">
+            <option>XS</option><option>S</option><option>M</option><option>L</option><option>XL</option>
+          </select>
+
+          <div class="flex justify-center gap-2">
+            <input type="number" min="1" value="1" class="theme-text border rounded w-16 text-center bg-transparent text-white quantity-selector">
+            <button class="add-to-cart bg-white text-black px-4 py-2 rounded" type="button" data-product-id="product4">Add</button>
           </div>
         </div>
       </div>
@@ -571,13 +753,22 @@
       <h2 id="aboutTitle" class="theme-text text-3xl font-bold mb-4">About SEP</h2>
       <p id="aboutBody1" class="theme-text mb-4">SEP stands for Se Proairesis - your choice in ancient greek. Each piece is pressed by hand in Copenhagen in small batches.</p>
       <p id="aboutBody2" class="theme-text mb-4">We make batches with small choice but good quality - rather focusing on quality than choice. That doesn't mean we wont do big batches though. We can't buy thousands of peices yet (we are still a small brand staring up)</p>
-      <p id="aboutBody3" class="theme-text mb-8">One t-shirt, one sweatshirt; all built to be the first thing you reach for when you open your wardrobe. I'm still a 13-year-old which means I cant have apple pay yet. So there's only mobile pay so far.</p>
+      <p id="aboutBody3" class="theme-text mb-8">One t-shirt, three sweatshirt colours; all built to be the first thing you reach for when you open your wardrobe. I'm still a 13-year-old which means I cant have apple pay yet. So there's only mobile pay so far.</p>
       <button id="aboutBackBtn" class="mt-4 px-6 py-3 rounded-full border border-white/40 bg-white/10 hover:bg-white/20" type="button">Back to shop</button>
       <div class="mt-6">
         <button id="sepExitBtn2" class="px-5 py-2 rounded-full border border-white/30 bg-transparent hover:bg-white/10 text-sm" type="button">Exit to main menu</button>
       </div>
     </div>
   </section>
+
+  <div id="imageModal" class="hidden">
+    <button id="imageModalClose" type="button" aria-label="Close image">✕</button>
+    <button id="imageModalPrev" class="image-modal-arrow image-modal-left" type="button" aria-label="Previous image">‹</button>
+    <div class="image-modal-frame">
+      <img id="imageModalImg" src="" alt="" class="image-modal-img">
+    </div>
+    <button id="imageModalNext" class="image-modal-arrow image-modal-right" type="button" aria-label="Next image">›</button>
+  </div>
 
   <div id="cartSidebar" class="fixed top-0 right-0 h-full w-80 bg-white shadow-xl translate-x-full transition-transform duration-300 z-50 overflow-y-auto">
     <div class="p-6">
@@ -1211,32 +1402,40 @@
 
   const productMedia = {
     product1: {
-      colors: {
-        white: [
-          "white-tee-1.jpeg",
-          "white-tee-2.jpeg",
-          "white-tee-3.jpeg"
-        ]
-      }
+      color: "white",
+      name: "SEP White T-shirt",
+      images: [
+        "images/white-tshirt-front.jpg",
+        "images/white-tshirt-front-2.jpg",
+        "images/white-tshirt-front-3.jpg"
+      ]
     },
     product2: {
-      colors: {
-        black: [
-          "sweatshirt-black-1.jpeg",
-          "sweatshirt-black-2.jpeg",
-          "sweatshirt-black-3.jpeg"
-        ],
-        grey: [
-          "sweatshirt-grey-1.jpeg",
-          "sweatshirt-grey-2.jpeg",
-          "sweatshirt-grey-3.jpeg"
-        ],
-        cream: [
-          "sweatshirt-cream-1.jpeg",
-          "sweatshirt-cream-2.jpeg",
-          "sweatshirt-cream-3.jpeg"
-        ]
-      }
+      color: "black",
+      name: "SEP Black Sweatshirt",
+      images: [
+        "images/black-jumper-front.jpg",
+        "images/black-jumper-front-2.jpg",
+        "images/black-jumper-rear.jpg"
+      ]
+    },
+    product3: {
+      color: "grey",
+      name: "SEP Grey Sweatshirt",
+      images: [
+        "images/grey-jumper-front.jpg",
+        "images/grey-jumper-front-2.jpg",
+        "images/grey-jumper-rear.jpg"
+      ]
+    },
+    product4: {
+      color: "cream",
+      name: "SEP Cream Sweatshirt",
+      images: [
+        "images/cream-jumper-front.jpg",
+        "images/cream-jumper-front-2.jpg",
+        "images/cream-jumper-rear.jpg"
+      ]
     }
   };
 
@@ -1248,14 +1447,16 @@
       btnShopNow: "Shop Now",
       btnViewCart: "View Cart",
       addToCart: "Add",
-      productsTitle: "Two products.",
+      productsTitle: "Four products.",
       productsSubtitle: "Our soft collection:",
       product1Name: "SEP White T-shirt",
-      product2Name: "SEP Sweatshirt",
+      product2Name: "SEP Black Sweatshirt",
+      product3Name: "SEP Grey Sweatshirt",
+      product4Name: "SEP Cream Sweatshirt",
       aboutTitle: "About SEP",
       aboutBody1: "SEP stands for Se Proairesis - your choice in ancient greek. Each piece is pressed by hand in Copenhagen in small batches.",
       aboutBody2: "We make batches with small choice but good quality - rather focusing on quality than choice. That doesn't mean we wont do big batches though. We can't buy thousands of peices yet (we are still a small brand staring up)",
-      aboutBody3: "One t-shirt, one sweatshirt; all built to be the first thing you reach for when you open your wardrobe. I'm still a 13-year-old which means I cant have apple pay yet. So there's only mobile pay so far.",
+      aboutBody3: "One t-shirt, three sweatshirt colours; all built to be the first thing you reach for when you open your wardrobe. I'm still a 13-year-old which means I cant have apple pay yet. So there's only mobile pay so far.",
       aboutBackBtn: "Back to shop",
       howToOrderTitle: "How to Order",
       step1Title: "1. Choose",
@@ -1291,10 +1492,7 @@
       colorBlack: "Black",
       colorGrey: "Grey",
       colorCream: "Cream",
-      colorWhite: "White",
-      optionBlack: "Black",
-      optionGrey: "Grey",
-      optionCream: "Cream"
+      colorWhite: "White"
     },
     da: {
       menuTitle: "SEP menu",
@@ -1303,14 +1501,16 @@
       btnShopNow: "Shop nu",
       btnViewCart: "Se kurv",
       addToCart: "Læg i kurv",
-      productsTitle: "To produkter.",
+      productsTitle: "Fire produkter.",
       productsSubtitle: "Vores bløde kollektion:",
       product1Name: "SEP hvid T-shirt",
-      product2Name: "SEP sweatshirt",
+      product2Name: "SEP sort sweatshirt",
+      product3Name: "SEP grå sweatshirt",
+      product4Name: "SEP cream sweatshirt",
       aboutTitle: "Om SEP",
       aboutBody1: "SEP står for Se Proairesis - dit valg på oldgræsk. Hvert stykke presses i hånden i København i små batches.",
       aboutBody2: "Vi laver batches med få valg, men god kvalitet - vi fokuserer mere på kvalitet end udvalg. Det betyder ikke, at vi ikke vil lave større batches senere. Vi kan bare ikke købe tusindvis endnu (vi er stadig et lille brand i opstart).",
-      aboutBody3: "En T-shirt, en sweatshirt; lavet til at være det første, du rækker ud efter. Jeg er stadig 13 år, så jeg kan ikke have Apple Pay endnu. Derfor er der kun MobilePay lige nu.",
+      aboutBody3: "En T-shirt, tre sweatshirt-farver; lavet til at være det første, du rækker ud efter. Jeg er stadig 13 år, så jeg kan ikke have Apple Pay endnu. Derfor er der kun MobilePay lige nu.",
       aboutBackBtn: "Tilbage til shop",
       howToOrderTitle: "Sådan bestiller du",
       step1Title: "1. Vælg",
@@ -1346,10 +1546,7 @@
       colorBlack: "Sort",
       colorGrey: "Grå",
       colorCream: "Cream",
-      colorWhite: "Hvid",
-      optionBlack: "Sort",
-      optionGrey: "Grå",
-      optionCream: "Cream"
+      colorWhite: "Hvid"
     },
     cs: {
       menuTitle: "Menu SEP",
@@ -1358,14 +1555,16 @@
       btnShopNow: "Nakoupit",
       btnViewCart: "Košík",
       addToCart: "Přidat",
-      productsTitle: "Dva produkty.",
+      productsTitle: "Čtyři produkty.",
       productsSubtitle: "Naše měkká kolekce:",
       product1Name: "SEP bílé tričko",
-      product2Name: "SEP mikina",
+      product2Name: "SEP černá mikina",
+      product3Name: "SEP šedá mikina",
+      product4Name: "SEP krémová mikina",
       aboutTitle: "O SEP",
       aboutBody1: "SEP znamená Se Proairesis - tvoje volba ve staré řečtině. Každý kus je ručně lisovaný v Kodani v malých sériích.",
       aboutBody2: "Děláme série s malým výběrem, ale dobrou kvalitou - soustředíme se víc na kvalitu než na množství. To neznamená, že později neuděláme větší série. Jen zatím nemůžeme koupit tisíce kusů (pořád jsme malá začínající značka).",
-      aboutBody3: "Jedno tričko, jedna mikina; vytvořené tak, aby to byla první věc, po které sáhneš. Je mi stále 13, takže zatím nemůžu mít Apple Pay. Proto je tu zatím jen MobilePay.",
+      aboutBody3: "Jedno tričko, tři barvy mikiny; vytvořené tak, aby to byla první věc, po které sáhneš. Je mi stále 13, takže zatím nemůžu mít Apple Pay. Proto je tu zatím jen MobilePay.",
       aboutBackBtn: "Zpět do shopu",
       howToOrderTitle: "Jak objednat",
       step1Title: "1. Vyber",
@@ -1401,10 +1600,7 @@
       colorBlack: "Černá",
       colorGrey: "Šedá",
       colorCream: "Krémová",
-      colorWhite: "Bílá",
-      optionBlack: "Černá",
-      optionGrey: "Šedá",
-      optionCream: "Krémová"
+      colorWhite: "Bílá"
     }
   };
 
@@ -1452,46 +1648,134 @@
   }
 
   const productState = {
-    product1: { color: 'white', index: 0, touchStartX: 0 },
-    product2: { color: 'black', index: 0, touchStartX: 0 }
+    product1: { index: 0, touchStartX: 0 },
+    product2: { index: 0, touchStartX: 0 },
+    product3: { index: 0, touchStartX: 0 },
+    product4: { index: 0, touchStartX: 0 }
   };
 
+  let modalProductId = null;
+
   function currentImages(productId){
-    return productMedia[productId].colors[productState[productId].color];
+    return productMedia[productId]?.images || [];
   }
 
   function renderDots(productId){
     const dotsWrap = document.getElementById(productId + 'Dots');
-    if (!dotsWrap) return;
+    if (!dotsWrap || !productState[productId]) return;
+
     const imgs = currentImages(productId);
     dotsWrap.innerHTML = imgs.map((_, i) =>
       `<span class="carousel-dot ${i === productState[productId].index ? 'active' : ''}"></span>`
     ).join('');
   }
 
+  function renderThumbs(productId){
+    const thumbsWrap = document.getElementById(productId + 'Thumbs');
+    if (!thumbsWrap || !productState[productId]) return;
+
+    const imgs = currentImages(productId);
+    const product = productMedia[productId];
+
+    thumbsWrap.innerHTML = imgs.map((img, i) => `
+      <button
+        class="product-thumb ${i === productState[productId].index ? 'active' : ''}"
+        type="button"
+        onclick="setProductImage('${productId}', ${i})"
+        aria-label="View image ${i + 1}"
+      >
+        <img src="${img}" alt="${escapeHTML(product.name)} image ${i + 1}" loading="lazy">
+      </button>
+    `).join('');
+  }
+
   function updateProductImage(productId){
     const img = document.getElementById(productId + 'Image');
-    if (!img) return;
+    if (!img || !productState[productId]) return;
+
     const imgs = currentImages(productId);
+    if (!imgs.length) return;
+
     img.src = imgs[productState[productId].index];
     renderDots(productId);
+    renderThumbs(productId);
+
+    if (modalProductId === productId) {
+      updateImageModal();
+    }
   }
+
+  window.setProductImage = function(productId, index){
+    const imgs = currentImages(productId);
+    if (!imgs.length || !productState[productId]) return;
+
+    productState[productId].index = Math.max(0, Math.min(index, imgs.length - 1));
+    updateProductImage(productId);
+  };
 
   window.nextImage = function(productId){
     const imgs = currentImages(productId);
+    if (!imgs.length || !productState[productId]) return;
+
     productState[productId].index = (productState[productId].index + 1) % imgs.length;
     updateProductImage(productId);
   };
 
   window.prevImage = function(productId){
     const imgs = currentImages(productId);
+    if (!imgs.length || !productState[productId]) return;
+
     productState[productId].index = (productState[productId].index - 1 + imgs.length) % imgs.length;
     updateProductImage(productId);
   };
 
+  function updateImageModal(){
+    if (!modalProductId) return;
+
+    const modalImg = document.getElementById('imageModalImg');
+    const product = productMedia[modalProductId];
+    const imgs = currentImages(modalProductId);
+
+    if (!modalImg || !product || !imgs.length) return;
+
+    const currentIndex = productState[modalProductId].index;
+    modalImg.src = imgs[currentIndex];
+    modalImg.alt = `${product.name} image ${currentIndex + 1}`;
+  }
+
+  window.openImageModal = function(productId){
+    const modal = document.getElementById('imageModal');
+    if (!modal || !productMedia[productId]) return;
+
+    modalProductId = productId;
+    updateImageModal();
+
+    modal.classList.remove('hidden');
+    modal.style.display = "flex";
+    document.body.style.overflow = 'hidden';
+  };
+
+  function closeImageModal(){
+    const modal = document.getElementById('imageModal');
+    if (!modal) return;
+
+    modal.classList.add('hidden');
+    modal.style.display = "";
+    document.body.style.overflow = '';
+    modalProductId = null;
+  }
+
+  function modalNextImage(){
+    if (modalProductId) nextImage(modalProductId);
+  }
+
+  function modalPrevImage(){
+    if (modalProductId) prevImage(modalProductId);
+  }
+
   function attachSwipe(productId){
     const img = document.getElementById(productId + 'Image');
-    if (!img) return;
+    if (!img || !productState[productId]) return;
 
     img.addEventListener('touchstart', (e) => {
       productState[productId].touchStartX = e.touches[0].clientX;
@@ -1528,6 +1812,8 @@
     setText('productsSubtitle', t.productsSubtitle);
     setText('product1Name', t.product1Name);
     setText('product2Name', t.product2Name);
+    setText('product3Name', t.product3Name);
+    setText('product4Name', t.product4Name);
     setText('aboutTitle', t.aboutTitle);
     setText('aboutBody1', t.aboutBody1);
     setText('aboutBody2', t.aboutBody2);
@@ -1555,13 +1841,6 @@
     setText('clearCartBtn', t.btnClearCart);
 
     document.querySelectorAll('.add-to-cart').forEach(btn => btn.textContent = t.addToCart);
-
-    const product2Color = document.getElementById('product2Color');
-    if (product2Color) {
-      product2Color.options[0].text = t.optionBlack;
-      product2Color.options[1].text = t.optionGrey;
-      product2Color.options[2].text = t.optionCream;
-    }
 
     document.querySelectorAll('.lang-btn').forEach(btn => {
       const isActive = btn.getAttribute('data-lang') === sepCurrentLang;
@@ -1623,12 +1902,6 @@
 
   document.getElementById('menuAboutBtn')?.addEventListener('click', () => window.sepShowScene('about'));
   document.getElementById('aboutBackBtn')?.addEventListener('click', () => window.sepShowScene('main'));
-
-  document.getElementById('product2Color')?.addEventListener('change', (e) => {
-    productState.product2.color = e.target.value;
-    productState.product2.index = 0;
-    updateProductImage('product2');
-  });
 
   const cartSidebar = document.getElementById('cartSidebar');
   const cartOverlay = document.getElementById('cartOverlay');
@@ -1730,10 +2003,7 @@
       const price = Number(card.querySelector('.product-price')?.getAttribute('data-price') || 0);
       const size = card.querySelector('.size-selector')?.value || "M";
       const qty = Math.max(1, parseInt(card.querySelector('.quantity-selector')?.value, 10) || 1);
-
-      let color = 'white';
-      const colorSelect = card.querySelector('.color-selector');
-      if (colorSelect && !colorSelect.classList.contains('hidden')) color = colorSelect.value;
+      const color = card.getAttribute('data-product-color') || productMedia[productId]?.color || 'white';
 
       sepAddToCart({ productId, name, price, size, color, qty });
     });
@@ -2619,10 +2889,26 @@
       btn.addEventListener('click', () => setGlobalLang(btn.getAttribute('data-lang')));
     });
 
-    attachSwipe('product1');
-    attachSwipe('product2');
-    updateProductImage('product1');
-    updateProductImage('product2');
+    ['product1','product2','product3','product4'].forEach(productId => {
+      attachSwipe(productId);
+      updateProductImage(productId);
+    });
+
+    document.getElementById('imageModalClose')?.addEventListener('click', closeImageModal);
+    document.getElementById('imageModalNext')?.addEventListener('click', modalNextImage);
+    document.getElementById('imageModalPrev')?.addEventListener('click', modalPrevImage);
+
+    document.getElementById('imageModal')?.addEventListener('click', (e) => {
+      if (e.target.id === 'imageModal') closeImageModal();
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (!modalProductId) return;
+      if (e.key === 'Escape') closeImageModal();
+      if (e.key === 'ArrowRight') modalNextImage();
+      if (e.key === 'ArrowLeft') modalPrevImage();
+    });
+
     updateCphButtons();
     applyTheme();
 
