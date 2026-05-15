@@ -90,6 +90,23 @@
       font-weight:600;cursor:pointer;margin:.25rem
     }
     #welcome-screen .welcome-secondary{background:transparent;border:1px solid #fff;color:#fff}
+
+    #welcome-screen .welcome-habits-btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      text-decoration:none;
+      background:rgba(255,255,255,.10);
+      color:#fff;
+      border:1px solid rgba(255,255,255,.35);
+    }
+
+    body.light-theme #welcome-screen .welcome-habits-btn{
+      background:#fff!important;
+      color:#000!important;
+      border-color:#000!important;
+    }
+
     #welcome-lang-row{margin-top:18px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
     #welcome-lang-row button{
       background:transparent;border:1px solid rgba(255,255,255,.35);color:#fff;
@@ -692,6 +709,7 @@
   <div>
     <button class="welcome-btn" id="welcomeSepBtn" type="button">SEP shop</button>
     <button class="welcome-btn welcome-secondary" id="welcomeMihBtn" type="button">Make It Happen</button>
+    <a class="welcome-btn welcome-habits-btn" id="welcomeHabitsBtn" href="/habits/">Habits</a>
   </div>
   <div id="welcome-lang-row">
     <button type="button" class="welcome-lang-btn" data-lang="en">English</button>
@@ -962,6 +980,7 @@
   </div>
   <div id="cartOverlay" class="fixed inset-0 bg-black/50 hidden pointer-none z-40"></div>
 </div>
+
 <div id="mih-app" class="hidden">
   <header>
     <div class="chip">
@@ -1411,8 +1430,7 @@
       errDeleteConfirm: "Slette din konto og alle entries?",
       noEntries: "Ingen entries endnu.",
       noPlayers: "Ingen spillere endnu."
-    },
-    cs: {
+    },    cs: {
       welcomeTitle: "SEP",
       welcomeSubtitle: "Tvoje volba. Buď nakupuj (SEP shop), nebo se hýbej (Make It Happen). Tak jednoduché.",
       welcomeSepBtn: "SEP shop",
